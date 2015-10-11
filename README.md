@@ -1,6 +1,4 @@
 # verdant-octo-spork
 A group project.
 
-/* Tony Chan: Please advise how the files should be organized. */
-
-/* Tony Chan: School visit, please be reminded that students could NOT choose interest in their own group. */
+Note to any team members wondering how to get started: https://www.sourcetreeapp.com/ (Mac/Win) is a great user interface for starting out interacting with this repository, albeit with a 30-day trial. https://desktop.github.com/ (Mac/Win) is less good, but is freeware.
