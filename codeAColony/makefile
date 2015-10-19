@@ -1,5 +1,5 @@
 CFLAGS = -Wall -pedantic -Werror
-LFLAGS = `sdl-config --libs` -lSDL -lSDL_image -lm
+LFLAGS = -lSDL -lm
 OBJS   = init.o input.o main.o
 PROG = CodeAColony
 CXX = gcc

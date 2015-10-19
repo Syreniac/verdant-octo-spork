@@ -105,14 +105,10 @@ void init(char *title)
                 printf("Couldn't load %s: %s\n", file_name, SDL_GetError());
         }
         
-        /*do the same for tree.png, but use SDL_image library to load a png
-        in order to preserve per-pixel transparency (where the image has different
-        alpha values at different pixels, useful for shadows). Standard bmp images seem
-        only capable of per-surface transparency (one alpha value across the whole image)
-        colorkey transparency (where one RGB value is reserved to become transparent)*/
-        file_name = "src/images/tree.png";
-        temp = IMG_Load(file_name);
-        tree = SDL_DisplayFormatAlpha(temp);
+        /*do the same for tree.bmp */
+        file_name = "src/images/tree.bmp";
+        temp = SDL_LoadBMP(file_name);
+        tree = SDL_DisplayFormat(temp);
         SDL_FreeSurface(temp);
         if(tree == NULL){
                 printf("Couldn't load %s: %s\n", file_name, SDL_GetError());
@@ -125,6 +121,8 @@ void init(char *title)
         SDL_SetColorKey(flower, SDL_SRCCOLORKEY, colorkey);
         colorkey = SDL_MapRGB(blueFlower->format, 255,255,255);
         SDL_SetColorKey(blueFlower, SDL_SRCCOLORKEY, colorkey);
+        colorkey = SDL_MapRGB(tree->format, 255,255,255);
+        SDL_SetColorKey(tree, SDL_SRCCOLORKEY, colorkey);
 
 
 
@@ -209,7 +207,7 @@ void init(char *title)
 	    SDL_FreeSurface(flower);
 	    SDL_FreeSurface(blueFlower);
 	    SDL_FreeSurface(tree);
-	    SDL_FreeSurface(temp);
+
 	
 	/* Set the screen title */
 	SDL_WM_SetCaption(title, NULL);
