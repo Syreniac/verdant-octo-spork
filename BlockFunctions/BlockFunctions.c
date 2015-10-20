@@ -109,6 +109,8 @@ int blockFunction_IfCountEqualToSecondInt(BlockFunctionArgs arguments){
   int i = 0;
   printf("blockFunction_IfCountEqualToSecondInt");
   if(arguments.integers[0] == arguments.integers[1]){
+    /* Reset the count to 0 */
+    arguments.integers[0] = 0;
     return(1);
   }
   arguments.integers[1]++;
