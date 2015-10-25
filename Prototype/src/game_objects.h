@@ -8,6 +8,10 @@
 
 #define _GAME_OBJECTS_INCLUDED 1
 
+enum ProgrammableWorkerStatus {LEAVING = 1,
+                               RETURNING = 2,
+                               WANTING_TO_RETURN = 3};
+
 /* I'm calling them resource nodes rather than flowers because it makes the
    game more easily adaptable to other themes if we want. Otherwise they are
    identical. */
@@ -62,7 +66,7 @@ struct ProgrammableWorker{
   float speed;
 
   int type;
-  int status;
+  enum ProgrammableWorkerStatus status;
 };
 
 typedef struct Hive Hive;

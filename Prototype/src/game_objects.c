@@ -130,8 +130,8 @@ ProgrammableWorker createProgrammableWorker(void){
   programmableWorker.speed = 0.1;
   /* I don't think this is used yet... */
   programmableWorker.type = 1;
-  /* todo - make this run of an enum */
-  programmableWorker.status = 2;
+  /* This is an enum detailed in game_objects.h */
+  programmableWorker.status = RETURNING;
   return(programmableWorker);
 }
 
@@ -169,13 +169,13 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
   /* Spooky AI stuff */
   /* If the ProgrammableWorker is within a small distance of the hive and has
      status == 2 (2 means returning to the Hive) */
-  if(getDistance2BetweenPoints(newX,newY,gameObjectData->hive.xPosition,gameObjectData->hive.yPosition) < 1.0 && programmableWorker->status == 2){
+  if(getDistance2BetweenPoints(newX,newY,gameObjectData->hive.xPosition,gameObjectData->hive.yPosition) < 1.0 && programmableWorker->status == RETURNING){
     /* Generate a random angle to head on */
     programmableWorker->heading = randPi() * 2;
-    /* Set the status to 1 (1 means heading away from the Hive) */
-    programmableWorker->status = 1;
+    /* Set the status to LEAVING */
+    programmableWorker->status = LEAVING;
   }
-  if(programmableWorker->status == 1){
+  if(programmableWorker->status == LEAVING){
     /* status being 1 means that the bee heading away from the center */
 
     /* We want to get back the ResourceNode and ResourceNodeSpawner (if any)
@@ -189,12 +189,12 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
       /* Make sure the ResourceNodeSpawner knows that it's lost a ResourceNode */
       resourceNodeSpawner->currentNodeCount--;
       /* Set the status to 3 (3 means wants to go home) */
-      programmableWorker->status = 3;
+      programmableWorker->status = WANTING_TO_RETURN;
     }
   }
   /* Check if the ProgrammableWorker is going out of bounds or is wanting to go
      home */
-  if(newX >= (X_SIZE_OF_SCREEN - programmableWorker->xDimensions) || newX < 0 || newY >= (Y_SIZE_OF_SCREEN - programmableWorker->yDimensions) || newY < 0 || programmableWorker->status == 3){
+  if(newX >= (X_SIZE_OF_SCREEN - programmableWorker->xDimensions) || newX < 0 || newY >= (Y_SIZE_OF_SCREEN - programmableWorker->yDimensions) || newY < 0 || programmableWorker->status == WANTING_TO_RETURN){
     /* atan2 == tan-1 but it takes (y,x) and respects quadrants. If you don't
        know what that means, don't worry.
        We use it here to calculate the angle between the ProgrammableWorker and
@@ -211,7 +211,7 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
     newX += programmableWorker->xPosition;
     newY += programmableWorker->yPosition;
     /* Set the status to 2 (2 means returning to the Hive) */
-    programmableWorker->status = 2;
+    programmableWorker->status = RETURNING;
   }
 
   /* Whatever the newX and newY are in the end, set the ProgrammableWorker's
