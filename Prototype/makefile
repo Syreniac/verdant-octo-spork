@@ -1,4 +1,5 @@
 CFLAGS = -pedantic
+# Remove the -lmingw32 part if you need it to compile on linux!
 LFLAGS = -ISDL2\include\SDL2 -LSDL2\lib -lmingw32 -lSDL2main -lSDL2 -lm
 # List all the files here
 OBJS = main.o init.o game.o world_generation.o game_objects.o

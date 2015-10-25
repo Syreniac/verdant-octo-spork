@@ -4,7 +4,8 @@ float generateRandomCoordOffset(float radius){
   /* float radius = the range to generate random numbers within
 
      This function just generates a random x or y offset for a coordinate within
-     a given range */
+     a given range. It's the cheap hack I'm using to make randomly spaced nodes
+     around a spawner. */
   float return_value = (radius * ( (float) rand() - (float) RAND_MAX * 0.5 )/(float) RAND_MAX );
   return(return_value);
 }
@@ -39,6 +40,10 @@ ResourceNodeSpawner createResourceNodeSpawner(int maximumNodeCount, float xPosit
 }
 
 ResourceNode initResourceNode(ResourceNodeSpawner *spawner){
+  /* ResourceNodeSpawner *spawner = the parent spawner that we are initialising
+                                    this resourceNode for
+     Initialising resourceNodes makes sure that we can be sure of what the
+     values in the memory for the resourceNode are before the */
   ResourceNode resourceNode;
   resourceNode.alive = 0;
   resourceNode.resourceUnits = 0;
@@ -56,6 +61,7 @@ void updateResourceNodeSpawner(ResourceNodeSpawner *spawner, float ticks){
      game loop. */
   int i = 0;
   ResourceNode resNode;
+  /* If the current  */
   if(spawner->currentNodeCount < spawner->maximumNodeCount){
     printf("ticksSinceSpawn: %f | spawnDelay: %f | ticks: %f\n", spawner->ticksSinceSpawn, spawner->spawnDelay, ticks);
     printf("currentNodeCount: %d | maxNodeCount %d\n", spawner->currentNodeCount, spawner->maximumNodeCount);
@@ -66,7 +72,9 @@ void updateResourceNodeSpawner(ResourceNodeSpawner *spawner, float ticks){
       printf("spawning new ResourceNode\n");
       i = getFirstDeadResourceNode(spawner);
       resNode = createResourceNode(spawner,100);
+
       spawner->resourceNodes[i] = resNode;
+
       spawner->ticksSinceSpawn = 0;
       printf("%f\n",spawner->ticksSinceSpawn);
       spawner->currentNodeCount++;
@@ -77,12 +85,13 @@ void updateResourceNodeSpawner(ResourceNodeSpawner *spawner, float ticks){
 ResourceNode createResourceNode(ResourceNodeSpawner *parentSpawner, int resourceUnits){
   /* ResourceNodeSpawner *parentSpawner = the spawner which this resource node
                                           is attached to
-     int resourceUnits = the amount of resources to put into this node*/
+     int resourceUnits = the amount of resources to put into this node
+
+     This creates a resource node attached to a spawner.*/
   ResourceNode resourceNode;
   resourceNode.alive = 1;
   resourceNode.resourceUnits = resourceUnits;
   resourceNode.xPosition = parentSpawner->xPosition + generateRandomCoordOffset(parentSpawner->spawnRadius);
   resourceNode.yPosition = parentSpawner->yPosition + generateRandomCoordOffset(parentSpawner->spawnRadius);
-  resourceNode.deathTime = -1;
   return resourceNode;
 }

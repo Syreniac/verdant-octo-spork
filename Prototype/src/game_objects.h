@@ -46,6 +46,8 @@ struct ResourceNodeSpawner{
   ResourceNode *resourceNodes;
 };
 
+// todo - ADD ENUM FOR STATUSES
+
 typedef struct ProgrammableWorker ProgrammableWorker;
 struct ProgrammableWorker{
   float xPosition;
@@ -61,14 +63,22 @@ struct ProgrammableWorker{
   int status;
 };
 
+typedef struct Hive Hive;
+struct Hive{
+  float xPosition;
+  float yPosition;
+};
+
 typedef struct GameObjectData GameObjectData;
 struct GameObjectData{
+  Hive hive;
   ResourceNodeSpawner resourceNodeSpawners[5];
   int resourceNodeSpawnerCount;
-  ProgrammableWorker programmableWorkers[1];
+  ProgrammableWorker programmableWorkers[2];
   int programmableWorkerCount;
 };
 
 int getFirstDeadResourceNode(ResourceNodeSpawner *resourceNodeSpawner);
 ProgrammableWorker createProgrammableWorker(void);
 void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, float ticks);
+Hive createHive(void);
