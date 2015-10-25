@@ -10,7 +10,6 @@ int main(int argc, char *argv[]){
 
   SDL_Window *window;
 
-  printf("Hello world\n");
   window  = initialise();
   gameStart(window);
   uninitialise();

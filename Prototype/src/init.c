@@ -11,7 +11,6 @@ SDL_Window *initialise(void){
      I'll line by line comment what I'm doing here. */
   SDL_Window *window;
 
-  printf("initialise\n");
 
   /* Initialise SDL library (must be called before any other SDL_function),
   SDL_INIT_VIDEO flag initialise only the video SDL subsystem*/
@@ -35,7 +34,7 @@ SDL_Window *initialise(void){
 	window = SDL_CreateWindow(GAME_NAME,
                           SDL_WINDOWPOS_UNDEFINED,
                           SDL_WINDOWPOS_UNDEFINED,
-                          640, 480,
+                          X_SIZE_OF_SCREEN, Y_SIZE_OF_SCREEN,
                           SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
 
 
@@ -46,6 +45,5 @@ SDL_Window *initialise(void){
 
 int uninitialise(void){
   /* This function should cleanup the SDL library for us */
-  printf("uninitialise\n");
   SDL_Quit();
 }

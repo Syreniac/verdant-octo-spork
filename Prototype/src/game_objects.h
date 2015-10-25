@@ -1,4 +1,6 @@
+#ifndef _GENERIC_INCLUDED
 #include "generic.h"
+#endif
 
 /* By putting the game object structs in here, we can more easily include them
    in other modules without having to copy-paste code BUT we'll need to put
@@ -78,7 +80,25 @@ struct GameObjectData{
   int programmableWorkerCount;
 };
 
-int getFirstDeadResourceNode(ResourceNodeSpawner *resourceNodeSpawner);
+float generateRandomCoordOffset(float radius);
+float randPi(void);
+float square(float f);
+double getDistance2BetweenPoints(float p1X, float p1Y, float p2X, float p2Y);
+
 ProgrammableWorker createProgrammableWorker(void);
 void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, float ticks);
+
 Hive createHive(void);
+
+/* I think that it will be better to do static respawning objects through
+   creating spawners rather than directly into the world.
+
+   Doing it this way, we can use the created hierarchy to cull collision
+   checking quickly and respawning resources will be easier */
+
+int getFirstDeadResourceNode(ResourceNodeSpawner *resourceNodeSpawner);
+ResourceNodeSpawner createResourceNodeSpawner(int maximumNodeCount, float xPosition, float yPosition, float radius);
+void updateResourceNodeSpawner(ResourceNodeSpawner *spawner, float ticks);
+
+ResourceNode initResourceNode(ResourceNodeSpawner *spawner);
+ResourceNode createResourceNode(ResourceNodeSpawner *parentSpawner, int resourceUnits);
