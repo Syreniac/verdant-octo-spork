@@ -52,8 +52,6 @@ struct ResourceNodeSpawner{
   ResourceNode *resourceNodes;
 };
 
-// todo - ADD ENUM FOR STATUSES
-
 typedef struct ProgrammableWorker ProgrammableWorker;
 struct ProgrammableWorker{
   float xPosition;
