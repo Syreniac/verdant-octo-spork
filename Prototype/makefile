@@ -1,9 +1,8 @@
+
 CFLAGS = -pedantic
-# Remove the -lmingw32 part if you need it to compile on linux!
-PATHS = -I/opt/SDL/2.0.3/include/ -L/opt/SDL/2.0.3/lib/
-LFLAGS = -lSDL2 -lm
+LFLAGS = -ISDL2\include\SDL2 -LSDL2\lib -lmingw32 -lSDL2main -lSDL2 -lm
 # List all the files here
-OBJS = main.o init.o game.o world_generation.o game_objects.o
+OBJS = main.o init.o game.o world_generation.o game_objects.o AI.o UI.o
 PROG = Prototype
 CXX = gcc
 
@@ -12,11 +11,11 @@ all: $(PROG)
 
 # compiling other source files.
 %.o: src/%.c src/%.h src/generic.h
-	$(CXX) $(CFLAGS) $(PATHS) -c -s $< $(LFLAGS)
+	$(CXX) $(CFLAGS) $(LFLAGS) -c -s $<
 
 # linking the program.
 $(PROG): $(OBJS)
-	$(CXX) $(OBJS) -o $(PROG) $(PATHS) $(LFLAGS)
+	$(CXX) $(OBJS) -o $(PROG) $(LFLAGS)
 
 # cleaning everything that can be automatically recreated with "make".
 clean:

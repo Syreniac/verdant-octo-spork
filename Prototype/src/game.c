@@ -58,6 +58,9 @@ int gameStart(SDL_Window *window){
   SDL_SetColorKey(gameData.nodeGraphic, SDL_TRUE, SDL_MapRGB(gameData.nodeGraphic->format, 255,255,255));
   SDL_SetColorKey(gameData.workerGraphic, SDL_TRUE, SDL_MapRGB(gameData.workerGraphic->format, 255,255,255));
 
+  gameData.blockFunctionRoots = calloc(1, sizeof(BlockFunctionRoot));
+  gameData.blockFunctionRoots[0] = generateGenericWorkerOrders();
+
   /* Then run the gameLoop until it returns 0 or exits */
   while(gameLoopReturn){
     gameLoopReturn = gameLoop(&gameData);
@@ -101,7 +104,7 @@ int gameLoop(GameData *gameData){
 
   /* Filling the background black helps get rid of things drawn onto the screen
      that shoudln't be there anymore */
-  SDL_FillRect(SDL_GetWindowSurface(gameData->window),NULL,0x000000);
+  SDL_FillRect(SDL_GetWindowSurface(gameData->window),NULL,0x1B8D2E);
 
 
   /* Loop through all the spawners so we can update and draw them all in turn */
@@ -138,8 +141,15 @@ int gameLoop(GameData *gameData){
   while(i<gameData->gameObjectData.programmableWorkerCount){
     /* Because the ProgrammableWorkers need to know the positions of objects in
        the world, we pass the gameObjectData to it, which holds the arrays of
-       game objects */
+       game objects. This function simply updates the position of the worker,
+       and checks whether it collides with a flower. */
     updateProgrammableWorker(&gameData->gameObjectData.programmableWorkers[i],&gameData->gameObjectData,delta_t);
+    /* Once we have the new positions, we then run the AI across the worker */
+
+    runBlockFunctionRootOverWorker(&gameData->blockFunctionRoots[0],
+                                   &gameData->gameObjectData.programmableWorkers[i],
+                                   &gameData->gameObjectData);
+
     /* Just like with the ResourceNodes above, we move rect2 to the position
        indicated by the ProgrammableWorker */
     rect2.x = gameData->gameObjectData.programmableWorkers[i].xPosition - X_SIZE_OF_WORKER/2;

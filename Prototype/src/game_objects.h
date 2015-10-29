@@ -63,6 +63,8 @@ struct ProgrammableWorker{
   float heading;
   float speed;
 
+  int cargo;
+
   int type;
   enum ProgrammableWorkerStatus status;
 };

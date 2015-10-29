@@ -130,6 +130,7 @@ ProgrammableWorker createProgrammableWorker(void){
   programmableWorker.speed = 0.1;
   /* I don't think this is used yet... */
   programmableWorker.type = 1;
+  programmableWorker.cargo = 0;
   /* This is an enum detailed in game_objects.h */
   programmableWorker.status = RETURNING;
   return(programmableWorker);
@@ -169,11 +170,13 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
   /* Spooky AI stuff */
   /* If the ProgrammableWorker is within a small distance of the hive and has
      status == 2 (2 means returning to the Hive) */
+
   if(getDistance2BetweenPoints(newX,newY,gameObjectData->hive.xPosition,gameObjectData->hive.yPosition) < 1.0 && programmableWorker->status == RETURNING){
-    /* Generate a random angle to head on */
-    programmableWorker->heading = randPi() * 2;
-    /* Set the status to LEAVING */
-    programmableWorker->status = LEAVING;
+    /* Generate a random angle to head on
+    programmableWorker->heading = randPi() * 2;*/
+    /* Set the status to LEAVING
+    programmableWorker->status = LEAVING;*/
+    programmableWorker->cargo = 0;
   }
   if(programmableWorker->status == LEAVING){
     /* status being 1 means that the bee heading away from the center */
@@ -188,31 +191,34 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
       resourceNode->alive = 0;
       /* Make sure the ResourceNodeSpawner knows that it's lost a ResourceNode */
       resourceNodeSpawner->currentNodeCount--;
+      programmableWorker->cargo++;
       /* Set the status to 3 (3 means wants to go home) */
       programmableWorker->status = WANTING_TO_RETURN;
     }
   }
   /* Check if the ProgrammableWorker is going out of bounds or is wanting to go
      home */
+  /* COMMENTING OUT TO TEST BLOCK FUNCTION AI
   if(newX >= (X_SIZE_OF_SCREEN - programmableWorker->xDimensions) || newX < 0 || newY >= (Y_SIZE_OF_SCREEN - programmableWorker->yDimensions) || newY < 0 || programmableWorker->status == WANTING_TO_RETURN){
     /* atan2 == tan-1 but it takes (y,x) and respects quadrants. If you don't
        know what that means, don't worry.
        We use it here to calculate the angle between the ProgrammableWorker and
        the Hive, and setting the ProgrammableWorker's heading to it, makes it
-       return to the Hive */
+       return to the Hive
     programmableWorker->heading = atan2(gameObjectData->hive.xPosition - programmableWorker->xPosition,
                                         gameObjectData->hive.yPosition - programmableWorker->yPosition);
 
     /* This is same stuff as above all these ifs, just trigonometric movement
-       data but using the new angle */
+       data but using the new angle
     newX = sin(programmableWorker->heading) * programmableWorker->speed * ticks;
     newY = cos(programmableWorker->heading) * programmableWorker->speed * ticks;
 
     newX += programmableWorker->xPosition;
     newY += programmableWorker->yPosition;
-    /* Set the status to 2 (2 means returning to the Hive) */
+    /* Set the status to 2 (2 means returning to the Hive)
     programmableWorker->status = RETURNING;
   }
+  */
 
   /* Whatever the newX and newY are in the end, set the ProgrammableWorker's
      positioning data to them. */
