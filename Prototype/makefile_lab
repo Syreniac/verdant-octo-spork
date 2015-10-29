@@ -1,6 +1,6 @@
 CFLAGS = -pedantic
 # Remove the -lmingw32 part if you need it to compile on linux!
-PATHS = -I/opt/SDL/2.0.3/include/ -L/opt/SDL/2.0.3/lib/ -Wl,-rpath=/opt/SDL/2.0.3/lib/ 
+PATHS = -I/opt/SDL/2.0.3/include/SDL2 -L/opt/SDL/2.0.3/lib/ -Wl,-rpath=/opt/SDL/2.0.3/lib/ 
 LFLAGS = -lSDL2 -lm
 # List all the files here
 OBJS = main.o init.o game.o world_generation.o game_objects.o AI.o UI.o
