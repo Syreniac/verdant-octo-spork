@@ -9,3 +9,11 @@
 #endif
 
 /* This is where we put the procedural generation stuff. */
+
+/* It's not really very complicated at the moment */
+
+void generateResourceNodeSpawners(GameObjectData *gameObjectData);
+
+void generateProgrammableWorkers(GameObjectData *gameObjectData);
+
+void generateHive(GameObjectData *gameObjectData);

@@ -26,28 +26,14 @@ int gameStart(SDL_Window *window){
   gameData.gameRunTime = (float) gameData.gameStartTime;
 
   /* Create some ResourceNodeSpawners to fill our world with ResourceNodes */
-  gameData.gameObjectData.resourceNodeSpawners[0] = createResourceNodeSpawner(DEFAULT_MAXNODECOUNT,
-                                                                              X_SIZE_OF_SCREEN/2,
-                                                                              Y_SIZE_OF_SCREEN/2,
-                                                                              DEFAULT_SPAWNRADIUS);
-
-  gameData.gameObjectData.resourceNodeSpawners[1] = createResourceNodeSpawner(DEFAULT_MAXNODECOUNT,
-                                                                              X_SIZE_OF_SCREEN/4,
-                                                                              Y_SIZE_OF_SCREEN/4,
-                                                                              DEFAULT_SPAWNRADIUS);
-  /* We need to keep a record of how many resourceNodeSpawners we have active
-     so that we can loop through them later */
-  gameData.gameObjectData.resourceNodeSpawnerCount = 2;
+  generateResourceNodeSpawners(&gameData.gameObjectData);
 
   /* Create some ProgammableWorkers to carry out our tasks */
-  gameData.gameObjectData.programmableWorkers[0] = createProgrammableWorker();
-  gameData.gameObjectData.programmableWorkers[1] = createProgrammableWorker();
-  /* Make sure the count is correct */
-  gameData.gameObjectData.programmableWorkerCount = 2;
+  generateProgrammableWorkers(&gameData.gameObjectData);
 
   /* This doesn't actually do much, but it lets us give the workers somewhere
      to return home to */
-  gameData.gameObjectData.hive = createHive();
+  generateHive(&gameData.gameObjectData);
 
   /* Load in the BMPs for our ResourceNodes and ProgrammableWorkers */
   gameData.nodeGraphic = SDL_LoadBMP("src/images/blueFlower.bmp");
