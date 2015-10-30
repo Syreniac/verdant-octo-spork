@@ -16,6 +16,7 @@ int gameStart(SDL_Window *window){
   /* By creating a new struct to hold our game data, we can more easily
      pass data between functions */
   GameData gameData;
+  FILE *file;
   int gameLoopReturn = 1;
 
   /* We will need the window pointer for later, so we should store that. */
@@ -45,7 +46,9 @@ int gameStart(SDL_Window *window){
   SDL_SetColorKey(gameData.workerGraphic, SDL_TRUE, SDL_MapRGB(gameData.workerGraphic->format, 255,255,255));
 
   gameData.blockFunctionRoots = calloc(1, sizeof(BlockFunctionRoot));
-  gameData.blockFunctionRoots[0] = generateGenericWorkerOrders();
+  file = fopen("GenericWorkerAI.txt","r");
+  makeBlockFunctionRootFromFile(&(gameData.blockFunctionRoots[0]), file);
+  fclose(file);
 
   /* Then run the gameLoop until it returns 0 or exits */
   while(gameLoopReturn){

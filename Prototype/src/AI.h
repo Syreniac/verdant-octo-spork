@@ -24,18 +24,18 @@ struct BlockFunctionArgs{
   int numOfFloats;
 };
 
-
-struct BlockFunctionRoot{
-  BlockFunction *blockFunctions;
-  int numOfBlockFunctions;
-};
-
 struct BlockFunction{
-  char *name;
+  char name[255];
   blockFunction_WrappedFunction wrapped_function;
   BlockFunction *primary;
   BlockFunction *secondary;
   BlockFunctionArgs arguments;
+};
+
+
+struct BlockFunctionRoot{
+  BlockFunction *blockFunctions;
+  int numOfBlockFunctions;
 };
 
 
@@ -76,3 +76,9 @@ int runBlockFunctionOverWorker(BlockFunction *blockFunction,
                                GameObjectData *gameObjectData);
 
 BlockFunctionRoot generateGenericWorkerOrders(void);
+
+void makeBlockFunctionRootFromFile(BlockFunctionRoot *blockFunctionRoot, FILE *file);
+
+int getNumberOfTextStoredBlocks(FILE *file, int *maxDescLength);
+
+int countCharsInString(char *string, char countChar);

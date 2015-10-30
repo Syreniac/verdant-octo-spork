@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <SDL.h>
+#include <string.h>
 
 #define _GENERIC_INCLUDED 1
 #define PROGRAM_NAME "Prototype"
