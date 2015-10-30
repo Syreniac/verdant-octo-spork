@@ -67,7 +67,7 @@ int blockFunction_WorkerReturnToHive(BlockFunctionArgs *arguments,
                                      ProgrammableWorker *programmableWorker,
                                      GameObjectData *gameObjectData);
 
-int runBlockFunctionRootOverWorker(BlockFunctionRoot *blockFunctionRoot,
+void runBlockFunctionRootOverWorker(BlockFunctionRoot *blockFunctionRoot,
                                    ProgrammableWorker *programmbleWorker,
                                    GameObjectData *gameObjectData);
 

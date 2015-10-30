@@ -37,8 +37,8 @@ int gameStart(SDL_Window *window){
   generateHive(&gameData.gameObjectData);
 
   /* Load in the BMPs for our ResourceNodes and ProgrammableWorkers */
-  gameData.nodeGraphic = SDL_LoadBMP("src/images/blueFlower.bmp");
-  gameData.workerGraphic = SDL_LoadBMP("src/images/bee.bmp");
+  gameData.nodeGraphic = SDL_LoadBMP("images/blueFlower.bmp");
+  gameData.workerGraphic = SDL_LoadBMP("images/bee.bmp");
 
   /* SDL_SetColorKey makes the program treat all pixels of a given colour as
      transparent (in these cases, white)*/
@@ -51,6 +51,7 @@ int gameStart(SDL_Window *window){
   fclose(file);
 
   /* Then run the gameLoop until it returns 0 or exits */
+  printf("gameStarted\n");
   while(gameLoopReturn){
     gameLoopReturn = gameLoop(&gameData);
   }
@@ -80,12 +81,6 @@ int gameLoop(GameData *gameData){
 
   rect2.w = X_SIZE_OF_WORKER;
   rect2.h = Y_SIZE_OF_WORKER;
-
-  /* There were weird things happening if the delta_t was too low, so putting
-     this in makes sure that the program behaves itself */
-  if(delta_t<FRAME_RATE){
-    return(1);
-  }
 
   /* Storing the number of milliseconds since the program was run helps keep it
      moving smoothly by calculating delta_t */
@@ -168,5 +163,6 @@ int gameLoop(GameData *gameData){
 		}
 
 	}
+  SDL_Delay(16);
   return(1);
 }

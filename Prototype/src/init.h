@@ -7,4 +7,4 @@
 #include "game.h"
 
 SDL_Window *initialise(void);
-int uninitialise(void);
+void uninitialise(void);

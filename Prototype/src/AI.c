@@ -8,11 +8,24 @@
 
 int blockFunction_Print(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
   int i = 0;
+  printf("PRINTING OUT BLOCK FUNCTION DATA\n");
   while(i < arguments->numOfChars){
       printf("%c",arguments->characters[i]);
       i++;
   }
-  printf("\n");
+  printf("\nINTEGERS\n");
+  i = 0;
+  while(i < arguments->numOfInts){
+    printf("%d ",arguments->integers[i]);
+    i++;
+  }
+  printf("\nFLOATS\n");
+  i=0;
+  while(i<arguments->numOfFloats){
+    printf("%f ",arguments->floats[i]);
+    i++;
+  }
+  printf("------------------");
   return(1);
 }
 
@@ -62,8 +75,21 @@ int blockFunction_WorkerReturnToHive(BlockFunctionArgs *arguments, ProgrammableW
   return(1);
 }
 
-int runBlockFunctionRootOverWorker(BlockFunctionRoot *blockFunctionRoot, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
-  runBlockFunctionOverWorker(&(blockFunctionRoot->blockFunctions[0]), programmableWorker,gameObjectData);
+void runBlockFunctionRootOverWorker(BlockFunctionRoot *blockFunctionRoot, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
+  int i;
+  BlockFunction *blockFunction = &(blockFunctionRoot->blockFunctions[0]);
+  while(1){
+    i = runBlockFunctionOverWorker(blockFunction, programmableWorker,gameObjectData);
+    if(i == 1 && blockFunction->primary != NULL){
+      blockFunction = blockFunction->primary;
+    }
+    else if(i == 2 && blockFunction->secondary != NULL){
+      blockFunction = blockFunction->secondary;
+    }
+    else{
+      return;
+    }
+  }
 }
 
 int runBlockFunctionOverWorker(BlockFunction *blockFunction, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
@@ -71,27 +97,7 @@ int runBlockFunctionOverWorker(BlockFunction *blockFunction, ProgrammableWorker 
   i = blockFunction->wrapped_function(&(blockFunction->arguments),
                                      programmableWorker,
                                      gameObjectData);
-  if(i == 1){
-      if(blockFunction->primary != NULL){
-        runBlockFunctionOverWorker(blockFunction->primary,
-                                   programmableWorker,
-                                   gameObjectData);
-      }
-      else{
-        return(0);
-      }
-  }
-  else if(i == 2){
-      if(blockFunction->secondary != NULL){
-        runBlockFunctionOverWorker(blockFunction->secondary,
-                                   programmableWorker,
-                                   gameObjectData);
-      }
-      else{
-        return(0);
-      }
-  }
-  return(0);
+  return(i);
 }
 
 BlockFunctionRoot generateGenericWorkerOrders(void){
@@ -188,10 +194,6 @@ BlockFunctionRoot generateGenericWorkerOrders(void){
 
 blockFunction_WrappedFunction getBlockFunctionByName(char *blockFunctionName){
   printf("requested function name: \"%s\"\n",blockFunctionName);
-  if(strcmp(blockFunctionName,"BlockFunction_Print") == 0){
-    printf("returning blockFunction_Print\n");
-    return &blockFunction_Print;
-  }
   if(strcmp(blockFunctionName,"BlockFunction_IfWorkerCargoGreaterThan") == 0){
     printf("returning blockFunction_IfWorkerCargoGreaterThan\n");
     return &blockFunction_IfWorkerCargoGreaterThan;
@@ -216,6 +218,7 @@ blockFunction_WrappedFunction getBlockFunctionByName(char *blockFunctionName){
     printf("blockFunction_WorkerReturnToHive\n");
     return &blockFunction_WorkerReturnToHive;
   }
+  return &blockFunction_Print;
 }
 
 int countCharsInString(char *string, char countChar){

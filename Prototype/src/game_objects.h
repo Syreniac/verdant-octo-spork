@@ -10,7 +10,8 @@
 
 enum ProgrammableWorkerStatus {LEAVING = 1,
                                RETURNING = 2,
-                               WANTING_TO_RETURN = 3};
+                               WANTING_TO_RETURN = 3,
+                               BLANK = -1};
 
 /* I'm calling them resource nodes rather than flowers because it makes the
    game more easily adaptable to other themes if we want. Otherwise they are
@@ -104,5 +105,5 @@ int getFirstDeadResourceNode(ResourceNodeSpawner *resourceNodeSpawner);
 ResourceNodeSpawner createResourceNodeSpawner(int maximumNodeCount, float xPosition, float yPosition, float radius);
 void updateResourceNodeSpawner(ResourceNodeSpawner *spawner, float ticks);
 
-ResourceNode initResourceNode(ResourceNodeSpawner *spawner);
+void initResourceNode(ResourceNode *resourceNode);
 ResourceNode createResourceNode(ResourceNodeSpawner *parentSpawner, int resourceUnits);

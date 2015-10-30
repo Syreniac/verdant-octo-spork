@@ -43,7 +43,7 @@ SDL_Window *initialise(void){
   return window;
 }
 
-int uninitialise(void){
+void uninitialise(void){
   /* This function should cleanup the SDL library for us */
   SDL_Quit();
 }
