@@ -1,11 +1,4 @@
-#ifndef _GENERIC_INCLUDED
-#include "generic.h"
-#endif
-#include "world_generation.h"
-#include "AI.h"
-/* Because we're working with numerous files that need to include game_objects.h
-   having this #ifndef check here prevents things breaking from trying to
-   include the same file several times */
+#include "UI.h"
 
 typedef struct GameData GameData;
 struct GameData{

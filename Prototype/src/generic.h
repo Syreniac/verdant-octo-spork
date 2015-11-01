@@ -1,4 +1,4 @@
-/* These are the generic things that every module in the project need. */
+/* These are the generic things that every module in the project needs. */
 
 #include <stdio.h>
 #include <math.h>

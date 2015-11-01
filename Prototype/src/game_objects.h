@@ -1,12 +1,4 @@
-#ifndef _GENERIC_INCLUDED
 #include "generic.h"
-#endif
-
-/* By putting the game object structs in here, we can more easily include them
-   in other modules without having to copy-paste code BUT we'll need to put
-   a check in to make sure this file doesn't get include multiple times.*/
-
-#define _GAME_OBJECTS_INCLUDED 1
 
 enum ProgrammableWorkerStatus {LEAVING = 1,
                                RETURNING = 2,
