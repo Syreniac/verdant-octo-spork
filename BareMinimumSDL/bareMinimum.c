@@ -15,7 +15,7 @@
 /* If you want to use a different window colour, google for HTML colour codes,
    which are also 6-digit hexidecimal numbers (though you will need to change
    the # to a 0x e.g. #b00000 goes to 0xb00000) */
-#define COLOUR 0xb00000
+#define COLOUR 0x000000
 /* This is the name that will appear in the top bar of the application window */
 #define NAME "bareMinimum"
 /* This is the width and height that we will create our window with */
@@ -33,6 +33,41 @@
 #define IMAGE_HEIGHT 10
 #define IMAGE_WIDTH 10
 
+struct Button{
+    SDL_Rect rectangle;
+    SDL_Surface *image;
+    char message[255];
+};
+
+int is_point_in_rect (int x, int y, SDL_Rect *rectangle){
+  if(x < rectangle->x){
+    return 0;
+  }
+  if(y < rectangle->y){
+    return 0;
+  }
+  if(x > rectangle->x + rectangle->w){
+    return 0;
+  }
+  if(y > rectangle->y + rectangle->h){
+    return 0;
+  }
+  return 1;
+}
+
+struct Button createButton(int x, int y, int w, int h, char *message){
+  struct Button button;
+  button.rectangle.x = x;
+  button.rectangle.y = y;
+  button.rectangle.w = w;
+  button.rectangle.h = h;
+  strcpy(button.message, message);
+
+  return button;
+
+}
+
+
 /* In windows, SDL needs to have a main function that takes these arguments,
    because it actually uses some trickery to run some important functions before
    starting your program. It then calls main(), but always passes in argc and
@@ -43,7 +78,11 @@ int main(int argc, char *argv[]){
   SDL_Surface *image;
   SDL_Rect rectangle;
   SDL_Event event;
+  struct Button buttons[2];
+  int i;
 
+  buttons[0] = createButton(100, 100, 40, 40, "nice one!");
+  buttons[1] = createButton(200, 200, 40, 40, "Fab.");
   /* If you think of your program as working with data in multiple layers:
      Screen <-> Operating System <-> SDL <-> Your Code
      Then before we can push information to the Operating system, which will
@@ -140,9 +179,9 @@ int main(int argc, char *argv[]){
      and height of the rectangle. Remember that the Y-axis is upside down in
      SDL! */
 
-     //SDL_FillRect(SDL_GetWindowSurface(window),
-      //            NULL,
-      //            COLOUR);
+   SDL_FillRect(SDL_GetWindowSurface(window),
+                NULL,
+                COLOUR);
 
   /* Loading a BMP in SDL is straightforward. We just use SDL_LoadBMP(), which
      just takes the path to the .bmp we want to load.
@@ -181,7 +220,6 @@ int main(int argc, char *argv[]){
                   NULL,
                   SDL_GetWindowSurface(window),
                   NULL);
-  SDL_GetError();
 
   /* Every time we decide that we want to make the display on the screen change
      to what we've told it to look like (in this case, after we've told it to
@@ -199,6 +237,42 @@ int main(int argc, char *argv[]){
      but it works here for what I'm trying to show you.*/
 
   while(1){
+  /* For many SDL applications, especially where the graphics on the screen need
+     to change with each frame, you'll need to do two steps.
+
+     The first is to make the whole screen return to some default state, which
+     in this case is the colour we #define'd back up at the top. If we didn't do
+     this, we'd potentially end up with loose pixels from where we draw in images
+     that move with each frame. */
+
+     SDL_FillRect(SDL_GetWindowSurface(window),
+                  NULL,
+                  COLOUR);
+
+  /* Once the screen has been reset to a default state, we'd then need to draw
+     in all the images and other objects that we want to display on the screen.
+     SDL only does this if we specifically tell it to, it doesn't have any ways
+     of keeping an image on the screen beyond redrawing it every frame */
+
+
+     SDL_BlitSurface(image,
+                     NULL,
+                     SDL_GetWindowSurface(window),
+                     NULL);
+
+      for (i=0; i<=1 ;i++) {
+        SDL_FillRect(SDL_GetWindowSurface(window),
+                  &buttons[i].rectangle, 0xb00000+i*255);
+      }
+
+  /* Because we've updated the graphics we want to show on the screen, we'll
+     need to call SDL_UpdateWindowSurface() again to make sure that the window
+     of our program displays the latest data we've drawn in. If we don't do this,
+     the window will never seem to change even though we're adjusting the data
+     that we're pushing in. */
+
+     SDL_UpdateWindowSurface(window);
+
   /* Whilst the loop is running, we need to make sure that the SDL application
      can still respond to things like being clicked on, otherwise it will seem
      to the operating system that it has crashed.
@@ -226,6 +300,13 @@ int main(int argc, char *argv[]){
           closes the application's window. Both of these will close SDL and end
           the program. */
           switch(event.type){
+            case SDL_MOUSEBUTTONDOWN:
+              for(i=0; i<2; i++){
+                if(is_point_in_rect(event.button.x, event.button.y, &buttons[i].rectangle)){
+                  printf("%s\n",buttons[i].message);
+                }
+              }
+              break;
             case SDL_QUIT:
               /* SDL_Quit() takes no arguments, and should be called at the end
                  of your program, and it just undoes whatever SDL_Init has done.

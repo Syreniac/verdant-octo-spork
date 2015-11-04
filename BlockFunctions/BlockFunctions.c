@@ -1,6 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+typedef struct BlockFunctionArgument{
+  char *name;
+  int integer;
+  float floating_point;
+  char *string;
+  BlockFunctionArgument *next;
+}
 
 typedef struct BlockFunctionArgs BlockFunctionArgs;
 struct BlockFunctionArgs{
@@ -33,6 +40,8 @@ int blockFunction_IfCountEqualToSecondInt(BlockFunctionArgs arguments);
 
 int runBlockFunction(BlockFunction blockFunction);
 
+void destroyBlockFunction(BlockFunction blockFunction);
+
 int main(void){
   BlockFunction blockFunctions[50];
   char *characters;
@@ -45,7 +54,6 @@ int main(void){
   blockFunctions[0].primary = NULL;
   blockFunctions[0].secondary = NULL;
 
-  characters = "Hello";
 
   blockFunctions[0].arguments.characters = "Hello";
   blockFunctions[0].arguments.numOfChars = 5;
