@@ -140,9 +140,9 @@ int main(int argc, char *argv[]){
      and height of the rectangle. Remember that the Y-axis is upside down in
      SDL! */
 
-     //SDL_FillRect(SDL_GetWindowSurface(window),
-      //            NULL,
-      //            COLOUR);
+   SDL_FillRect(SDL_GetWindowSurface(window),
+                NULL,
+                COLOUR);
 
   /* Loading a BMP in SDL is straightforward. We just use SDL_LoadBMP(), which
      just takes the path to the .bmp we want to load.
@@ -181,7 +181,6 @@ int main(int argc, char *argv[]){
                   NULL,
                   SDL_GetWindowSurface(window),
                   NULL);
-  SDL_GetError();
 
   /* Every time we decide that we want to make the display on the screen change
      to what we've told it to look like (in this case, after we've told it to
@@ -199,6 +198,37 @@ int main(int argc, char *argv[]){
      but it works here for what I'm trying to show you.*/
 
   while(1){
+  /* For many SDL applications, especially where the graphics on the screen need
+     to change with each frame, you'll need to do two steps.
+
+     The first is to make the whole screen return to some default state, which
+     in this case is the colour we #define'd back up at the top. If we didn't do
+     this, we'd potentially end up with loose pixels from where we draw in images
+     that move with each frame. */
+
+     SDL_FillRect(SDL_GetWindowSurface(window),
+                  NULL,
+                  COLOUR);
+
+  /* Once the screen has been reset to a default state, we'd then need to draw
+     in all the images and other objects that we want to display on the screen.
+     SDL only does this if we specifically tell it to, it doesn't have any ways
+     of keeping an image on the screen beyond redrawing it every frame */
+
+
+     SDL_BlitSurface(image,
+                     NULL,
+                     SDL_GetWindowSurface(window),
+                     NULL);
+
+  /* Because we've updated the graphics we want to show on the screen, we'll
+     need to call SDL_UpdateWindowSurface() again to make sure that the window
+     of our program displays the latest data we've drawn in. If we don't do this,
+     the window will never seem to change even though we're adjusting the data
+     that we're pushing in. */
+
+     SDL_UpdateWindowSurface(window); 
+
   /* Whilst the loop is running, we need to make sure that the SDL application
      can still respond to things like being clicked on, otherwise it will seem
      to the operating system that it has crashed.
