@@ -20,11 +20,21 @@ int gameStart(SDL_Window *window){
   int gameLoopReturn = 1;
 
   /* We will need the window pointer for later, so we should store that. */
-  gameData.window = window;
+  gameData.graphicsData.window = window;
 
   /* We also need some time information to make things run smoothly */
   gameData.gameStartTime = SDL_GetTicks();
   gameData.gameRunTime = (float) gameData.gameStartTime;
+
+  gameData.uiData.numberOfSimpleButtons = 1;
+  gameData.uiData.simpleButtons[0] = createUISimpleButton(0, 0, 40, 40, "Hello", 0xb00000);
+  gameData.uiData.numberOfExpandablePanels = 1;
+  gameData.uiData.expandablePanels[0] = createExpandingPanel(100, 100, 40, 40,
+                                                             100, 100, 160, 160,
+                                                             1000,1000,0x00b000);
+  gameData.uiData.numberOfDraggableBlocks = 1;
+  gameData.uiData.draggableBlocks[0] = createDraggableBlock(0,0,20,20,&gameData.uiData.expandablePanels[0],0x0000b0);
+
 
   /* Create some ResourceNodeSpawners to fill our world with ResourceNodes */
   generateResourceNodeSpawners(&gameData.gameObjectData);
@@ -88,7 +98,7 @@ int gameLoop(GameData *gameData){
 
   /* Filling the background black helps get rid of things drawn onto the screen
      that shoudln't be there anymore */
-  SDL_FillRect(SDL_GetWindowSurface(gameData->window),NULL,0x1B8D2E);
+  SDL_FillRect(SDL_GetWindowSurface(gameData->graphicsData.window),NULL,0x1B8D2E);
 
 
   /* Loop through all the spawners so we can update and draw them all in turn */
@@ -111,7 +121,7 @@ int gameLoop(GameData *gameData){
         rect1.y = gameData->gameObjectData.resourceNodeSpawners[i].resourceNodes[j].yPosition - Y_SIZE_OF_NODE/2;
         /* Draw the nodeGraphic from gameData on to the screen at rect1's new
            coordinates */
-        SDL_BlitSurface(gameData->nodeGraphic,NULL,SDL_GetWindowSurface(gameData->window),&rect1);
+        SDL_BlitSurface(gameData->nodeGraphic,NULL,SDL_GetWindowSurface(gameData->graphicsData.window),&rect1);
       }
 
       j++;
@@ -139,13 +149,15 @@ int gameLoop(GameData *gameData){
     rect2.x = gameData->gameObjectData.programmableWorkers[i].xPosition - X_SIZE_OF_WORKER/2;
     rect2.y = gameData->gameObjectData.programmableWorkers[i].yPosition - Y_SIZE_OF_WORKER/2;
     /* Then we draw the workerGraphic to the position of rect2 */
-    SDL_BlitSurface(gameData->workerGraphic,NULL,SDL_GetWindowSurface(gameData->window),&rect2);
+    SDL_BlitSurface(gameData->workerGraphic,NULL,SDL_GetWindowSurface(gameData->graphicsData.window),&rect2);
     i++;
   }
 
+  updateUI(&gameData->uiData, &gameData->graphicsData, delta_t);
+
   /* At the end of the loop we need to update the main application window to
      reflect the changes we've made to the graphics */
-  SDL_UpdateWindowSurface( gameData->window );
+  SDL_UpdateWindowSurface(gameData->graphicsData.window);
 
   /* This bit makes sure our application keeps responding and doesn't crash */
   /* Don't worry too much about this for now */
@@ -155,13 +167,19 @@ int gameLoop(GameData *gameData){
 		switch (event.type)
 		{
 			/* Closing the Window will exit the program */
-
+      case SDL_MOUSEMOTION:
+        moveMouseOnUi(&gameData->uiData,&event);
+        break;
+      case SDL_MOUSEBUTTONUP:
+        clickUpOnUI(&gameData->uiData, &event);
+        break;
+      case SDL_MOUSEBUTTONDOWN:
+        clickDownOnUI(&gameData->uiData, &event);
+        break;
 			case SDL_QUIT:
 				exit(0);
-			break;
-
+			  break;
 		}
-
 	}
   SDL_Delay(16);
   return(1);

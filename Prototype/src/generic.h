@@ -22,3 +22,13 @@
 #define DEFAULT_SPAWNRADIUS 200.0
 #define DEFAULT_MAXNODECOUNT 10
 #define FRAME_RATE 16.6667
+
+typedef struct GraphicsData GraphicsData;
+
+struct GraphicsData{
+  SDL_Window *window;
+};
+
+int isPointInRect(int point_x, int point_y, SDL_Rect rect);
+int isRectEnclosedInRect(SDL_Rect rectA, SDL_Rect rectB);
+void ensureRectEnclosed(SDL_Rect *ensure, SDL_Rect *against);

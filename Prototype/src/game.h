@@ -6,10 +6,13 @@ struct GameData{
   SDL_Window *window;
   Uint32 gameStartTime;
   float gameRunTime;
-  GameObjectData gameObjectData;
   SDL_Surface *nodeGraphic;
   SDL_Surface *workerGraphic;
   BlockFunctionRoot *blockFunctionRoots;
+
+  GraphicsData graphicsData;
+  GameObjectData gameObjectData;
+  UIData uiData;
 };
 
 int gameStart(SDL_Window *window);
