@@ -76,8 +76,8 @@ ResourceNode *checkResourceNodeCollision(ResourceNodeSpawner **resourceNodeSpawn
         /* Get the distance2 between the ResourceNode and the point to check */
         d2 = getDistance2BetweenPoints(positionX,
                                        positionY,
-                                       gameObjectData->resourceNodeSpawners[i].resourceNodes[j].xPosition,
-                                       gameObjectData->resourceNodeSpawners[i].resourceNodes[j].yPosition);
+                                       gameObjectData->resourceNodeSpawners[i].resourceNodes[j].rect.x,
+                                       gameObjectData->resourceNodeSpawners[i].resourceNodes[j].rect.y);
         /* Check whether we are close enough to a ResourceNode to collide and
            that the node we're testing is actually alive.*/
         if(d2 < square(X_SIZE_OF_NODE/2+X_SIZE_OF_WORKER/2) && gameObjectData->resourceNodeSpawners[i].resourceNodes[j].alive){
@@ -120,10 +120,15 @@ ProgrammableWorker createProgrammableWorker(void){
   /* This function creates a ProgrammableWorker struct and fills in the default
      values. Many of these are defined in generic.h */
   ProgrammableWorker programmableWorker;
-  programmableWorker.xPosition = (float) X_SIZE_OF_SCREEN/2.0;
-  programmableWorker.yPosition = (float) Y_SIZE_OF_SCREEN/2.0;
-  programmableWorker.xDimensions = X_SIZE_OF_WORKER;
-  programmableWorker.yDimensions = Y_SIZE_OF_WORKER;
+  /* Because we're using trigonometry to move things around, if work purely with
+     integers then Bad Things happen. Instead, we work first in doubles then
+     copy the information to the integers in the rectangle. */
+  programmableWorker.rawX = 100.0;
+  programmableWorker.rawY = 100.0;
+  programmableWorker.rect.x = 100;
+  programmableWorker.rect.y = 100;
+  programmableWorker.rect.w = X_SIZE_OF_WORKER;
+  programmableWorker.rect.h = Y_SIZE_OF_WORKER;
   /* heading is measured in radians because maths in C all take radians */
   programmableWorker.heading = 0.0;
   /* This is basically pixels/milliseconds */
@@ -132,7 +137,7 @@ ProgrammableWorker createProgrammableWorker(void){
   programmableWorker.type = 1;
   programmableWorker.cargo = 0;
   /* This is an enum detailed in game_objects.h */
-  programmableWorker.status = RETURNING;
+  programmableWorker.status = LEAVING;
   return(programmableWorker);
 }
 
@@ -140,8 +145,10 @@ Hive createHive(void){
   /* This function creates a Hive struct and fills in the default
      values. Many of these are defined in generic.h */
   Hive hive;
-  hive.xPosition = (float) X_SIZE_OF_SCREEN/2.0;
-  hive.yPosition = (float) Y_SIZE_OF_SCREEN/2.0;
+  hive.rect.w = 64;
+  hive.rect.h = 80;
+  hive.rect.x = X_SIZE_OF_SCREEN/2 - hive.rect.w/2;
+  hive.rect.y = Y_SIZE_OF_SCREEN/2 - hive.rect.h/2;
   return(hive);
 }
 
@@ -153,21 +160,25 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
                                               determining collision
      float ticks                            = The number of ticks to update for.*/
   double newX,newY;
+  int i;
   ResourceNodeSpawner *resourceNodeSpawner;
   ResourceNode *resourceNode;
 
-
   /* Because we're using a heading/velocity movement system here, we have to use
      some trigonometry to work out the new positions */
-  newX = sin(programmableWorker->heading) * programmableWorker->speed * ticks;
-  newY = cos(programmableWorker->heading) * programmableWorker->speed * ticks;
+  newX = sin(programmableWorker->heading);
+  newY = cos(programmableWorker->heading);
+  newX *= programmableWorker->speed * ticks;
+  newY *= programmableWorker->speed * ticks;
 
   /* These are then the tentative final new positions for the ProgrammableWorker
      we're updating */
-  newX = programmableWorker->xPosition + newX;
-  newY = programmableWorker->yPosition + newY;
+  programmableWorker->rawX += newX;
+  programmableWorker->rawY += newY;
+  programmableWorker->rect.x = floor(programmableWorker->rawX);
+  programmableWorker->rect.y = floor(programmableWorker->rawY);
 
-  if(getDistance2BetweenPoints(newX,newY,gameObjectData->hive.xPosition,gameObjectData->hive.yPosition) < 1.0 && programmableWorker->status == RETURNING){
+  if(getDistance2BetweenPoints(programmableWorker->rect.x,programmableWorker->rect.y,gameObjectData->hive.rect.x,gameObjectData->hive.rect.y) < 1.0 && programmableWorker->status == RETURNING){
     programmableWorker->cargo = 0;
   }
   if(programmableWorker->status == LEAVING){
@@ -184,15 +195,8 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
       /* Make sure the ResourceNodeSpawner knows that it's lost a ResourceNode */
       resourceNodeSpawner->currentNodeCount--;
       programmableWorker->cargo++;
-      /* Set the status to 3 (3 means wants to go home) */
-      programmableWorker->status = WANTING_TO_RETURN;
     }
   }
-
-  /* Whatever the newX and newY are in the end, set the ProgrammableWorker's
-     positioning data to them. */
-  programmableWorker->xPosition = newX;
-  programmableWorker->yPosition = newY;
 }
 
 ResourceNodeSpawner createResourceNodeSpawner(int maximumNodeCount, float xPosition, float yPosition, float radius){
@@ -242,8 +246,10 @@ void initResourceNode(ResourceNode *resourceNode){
      are alive without this.*/
   resourceNode->alive = 0;
   resourceNode->resourceUnits = 0;
-  resourceNode->xPosition = 0;
-  resourceNode->yPosition = 0;
+  resourceNode->rect.x = 0;
+  resourceNode->rect.y = 0;
+  resourceNode->rect.w = X_SIZE_OF_NODE;
+  resourceNode->rect.h = Y_SIZE_OF_NODE;
   resourceNode->deathTime = -1;
 }
 
@@ -290,7 +296,60 @@ ResourceNode createResourceNode(ResourceNodeSpawner *parentSpawner, int resource
   resourceNode.resourceUnits = resourceUnits;
   /* We use a randomly generated offset value for now to distribute the
      ResourceNode around the ResourceNodeSpawner. This can be improved. */
-  resourceNode.xPosition = parentSpawner->xPosition + generateRandomCoordOffset(parentSpawner->spawnRadius);
-  resourceNode.yPosition = parentSpawner->yPosition + generateRandomCoordOffset(parentSpawner->spawnRadius);
+  resourceNode.rect.x = parentSpawner->xPosition + generateRandomCoordOffset(parentSpawner->spawnRadius) - X_SIZE_OF_NODE/2;
+  resourceNode.rect.y = parentSpawner->yPosition + generateRandomCoordOffset(parentSpawner->spawnRadius) - Y_SIZE_OF_NODE/2;
   return resourceNode;
+}
+
+void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsData, float ticks){
+  /* GameObjectData *gameObjectData = the pointer to the GameObjectData struct
+                                      that holds all the information about our
+                                      GameObjects.
+     GraphicsData *graphicsData     = the pointer to the GraphicsData struct
+                                      that holds the information we need to draw
+                                      things on the screen.
+     float ticks                    = the number of milliseconds that we need to
+                                      run the updates for this FRAME_RATE
+
+     This function makes all the GameObjects move around on the screen and show
+     up graphically. It gets called every frame from the main gameLoop function
+     in game.c.*/
+  int i = 0, j = 0;
+
+  /* First, we need to draw the Hive in at the correct position. */
+  SDL_BlitSurface(graphicsData->hiveGraphic,
+                  NULL,
+                  SDL_GetWindowSurface(graphicsData->window),
+                  &gameObjectData->hive.rect);
+
+  /* Second, we loop through all the ResourceNodeSpawners */
+  while(i < gameObjectData->resourceNodeSpawnerCount){
+    j = 0;
+    /* Update each one to reflect respawning nodes and so on. */
+    updateResourceNodeSpawner(&gameObjectData->resourceNodeSpawners[i],ticks);
+    /* Then we need to loop through the attached ResourceNodes and draw them */
+    while(j < gameObjectData->resourceNodeSpawners[i].maximumNodeCount){
+      if(gameObjectData->resourceNodeSpawners[i].resourceNodes[j].alive){
+        SDL_BlitSurface(graphicsData->nodeGraphic,
+                        NULL,
+                        SDL_GetWindowSurface(graphicsData->window),
+                        &gameObjectData->resourceNodeSpawners[i].resourceNodes[j].rect);
+      }
+      j++;
+    }
+    i++;
+  }
+  /* Thirdly, we loop through all the ProgrammableWorkers and update them */
+  /* AI thinking has been moved to a seperate function to prevent some circular
+     inheritance issues. */
+  i = 0;
+  while(i < gameObjectData->programmableWorkerCount){
+    updateProgrammableWorker(&gameObjectData->programmableWorkers[i],gameObjectData,ticks);
+    SDL_BlitSurface(graphicsData->workerGraphic,
+                    NULL,
+                    SDL_GetWindowSurface(graphicsData->window),
+                    &gameObjectData->programmableWorkers[i].rect);
+    i++;
+  }
+
 }

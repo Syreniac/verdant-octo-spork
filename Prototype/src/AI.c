@@ -44,18 +44,19 @@ int blockFunction_IfWorkerStatusEqual(BlockFunctionArgs *arguments, Programmable
 }
 
 int blockFunction_IfWorkerOutsideOfBounds(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
-  if(programmableWorker->xPosition >= (X_SIZE_OF_SCREEN - programmableWorker->xDimensions) || programmableWorker->xPosition < 0 ||
-     programmableWorker->yPosition >= (Y_SIZE_OF_SCREEN - programmableWorker->yDimensions) || programmableWorker->yPosition < 0){
+  if(programmableWorker->rect.x > (X_SIZE_OF_SCREEN - programmableWorker->rect.w) || programmableWorker->rect.x <= 0 ||
+     programmableWorker->rect.y > (Y_SIZE_OF_SCREEN - programmableWorker->rect.h) || programmableWorker->rect.y <= 0){
+       printf("worker outside of bounds\n");
        return(1);
     }
     return(2);
 }
 
 int blockFunction_IfWorkerWithinDistanceOfHive(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
-  if(getDistance2BetweenPoints(programmableWorker->xPosition,
-                               programmableWorker->yPosition,
-                               gameObjectData->hive.xPosition,
-                               gameObjectData->hive.yPosition) <= 1.0){
+  if(getDistance2BetweenPoints(programmableWorker->rect.x,
+                               programmableWorker->rect.y,
+                               gameObjectData->hive.rect.x,
+                               gameObjectData->hive.rect.y) <= arguments->floats[0]){
     return(1);
   }
   return(2);
@@ -69,8 +70,7 @@ int blockFunction_SetWorkerHeadingRandomly(BlockFunctionArgs *arguments, Program
 
 
 int blockFunction_WorkerReturnToHive(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
-  programmableWorker->heading = atan2(gameObjectData->hive.xPosition - programmableWorker->xPosition,
-                                      gameObjectData->hive.yPosition - programmableWorker->yPosition);
+  programmableWorker->heading = atan2(gameObjectData->hive.rect.x - programmableWorker->rawX,gameObjectData->hive.rect.y - programmableWorker->rawY);
   programmableWorker->status = RETURNING;
   return(1);
 }
@@ -193,31 +193,25 @@ BlockFunctionRoot generateGenericWorkerOrders(void){
 }
 
 blockFunction_WrappedFunction getBlockFunctionByName(char *blockFunctionName){
-  printf("requested function name: \"%s\"\n",blockFunctionName);
   if(strcmp(blockFunctionName,"BlockFunction_IfWorkerCargoGreaterThan") == 0){
-    printf("returning blockFunction_IfWorkerCargoGreaterThan\n");
     return &blockFunction_IfWorkerCargoGreaterThan;
   }
   if(strcmp(blockFunctionName,"BlockFunction_IfWorkerStatusEqual") == 0){
-    printf("returning blockFunction_IfWorkerStatusEqual\n");
     return &blockFunction_IfWorkerStatusEqual;
   }
   if(strcmp(blockFunctionName,"BlockFunction_IfWorkerOutsideOfBounds") == 0){
-    printf("returning blockFunction_IfWorkerOutsideOfBounds\n");
     return &blockFunction_IfWorkerOutsideOfBounds;
   }
   if(strcmp(blockFunctionName,"BlockFunction_IfWorkerWithinDistanceOfHive") == 0){
-    printf("returning blockFunction_IfWorkerWithinDistanceOfHive\n");
     return &blockFunction_IfWorkerWithinDistanceOfHive;
   }
   if(strcmp(blockFunctionName,"BlockFunction_SetWorkerHeadingRandomly") == 0){
-    printf("returning blockFunction_SetWorkerHeadingRandomly\n");
     return &blockFunction_SetWorkerHeadingRandomly;
   }
   if(strcmp(blockFunctionName,"BlockFunction_WorkerReturnToHive") == 0){
-    printf("blockFunction_WorkerReturnToHive\n");
     return &blockFunction_WorkerReturnToHive;
   }
+  printf("ERROR: Unrecognised function name: \"%s\".\n Substituting a print function.\n",blockFunctionName);
   return &blockFunction_Print;
 }
 
@@ -293,7 +287,7 @@ void makeBlockFunctionRootFromFile(BlockFunctionRoot *blockFunctionRoot, FILE *f
   char name[255];
   blockFunction_WrappedFunction wrapped_function;
 
-  printf("number of function blocks in this file = %d\n",functionBlockCount);
+  printf("number of function blocks in file = %d\n",functionBlockCount);
 
   fseek(file,0,SEEK_SET);
 
@@ -308,7 +302,6 @@ void makeBlockFunctionRootFromFile(BlockFunctionRoot *blockFunctionRoot, FILE *f
     /* Work out whether we need to move onto the next block */
     if(read_line2[0] != '\t' && read_line2[0] != ' '){
       if(initialRun == 0){
-        printf("creating block %d\n",blockFunctionIndex);
         strcpy(blockFunctionRoot->blockFunctions[blockFunctionIndex].name, name);
         blockFunctionRoot->blockFunctions[blockFunctionIndex].wrapped_function = wrapped_function;
         if(primaryRef != -1){
@@ -394,7 +387,6 @@ void makeBlockFunctionRootFromFile(BlockFunctionRoot *blockFunctionRoot, FILE *f
       }
     }
   }
-    printf("creating block %d\n",blockFunctionIndex);
     strcpy(blockFunctionRoot->blockFunctions[blockFunctionIndex].name, name);
     blockFunctionRoot->blockFunctions[blockFunctionIndex].wrapped_function = wrapped_function;
     if(primaryRef != -1){
@@ -413,8 +405,21 @@ void makeBlockFunctionRootFromFile(BlockFunctionRoot *blockFunctionRoot, FILE *f
     blockFunctionRoot->blockFunctions[blockFunctionIndex].arguments.numOfFloats = numOfFloats;
     blockFunctionRoot->blockFunctions[blockFunctionIndex].arguments.integers = integers;
     blockFunctionRoot->blockFunctions[blockFunctionIndex].arguments.numOfInts = numOfInts;
+}
 
+void runAI(AIData *aiData, GameObjectData *gameObjectData){
+  /* AIData *aiData                 = the pointer to the AIData struct that
+                                      holds all the AI data we need to run it
+     GameObjectData *gameObjectData = the pointer to the GameObjectData struct
+                                      that holds all the data we need to find
+                                      GameObjects and get the context for the AI
 
-
-
+     This function is where we run the AI over all the ProgrammableWorkers. */
+  int i = 0;
+  while(i < gameObjectData->programmableWorkerCount){
+    runBlockFunctionRootOverWorker(&aiData->blockFunctionRoots[0],
+                                   &gameObjectData->programmableWorkers[i],
+                                   gameObjectData);
+    i++;
+  }
 }

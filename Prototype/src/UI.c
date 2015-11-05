@@ -1,6 +1,18 @@
 #include "UI.h"
 
 SimpleButton createUISimpleButton(int x, int y, int w, int h, char *message, Uint32 colour){
+  /* int x = the x coordinates relative to the main window that we want to
+             create the SimpleButton at.
+     int y = the y coordinates relative to the main window that we want to
+             create the SimpleButton at.
+     int w = the width of the SimpleButton.
+     int h = the height of the SimpleButton.
+     char *message = the message the button will print to the terminal when clicked.
+     Uint32 colour = the colour the button will be on the screen.
+
+     This creates a SimpleButton using the arguments provided, and helps prevent
+     the data being junk.
+     It returns a SimpleButton.*/
   SimpleButton simpleButton;
   simpleButton.rect.x = x;
   simpleButton.rect.y = y;
@@ -12,6 +24,14 @@ SimpleButton createUISimpleButton(int x, int y, int w, int h, char *message, Uin
 }
 
 void updateSimpleButton(GraphicsData *graphicsData, SimpleButton *simpleButton){
+  /* GraphicsData *graphicsData = a pointer to the GraphicsData struct that
+                                  contains the information we need to draw
+                                  things on the screen.
+     SimpleButton *simpleButton = a pointer to the individual SimpleButton we
+                                  are updating in this function
+
+     This updates a SimpleButton and draws it onto the screen. At the moment
+     this just means filling a rectangle with a given colour. */
   SDL_FillRect(SDL_GetWindowSurface(graphicsData->window),
                &simpleButton->rect,
                simpleButton->colour);

@@ -9,7 +9,7 @@ typedef struct ExpandablePanel ExpandablePanel;
 typedef struct DraggableBlock DraggableBlock;
 typedef enum ExpandableStatus ExpandableStatus;
 
-typedef union UI_Element UI_Element;
+typedef union UI_Link UI_Link;
 
 SimpleButton createUISimpleButton(int x, int y, int w, int h, char *message, Uint32 colour);
 void updateSimpleButton(GraphicsData *graphicsData, SimpleButton *simpleButton);
@@ -70,6 +70,7 @@ struct UIData{
   /* We will be moving to a more tree/node based way of structuring this soon. */
 };
 
-union UI_Element{
-  ExpandablePanel expandable;
+union UI_Link{
+  ExpandablePanel *expandablePanel;
+  SimpleButton *simpleButton;
 };

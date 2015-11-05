@@ -20,9 +20,8 @@ void generateResourceNodeSpawners(GameObjectData *gameObjectData){
 void generateProgrammableWorkers(GameObjectData *gameObjectData){
   /* Create two ProgrammableWorkers */
   gameObjectData->programmableWorkers[0] = createProgrammableWorker();
-  gameObjectData->programmableWorkers[1] = createProgrammableWorker();
   /* Make sure the count is correct */
-  gameObjectData->programmableWorkerCount = 2;
+  gameObjectData->programmableWorkerCount = 1;
 }
 
 void generateHive(GameObjectData *gameObjectData){

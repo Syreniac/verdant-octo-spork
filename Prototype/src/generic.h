@@ -5,8 +5,8 @@
 #include <stdlib.h>
 #include <SDL.h>
 #include <string.h>
+#include <assert.h>
 
-#define _GENERIC_INCLUDED 1
 #define PROGRAM_NAME "Prototype"
 #define X_SIZE_OF_SCREEN 640
 #define Y_SIZE_OF_SCREEN 480
@@ -27,6 +27,9 @@ typedef struct GraphicsData GraphicsData;
 
 struct GraphicsData{
   SDL_Window *window;
+  SDL_Surface *workerGraphic;
+  SDL_Surface *nodeGraphic;
+  SDL_Surface *hiveGraphic;
 };
 
 int isPointInRect(int point_x, int point_y, SDL_Rect rect);

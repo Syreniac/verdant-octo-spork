@@ -16,8 +16,7 @@ struct ResourceNode{
   /* How many resources (e.g. Honey) are in a node*/
   int resourceUnits;
   /* standard positioning data - x,y coords */
-  float xPosition;
-  float yPosition;
+  SDL_Rect rect;
   /* This is how we know when to respawn it once it dies. The value stored here
      will be the SDL_GetTicks() at the time of the flowers death. */
   int deathTime;
@@ -47,13 +46,12 @@ struct ResourceNodeSpawner{
 
 typedef struct ProgrammableWorker ProgrammableWorker;
 struct ProgrammableWorker{
-  float xPosition;
-  float yPosition;
+  SDL_Rect rect;
 
-  float xDimensions;
-  float yDimensions;
+  double rawX;
+  double rawY;
 
-  float heading;
+  double heading;
   float speed;
 
   int cargo;
@@ -66,6 +64,7 @@ typedef struct Hive Hive;
 struct Hive{
   float xPosition;
   float yPosition;
+  SDL_Rect rect;
 };
 
 typedef struct GameObjectData GameObjectData;
@@ -99,3 +98,4 @@ void updateResourceNodeSpawner(ResourceNodeSpawner *spawner, float ticks);
 
 void initResourceNode(ResourceNode *resourceNode);
 ResourceNode createResourceNode(ResourceNodeSpawner *parentSpawner, int resourceUnits);
+void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsData, float ticks);

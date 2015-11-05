@@ -8,6 +8,7 @@ typedef struct GameObjectData GameObjectData;
 typedef struct BlockFunctionArgs BlockFunctionArgs;
 typedef struct BlockFunction BlockFunction;
 typedef struct BlockFunctionRoot BlockFunctionRoot;
+typedef struct AIData AIData;
 
 typedef int(*blockFunction_WrappedFunction)(BlockFunctionArgs *arguments,
                                             ProgrammableWorker *programmableWorker,
@@ -34,6 +35,10 @@ struct BlockFunction{
 struct BlockFunctionRoot{
   BlockFunction *blockFunctions;
   int numOfBlockFunctions;
+};
+
+struct AIData{
+  BlockFunctionRoot *blockFunctionRoots;
 };
 
 
@@ -80,3 +85,5 @@ void makeBlockFunctionRootFromFile(BlockFunctionRoot *blockFunctionRoot, FILE *f
 int getNumberOfTextStoredBlocks(FILE *file, int *maxDescLength);
 
 int countCharsInString(char *string, char countChar);
+
+void runAI(AIData *aiData, GameObjectData *gameObjectData);

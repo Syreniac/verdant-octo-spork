@@ -47,17 +47,19 @@ int gameStart(SDL_Window *window){
   generateHive(&gameData.gameObjectData);
 
   /* Load in the BMPs for our ResourceNodes and ProgrammableWorkers */
-  gameData.nodeGraphic = SDL_LoadBMP("images/blueFlower.bmp");
-  gameData.workerGraphic = SDL_LoadBMP("images/bee.bmp");
+  gameData.graphicsData.nodeGraphic = SDL_LoadBMP("images/blueFlower.bmp");
+  gameData.graphicsData.workerGraphic = SDL_LoadBMP("images/bee.bmp");
+  gameData.graphicsData.hiveGraphic = SDL_LoadBMP("images/beehive.bmp");
 
   /* SDL_SetColorKey makes the program treat all pixels of a given colour as
      transparent (in these cases, white)*/
-  SDL_SetColorKey(gameData.nodeGraphic, SDL_TRUE, SDL_MapRGB(gameData.nodeGraphic->format, 255,255,255));
-  SDL_SetColorKey(gameData.workerGraphic, SDL_TRUE, SDL_MapRGB(gameData.workerGraphic->format, 255,255,255));
+  SDL_SetColorKey(gameData.graphicsData.nodeGraphic, SDL_TRUE, SDL_MapRGB(gameData.graphicsData.nodeGraphic->format, 255,255,255));
+  SDL_SetColorKey(gameData.graphicsData.workerGraphic, SDL_TRUE, SDL_MapRGB(gameData.graphicsData.workerGraphic->format, 255,255,255));
+  SDL_SetColorKey(gameData.graphicsData.hiveGraphic, SDL_TRUE, SDL_MapRGB(gameData.graphicsData.hiveGraphic->format, 255,255,255));
 
-  gameData.blockFunctionRoots = calloc(1, sizeof(BlockFunctionRoot));
+  gameData.aiData.blockFunctionRoots = calloc(1, sizeof(BlockFunctionRoot));
   file = fopen("GenericWorkerAI.txt","r");
-  makeBlockFunctionRootFromFile(&(gameData.blockFunctionRoots[0]), file);
+  makeBlockFunctionRootFromFile(&(gameData.aiData.blockFunctionRoots[0]), file);
   fclose(file);
 
   /* Then run the gameLoop until it returns 0 or exits */
@@ -77,20 +79,7 @@ int gameLoop(GameData *gameData){
      function ran */
   float delta_t = calculateDt(gameData->gameRunTime);
   SDL_Event event;
-  SDL_Rect rect1,rect2;
   int i = 0, j = 0;
-
-  /* because rect1 is used for drawing ResourceNodes, we'll set its height and
-     width to the globally defined values for ResourceNodes */
-
-  rect1.w = X_SIZE_OF_NODE;
-  rect1.h = Y_SIZE_OF_NODE;
-
-  /* similarly, rect2 is used for drawing ProgrammableWorkers, so we'll use the
-     globally defined values again. */
-
-  rect2.w = X_SIZE_OF_WORKER;
-  rect2.h = Y_SIZE_OF_WORKER;
 
   /* Storing the number of milliseconds since the program was run helps keep it
      moving smoothly by calculating delta_t */
@@ -100,58 +89,9 @@ int gameLoop(GameData *gameData){
      that shoudln't be there anymore */
   SDL_FillRect(SDL_GetWindowSurface(gameData->graphicsData.window),NULL,0x1B8D2E);
 
+  updateGameObjects(&gameData->gameObjectData, &gameData->graphicsData, delta_t);
 
-  /* Loop through all the spawners so we can update and draw them all in turn */
-  while(i<gameData->gameObjectData.resourceNodeSpawnerCount){
-    /* j is the index for individual resourceNodes within the
-       resourceNodeSpawner so we need to rezero it for every resourceNodeSpawner */
-    j = 0;
-
-    /* This just updates the ResourceNodeSpawner */
-    updateResourceNodeSpawner(&(gameData->gameObjectData.resourceNodeSpawners[i]), delta_t);
-
-    /* This draws the resourceNodes onto the screen by iterating through the
-       array attached to the ResourceNodeSpawner*/
-    while(j<gameData->gameObjectData.resourceNodeSpawners[i].maximumNodeCount){
-      if(gameData->gameObjectData.resourceNodeSpawners[i].resourceNodes[j].alive){
-        /* This gets the x or y coordinate from the ResourceNode attached to the
-           ResourceNodeSpawner selected from gameObjectData in gameData and
-           moves the x or y coordinate of rect1 to that position*/
-        rect1.x = gameData->gameObjectData.resourceNodeSpawners[i].resourceNodes[j].xPosition - X_SIZE_OF_NODE/2;
-        rect1.y = gameData->gameObjectData.resourceNodeSpawners[i].resourceNodes[j].yPosition - Y_SIZE_OF_NODE/2;
-        /* Draw the nodeGraphic from gameData on to the screen at rect1's new
-           coordinates */
-        SDL_BlitSurface(gameData->nodeGraphic,NULL,SDL_GetWindowSurface(gameData->graphicsData.window),&rect1);
-      }
-
-      j++;
-    }
-
-    i++;
-  }
-
-  i = 0;
-  /* Loop through all the workers so we can update and draw them all in turn */
-  while(i<gameData->gameObjectData.programmableWorkerCount){
-    /* Because the ProgrammableWorkers need to know the positions of objects in
-       the world, we pass the gameObjectData to it, which holds the arrays of
-       game objects. This function simply updates the position of the worker,
-       and checks whether it collides with a flower. */
-    updateProgrammableWorker(&gameData->gameObjectData.programmableWorkers[i],&gameData->gameObjectData,delta_t);
-    /* Once we have the new positions, we then run the AI across the worker */
-
-    runBlockFunctionRootOverWorker(&gameData->blockFunctionRoots[0],
-                                   &gameData->gameObjectData.programmableWorkers[i],
-                                   &gameData->gameObjectData);
-
-    /* Just like with the ResourceNodes above, we move rect2 to the position
-       indicated by the ProgrammableWorker */
-    rect2.x = gameData->gameObjectData.programmableWorkers[i].xPosition - X_SIZE_OF_WORKER/2;
-    rect2.y = gameData->gameObjectData.programmableWorkers[i].yPosition - Y_SIZE_OF_WORKER/2;
-    /* Then we draw the workerGraphic to the position of rect2 */
-    SDL_BlitSurface(gameData->workerGraphic,NULL,SDL_GetWindowSurface(gameData->graphicsData.window),&rect2);
-    i++;
-  }
+  runAI(&gameData->aiData,&gameData->gameObjectData);
 
   updateUI(&gameData->uiData, &gameData->graphicsData, delta_t);
 
