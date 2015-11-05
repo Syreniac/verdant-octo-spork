@@ -2,7 +2,7 @@
 CFLAGS = -pedantic -Wall -Wextra -Wno-unused-variable -Wno-unused-parameter
 LFLAGS = -I/opt/SDL/2.0.3/include -L/opt/SDL/2.0.3/lib -Wl,-rpath,/opt/SDL/2.0.3/lib -lSDL2 -lm
 # List all the files here
-OBJS = main.o init.o game.o world_generation.o game_objects.o AI.o UI.o
+OBJS = main.o init.o game.o world_generation.o game_objects.o AI.o UI.o generic.o
 PROG = bin_lab/Prototype
 CXX = gcc
 
@@ -10,7 +10,7 @@ CXX = gcc
 all: $(PROG)
 
 # compiling other source files.
-%.o: src/%.c src/%.h src/generic.h
+%.o: src/%.c src/%.h
 	$(CXX) $(CFLAGS) $(LFLAGS) -c -s $<
 
 # linking the program.
