@@ -4,8 +4,8 @@ void generateResourceNodeSpawners(GameObjectData *gameObjectData){
 
   /* Create two ResourceNodeSpawners at 'random' positions */
   gameObjectData->resourceNodeSpawners[0] = createResourceNodeSpawner(DEFAULT_MAXNODECOUNT,
-                                                                      500,
-                                                                      300,
+                                                                      X_SIZE_OF_SCREEN/2,
+                                                                      Y_SIZE_OF_SCREEN/2,
                                                                       DEFAULT_SPAWNRADIUS);
 
   gameObjectData->resourceNodeSpawners[1] = createResourceNodeSpawner(DEFAULT_MAXNODECOUNT,

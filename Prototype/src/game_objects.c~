@@ -275,6 +275,7 @@ void updateResourceNodeSpawner(ResourceNodeSpawner *spawner, float ticks){
       resNode = createResourceNode(spawner,DEFAULT_RESOURCEUNITS);
       /* attach it to the spawner by inserting it into the resourceNodes array */
       spawner->resourceNodes[i] = resNode;
+
       /* Set the timer back to 0 */
       spawner->ticksSinceSpawn = 0;
       /* Update the currentNodeCount */

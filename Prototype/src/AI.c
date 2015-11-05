@@ -44,8 +44,8 @@ int blockFunction_IfWorkerStatusEqual(BlockFunctionArgs *arguments, Programmable
 }
 
 int blockFunction_IfWorkerOutsideOfBounds(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
-  if(programmableWorker->rect.x > (X_SIZE_OF_SCREEN - programmableWorker->rect.w) || programmableWorker->rect.x <= 0 ||
-     programmableWorker->rect.y > (Y_SIZE_OF_SCREEN - programmableWorker->rect.h) || programmableWorker->rect.y <= 0){
+  if(programmableWorker->rect.x > (X_SIZE_OF_WORLD + programmableWorker->rect.w) || programmableWorker->rect.x <= 0 ||
+     programmableWorker->rect.y > (Y_SIZE_OF_WORLD + programmableWorker->rect.h) || programmableWorker->rect.y <= 0){
        printf("worker outside of bounds\n");
        return(1);
     }
