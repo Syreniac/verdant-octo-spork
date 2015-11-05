@@ -1,6 +1,6 @@
 
 CFLAGS = -pedantic -Wall -Wextra -Wno-unused-variable -Wno-unused-parameter
-SDL_FLAGS = -ISDL2_x32/include/SDL2 -LSDL2_x32/lib
+SDL_FLAGS = -ISDL2_x32/include -LSDL2_x32/lib
 TTF_FLAGS = -ISDL_ttf_x32/include/SDL2 -LSDL_ttf_x32/lib
 LFLAGS =  $(SDL_FLAGS) $(TTF_FLAGS) -lmingw32 -lSDL2main -lSDL2 -lSDL2_ttf -lm
 # List all the files here
