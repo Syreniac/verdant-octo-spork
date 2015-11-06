@@ -46,15 +46,8 @@ int gameStart(SDL_Window *window){
      to return home to */
   generateHive(&gameData.gameObjectData);
 
-    SDL_ClearError();
     /* Load in the BMPs for our ResourceNodes and ProgrammableWorkers */
-    SDL_RWops * theFile = SDL_RWFromFile("images/bee.bmp", "rb");
-    char* theError = SDL_GetError();
-    printf(theError);
-    SDL_Surface * theBmp = SDL_LoadBMP_RW(theFile, 1);
-    theError = SDL_GetError();
-    printf(theError);
-  gameData.graphicsData.nodeGraphic = theBmp;
+  gameData.graphicsData.nodeGraphic = SDL_LoadBMP_RW(SDL_RWFromFile("images/blueFlower.bmp", "rb"),1);
   gameData.graphicsData.workerGraphic = SDL_LoadBMP_RW(SDL_RWFromFile("images/bee.bmp", "rb"), 1);
   gameData.graphicsData.hiveGraphic = SDL_LoadBMP_RW(SDL_RWFromFile("images/beehive.bmp", "rb"), 1);
 
