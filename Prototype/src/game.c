@@ -46,10 +46,17 @@ int gameStart(SDL_Window *window){
      to return home to */
   generateHive(&gameData.gameObjectData);
 
-  /* Load in the BMPs for our ResourceNodes and ProgrammableWorkers */
-  gameData.graphicsData.nodeGraphic = SDL_LoadBMP("images/blueFlower.bmp");
-  gameData.graphicsData.workerGraphic = SDL_LoadBMP("images/bee.bmp");
-  gameData.graphicsData.hiveGraphic = SDL_LoadBMP("images/beehive.bmp");
+    SDL_ClearError();
+    /* Load in the BMPs for our ResourceNodes and ProgrammableWorkers */
+    SDL_RWops * theFile = SDL_RWFromFile("images/bee.bmp", "rb");
+    char* theError = SDL_GetError();
+    printf(theError);
+    SDL_Surface * theBmp = SDL_LoadBMP_RW(theFile, 1);
+    theError = SDL_GetError();
+    printf(theError);
+  gameData.graphicsData.nodeGraphic = theBmp;
+  gameData.graphicsData.workerGraphic = SDL_LoadBMP_RW(SDL_RWFromFile("images/bee.bmp", "rb"), 1);
+  gameData.graphicsData.hiveGraphic = SDL_LoadBMP_RW(SDL_RWFromFile("images/beehive.bmp", "rb"), 1);
 
   /* SDL_SetColorKey makes the program treat all pixels of a given colour as
      transparent (in these cases, white)*/
@@ -58,7 +65,7 @@ int gameStart(SDL_Window *window){
   SDL_SetColorKey(gameData.graphicsData.hiveGraphic, SDL_TRUE, SDL_MapRGB(gameData.graphicsData.hiveGraphic->format, 255,255,255));
 
   gameData.aiData.blockFunctionRoots = calloc(1, sizeof(BlockFunctionRoot));
-  file = fopen("GenericWorkerAI.txt","r");
+  file = fopen("ai/GenericWorkerAI.txt","r");
   makeBlockFunctionRootFromFile(&(gameData.aiData.blockFunctionRoots[0]), file);
   fclose(file);
 
