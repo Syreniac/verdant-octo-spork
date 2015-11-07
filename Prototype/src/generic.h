@@ -11,8 +11,8 @@
 #define X_SIZE_OF_SCREEN 640
 #define Y_SIZE_OF_SCREEN 480
 
-#define X_SIZE_OF_WORLD 1280
-#define Y_SIZE_OF_WORLD 960
+#define X_SIZE_OF_WORLD 840
+#define Y_SIZE_OF_WORLD 680
 
 #define X_SIZE_OF_NODE 20
 #define Y_SIZE_OF_NODE 20
@@ -33,8 +33,8 @@ struct GraphicsData{
   SDL_Surface *workerGraphic;
   SDL_Surface *nodeGraphic;
   SDL_Surface *hiveGraphic;
-  int xOffset;
-  int yOffset;
+  SDL_Surface *navigatableWorld;
+  SDL_Rect *navigationOffset;
 };
 
 int isPointInRect(int point_x, int point_y, SDL_Rect rect);

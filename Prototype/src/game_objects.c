@@ -314,11 +314,15 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
      up graphically. It gets called every frame from the main gameLoop function
      in game.c.*/
   int i = 0, j = 0;
+  SDL_Rect tempRect;
+  
+  /* Clear surface for next sequence of blits. This prevents trailing images*/
+  SDL_FillRect(graphicsData->navigatableWorld, NULL, 0x000000);
 
   /* First, we need to draw the Hive in at the correct position. */
   SDL_BlitSurface(graphicsData->hiveGraphic,
                   NULL,
-                  SDL_GetWindowSurface(graphicsData->window),
+                  graphicsData->navigatableWorld,
                   &gameObjectData->hive.rect);
 
   /* Second, we loop through all the ResourceNodeSpawners */
@@ -331,7 +335,7 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
       if(gameObjectData->resourceNodeSpawners[i].resourceNodes[j].alive){
         SDL_BlitSurface(graphicsData->nodeGraphic,
                         NULL,
-                        SDL_GetWindowSurface(graphicsData->window),
+                        graphicsData->navigatableWorld,
                         &gameObjectData->resourceNodeSpawners[i].resourceNodes[j].rect);
       }
       j++;
@@ -346,9 +350,15 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
     updateProgrammableWorker(&gameObjectData->programmableWorkers[i],gameObjectData,ticks);
     SDL_BlitSurface(graphicsData->workerGraphic,
                     NULL,
-                    SDL_GetWindowSurface(graphicsData->window),
+                    graphicsData->navigatableWorld,
                     &gameObjectData->programmableWorkers[i].rect);
     i++;
   }
+  
+  /* Fourthly we blit navigatableWindow to the screen at the co-ordinates dictated by ... which can*/
+  /*be altered by the user, pressing the up, down, left and right keys*/
+  tempRect = *(graphicsData->navigationOffset);
+  SDL_BlitSurface(graphicsData->navigatableWorld, NULL, SDL_GetWindowSurface(graphicsData->window),
+                  &tempRect);
 
 }
