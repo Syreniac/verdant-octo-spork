@@ -333,10 +333,11 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
     /* Then we need to loop through the attached ResourceNodes and draw them */
     while(j < gameObjectData->resourceNodeSpawners[i].maximumNodeCount){
       if(gameObjectData->resourceNodeSpawners[i].resourceNodes[j].alive){
+        tempRect = gameObjectData->resourceNodeSpawners[i].resourceNodes[j].rect;
         SDL_BlitSurface(graphicsData->nodeGraphic,
                         NULL,
                         graphicsData->navigatableWorld,
-                        &gameObjectData->resourceNodeSpawners[i].resourceNodes[j].rect);
+                        &tempRect);
       }
       j++;
     }
@@ -347,11 +348,12 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
      inheritance issues. */
   i = 0;
   while(i < gameObjectData->programmableWorkerCount){
+    tempRect = gameObjectData->programmableWorkers[i].rect;
     updateProgrammableWorker(&gameObjectData->programmableWorkers[i],gameObjectData,ticks);
     SDL_BlitSurface(graphicsData->workerGraphic,
                     NULL,
                     graphicsData->navigatableWorld,
-                    &gameObjectData->programmableWorkers[i].rect);
+                    &tempRect);
     i++;
   }
   
