@@ -1,24 +1,27 @@
 #include "game.h"
 
+char *workingDirectory;
+
 float calculateDt(float previousRunTime){
   /* float previousRunTime = the milliseconds you want to calculate from
-     This returns the difference in milliseconds between now and another time
-     in the past. It's used here to help keep the main loop running
-     consistently. */
+   * This returns the difference in milliseconds between now and another time
+   * in the past. It's used here to help keep the main loop running
+   * consistently. */
   return (float) SDL_GetTicks() - previousRunTime;
 }
 
 int gameStart(SDL_Window *window){
   /* SDL_Window *window = the pointer to the program's window
-     This function will start the game looping.
-     The return should be 0 unless there's an error we need to catch.*/
+   * This function will start the game looping.
+   * The return should be 0 unless there's an error we need to catch.*/
 
   /* By creating a new struct to hold our game data, we can more easily
-     pass data between functions */
+   * pass data between functions */
+  workingDirectory = SDL_GetBasePath();
+  printf("\nworking directory:%s\n", workingDirectory);
   GameData gameData;
   FILE *file;
   int gameLoopReturn = 1;
-
   /* We will need the window pointer for later, so we should store that. */
   gameData.graphicsData.window = window;
 
@@ -46,10 +49,11 @@ int gameStart(SDL_Window *window){
      to return home to */
   generateHive(&gameData.gameObjectData);
 
-    /* Load in the BMPs for our ResourceNodes and ProgrammableWorkers */
-  gameData.graphicsData.nodeGraphic = SDL_LoadBMP_RW(SDL_RWFromFile("images/blueFlower.bmp", "rb"),1);
-  gameData.graphicsData.workerGraphic = SDL_LoadBMP_RW(SDL_RWFromFile("images/bee.bmp", "rb"), 1);
-  gameData.graphicsData.hiveGraphic = SDL_LoadBMP_RW(SDL_RWFromFile("images/beehive.bmp", "rb"), 1);
+  /* Load in the BMPs for our ResourceNodes and ProgrammableWorkers.
+     Now processes only absolute paths for cross-system compatibility. */
+  gameData.graphicsData.nodeGraphic = loadBMPFromAbsolutePath("images/blueFlower.bmp");
+  gameData.graphicsData.workerGraphic = loadBMPFromAbsolutePath("images/bee.bmp");
+  gameData.graphicsData.hiveGraphic = loadBMPFromAbsolutePath("images/beehive.bmp");
 
   /* SDL_SetColorKey makes the program treat all pixels of a given colour as
      transparent (in these cases, white)*/
@@ -58,7 +62,7 @@ int gameStart(SDL_Window *window){
   SDL_SetColorKey(gameData.graphicsData.hiveGraphic, SDL_TRUE, SDL_MapRGB(gameData.graphicsData.hiveGraphic->format, 255,255,255));
 
   gameData.aiData.blockFunctionRoots = calloc(1, sizeof(BlockFunctionRoot));
-  file = fopen("ai/GenericWorkerAI.txt","r");
+  file = fopenFromAbsolutePath("ai/GenericWorkerAI.txt");
   makeBlockFunctionRootFromFile(&(gameData.aiData.blockFunctionRoots[0]), file);
   fclose(file);
 
@@ -70,23 +74,48 @@ int gameStart(SDL_Window *window){
   return(0);
 }
 
+/* Generates an absolute path, given a relative one. */
+char* absolutePathGenerator(char* filepath){
+  char *absolutePath = malloc( sizeof('\0') + sizeof(char) * (strlen(workingDirectory) + strlen(filepath)));
+  asprintf(&absolutePath, "%s%s", workingDirectory, filepath);
+  printf("absolutePath is:%s\n", absolutePath);
+  return absolutePath;
+}
+
+/* A wrapper for loadBMP which accepts absolute paths.
+ * Necessary for cross-platform compatibility. */
+SDL_Surface* loadBMPFromAbsolutePath(char* filepath){
+  char* absolutePath = absolutePathGenerator(filepath);
+  SDL_Surface* surface = SDL_LoadBMP(absolutePath);
+  free(absolutePath);
+  return surface;
+}
+
+/* A wrapper for fopen which accepts absolute paths. Currently read-only. */
+FILE* fopenFromAbsolutePath(char* filepath){
+  char* absolutePath = absolutePathGenerator(filepath);
+  FILE* file = fopen(absolutePath, "r");
+  free(absolutePath);
+  return file;
+}
+
 int gameLoop(GameData *gameData){
   /* GameData *gameData = the pointer to the gameData struct that we're using
-     to save on the arguments passed to functions.
-     This function should be called every frame */
+   * to save on the arguments passed to functions.
+   * This function should be called every frame */
 
   /* delta_t is the time in milliseconds elapsed since the last time this
-     function ran */
+   * function ran */
   float delta_t = calculateDt(gameData->gameRunTime);
   SDL_Event event;
   int i = 0, j = 0;
 
   /* Storing the number of milliseconds since the program was run helps keep it
-     moving smoothly by calculating delta_t */
+   * moving smoothly by calculating delta_t */
   gameData->gameRunTime = (float) SDL_GetTicks();
 
   /* Filling the background black helps get rid of things drawn onto the screen
-     that shoudln't be there anymore */
+   * that shouldn't be there anymore */
   SDL_FillRect(SDL_GetWindowSurface(gameData->graphicsData.window),NULL,0x1B8D2E);
 
   updateGameObjects(&gameData->gameObjectData, &gameData->graphicsData, delta_t);
@@ -96,7 +125,7 @@ int gameLoop(GameData *gameData){
   updateUI(&gameData->uiData, &gameData->graphicsData, delta_t);
 
   /* At the end of the loop we need to update the main application window to
-     reflect the changes we've made to the graphics */
+   * reflect the changes we've made to the graphics */
   SDL_UpdateWindowSurface(gameData->graphicsData.window);
 
   /* This bit makes sure our application keeps responding and doesn't crash */
@@ -118,9 +147,13 @@ int gameLoop(GameData *gameData){
         break;
 			case SDL_QUIT:
 				exit(0);
-			  break;
 		}
 	}
   SDL_Delay(16);
   return(1);
+}
+
+/* Free up any memory allocated during gameStart. */
+void gameEnd(){
+  SDL_free(workingDirectory);
 }

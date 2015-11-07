@@ -10,10 +10,12 @@ int main(int argc, char *argv[]){
 
   SDL_Window *window;
 
-  printf("main\n");
   window  = initialise();
-  printf("initialised\n");
+  printf("\ninitialised\n");
   gameStart(window);
   uninitialise();
+  gameEnd();
   exit(0);
 }
+
+
