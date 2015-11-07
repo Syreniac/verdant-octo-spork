@@ -70,6 +70,7 @@ int gameStart(SDL_Window *window){
   return(0);
 }
 
+
 int gameLoop(GameData *gameData){
   /* GameData *gameData = the pointer to the gameData struct that we're using
      to save on the arguments passed to functions.
@@ -108,6 +109,7 @@ int gameLoop(GameData *gameData){
 		{
 			/* Closing the Window will exit the program */
       case SDL_MOUSEMOTION:
+        
         moveMouseOnUi(&gameData->uiData,&event);
         break;
       case SDL_MOUSEBUTTONUP:
@@ -115,6 +117,9 @@ int gameLoop(GameData *gameData){
         break;
       case SDL_MOUSEBUTTONDOWN:
         clickDownOnUI(&gameData->uiData, &event);
+        break;
+      case SDL_KEYDOWN:
+        keydown(&event);
         break;
 			case SDL_QUIT:
 				exit(0);

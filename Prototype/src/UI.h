@@ -29,6 +29,8 @@ void checkMouseMoveDraggableBlock(int click_x, int click_y, DraggableBlock *drag
 int checkClickDownDraggableBlock(int click_x, int click_y, DraggableBlock *draggableBlock);
 int checkClickUpDraggableBlock(int click_x, int click_y, DraggableBlock *draggableBlock);
 
+void keydown(SDL_Event *event);
+
 void clickDownOnUI(UIData *uiData, SDL_Event *event);
 void clickUpOnUI(UIData *uiData, SDL_Event *event);
 void moveMouseOnUi(UIData *uiData, SDL_Event *event);

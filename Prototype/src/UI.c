@@ -217,6 +217,25 @@ void updateUI(UIData *uiData, GraphicsData *graphicsData, float ticks){
   }
 }
 
+void keydown(SDL_Event *event){
+    switch (event->key.keysym.scancode){
+        case (SDL_SCANCODE_DOWN):
+            printf("you pressed down key\n");
+            break;
+        case (SDL_SCANCODE_UP):
+            printf("you pressed up key\n");
+            break;
+        case (SDL_SCANCODE_RIGHT):
+            printf("you pressed right key\n");
+            break;
+        case (SDL_SCANCODE_LEFT):
+            printf("you pressed left key\n");
+            break;
+        default:
+            printf("redundant key pressed\n");
+    }
+}
+
 void clickDownOnUI(UIData *uiData, SDL_Event *event){
   int i = 0;
   int checkBreak = 0;
