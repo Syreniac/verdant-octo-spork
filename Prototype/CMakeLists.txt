@@ -35,18 +35,19 @@ set(SOURCE_FILES
     src/world_generation.c
     src/world_generation.h)
 
-set(ASSETS_DIR ${PROJECT_SOURCE_DIR}/assets)
+set(ASSETS_DIR assets)
 set(AI_DIR ${ASSETS_DIR}/ai)
 set(IMAGES_DIR ${ASSETS_DIR}/images)
 
 set(PROJECT_BINARY_DIR ${PROJECT_SOURCE_DIR}/bin_mac)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
 
+#file(COPY ${PROJECT_SOURCE_DIR}/${IMAGES_DIR} DESTINATION ${PROJECT_BINARY_DIR})
+#file(COPY ${PROJECT_SOURCE_DIR}/${AI_DIR} DESTINATION ${PROJECT_BINARY_DIR})
 
-file(COPY ${IMAGES_DIR} DESTINATION ${PROJECT_BINARY_DIR})
-file(COPY ${AI_DIR} DESTINATION ${PROJECT_BINARY_DIR})
-
-#configure_file("${images}" ${PROJECT_BINARY_DIR} COPYONLY)
+add_custom_target(copy-runtime-files
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/${ASSETS_DIR} ${PROJECT_BINARY_DIR})
 
 add_executable(Prototype ${SOURCE_FILES})
+add_dependencies(Prototype copy-runtime-files)
 target_link_libraries(Prototype ${sdl} ${sdlimg} ${math})

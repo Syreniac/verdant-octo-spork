@@ -1,3 +1,4 @@
+#include <sys/errno.h>
 #include "game.h"
 #include "SDL_image.h"
 
@@ -52,18 +53,12 @@ int gameStart(SDL_Window *window){
 
   /* Load in the BMPs for our ResourceNodes and ProgrammableWorkers.
      Now processes only absolute paths for cross-system compatibility. */
-  gameData.graphicsData.nodeGraphic = loadBMPFromAbsolutePath("images/blueFlower.bmp");
-  gameData.graphicsData.workerGraphic = loadBMPFromAbsolutePath("images/bee.bmp");
-  gameData.graphicsData.hiveGraphic = IMG_Load("images/beehive.png");
-  /*gameData.graphicsData.hiveGraphic = loadBMPFromAbsolutePath("images/beehive.bmp"); */
-
-  /* SDL_SetColorKey makes the program treat all pixels of a given colour as
-     transparent (in these cases, white)*/
-  SDL_SetColorKey(gameData.graphicsData.nodeGraphic, SDL_TRUE, SDL_MapRGB(gameData.graphicsData.nodeGraphic->format, 255,255,255));
-  SDL_SetColorKey(gameData.graphicsData.workerGraphic, SDL_TRUE, SDL_MapRGB(gameData.graphicsData.workerGraphic->format, 255,255,255));
+  IMG_LoadAndVerify(&gameData.graphicsData.nodeGraphic, "images/blueFlower.png");
+  IMG_LoadAndVerify(&gameData.graphicsData.workerGraphic, "images/bee.png");
+  IMG_LoadAndVerify(&gameData.graphicsData.hiveGraphic, "images/beehive.png");
 
   gameData.aiData.blockFunctionRoots = calloc(1, sizeof(BlockFunctionRoot));
-  file = fopenFromAbsolutePath("ai/GenericWorkerAI.txt");
+  fopenAndVerify(&file,"ai/GenericWorkerAI.txt");
   makeBlockFunctionRootFromFile(&(gameData.aiData.blockFunctionRoots[0]), file);
   fclose(file);
 
@@ -75,19 +70,47 @@ int gameStart(SDL_Window *window){
   return(0);
 }
 
-/* Generates an absolute path, given a relative one. */
+/* A wrapper for IMG_Load that also verifies loading success. */
+void IMG_LoadAndVerify(SDL_Surface **surface, char *filepath) {
+  *surface = IMG_LoadFromAbsolutePath(filepath);
+  if(*surface == NULL ) {
+    printf( "Unable to load %s! Consider rebuilding. SDL_image Error: %s\n", filepath, IMG_GetError() );
+    exit(1);
+  }
+}
+
+/* A wrapper for fopen that also verifies loading success. */
+void fopenAndVerify(FILE **file, char *filepath) {
+  *file = fopenFromAbsolutePath(filepath);
+  if(*file == NULL ) {
+    printf( "Unable to load %s! Consider rebuilding. errno reports: %d.\n"\
+                "See errno.h to look up key of error values.", filepath, errno);
+    exit(1);
+  }
+}
+
+/* Generates an absolute path, given a relative one.
+ * Necessary for cross-platform compatibility. */
 char* absolutePathGenerator(char* filepath){
   char *absolutePath = malloc( sizeof('\0') + sizeof(char) * (strlen(workingDirectory) + strlen(filepath)));
   asprintf(&absolutePath, "%s%s", workingDirectory, filepath);
-  printf("absolutePath is:%s\n", absolutePath);
+  printf("Absolute path to asset used:%s\n", absolutePath);
   return absolutePath;
 }
 
-/* A wrapper for loadBMP which accepts absolute paths.
- * Necessary for cross-platform compatibility. */
+/* A wrapper for loadBMP which accepts absolute paths. Only needed available
+ * whilst coders are having problems installing SDL2_image.*/
 SDL_Surface* loadBMPFromAbsolutePath(char* filepath){
   char* absolutePath = absolutePathGenerator(filepath);
   SDL_Surface* surface = SDL_LoadBMP(absolutePath);
+  free(absolutePath);
+  return surface;
+}
+
+/* A wrapper for IMG_Load which accepts absolute paths. */
+SDL_Surface* IMG_LoadFromAbsolutePath(char* filepath){
+  char* absolutePath = absolutePathGenerator(filepath);
+  SDL_Surface* surface = IMG_Load(absolutePath);
   free(absolutePath);
   return surface;
 }
@@ -99,6 +122,7 @@ FILE* fopenFromAbsolutePath(char* filepath){
   free(absolutePath);
   return file;
 }
+
 
 int gameLoop(GameData *gameData){
   /* GameData *gameData = the pointer to the gameData struct that we're using
@@ -157,4 +181,7 @@ int gameLoop(GameData *gameData){
 /* Free up any memory allocated during gameStart. */
 void gameEnd(){
   SDL_free(workingDirectory);
+  /*SDL_FreeSurface(gameData.graphicsData.nodeGraphic);
+  SDL_FreeSurface(gameData.graphicsData.workerGraphic);
+  SDL_FreeSurface(gameData.graphicsData.hiveGraphic); */
 }

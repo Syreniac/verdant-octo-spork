@@ -1,3 +1,4 @@
+#include <SDL_image.h>
 #include "UI.h"
 
 typedef struct GameData GameData;
@@ -16,7 +17,11 @@ struct GameData{
 void gameEnd();
 int gameStart(SDL_Window *window);
 char* absolutePathGenerator(char* filepath);
+SDL_Surface* IMG_LoadFromAbsolutePath(char* filepath);
 SDL_Surface* loadBMPFromAbsolutePath(char* filepath);
 FILE* fopenFromAbsolutePath(char* filepath);
 int gameLoop(GameData *gameData);
 float calculateDt(float previousRunTime);
+
+void IMG_LoadAndVerify(SDL_Surface **gameData, char *filepath);
+void fopenAndVerify(FILE **file, char *filepath);
