@@ -1,4 +1,5 @@
 #include "game.h"
+#include "SDL_image.h"
 
 char *workingDirectory;
 
@@ -53,13 +54,13 @@ int gameStart(SDL_Window *window){
      Now processes only absolute paths for cross-system compatibility. */
   gameData.graphicsData.nodeGraphic = loadBMPFromAbsolutePath("images/blueFlower.bmp");
   gameData.graphicsData.workerGraphic = loadBMPFromAbsolutePath("images/bee.bmp");
-  gameData.graphicsData.hiveGraphic = loadBMPFromAbsolutePath("images/beehive.bmp");
+  gameData.graphicsData.hiveGraphic = IMG_Load("images/beehive.png");
+  /*gameData.graphicsData.hiveGraphic = loadBMPFromAbsolutePath("images/beehive.bmp"); */
 
   /* SDL_SetColorKey makes the program treat all pixels of a given colour as
      transparent (in these cases, white)*/
   SDL_SetColorKey(gameData.graphicsData.nodeGraphic, SDL_TRUE, SDL_MapRGB(gameData.graphicsData.nodeGraphic->format, 255,255,255));
   SDL_SetColorKey(gameData.graphicsData.workerGraphic, SDL_TRUE, SDL_MapRGB(gameData.graphicsData.workerGraphic->format, 255,255,255));
-  SDL_SetColorKey(gameData.graphicsData.hiveGraphic, SDL_TRUE, SDL_MapRGB(gameData.graphicsData.hiveGraphic->format, 255,255,255));
 
   gameData.aiData.blockFunctionRoots = calloc(1, sizeof(BlockFunctionRoot));
   file = fopenFromAbsolutePath("ai/GenericWorkerAI.txt");
