@@ -215,6 +215,5 @@ void gameEnd(){
   SDL_FreeSurface(gameData.graphicsData.workerGraphic);
   SDL_FreeSurface(gameData.graphicsData.hiveGraphic); Not sure how to set up the
  * pointers for all of these*/
-/* void TTF_Quit(); It currently complains that TTF_Quit is unused; possibly
- * because I haven't yetused any TTF objects */
+  TTF_Quit();
 }
