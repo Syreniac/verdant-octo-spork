@@ -7,12 +7,15 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c90 -O3")
 
 include_directories(/Library/Frameworks/SDL2_image.framework/Headers)
 link_directories(/Library/Frameworks/SDL2_image.framework)
+include_directories(/Library/Frameworks/SDL2_ttf.framework/Headers)
+link_directories(/Library/Frameworks/SDL2_ttf.framework)
 #Above lines are used to help find_library find the files if the default lookup path yields nothing
-#Ie. if you install the framework but don't reboot CLion or the system before building the executable
+#Ie. if you install the framework but don't reboot CLion or the system before building the executable.
 
 find_library(math m)
 find_library(sdl SDL2)
 find_library(sdlimg SDL2_image)
+find_library(sdlttf SDL2_TTF)
 #Finds m and SDL2 from user's own frameworks folder
 
 #MESSAGE(WARNING PROJECT_SOURCE_DIR ${PROJECT_SOURCE_DIR})
@@ -50,4 +53,4 @@ add_custom_target(copy-runtime-files
 
 add_executable(Prototype ${SOURCE_FILES})
 add_dependencies(Prototype copy-runtime-files)
-target_link_libraries(Prototype ${sdl} ${sdlimg} ${math})
+target_link_libraries(Prototype ${sdl} ${sdlimg} ${sdlttf} ${math})

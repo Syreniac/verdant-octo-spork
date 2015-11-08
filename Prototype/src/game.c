@@ -1,6 +1,7 @@
 #include <sys/errno.h>
 #include "game.h"
 #include "SDL_image.h"
+#include "SDL_TTF.h"
 
 char *workingDirectory;
 
@@ -17,14 +18,23 @@ int gameStart(SDL_Window *window){
    * This function will start the game looping.
    * The return should be 0 unless there's an error we need to catch.*/
 
-  /* By creating a new struct to hold our game data, we can more easily
-   * pass data between functions */
+  /* Error-handling for absolute vs. relative directories. */
   workingDirectory = SDL_GetBasePath();
   printf("\nworking directory:%s\n", workingDirectory);
+
+  /* By creating a new struct to hold our game data, we can more easily
+   * pass data between functions */
   GameData gameData;
   FILE *file;
   int gameLoopReturn = 1;
   SDL_Rect rect;
+
+  /* Initialising SDL_TTF. Could be wrapped in a function later. */
+  if(TTF_Init() == -1) {
+    printf("TTF_Init: %s\n", TTF_GetError());
+    exit(1);
+  }
+
   /* We will need the window pointer for later, so we should store that. */
   gameData.graphicsData.window = window;
   
@@ -201,7 +211,10 @@ int gameLoop(GameData *gameData){
 /* Free up any memory allocated during gameStart. */
 void gameEnd(){
   SDL_free(workingDirectory);
-  /*SDL_FreeSurface(gameData.graphicsData.nodeGraphic);
+/*SDL_FreeSurface(gameData.graphicsData.nodeGraphic);
   SDL_FreeSurface(gameData.graphicsData.workerGraphic);
-  SDL_FreeSurface(gameData.graphicsData.hiveGraphic); */
+  SDL_FreeSurface(gameData.graphicsData.hiveGraphic); Not sure how to set up the
+ * pointers for all of these*/
+/* void TTF_Quit(); It currently complains that TTF_Quit is unused; possibly
+ * because I haven't yetused any TTF objects */
 }
