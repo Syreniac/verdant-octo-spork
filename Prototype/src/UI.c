@@ -217,6 +217,42 @@ void updateUI(UIData *uiData, GraphicsData *graphicsData, float ticks){
   }
 }
 
+void keydown(GraphicsData *graphicsData, SDL_Event *event){
+    switch (event->key.keysym.scancode){
+        case (SDL_SCANCODE_DOWN):
+            printf("you pressed down key\n");
+            /*if not at edge of world, keep going*/
+
+            if(!(graphicsData->navigationOffset->y <= -Y_SIZE_OF_WORLD + Y_SIZE_OF_SCREEN)){
+                graphicsData->navigationOffset->y -= 20;
+            }
+            break;
+        case (SDL_SCANCODE_UP):
+            printf("you pressed up key\n");
+            /*if not at edge of world, keep going*/
+            if(!(graphicsData->navigationOffset->y >= Y_SIZE_OF_WORLD - Y_SIZE_OF_SCREEN)){
+                graphicsData->navigationOffset->y += 20;
+            }
+            break;
+        case (SDL_SCANCODE_RIGHT):
+            printf("you pressed right key\n");
+            /*if not at edge of world, keep going*/
+            if(!(graphicsData->navigationOffset->x <= -X_SIZE_OF_WORLD + X_SIZE_OF_SCREEN)){
+                graphicsData->navigationOffset->x -= 20;
+            }
+            break;
+        case (SDL_SCANCODE_LEFT):
+            printf("you pressed left key\n");
+            /*if not at edge of world, keep going*/
+            if(!(graphicsData->navigationOffset->x >= X_SIZE_OF_WORLD - X_SIZE_OF_SCREEN)){
+                graphicsData->navigationOffset->x += 20;
+            }
+            break;
+        default:
+            printf("redundant key pressed\n");
+    }
+}
+
 void clickDownOnUI(UIData *uiData, SDL_Event *event){
   int i = 0;
   int checkBreak = 0;
