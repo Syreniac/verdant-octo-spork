@@ -324,10 +324,13 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
   /* Second, we loop through all the ResourceNodeSpawners */
   while(i < gameObjectData->resourceNodeSpawnerCount){
     j = 0;
-    /* Update each one to reflect respawning nodes and so on. */
-    updateResourceNodeSpawner(&gameObjectData->resourceNodeSpawners[i],ticks);
+
+    if(!gameObjectData->pause_status){
+       /* Update each one to reflect respawning nodes and so on. */
+       updateResourceNodeSpawner(&gameObjectData->resourceNodeSpawners[i],ticks);
+    }
     /* Then we need to loop through the attached ResourceNodes and draw them */
-    while(j < gameObjectData->resourceNodeSpawners[i].maximumNodeCount){
+   while(j < gameObjectData->resourceNodeSpawners[i].maximumNodeCount){
       if(gameObjectData->resourceNodeSpawners[i].resourceNodes[j].alive){
         blitGameObject(gameObjectData->resourceNodeSpawners[i].resourceNodes[j].rect, graphicsData, graphicsData->nodeGraphic);
       }
@@ -340,7 +343,9 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
      inheritance issues. */
   i = 0;
   while(i < gameObjectData->programmableWorkerCount){
-    updateProgrammableWorker(&gameObjectData->programmableWorkers[i],gameObjectData,ticks);
+    if(!gameObjectData->pause_status){
+      updateProgrammableWorker(&gameObjectData->programmableWorkers[i],gameObjectData,ticks);
+    }
     blitGameObject(gameObjectData->programmableWorkers[i].rect, graphicsData, graphicsData->workerGraphic);
 
     i++;
