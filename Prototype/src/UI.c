@@ -217,7 +217,7 @@ void updateUI(UIData *uiData, GraphicsData *graphicsData, float ticks){
   }
 }
 
-void keydown(GraphicsData *graphicsData, SDL_Event *event){
+void keydown(GraphicsData *graphicsData, GameObjectData *gameObjectData, SDL_Event *event){
     switch (event->key.keysym.scancode){
         case (SDL_SCANCODE_DOWN):
             printf("you pressed down key\n");
@@ -246,6 +246,22 @@ void keydown(GraphicsData *graphicsData, SDL_Event *event){
             /*if not at edge of world, keep going*/
             if(!(graphicsData->navigationOffset->x >= X_SIZE_OF_WORLD - X_SIZE_OF_SCREEN)){
                 graphicsData->navigationOffset->x += 20;
+            }
+            break;
+        case (SDL_SCANCODE_P):
+            printf("you pressed P (pause) key\n");
+            gameObjectData->pause_status = 1 - gameObjectData->pause_status; /* 1 for pause, 0 for go on */
+
+            if (gameObjectData->pause_status){
+               /*put a big recentage in the middle of the screen, with a big PAUSE*/
+               printf("Test1: %d\n", gameObjectData->pause_status);
+               /*output pause_status to other part of program*/
+
+            }
+            else{
+               /*remove the big recentage in the middle of the screen, and continue the clock*/
+               printf("Test2: %d\n", gameObjectData->pause_status);
+               /*output pause_status to other part of program*/
             }
             break;
         default:

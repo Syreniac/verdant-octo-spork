@@ -1,8 +1,7 @@
 
 CFLAGS = -pedantic -Wall -Wextra -Wno-unused-variable -Wno-unused-parameter
 SDL_FLAGS = -ISDL2_x64/include -LSDL2_x64/lib
-TTF_FLAGS = -ISDL_ttf_x64/include/SDL2 -LSDL_ttf_x64/lib
-LFLAGS =  $(SDL_FLAGS) $(TTF_FLAGS) -lmingw32 -lSDL2main -lSDL2 -lSDL2_ttf -lm
+LFLAGS =  $(SDL_FLAGS) -lmingw32 -lSDL2main -lSDL2 -lm
 # List all the files here
 OBJS = main.o init.o game.o world_generation.o game_objects.o AI.o UI.o generic.o
 PROG = bin_x64\Prototype

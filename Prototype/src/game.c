@@ -19,7 +19,7 @@ int gameStart(SDL_Window *window){
   FILE *file;
   int gameLoopReturn = 1;
   SDL_Rect rect;
-
+  gameData.gameObjectData.pause_status = 0;
 
   /* We will need the window pointer for later, so we should store that. */
   gameData.graphicsData.window = window;
@@ -129,7 +129,7 @@ int gameLoop(GameData *gameData){
         clickDownOnUI(&gameData->uiData, &event);
         break;
       case SDL_KEYDOWN:
-        keydown(&gameData->graphicsData, &event);
+        keydown(&gameData->graphicsData, &gameData->gameObjectData, &event);
         break;
 			case SDL_QUIT:
 				exit(0);
