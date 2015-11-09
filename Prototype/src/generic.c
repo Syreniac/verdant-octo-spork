@@ -57,3 +57,17 @@ void ensureRectEnclosed(SDL_Rect *ensure, SDL_Rect *limit){
   ensure->x += xOffset;
   ensure->y += yOffset;
 }
+
+void blitGameObject(SDL_Rect objectRect, GraphicsData *graphicsData, SDL_Surface *graphic){
+  SDL_Rect tempRect;
+
+  tempRect = objectRect;
+  tempRect.x += graphicsData->navigationOffset->x;
+  tempRect.y += graphicsData->navigationOffset->y;
+
+  SDL_BlitSurface(graphic,
+                  NULL,
+                  SDL_GetWindowSurface(graphicsData->window),
+                  &tempRect);
+
+}

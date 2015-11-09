@@ -23,22 +23,14 @@ int gameStart(SDL_Window *window){
 
   /* We will need the window pointer for later, so we should store that. */
   gameData.graphicsData.window = window;
-  
-  /* initialise navigatableWorld surface*/
-  gameData.graphicsData.navigatableWorld = SDL_CreateRGBSurface(0, X_SIZE_OF_WORLD,
-                                                                Y_SIZE_OF_WORLD,
-                                                                32,
-                                                                0xff000000, /*red channel*/
-                                                                0x00ff0000, /*green channel*/
-                                                                0x0000ff00, /*blue channel*/
-                                                                0x000000ff);/*alpha channel*/
+
   /* initialise navigationOffset values */
   gameData.graphicsData.navigationOffset = &rect;
   gameData.graphicsData.navigationOffset->x = -(X_SIZE_OF_WORLD/2)+(X_SIZE_OF_SCREEN/2); /*setting initial x offset to center of world*/
   gameData.graphicsData.navigationOffset->y = -(Y_SIZE_OF_WORLD/2)+(Y_SIZE_OF_SCREEN/2); /*setting initial y offset ot center of world*/
   gameData.graphicsData.navigationOffset->w = X_SIZE_OF_WORLD;
   gameData.graphicsData.navigationOffset->h = Y_SIZE_OF_WORLD;
-  
+
 
   /* We also need some time information to make things run smoothly */
   gameData.gameStartTime = SDL_GetTicks();
@@ -127,7 +119,7 @@ int gameLoop(GameData *gameData){
 		{
 			/* Closing the Window will exit the program */
       case SDL_MOUSEMOTION:
-        
+
         moveMouseOnUi(&gameData->uiData,&event);
         break;
       case SDL_MOUSEBUTTONUP:
