@@ -19,11 +19,12 @@ int gameStart(SDL_Window *window){
   FILE *file;
   int gameLoopReturn = 1;
   SDL_Rect rect;
+  SDL_Rect rect2;
 
 
   /* We will need the window pointer for later, so we should store that. */
   gameData.graphicsData.window = window;
-  
+
   /* initialise navigatableWorld surface*/
   gameData.graphicsData.navigatableWorld = SDL_CreateRGBSurface(0, X_SIZE_OF_WORLD,
                                                                 Y_SIZE_OF_WORLD,
@@ -38,20 +39,38 @@ int gameStart(SDL_Window *window){
   gameData.graphicsData.navigationOffset->y = -(Y_SIZE_OF_WORLD/2)+(Y_SIZE_OF_SCREEN/2); /*setting initial y offset ot center of world*/
   gameData.graphicsData.navigationOffset->w = X_SIZE_OF_WORLD;
   gameData.graphicsData.navigationOffset->h = Y_SIZE_OF_WORLD;
-  
+
 
   /* We also need some time information to make things run smoothly */
   gameData.gameStartTime = SDL_GetTicks();
   gameData.gameRunTime = (float) gameData.gameStartTime;
 
-  gameData.uiData.numberOfSimpleButtons = 1;
-  gameData.uiData.simpleButtons[0] = createUISimpleButton(0, 0, 40, 40, "Hello", 0xb00000);
-  gameData.uiData.numberOfExpandablePanels = 1;
-  gameData.uiData.expandablePanels[0] = createExpandingPanel(100, 100, 40, 40,
-                                                             100, 100, 160, 160,
-                                                             1000,1000,0x00b000);
-  gameData.uiData.numberOfDraggableBlocks = 1;
-  gameData.uiData.draggableBlocks[0] = createDraggableBlock(0,0,20,20,&gameData.uiData.expandablePanels[0],0x0000b0);
+  rect.x = 0;
+  rect.y = 0;
+  rect.w = 40;
+  rect.h = 40;
+
+  gameData.uiData.UIElements[0] = createUI_Clickable(rect, "Hello", 0xb00000);
+
+  rect.x = 100;
+  rect.y = 100;
+  rect.w = 40;
+  rect.h = 40;
+
+  rect2.x = 100;
+  rect2.y = 100;
+  rect2.w = 160;
+  rect2.h = 160;
+
+  gameData.uiData.UIElements[1] = createUI_Expandable(rect,rect2,1000,1000,0x00b000);
+
+  rect.x = 100;
+  rect.y = 100;
+  rect.w = 20;
+  rect.h = 20;
+
+  gameData.uiData.UIElements[2] = createUI_Draggable(rect,&gameData.uiData.UIElements[1],0x0000b0);
+  gameData.uiData.numberOfUIElements = 3;
 
 
   /* Create some ResourceNodeSpawners to fill our world with ResourceNodes */
@@ -112,7 +131,7 @@ int gameLoop(GameData *gameData){
 
   runAI(&gameData->aiData,&gameData->gameObjectData);
 
-  updateUI(&gameData->uiData, &gameData->graphicsData, delta_t);
+  renderUI(&gameData->uiData, &gameData->graphicsData);
 
   /* At the end of the loop we need to update the main application window to
      reflect the changes we've made to the graphics */
@@ -127,14 +146,14 @@ int gameLoop(GameData *gameData){
 		{
 			/* Closing the Window will exit the program */
       case SDL_MOUSEMOTION:
-        
+
         moveMouseOnUi(&gameData->uiData,&event);
         break;
       case SDL_MOUSEBUTTONUP:
-        clickUpOnUI(&gameData->uiData, &event);
+        clickupOnUI(&gameData->uiData, &event);
         break;
       case SDL_MOUSEBUTTONDOWN:
-        clickDownOnUI(&gameData->uiData, &event);
+        clickOnUI(&gameData->uiData, &event);
         break;
       case SDL_KEYDOWN:
         keydown(&gameData->graphicsData, &event);

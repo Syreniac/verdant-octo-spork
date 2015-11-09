@@ -1,4 +1,4 @@
-#include "ModularUI.h"
+#include "modularUI.h"
 
 int isPointInRect(int point_x, int point_y, SDL_Rect rect){
   /* int point_x   = the x coordinate of the point we want to test
@@ -206,48 +206,79 @@ void renderUIElement(UI_Element *element, SDL_Window *window){
   }
 }
 
-int getInheritanceDepth(UI_Element *element, int count){
-  UI_Element *child = element->generic.child;
-  int i = getInheritanceDepth(child,count);
-  int i2;
-  while(child->generic.sibling != NULL){
-    child = child->generic.sibling;
+int calculateInheritanceDepth(UI_Element *element){
+  UI_Element *moving_pointer = element;
+  int checked_children = 0;
+  int depth = 0;
+  int greatestDepth = 0;
+
+  if(moving_pointer == NULL){
+    return(depth);
+  }
+
+  while(moving_pointer != NULL){
+    /* If our location has a child and we haven't checked its children, step down */
+    if(moving_pointer->generic.child != NULL && !checked_children){
+      depth++;
+      if(greatestDepth < depth){
+        greatestDepth = depth;
+      }
+      moving_pointer = moving_pointer->generic.child;
+      printf("%d = current depth| ",depth);
+      printUIElement(moving_pointer);
+    }
+    /* Else, step sideways to a sibling */
+    else if(moving_pointer->generic.sibling != NULL){
+      moving_pointer = moving_pointer->generic.sibling;
+      checked_children = 0;
+    }
+    /* If no siblings and no children, step up one level */
+    else{
+      moving_pointer = moving_pointer->generic.parent;
+      depth--;
+      checked_children = 1;
+    }
+  }
+  return(greatestDepth);
+
+}
+
+void renderUIRecurse(UI_Element *parent, SDL_Window *window, int depth){
+  UI_Element *child = parent->generic.child;
+
+  depth--;
+  if(depth == 0){
+    while(child != NULL){
+      renderUIElement(child,window);
+      child = child->generic.sibling;
+    }
+  }
+  else{
+    while(child != NULL){
+      renderUIRecurse(child,window,depth);
+      child = child->generic.sibling;
+    }
   }
 }
+
 
 void renderUI(UI_Element *root, SDL_Window *window){
   assert(root->type == GENERIC);
   UI_Element *child = root->generic.child;
   UI_Element *sibling = NULL;
-  UI_Element *moving_pointer;
+  UI_Element *moving_pointer = root;
   int rendered_on_this_pass = 1;
-  int depth = 0;
+  int desired_depth = calculateInheritanceDepth(root);
+  int current_depth = 0;
+  int checked_children = 0;
   int i = 0;
 
-  while(rendered_on_this_pass != 0){
-    i = 0;
-    child = root->generic.child;
-    sibling = NULL;
-    while(i < depth && child->generic.child != NULL){
+  printf("rendering UI to depth %d\n",desired_depth);
 
-    }
-
-
-  }
-
-
-  while(child != NULL){
-
-    renderUIElement(child,window);
-    sibling = child->generic.sibling;
-
-    while(sibling != NULL){
-      renderUIElement(sibling,window);
-      sibling = sibling->generic.sibling;
-    }
-
-    child = child->generic.child;
-
+  while(current_depth <= desired_depth){
+    printf("at depth %d\n",desired_depth);
+    renderUIRecurse(root,window,current_depth);
+    current_depth++;
   }
 }
 
@@ -447,6 +478,8 @@ int goSDL(void){
   printUIElement(panel2);
   printUIElement(button);
   printUIElement(button2);
+
+  printf("%d = UIDepth\n",calculateInheritanceDepth(root));
 
   while(1){
 
