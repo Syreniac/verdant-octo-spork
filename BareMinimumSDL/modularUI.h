@@ -28,6 +28,7 @@ struct Generic{
   union UI_Element *parent;
   union UI_Element *sibling;
   union UI_Element *child;
+  int inheritanceDepth;
 };
 
 struct Button{

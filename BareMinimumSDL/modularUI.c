@@ -206,6 +206,15 @@ void renderUIElement(UI_Element *element, SDL_Window *window){
   }
 }
 
+int getInheritanceDepth(UI_Element *element, int count){
+  UI_Element *child = element->generic.child;
+  int i = getInheritanceDepth(child,count);
+  int i2;
+  while(child->generic.sibling != NULL){
+    child = child->generic.sibling;
+  }
+}
+
 void renderUI(UI_Element *root, SDL_Window *window){
   assert(root->type == GENERIC);
   UI_Element *child = root->generic.child;
