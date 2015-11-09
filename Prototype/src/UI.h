@@ -22,6 +22,7 @@ typedef union UI_Element UI_Element;
 struct Generic{
   enum UI_Elements type;
 };
+void keydown(GraphicsData *graphicsData, GameObjectData *gameObjectData, SDL_Event *event);
 
 struct Panel{
   enum UI_Elements type;
@@ -90,4 +91,4 @@ void clickupOnUI(UIData *uiData, SDL_Event *event);
 void moveMouseOnUi(UIData *uiData, SDL_Event *event);
 void renderUI(UIData *uiData, GraphicsData *graphicsData);
 
-void keydown(GraphicsData *graphicsData, SDL_Event *event);
+void keydown(GraphicsData *graphicsData, GameObjectData *gameObjectData, SDL_Event *event);

@@ -33,10 +33,10 @@ struct GraphicsData{
   SDL_Surface *workerGraphic;
   SDL_Surface *nodeGraphic;
   SDL_Surface *hiveGraphic;
-  SDL_Surface *navigatableWorld;
   SDL_Rect *navigationOffset;
 };
 
 int isPointInRect(int point_x, int point_y, SDL_Rect rect);
 int isRectEnclosedInRect(SDL_Rect rectA, SDL_Rect rectB);
 void ensureRectEnclosed(SDL_Rect *ensure, SDL_Rect *against);
+void blitGameObject(SDL_Rect objectRect, GraphicsData *graphicsData, SDL_Surface *graphic);

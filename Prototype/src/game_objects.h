@@ -74,6 +74,7 @@ struct GameObjectData{
   int resourceNodeSpawnerCount;
   ProgrammableWorker programmableWorkers[2];
   int programmableWorkerCount;
+  int pause_status;
 };
 
 float generateRandomCoordOffset(float radius);
