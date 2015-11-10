@@ -9,7 +9,7 @@
 CFLAGS = -pedantic -Wall -Wextra -Wno-unused-variable -Wno-unused-parameter
 
 # File structure variables
-ASSETS_CONTENTS = assets/.
+ASSETS_CONTENTS = assets
 OBJS = main.o init.o game.o world_generation.o game_objects.o AI.o UI.o generic.o controls.o
 BIN = bin
 PROG = $(BIN)/Prototype
@@ -25,14 +25,12 @@ ifeq ($(OS),Windows_NT)
 	endif
 	LFLAGS =  $(SDL_FLAGS) -lmingw32 -lSDL2main -lSDL2 -lm
 	DELETE = del
-	DELETE_RECURSIVE = del /s
 	DLL_COPY_COMMAND = xcopy $(DLL_LOCATION) $(BIN) /C /Y
 	ASSET_COPY_COMMAND = xcopy $(ASSETS_CONTENTS) $(BIN) /C /E /Y
 else
 	SDL_FLAGS = -I/opt/SDL/2.0.3/include -L/opt/SDL/2.0.3/lib
 	LFLAGS = $(SDL_FLAGS) $(TTF_FLAGS) -Wl,-rpath,/opt/SDL/2.0.3/lib -lSDL2 -lm
 	DELETE = rm
-	DELETE_RECURSIVE = rm -r
 	DLL_COPY_COMMAND = echo "linux rocks"
 	ASSET_COPY_COMMAND = cp -R $(ASSETS_CONTENTS) $@
 endif
@@ -50,6 +48,7 @@ all: $(PROG)
 # linking the program. | $(BIN) makes the bin/ directory if it does not yet exist.
 $(PROG): $(OBJS) | $(BIN)
 	$(CXX) $(OBJS) -o $(PROG) $(LFLAGS)
+	$(DELETE) $(OBJS)
 
 # makes bin/ directory and copies assets to bin/ so we don't have to drag them in manually.
 $(BIN):
@@ -60,5 +59,4 @@ $(BIN):
 # cleans everything that can be automatically recreated with "make".
 # To do this, run the following command in verdant-octo-spork/Prototype: make -f makefile_win64 clean
 clean:
-	$(DELETE_RECURSIVE) $(BIN)
-	$(DELETE) *.o
+	$(DELETE) $(OBJS)

@@ -1,5 +1,6 @@
 #include <SDL_image.h>
-#include "UI.h"
+/* #include "UI.h" This was included on an older version; leaving it commented out for this merge - Jamie. */
+#include "controls.h"
 
 typedef struct GameData GameData;
 struct GameData{

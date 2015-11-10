@@ -42,6 +42,7 @@ struct ResourceNodeSpawner{
   /* rather than specify a hard array, we'll calloc something up to go here
      later */
   ResourceNode *resourceNodes;
+  SDL_Rect collisionRect;
 };
 
 typedef struct ProgrammableWorker ProgrammableWorker;
@@ -74,6 +75,7 @@ struct GameObjectData{
   int resourceNodeSpawnerCount;
   ProgrammableWorker programmableWorkers[2];
   int programmableWorkerCount;
+  int pause_status;
 };
 
 float generateRandomCoordOffset(float radius);

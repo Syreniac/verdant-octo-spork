@@ -1,59 +1,56 @@
 #include "AI.h"
 
+enum UI_Elements{GENERIC,
+                 PANEL,
+                 CLICKABLE,
+                 EXPANDABLE,
+                 DRAGGABLE};
+
 enum ExpandableStatus {SMALL,SMALL2BIG,BIG2SMALL,BIG};
 enum DraggableStatus {ROOTED,GRABBED};
 
-typedef struct SimpleButton SimpleButton;
-typedef struct UIData UIData;
-typedef struct ExpandablePanel ExpandablePanel;
-typedef struct DraggableBlock DraggableBlock;
+typedef struct Clickable Clickable;
+typedef struct Expandable Expandable;
+typedef struct Draggable Draggable;
+typedef struct Panel Panel;
+typedef struct Generic Generic;
 typedef enum ExpandableStatus ExpandableStatus;
+typedef struct UIData UIData;
 
-typedef union UI_Link UI_Link;
+typedef union UI_Element UI_Element;
 
-SimpleButton createUISimpleButton(int x, int y, int w, int h, char *message, Uint32 colour);
-void updateSimpleButton(GraphicsData *graphicsData, SimpleButton *simpleButton);
-int checkClickSimpleButton(int click_x, int click_y, SimpleButton *simpleButton);
-void performClickSimpleButton(SimpleButton *simpleButton);
+struct Generic{
+  enum UI_Elements type;
+};
+void keydown(GraphicsData *graphicsData, GameObjectData *gameObjectData, SDL_Event *event);
 
-ExpandablePanel createExpandingPanel(int s_x, int s_y, int s_h, int s_w,
-                                     int b_x, int b_y, int b_h, int b_w,
-                                     int msToBig, int msToSmall, Uint32 colour);
-void updateExpandablePanel(GraphicsData *graphicsData, ExpandablePanel *expandablePanel, float ticks);
-int checkClickExpandablePanel(int click_x, int click_y, ExpandablePanel *expandablePanel);
-void performClickExpandablePanel(ExpandablePanel *expandablePanel);
+struct Panel{
+  enum UI_Elements type;
+  SDL_Rect rect;
+  Uint32 colour;
+};
 
-DraggableBlock createDraggableBlock(int x, int y, int w, int h, ExpandablePanel *parent, Uint32 colour);
-void updateDraggableBlock(GraphicsData *graphicsData, DraggableBlock *draggableBlock);
-void checkMouseMoveDraggableBlock(int click_x, int click_y, DraggableBlock *draggableBlock);
-int checkClickDownDraggableBlock(int click_x, int click_y, DraggableBlock *draggableBlock);
-int checkClickUpDraggableBlock(int click_x, int click_y, DraggableBlock *draggableBlock);
-
-void keydown(GraphicsData *graphicsData, SDL_Event *event);
-
-void clickDownOnUI(UIData *uiData, SDL_Event *event);
-void clickUpOnUI(UIData *uiData, SDL_Event *event);
-void moveMouseOnUi(UIData *uiData, SDL_Event *event);
-void updateUI(UIData *uiData, GraphicsData *graphicsData, float ticks);
-
-struct SimpleButton{
+struct Clickable{
+  enum UI_Elements type;
   SDL_Rect rect;
   Uint32 colour;
   char *message;
+  UI_Element *parent;
 };
 
-struct DraggableBlock{
+struct Draggable{
+  enum UI_Elements type;
   SDL_Rect rect;
-  SDL_Rect mobile_rect;
   Uint32 colour;
   enum DraggableStatus status;
-  ExpandablePanel *parent;
+  UI_Element *parent;
 };
 
-struct ExpandablePanel{
+struct Expandable{
+  enum UI_Elements type;
   SDL_Rect big_rect;
   SDL_Rect small_rect;
-  SDL_Rect mobile_rect;
+  SDL_Rect rect;
   int msToBig;
   int msToSmall;
   int msTimer;
@@ -61,18 +58,35 @@ struct ExpandablePanel{
   Uint32 colour;
 };
 
-struct UIData{
-  /* This is a very simple way of doing it */
-  int numberOfSimpleButtons;
-  SimpleButton simpleButtons[1];
-  int numberOfExpandablePanels;
-  ExpandablePanel expandablePanels[1];
-  int numberOfDraggableBlocks;
-  DraggableBlock draggableBlocks[1];
-  /* We will be moving to a more tree/node based way of structuring this soon. */
+union UI_Element{
+  enum UI_Elements type;
+  Generic generic;
+  Panel panel;
+  Expandable expandable;
+  Clickable clickable;
+  Draggable draggable;
 };
 
-union UI_Link{
-  ExpandablePanel *expandablePanel;
-  SimpleButton *simpleButton;
+struct UIData{
+  /* This is a very simple way of doing it */
+  int numberOfUIElements;
+  UI_Element UIElements[255];
 };
+
+UI_Element createUI_Clickable(SDL_Rect rect, char *message, Uint32 colour);
+UI_Element createUI_Expandable(SDL_Rect s_rect, SDL_Rect b_rect,
+                               int msToBig, int msToSmall, Uint32 colour);
+UI_Element createUI_Draggable(SDL_Rect rect, UI_Element *parent, Uint32 colour);
+UI_Element createUI_Panel(SDL_Rect rect, Uint32 colour);
+
+SDL_Rect *getUIElementRect(UI_Element *element);
+
+void renderUIElement(GraphicsData *graphicsData,UI_Element *element);
+void clickOnUIElement(UI_Element *element, SDL_Event *event);
+void clickupOnUIElement(UI_Element *element, SDL_Event *event);
+void mousemoveOnUIElement(UI_Element *element, SDL_Event *event);
+
+void clickOnUI(UIData *uiData, SDL_Event *event);
+void clickupOnUI(UIData *uiData, SDL_Event *event);
+void moveMouseOnUi(UIData *uiData, SDL_Event *event);
+void renderUI(UIData *uiData, GraphicsData *graphicsData);
