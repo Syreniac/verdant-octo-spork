@@ -54,10 +54,12 @@ int blockFunction_IfWorkerOutsideOfBounds(BlockFunctionArgs *arguments, Programm
 }
 
 int blockFunction_IfWorkerWithinDistanceOfHive(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
-  if(getDistance2BetweenPoints(programmableWorker->rect.x,
-                               programmableWorker->rect.y,
-                               gameObjectData->hive.rect.x,
-                               gameObjectData->hive.rect.y) <= arguments->floats[0]){
+	float d2 = getDistance2BetweenPoints(programmableWorker->rect.x + programmableWorker->rect.w/2,
+                               programmableWorker->rect.y + programmableWorker->rect.h/2,
+                               gameObjectData->hive.rect.x + gameObjectData->hive.rect.w/2,
+                               gameObjectData->hive.rect.y + gameObjectData->hive.rect.h/2);
+	printf("AI bounce %f v %f\n",arguments->floats[0],d2);
+  if(d2 <= arguments->floats[0]){
     return(1);
   }
   return(2);
@@ -71,7 +73,8 @@ int blockFunction_SetWorkerHeadingRandomly(BlockFunctionArgs *arguments, Program
 
 
 int blockFunction_WorkerReturnToHive(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
-  programmableWorker->heading = atan2(gameObjectData->hive.rect.x - programmableWorker->rawX,gameObjectData->hive.rect.y - programmableWorker->rawY);
+  programmableWorker->heading = atan2(gameObjectData->hive.rect.x + gameObjectData->hive.rect.w/2 - programmableWorker->rect.w/2 - programmableWorker->rect.x,
+									  gameObjectData->hive.rect.y + gameObjectData->hive.rect.h/2 - programmableWorker->rect.h/2 - programmableWorker->rect.y);
   programmableWorker->status = RETURNING;
   return(1);
 }

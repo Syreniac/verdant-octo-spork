@@ -111,8 +111,7 @@ int gameLoop(GameData *gameData){
      function ran */
   float delta_t = calculateDt(gameData->gameRunTime);
   SDL_Event event;
-  int i = 0, j = 0;
-
+  
   /* Storing the number of milliseconds since the program was run helps keep it
      moving smoothly by calculating delta_t */
   gameData->gameRunTime = (float) SDL_GetTicks();
@@ -127,29 +126,7 @@ int gameLoop(GameData *gameData){
 
   renderUI(&gameData->uiData, &gameData->graphicsData);
 
-  if(gameData->graphicsData.keys[ARROW_DOWN]){
-	if(!(gameData->graphicsData.navigationOffset.y <= -Y_SIZE_OF_WORLD + Y_SIZE_OF_SCREEN)){
-		gameData->graphicsData.navigationOffset.y -= floor(delta_t * PANSPEEDMULTI);
-	}
-  }
-  
-  if(gameData->graphicsData.keys[ARROW_UP]){
-    if(!(gameData->graphicsData.navigationOffset.y >= Y_SIZE_OF_WORLD - Y_SIZE_OF_SCREEN)){
-		gameData->graphicsData.navigationOffset.y += floor(delta_t * PANSPEEDMULTI);
-	}
-  }
-
-if(gameData->graphicsData.keys[ARROW_RIGHT]){
-	if(!(gameData->graphicsData.navigationOffset.x <= -X_SIZE_OF_WORLD + X_SIZE_OF_SCREEN)){
-		gameData->graphicsData.navigationOffset.x -= floor(delta_t * PANSPEEDMULTI);
-	}
-  }
-  
-  if(gameData->graphicsData.keys[ARROW_LEFT]){
-    if(!(gameData->graphicsData.navigationOffset.x >= X_SIZE_OF_WORLD - X_SIZE_OF_SCREEN)){
-         gameData->graphicsData.navigationOffset.x += floor(delta_t * PANSPEEDMULTI);
-	}
-  }
+  panScreen(&gameData->graphicsData, delta_t);
 				
 				
   /* At the end of the loop we need to update the main application window to

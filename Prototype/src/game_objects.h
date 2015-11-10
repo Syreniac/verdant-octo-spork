@@ -42,6 +42,7 @@ struct ResourceNodeSpawner{
   /* rather than specify a hard array, we'll calloc something up to go here
      later */
   ResourceNode *resourceNodes;
+  SDL_Rect collisionRect;
 };
 
 typedef struct ProgrammableWorker ProgrammableWorker;

@@ -33,8 +33,6 @@ void keydown(GraphicsData *graphicsData, GameObjectData *gameObjectData, SDL_Eve
     }
 }
 
-
-
 void keyup(GraphicsData *graphicsData, GameObjectData *gameObjectData, SDL_Event *event){
     switch (event->key.keysym.scancode){
         case (SDL_SCANCODE_DOWN):
@@ -52,4 +50,32 @@ void keyup(GraphicsData *graphicsData, GameObjectData *gameObjectData, SDL_Event
         default:
             return;
     }
+}
+
+void panScreen(GraphicsData *graphicsData, float delta_t)
+{
+  if(graphicsData->keys[ARROW_DOWN]){
+	if(!(graphicsData->navigationOffset.y <= -Y_SIZE_OF_WORLD + Y_SIZE_OF_SCREEN)){
+		graphicsData->navigationOffset.y -= floor(delta_t * PANSPEEDMULTI);
+	}
+  }
+  
+  if(graphicsData->keys[ARROW_UP]){
+    if(!(graphicsData->navigationOffset.y >= Y_SIZE_OF_WORLD - Y_SIZE_OF_SCREEN)){
+		graphicsData->navigationOffset.y += floor(delta_t * PANSPEEDMULTI);
+	}
+  }
+
+if(graphicsData->keys[ARROW_RIGHT]){
+	if(!(graphicsData->navigationOffset.x <= -X_SIZE_OF_WORLD + X_SIZE_OF_SCREEN)){
+		graphicsData->navigationOffset.x -= floor(delta_t * PANSPEEDMULTI);
+	}
+  }
+  
+  if(graphicsData->keys[ARROW_LEFT]){
+    if(!(graphicsData->navigationOffset.x >= X_SIZE_OF_WORLD - X_SIZE_OF_SCREEN)){
+         graphicsData->navigationOffset.x += floor(delta_t * PANSPEEDMULTI);
+	}
+  }
+		
 }

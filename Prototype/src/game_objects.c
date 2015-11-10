@@ -35,7 +35,7 @@ float generateRandomCoordOffset(float radius){
   return(return_value);
 }
 
-ResourceNode *checkResourceNodeCollision(ResourceNodeSpawner **resourceNodeSpawnerPointer, GameObjectData *gameObjectData, float positionX, float positionY){
+ResourceNode *checkResourceNodeCollision(ResourceNodeSpawner **resourceNodeSpawnerPointer, GameObjectData *gameObjectData, ProgrammableWorker *programmableWorker){
   /* ResourceNodeSpawner **resourceNodeSpawnerPoint
                                     = this is a pointer to a pointer (I hate it
                                       too). We need it so we return both the
@@ -43,9 +43,6 @@ ResourceNode *checkResourceNodeCollision(ResourceNodeSpawner **resourceNodeSpawn
                                       ResourceNodeSpawner pointer.
      GameObjectData *gameObjectData = a pointer to the GameObjectData struct
                                       which we will be drawing object data from
-     float positionX                = The x position we are checking collisions
-                                      against
-     float positionY                = the y position like above
 
      This is probably the most complicated part of what I've done here. Rather
      than checking collision against every ResourceNode we check against every
@@ -61,26 +58,21 @@ ResourceNode *checkResourceNodeCollision(ResourceNodeSpawner **resourceNodeSpawn
      passed */
   while(i < gameObjectData->resourceNodeSpawnerCount){
     /* Get the distance2 between the resourceNodeSpawner and the point to check */
-    d2=getDistance2BetweenPoints(positionX,
-                                 positionY,
-                                 gameObjectData->resourceNodeSpawners[i].xPosition,
-                                 gameObjectData->resourceNodeSpawners[i].yPosition);
     /* This checks if we are close enough to a resourceNodeSpawner that we
        should check against the individual nodes*/
-    if(d2 < square(gameObjectData->resourceNodeSpawners[i].spawnRadius+X_SIZE_OF_NODE/2+X_SIZE_OF_WORKER/2)){
+    if(testRectIntersection(programmableWorker->rect, gameObjectData->resourceNodeSpawners[i].collisionRect)){
       /* Reset j every time */
       j = 0;
       /* Loop through the ResourceNodes on the resourceNodeSpawner and check
          collisions */
       while(j < gameObjectData->resourceNodeSpawners[i].maximumNodeCount){
         /* Get the distance2 between the ResourceNode and the point to check */
-        d2 = getDistance2BetweenPoints(positionX,
-                                       positionY,
-                                       gameObjectData->resourceNodeSpawners[i].resourceNodes[j].rect.x,
-                                       gameObjectData->resourceNodeSpawners[i].resourceNodes[j].rect.y);
         /* Check whether we are close enough to a ResourceNode to collide and
            that the node we're testing is actually alive.*/
-        if(d2 < square(X_SIZE_OF_NODE/2+X_SIZE_OF_WORKER/2) && gameObjectData->resourceNodeSpawners[i].resourceNodes[j].alive){
+        if(isPointInRect(gameObjectData->resourceNodeSpawners[i].resourceNodes[j].rect.x + X_SIZE_OF_NODE/2,
+		   gameObjectData->resourceNodeSpawners[i].resourceNodes[j].rect.y + Y_SIZE_OF_NODE/2,
+		   programmableWorker->rect)
+			&& gameObjectData->resourceNodeSpawners[i].resourceNodes[j].alive){
           /* Both these values are essentially returned */
           *resourceNodeSpawnerPointer = &gameObjectData->resourceNodeSpawners[i];
           return(&gameObjectData->resourceNodeSpawners[i].resourceNodes[j]);
@@ -147,8 +139,8 @@ Hive createHive(void){
   Hive hive;
   hive.rect.w = 64;
   hive.rect.h = 80;
-  hive.rect.x = X_SIZE_OF_SCREEN/2 - hive.rect.w/2;
-  hive.rect.y = Y_SIZE_OF_SCREEN/2 - hive.rect.h/2;
+  hive.rect.x = X_SIZE_OF_WORLD/2 - hive.rect.w/2;
+  hive.rect.y = Y_SIZE_OF_WORLD/2 - hive.rect.h/2;
   return(hive);
 }
 
@@ -178,7 +170,11 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
   programmableWorker->rect.x = floor(programmableWorker->rawX);
   programmableWorker->rect.y = floor(programmableWorker->rawY);
 
-  if(getDistance2BetweenPoints(programmableWorker->rect.x,programmableWorker->rect.y,gameObjectData->hive.rect.x,gameObjectData->hive.rect.y) < 1.0 && programmableWorker->status == RETURNING){
+  if(getDistance2BetweenPoints(programmableWorker->rect.x + programmableWorker->rect.w/2,
+							   programmableWorker->rect.y + programmableWorker->rect.h/2,
+							   gameObjectData->hive.rect.x + gameObjectData->hive.rect.w/2,
+							   gameObjectData->hive.rect.y + gameObjectData->hive.rect.h/2) < 10.0 && programmableWorker->status == RETURNING){
+								   printf("dropped off cargo\n");
     programmableWorker->cargo = 0;
   }
   if(programmableWorker->status == LEAVING){
@@ -186,7 +182,7 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
 
     /* We want to get back the ResourceNode and ResourceNodeSpawner (if any)
        that we are colliding with */
-    resourceNode = checkResourceNodeCollision(&resourceNodeSpawner,gameObjectData,newX,newY);
+    resourceNode = checkResourceNodeCollision(&resourceNodeSpawner,gameObjectData,programmableWorker);
 
     /* resourceNode will be NULL if there are no collisions, so test that */
     if(resourceNode != NULL){
@@ -214,7 +210,6 @@ ResourceNodeSpawner createResourceNodeSpawner(int maximumNodeCount, float xPosit
   ResourceNodeSpawner resourceNodeSpawner;
   int i = 0;
 
-
   resourceNodeSpawner.maximumNodeCount = maximumNodeCount;
   /* Set the currentNodeCount to 0 because no nodes have been spawned yet */
   resourceNodeSpawner.currentNodeCount = 0;
@@ -226,6 +221,11 @@ ResourceNodeSpawner createResourceNodeSpawner(int maximumNodeCount, float xPosit
   resourceNodeSpawner.ticksSinceSpawn = 0.0;
   resourceNodeSpawner.spawnDelay = DEFAULT_SPAWNDELAY;
   resourceNodeSpawner.spawnRadius = radius;
+  
+  resourceNodeSpawner.collisionRect.x = xPosition - radius/2;
+  resourceNodeSpawner.collisionRect.y = yPosition - radius/2;
+  resourceNodeSpawner.collisionRect.w = radius;
+  resourceNodeSpawner.collisionRect.h = radius;
 
   /* calloc up an array for us to use here */
   resourceNodeSpawner.resourceNodes = calloc(maximumNodeCount, sizeof(ResourceNode));

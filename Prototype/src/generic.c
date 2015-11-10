@@ -18,6 +18,13 @@ int isPointInRect(int point_x, int point_y, SDL_Rect rect){
   return 1;
 }
 
+int testRectIntersection(SDL_Rect rectA, SDL_Rect rectB){
+	if (rectA.x+rectA.w<rectB.x || rectB.x+rectB.w<rectA.x || rectA.y+rectA.h<rectB.y || rectB.y+rectB.h<rectA.y){
+		return 0;
+	}
+	return 1; /*There is intersection!*/
+}
+
 int isRectEnclosedInRect(SDL_Rect rectA, SDL_Rect rectB){
   /* SDL_Rect rectA = the rectangle that we want to test is enclosed.
      SDL_Rect rectB = the rectangle that we want to see if it encloses rectA.

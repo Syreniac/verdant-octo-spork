@@ -81,6 +81,7 @@ void clickOnUIElement(UI_Element *element, SDL_Event *event){
       if(isPointInRect(event->button.x, event->button.y,*getUIElementRect(element))){
         printf("clicked on clickable\n");
       }
+	  break;
     }
     case DRAGGABLE:
     {
@@ -88,6 +89,7 @@ void clickOnUIElement(UI_Element *element, SDL_Event *event){
         element->draggable.status = GRABBED;
         printf("clicked on draggable\n");
       }
+	  break;
     }
 	default:
 	  return;
