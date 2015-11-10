@@ -1,0 +1,42 @@
+# Please run the clean command detailed at the bottom before running: make -f makefile_win64
+
+# This make file works. Please do not modify it unless you're at a windows computer and can test it.
+# Linux terminal commands are not the same as windows ones - many of the make commands that were
+# in here were not workined at all on Windows.
+
+CFLAGS = -pedantic -Wall -Wextra -Wno-unused-variable -Wno-unused-parameter
+SDL_FLAGS = -ISDL2_x64/include -LSDL2_x64/lib
+LFLAGS =  $(SDL_FLAGS) $(TTF_FLAGS) -lmingw32 -lSDL2main -lSDL2 -lm
+
+
+# List all the files here
+ASSETS_CONTENTS = assets
+DLL_LOCATION = SDL2_x64
+OBJS = main.o init.o game.o world_generation.o game_objects.o AI.o UI.o generic.o controls.o
+BIN = bin
+PROG = $(BIN)/Prototype
+CXX = gcc
+
+# top-level rule to create the program.
+all: $(PROG)
+
+
+# compiling other source files.
+%.o: src/%.c src/%.h
+	$(CXX) $(CFLAGS) $(LFLAGS) -c -s $<
+
+# linking the program. | $(BIN) makes the bin/ directory if it does not yet exist.
+$(PROG): $(OBJS) | $(BIN)
+	$(CXX) $(OBJS) -o $(PROG) $(LFLAGS)
+	del $(OBJS)
+
+# makes bin/ directory and copies assets to bin/ so we don't have to drag them in manually.
+$(BIN):
+	mkdir $(BIN)
+	xcopy $(DLL_LOCATION) $(BIN) /C /Y
+	xcopy $(ASSETS_CONTENTS) $(BIN) /C /E /Y
+
+# cleans everything that can be automatically recreated with "make".
+# To do this, run the following command in verdant-octo-spork/Prototype: make -f makefile_win64 clean
+clean:
+	del $(OBJS)
