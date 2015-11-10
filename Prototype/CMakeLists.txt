@@ -23,6 +23,8 @@ find_library(sdlttf SDL2_TTF)
 set(SOURCE_FILES
     src/AI.c
     src/AI.h
+    src/controls.c
+    src/controls.h
     src/game.c
     src/game.h
     src/game_objects.c

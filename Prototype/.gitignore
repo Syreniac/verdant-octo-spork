@@ -1,2 +1,4 @@
 .idea
-bin
+bin*
+*.o
+makefile_mac
