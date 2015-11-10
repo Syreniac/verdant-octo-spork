@@ -2,9 +2,11 @@
 
 CFLAGS = -pedantic -Wall -Wextra -Wno-unused-variable -Wno-unused-parameter
 SDL_FLAGS = -I/opt/SDL/2.0.3/include -L/opt/SDL/2.0.3/lib
-#TTF_FLAGS = -ISDL_ttf_lab/include -LSDL_ttf_lab/lib
-LFLAGS = $(SDL_FLAGS) -Wl,-rpath,/opt/SDL/2.0.3/lib -lSDL2 -lm
-# Once we have TTF working, $(TTF_FLAGS) needs to go in at start, and -lSDL_ttf needs to go in at end.
+#TTF_FLAGS = -ISDL_ttf_lab/include -LSDL_ttf_lab/lib -Wl,-rpath,/home/msc15/jb15339/linux/git/verdant-octo-spork/Prototype/SDL_ttf_lab/lib -lSDL_ttf
+LFLAGS = $(SDL_FLAGS) $(TTF_FLAGS) -Wl,-rpath,/opt/SDL/2.0.3/lib -lSDL2 -lm
+# Once we have TTF working, just remove the comment mark from the TTF_FLAGS definition and it'll be ready to go. Currently only accepts an absolute path.
+# Could make a shell script to pass in an absolute path for each individual computer.
+# I asked Ian how to get ttf_lab working, and he wasn't able to do it either, due to this error... /bin/ld: cannot find -lSDL_ttf collect2: error: ld returned 1 exit status.
 
 # List all the files here
 ASSETS_CONTENTS = assets/.
