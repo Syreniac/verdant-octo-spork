@@ -62,8 +62,8 @@ void blitGameObject(SDL_Rect objectRect, GraphicsData *graphicsData, SDL_Surface
   SDL_Rect tempRect;
 
   tempRect = objectRect;
-  tempRect.x += graphicsData->navigationOffset->x;
-  tempRect.y += graphicsData->navigationOffset->y;
+  tempRect.x += graphicsData->navigationOffset.x;
+  tempRect.y += graphicsData->navigationOffset.y;
 
   SDL_BlitSurface(graphic,
                   NULL,

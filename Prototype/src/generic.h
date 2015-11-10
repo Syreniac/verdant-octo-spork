@@ -26,15 +26,26 @@
 #define DEFAULT_MAXNODECOUNT 10
 #define FRAME_RATE 16.6667
 
+#define NUM_OF_KEYS 30
+#define PANSPEEDMULTI 0.2
+
 typedef struct GraphicsData GraphicsData;
+
+enum Keybindings {ARROW_DOWN,
+                  ARROW_UP,
+				  ARROW_LEFT,
+				  ARROW_RIGHT};
 
 struct GraphicsData{
   SDL_Window *window;
   SDL_Surface *workerGraphic;
   SDL_Surface *nodeGraphic;
   SDL_Surface *hiveGraphic;
-  SDL_Rect *navigationOffset;
+  SDL_Rect navigationOffset;
+  int keys[NUM_OF_KEYS]; /*keybindings*/
 };
+
+typedef enum Keybindings Keybindings;
 
 int isPointInRect(int point_x, int point_y, SDL_Rect rect);
 int isRectEnclosedInRect(SDL_Rect rectA, SDL_Rect rectB);

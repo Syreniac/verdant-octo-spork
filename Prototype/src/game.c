@@ -22,16 +22,17 @@ int gameStart(SDL_Window *window){
   SDL_Rect rect2;
 
   gameData.gameObjectData.pause_status = 0;
+  
+  memset(gameData.graphicsData.keys,0,sizeof(int) * NUM_OF_KEYS);
 
   /* We will need the window pointer for later, so we should store that. */
   gameData.graphicsData.window = window;
 
   /* initialise navigationOffset values */
-  gameData.graphicsData.navigationOffset = &rect;
-  gameData.graphicsData.navigationOffset->x = -(X_SIZE_OF_WORLD/2)+(X_SIZE_OF_SCREEN/2); /*setting initial x offset to center of world*/
-  gameData.graphicsData.navigationOffset->y = -(Y_SIZE_OF_WORLD/2)+(Y_SIZE_OF_SCREEN/2); /*setting initial y offset ot center of world*/
-  gameData.graphicsData.navigationOffset->w = X_SIZE_OF_WORLD;
-  gameData.graphicsData.navigationOffset->h = Y_SIZE_OF_WORLD;
+  gameData.graphicsData.navigationOffset.x = -(X_SIZE_OF_WORLD/2)+(X_SIZE_OF_SCREEN/2); /*setting initial x offset to center of world*/
+  gameData.graphicsData.navigationOffset.y = -(Y_SIZE_OF_WORLD/2)+(Y_SIZE_OF_SCREEN/2); /*setting initial y offset ot center of world*/
+  gameData.graphicsData.navigationOffset.w = X_SIZE_OF_WORLD;
+  gameData.graphicsData.navigationOffset.h = Y_SIZE_OF_WORLD;
 
 
   /* We also need some time information to make things run smoothly */
@@ -126,6 +127,31 @@ int gameLoop(GameData *gameData){
 
   renderUI(&gameData->uiData, &gameData->graphicsData);
 
+  if(gameData->graphicsData.keys[ARROW_DOWN]){
+	if(!(gameData->graphicsData.navigationOffset.y <= -Y_SIZE_OF_WORLD + Y_SIZE_OF_SCREEN)){
+		gameData->graphicsData.navigationOffset.y -= floor(delta_t * PANSPEEDMULTI);
+	}
+  }
+  
+  if(gameData->graphicsData.keys[ARROW_UP]){
+    if(!(gameData->graphicsData.navigationOffset.y >= Y_SIZE_OF_WORLD - Y_SIZE_OF_SCREEN)){
+		gameData->graphicsData.navigationOffset.y += floor(delta_t * PANSPEEDMULTI);
+	}
+  }
+
+if(gameData->graphicsData.keys[ARROW_RIGHT]){
+	if(!(gameData->graphicsData.navigationOffset.x <= -X_SIZE_OF_WORLD + X_SIZE_OF_SCREEN)){
+		gameData->graphicsData.navigationOffset.x -= floor(delta_t * PANSPEEDMULTI);
+	}
+  }
+  
+  if(gameData->graphicsData.keys[ARROW_LEFT]){
+    if(!(gameData->graphicsData.navigationOffset.x >= X_SIZE_OF_WORLD - X_SIZE_OF_SCREEN)){
+         gameData->graphicsData.navigationOffset.x += floor(delta_t * PANSPEEDMULTI);
+	}
+  }
+				
+				
   /* At the end of the loop we need to update the main application window to
      reflect the changes we've made to the graphics */
   SDL_UpdateWindowSurface(gameData->graphicsData.window);
@@ -151,9 +177,12 @@ int gameLoop(GameData *gameData){
       case SDL_KEYDOWN:
         keydown(&gameData->graphicsData, &gameData->gameObjectData, &event);
         break;
-			case SDL_QUIT:
-				exit(0);
-			  break;
+	  case SDL_KEYUP:
+		keyup(&gameData->graphicsData, &gameData->gameObjectData, &event);
+		break;
+	  case SDL_QUIT:
+		exit(0);
+	    break;
 		}
 	}
   SDL_Delay(16);

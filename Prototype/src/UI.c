@@ -89,6 +89,8 @@ void clickOnUIElement(UI_Element *element, SDL_Event *event){
         printf("clicked on draggable\n");
       }
     }
+	default:
+	  return;
   }
 }
 void clickupOnUIElement(UI_Element *element, SDL_Event *event){
@@ -97,6 +99,8 @@ void clickupOnUIElement(UI_Element *element, SDL_Event *event){
       if(element->draggable.status == GRABBED){
         element->draggable.status = ROOTED;
       }
+	default:
+	  return;
   }
 }
 void mousemoveOnUIElement(UI_Element *element, SDL_Event *event){
@@ -109,6 +113,8 @@ void mousemoveOnUIElement(UI_Element *element, SDL_Event *event){
         rect->y = event->motion.y;
         ensureRectEnclosed(rect,getUIElementRect(element->draggable.parent));
       }
+	default:
+	  return;
   }
 }
 
@@ -127,6 +133,7 @@ void clickupOnUI(UIData *uiData, SDL_Event *event){
   }
 }
 
+
 void moveMouseOnUi(UIData *uiData, SDL_Event *event){
   int i = 0;
   while(i < uiData->numberOfUIElements){
@@ -141,56 +148,4 @@ void renderUI(UIData *uiData, GraphicsData *graphicsData){
     renderUIElement(graphicsData,&uiData->UIElements[i]);
     i++;
   }
-}
-
-void keydown(GraphicsData *graphicsData, GameObjectData *gameObjectData, SDL_Event *event){
-    switch (event->key.keysym.scancode){
-        case (SDL_SCANCODE_DOWN):
-            printf("you pressed down key\n");
-            /*if not at edge of world, keep going*/
-
-            if(!(graphicsData->navigationOffset->y <= -Y_SIZE_OF_WORLD + Y_SIZE_OF_SCREEN)){
-                graphicsData->navigationOffset->y -= 20;
-            }
-            break;
-        case (SDL_SCANCODE_UP):
-            printf("you pressed up key\n");
-            /*if not at edge of world, keep going*/
-            if(!(graphicsData->navigationOffset->y >= Y_SIZE_OF_WORLD - Y_SIZE_OF_SCREEN)){
-                graphicsData->navigationOffset->y += 20;
-            }
-            break;
-        case (SDL_SCANCODE_RIGHT):
-            printf("you pressed right key\n");
-            /*if not at edge of world, keep going*/
-            if(!(graphicsData->navigationOffset->x <= -X_SIZE_OF_WORLD + X_SIZE_OF_SCREEN)){
-                graphicsData->navigationOffset->x -= 20;
-            }
-            break;
-        case (SDL_SCANCODE_LEFT):
-            printf("you pressed left key\n");
-            /*if not at edge of world, keep going*/
-            if(!(graphicsData->navigationOffset->x >= X_SIZE_OF_WORLD - X_SIZE_OF_SCREEN)){
-                graphicsData->navigationOffset->x += 20;
-            }
-            break;
-        case (SDL_SCANCODE_P):
-            printf("you pressed P (pause) key\n");
-            gameObjectData->pause_status = 1 - gameObjectData->pause_status; /* 1 for pause, 0 for go on */
-
-            if (gameObjectData->pause_status){
-               /*put a big recentage in the middle of the screen, with a big PAUSE*/
-               printf("Test1: %d\n", gameObjectData->pause_status);
-               /*output pause_status to other part of program*/
-
-            }
-            else{
-               /*remove the big recentage in the middle of the screen, and continue the clock*/
-               printf("Test2: %d\n", gameObjectData->pause_status);
-               /*output pause_status to other part of program*/
-            }
-            break;
-        default:
-            printf("redundant key pressed\n");
-    }
 }

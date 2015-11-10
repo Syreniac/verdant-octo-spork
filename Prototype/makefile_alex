@@ -2,7 +2,7 @@
 CFLAGS = -pedantic -Wall -Wextra -Wno-unused-variable -Wno-unused-parameter
 LFLAGS = -lSDL2 -lm
 # List all the files here
-OBJS = main.o init.o game.o world_generation.o game_objects.o AI.o UI.o generic.o
+OBJS = main.o init.o game.o world_generation.o game_objects.o AI.o UI.o generic.o controls.o
 PROG = bin_alex/Prototype
 CXX = gcc
 

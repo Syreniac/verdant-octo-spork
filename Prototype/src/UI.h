@@ -90,5 +90,3 @@ void clickOnUI(UIData *uiData, SDL_Event *event);
 void clickupOnUI(UIData *uiData, SDL_Event *event);
 void moveMouseOnUi(UIData *uiData, SDL_Event *event);
 void renderUI(UIData *uiData, GraphicsData *graphicsData);
-
-void keydown(GraphicsData *graphicsData, GameObjectData *gameObjectData, SDL_Event *event);

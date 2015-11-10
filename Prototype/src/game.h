@@ -1,4 +1,4 @@
-#include "UI.h"
+#include "controls.h"
 
 typedef struct GameData GameData;
 struct GameData{
