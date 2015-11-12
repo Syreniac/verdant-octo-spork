@@ -24,7 +24,12 @@ int gameStart(SDL_Window *window){
   gameData.gameObjectData.pause_status = 0;
   
   memset(gameData.graphicsData.keys,0,sizeof(int) * NUM_OF_KEYS);
+  
+  gameData.graphicsData.renderer = SDL_CreateRenderer(window,
+                                                      -1,
+                                                      SDL_RENDERER_TARGETTEXTURE);
 
+  
   /* We will need the window pointer for later, so we should store that. */
   gameData.graphicsData.window = window;
 
@@ -44,7 +49,7 @@ int gameStart(SDL_Window *window){
   rect.w = 40;
   rect.h = 40;
 
-  gameData.uiData.UIElements[0] = createUI_Clickable(rect, "Hello", 0xb00000);
+  gameData.uiData.UIElements[0] = createUI_Clickable(rect, "Hello", 50,50,150);
 
   rect.x = 100;
   rect.y = 100;
@@ -56,17 +61,17 @@ int gameStart(SDL_Window *window){
   rect2.w = 160;
   rect2.h = 160;
 
-  gameData.uiData.UIElements[1] = createUI_Expandable(rect,rect2,1000,1000,0x00b000);
+  gameData.uiData.UIElements[1] = createUI_Expandable(rect,rect2,1000,1000, 0, 0, 200);
 
   rect.x = 100;
   rect.y = 100;
   rect.w = 20;
   rect.h = 20;
 
-  gameData.uiData.UIElements[2] = createUI_Draggable(rect,&gameData.uiData.UIElements[1],0x0000b0);
+  gameData.uiData.UIElements[2] = createUI_Draggable(rect,&gameData.uiData.UIElements[1],0,136,64);
   gameData.uiData.numberOfUIElements = 3;
-
-
+  
+  
   /* Create some ResourceNodeSpawners to fill our world with ResourceNodes */
   generateResourceNodeSpawners(&gameData.gameObjectData);
 
@@ -81,13 +86,36 @@ int gameStart(SDL_Window *window){
   gameData.graphicsData.nodeGraphic = SDL_LoadBMP("images/blueFlower.bmp");
   gameData.graphicsData.workerGraphic = SDL_LoadBMP("images/bee.bmp");
   gameData.graphicsData.hiveGraphic = SDL_LoadBMP("images/beehive.bmp");
+  
+  if(gameData.graphicsData.nodeGraphic == NULL ||
+     gameData.graphicsData.workerGraphic == NULL ||
+     gameData.graphicsData.hiveGraphic == NULL){
+    printf("IMAGE CANNOT BE FOUND\n");
+  }
+  
 
-  /* SDL_SetColorKey makes the program treat all pixels of a given colour as
-     transparent (in these cases, white)*/
-  SDL_SetColorKey(gameData.graphicsData.nodeGraphic, SDL_TRUE, SDL_MapRGB(gameData.graphicsData.nodeGraphic->format, 255,255,255));
-  SDL_SetColorKey(gameData.graphicsData.workerGraphic, SDL_TRUE, SDL_MapRGB(gameData.graphicsData.workerGraphic->format, 255,255,255));
-  SDL_SetColorKey(gameData.graphicsData.hiveGraphic, SDL_TRUE, SDL_MapRGB(gameData.graphicsData.hiveGraphic->format, 255,255,255));
 
+  SDL_SetColorKey(gameData.graphicsData.nodeGraphic, SDL_TRUE,
+                  SDL_MapRGB(gameData.graphicsData.nodeGraphic->format, 255, 255, 255));
+  SDL_SetColorKey(gameData.graphicsData.workerGraphic, SDL_TRUE,
+                  SDL_MapRGB(gameData.graphicsData.workerGraphic->format, 255,255,255));
+  SDL_SetColorKey(gameData.graphicsData.hiveGraphic, SDL_TRUE,
+                  SDL_MapRGB(gameData.graphicsData.hiveGraphic->format, 255,255,255)); 
+  
+  
+  
+  gameData.graphicsData.nodeTexture = SDL_CreateTextureFromSurface(gameData.graphicsData.renderer,
+                                                                   gameData.graphicsData.nodeGraphic);
+                                                                   
+  gameData.graphicsData.workerTexture = SDL_CreateTextureFromSurface(gameData.graphicsData.renderer,
+                                                                   gameData.graphicsData.workerGraphic);
+                                                                   
+  gameData.graphicsData.hiveTexture = SDL_CreateTextureFromSurface(gameData.graphicsData.renderer,
+                                                                   gameData.graphicsData.hiveGraphic);
+
+
+    
+    
   gameData.aiData.blockFunctionRoots = calloc(1, sizeof(BlockFunctionRoot));
   file = fopen("GenericWorkerAI.txt","r");
   makeBlockFunctionRootFromFile(&(gameData.aiData.blockFunctionRoots[0]), file);
@@ -115,10 +143,12 @@ int gameLoop(GameData *gameData){
   /* Storing the number of milliseconds since the program was run helps keep it
      moving smoothly by calculating delta_t */
   gameData->gameRunTime = (float) SDL_GetTicks();
-
-  /* Filling the background black helps get rid of things drawn onto the screen
-     that shoudln't be there anymore */
-  SDL_FillRect(SDL_GetWindowSurface(gameData->graphicsData.window),NULL,0x1B8D2E);
+  
+  
+  /*clear helps get rid of things on the screen that shouldn't be there anymore
+  and is also essential due to the way that render buffers can change unpredictably
+  after the function SDL_RenderPresent*/
+  SDL_RenderClear(gameData->graphicsData.renderer);
 
   updateGameObjects(&gameData->gameObjectData, &gameData->graphicsData, delta_t);
 
@@ -127,11 +157,18 @@ int gameLoop(GameData *gameData){
   renderUI(&gameData->uiData, &gameData->graphicsData);
 
   panScreen(&gameData->graphicsData, delta_t);
-				
+  
+  
+  /*This function is like the blit function, putting pixels to the screen.
+  but it needs to be called after all of the graphicall changes have been made,
+  including those in the renderUI() function. After the call to render present
+  the pixel buffer becomes unpredictable and should be followed by SDL_RenderClear
+  (as above in this loop)*/
+  SDL_RenderPresent(gameData->graphicsData.renderer);
 				
   /* At the end of the loop we need to update the main application window to
      reflect the changes we've made to the graphics */
-  SDL_UpdateWindowSurface(gameData->graphicsData.window);
+  /*SDL_UpdateWindowSurface(gameData->graphicsData.window);*/
 
   /* This bit makes sure our application keeps responding and doesn't crash */
   /* Don't worry too much about this for now */

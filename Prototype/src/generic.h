@@ -44,6 +44,10 @@ struct GraphicsData{
   SDL_Surface *nodeGraphic;
   SDL_Surface *hiveGraphic;
   SDL_Rect navigationOffset;
+  SDL_Renderer *renderer;
+  SDL_Texture *workerTexture;
+  SDL_Texture *nodeTexture;
+  SDL_Texture *hiveTexture;
   int keys[MAX_KEYS]; /*keybindings*/
 };
 
@@ -52,5 +56,5 @@ typedef enum Keybindings Keybindings;
 int isPointInRect(int point_x, int point_y, SDL_Rect rect);
 int isRectEnclosedInRect(SDL_Rect rectA, SDL_Rect rectB);
 void ensureRectEnclosed(SDL_Rect *ensure, SDL_Rect *against);
-void blitGameObject(SDL_Rect objectRect, GraphicsData *graphicsData, SDL_Surface *graphic);
+void blitGameObject(SDL_Rect objectRect, GraphicsData *graphicsData, SDL_Surface *graphic, SDL_Texture *texture);
 int testRectIntersection(SDL_Rect rectA, SDL_Rect rectB);

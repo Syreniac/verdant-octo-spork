@@ -27,13 +27,19 @@ void keydown(GraphicsData *graphicsData, GameObjectData *gameObjectData, SDL_Eve
 struct Panel{
   enum UI_Elements type;
   SDL_Rect rect;
-  Uint32 colour;
+  /*Uint32 colour;*/
+  int r;
+  int g;
+  int b;
 };
 
 struct Clickable{
   enum UI_Elements type;
   SDL_Rect rect;
-  Uint32 colour;
+  /*Uint32 colour;*/
+  int r;
+  int g;
+  int b;
   char *message;
   UI_Element *parent;
 };
@@ -41,7 +47,10 @@ struct Clickable{
 struct Draggable{
   enum UI_Elements type;
   SDL_Rect rect;
-  Uint32 colour;
+  /*Uint32 colour;*/
+  int r;
+  int g;
+  int b;
   enum DraggableStatus status;
   UI_Element *parent;
 };
@@ -49,13 +58,17 @@ struct Draggable{
 struct Expandable{
   enum UI_Elements type;
   SDL_Rect big_rect;
+  int r;
+  int g;
+  int b;
   SDL_Rect small_rect;
   SDL_Rect rect;
   int msToBig;
   int msToSmall;
   int msTimer;
   enum ExpandableStatus status;
-  Uint32 colour;
+ /* Uint32 colour;*/
+
 };
 
 union UI_Element{
@@ -73,11 +86,11 @@ struct UIData{
   UI_Element UIElements[255];
 };
 
-UI_Element createUI_Clickable(SDL_Rect rect, char *message, Uint32 colour);
+UI_Element createUI_Clickable(SDL_Rect rect, char *message, int r, int g, int b);
 UI_Element createUI_Expandable(SDL_Rect s_rect, SDL_Rect b_rect,
-                               int msToBig, int msToSmall, Uint32 colour);
-UI_Element createUI_Draggable(SDL_Rect rect, UI_Element *parent, Uint32 colour);
-UI_Element createUI_Panel(SDL_Rect rect, Uint32 colour);
+                               int msToBig, int msToSmall, int r, int g, int b);
+UI_Element createUI_Draggable(SDL_Rect rect, UI_Element *parent, int r, int g, int b);
+UI_Element createUI_Panel(SDL_Rect rect, int r, int g, int b);
 
 SDL_Rect *getUIElementRect(UI_Element *element);
 

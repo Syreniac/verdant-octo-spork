@@ -65,16 +65,30 @@ void ensureRectEnclosed(SDL_Rect *ensure, SDL_Rect *limit){
   ensure->y += yOffset;
 }
 
-void blitGameObject(SDL_Rect objectRect, GraphicsData *graphicsData, SDL_Surface *graphic){
+void blitGameObject(SDL_Rect objectRect, GraphicsData *graphicsData, SDL_Surface *graphic, SDL_Texture *texture){
   SDL_Rect tempRect;
 
+
+  
   tempRect = objectRect;
   tempRect.x += graphicsData->navigationOffset.x;
   tempRect.y += graphicsData->navigationOffset.y;
+  
 
-  SDL_BlitSurface(graphic,
+
+    /*this function copies the texture into the renderer, but is not put on screen until*/
+    /*SDL_RenderPresent is called in the gameloop of game.c*/
+    /*SDL_RenderPresent function must be called after all graphical changes have been made, including those*/
+    /*made by UIrender, also found in the gameloop*/
+  SDL_RenderCopy(graphicsData->renderer, texture, &graphic->clip_rect, &tempRect);
+
+
+
+
+
+ /* SDL_BlitSurface(surface,
                   NULL,
                   SDL_GetWindowSurface(graphicsData->window),
-                  &tempRect);
+                  &tempRect);*/
 
 }

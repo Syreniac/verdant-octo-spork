@@ -2,26 +2,33 @@
 
 
 
-UI_Element createUI_Panel(SDL_Rect rect, Uint32 colour){
+UI_Element createUI_Panel(SDL_Rect rect, int r, int g, int b){
   UI_Element element;
 
   element.panel.type = PANEL;
   element.panel.rect = rect;
-  element.panel.colour = colour;
+  /*element.panel.colour = colour*/
+  element.panel.r = r;
+  element.panel.g = g;
+  element.panel.b = b;
 
   return element;
 }
-UI_Element createUI_Clickable(SDL_Rect rect, char *message, Uint32 colour){
+UI_Element createUI_Clickable(SDL_Rect rect, char *message,int r, int g, int b){
   UI_Element element;
   element.clickable.type = CLICKABLE;
   element.clickable.rect = rect;
-  element.clickable.colour = colour;
+  /*element.clickable.colour = colour;*/
   element.clickable.message = message;
   element.clickable.parent = NULL;
+  
+  element.clickable.r = r;
+  element.clickable.g = g;
+  element.clickable.b = b;
   return element;
 }
 UI_Element createUI_Expandable(SDL_Rect s_rect, SDL_Rect b_rect,
-                                     int msToBig, int msToSmall, Uint32 colour){
+                                     int msToBig, int msToSmall, int r, int g, int b){
   UI_Element element;
   element.expandable.type = EXPANDABLE;
   element.expandable.small_rect = s_rect;
@@ -30,17 +37,25 @@ UI_Element createUI_Expandable(SDL_Rect s_rect, SDL_Rect b_rect,
   element.expandable.msToBig = msToBig;
   element.expandable.msToSmall = msToSmall;
   element.expandable.msTimer = 0;
-  element.expandable.colour = colour;
+  /*element.expandable.colour = colour;*/
+  
+  element.expandable.r = r;
+  element.expandable.g = g;
+  element.expandable.b = b;
   return element;
 }
 
-UI_Element createUI_Draggable(SDL_Rect rect, UI_Element *parent, Uint32 colour){
+UI_Element createUI_Draggable(SDL_Rect rect, UI_Element *parent, int r, int g, int b){
   UI_Element element;
   element.draggable.type = DRAGGABLE;
   element.draggable.rect = rect;
   element.draggable.status = ROOTED;
   element.draggable.parent = parent;
-  element.draggable.colour = colour;
+  /*element.draggable.colour = colour;*/
+  
+  element.draggable.r = r;
+  element.draggable.g = g;
+  element.draggable.b = b;
   return element;
 }
 
@@ -66,9 +81,19 @@ void renderUIElement(GraphicsData *graphicsData, UI_Element *element){
     case DRAGGABLE:
     case PANEL:
     case EXPANDABLE:
+
+      SDL_SetRenderDrawColor(graphicsData->renderer,
+                             element->panel.r,
+                             element->panel.g,
+                             element->panel.b, 
+                             SDL_ALPHA_OPAQUE);
+      
+      SDL_RenderFillRect(graphicsData->renderer,
+                   getUIElementRect(element));
+/*                       
       SDL_FillRect(SDL_GetWindowSurface(graphicsData->window),
                    getUIElementRect(element),
-                   element->panel.colour);
+                   element->panel.colour);*/
       break;
     case GENERIC:
       break;

@@ -297,6 +297,8 @@ ResourceNode createResourceNode(ResourceNodeSpawner *parentSpawner, int resource
      ResourceNode around the ResourceNodeSpawner. This can be improved. */
   resourceNode.rect.x = parentSpawner->xPosition + generateRandomCoordOffset(parentSpawner->spawnRadius) - X_SIZE_OF_NODE/2;
   resourceNode.rect.y = parentSpawner->yPosition + generateRandomCoordOffset(parentSpawner->spawnRadius) - Y_SIZE_OF_NODE/2;
+  resourceNode.rect.w = 20;
+  resourceNode.rect.h = 20;
   return resourceNode;
 }
 
@@ -317,10 +319,14 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 
 
 
+
   /* First, we need to draw the Hive in at the correct position. */
-  blitGameObject(gameObjectData->hive.rect, graphicsData, graphicsData->hiveGraphic);
+  blitGameObject(gameObjectData->hive.rect,
+                 graphicsData,
+                 graphicsData->hiveGraphic,
+                 graphicsData->hiveTexture);
 
-
+        
   /* Second, we loop through all the ResourceNodeSpawners */
   while(i < gameObjectData->resourceNodeSpawnerCount){
     j = 0;
@@ -332,7 +338,13 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
     /* Then we need to loop through the attached ResourceNodes and draw them */
    while(j < gameObjectData->resourceNodeSpawners[i].maximumNodeCount){
       if(gameObjectData->resourceNodeSpawners[i].resourceNodes[j].alive){
-        blitGameObject(gameObjectData->resourceNodeSpawners[i].resourceNodes[j].rect, graphicsData, graphicsData->nodeGraphic);
+
+     
+
+        blitGameObject(gameObjectData->resourceNodeSpawners[i].resourceNodes[j].rect,
+                       graphicsData,
+                       graphicsData->nodeGraphic,
+                       graphicsData->nodeTexture);
       }
       j++;
     }
@@ -341,15 +353,22 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
   /* Thirdly, we loop through all the ProgrammableWorkers and update them */
   /* AI thinking has been moved to a seperate function to prevent some circular
      inheritance issues. */
+     
+     
   i = 0;
   while(i < gameObjectData->programmableWorkerCount){
     if(!gameObjectData->pause_status){
       updateProgrammableWorker(&gameObjectData->programmableWorkers[i],gameObjectData,ticks);
     }
-    blitGameObject(gameObjectData->programmableWorkers[i].rect, graphicsData, graphicsData->workerGraphic);
+    blitGameObject(gameObjectData->programmableWorkers[i].rect,
+                   graphicsData,
+                   graphicsData->workerGraphic,
+                   graphicsData->workerTexture);
 
     i++;
   }
+
+
 
 
 }
