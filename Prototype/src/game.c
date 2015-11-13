@@ -176,6 +176,8 @@ int gameLoop(GameData *gameData){
 	}
   delta_t = calculateDt(gameData->gameRunTime);
   gameData->gameRunTime = SDL_GetTicks();
-  SDL_Delay(20-delta_t);	
+  if(delta_t<FRAME_TIME){
+	SDL_Delay(FRAME_TIME-delta_t);
+  }
   return(1);
 }
