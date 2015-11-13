@@ -1,15 +1,9 @@
-/* This file contains the functions that govern initialising and uninitialising
-   the SDL components of the program. */
-
 #include "init.h"
 
-#define GAME_NAME "Prototype"
-
-
-SDL_Window *initialise(void){
+GraphicsData initialise(void){
   /* This function will initialise the SDL library and create a blank window.
      I'll line by line comment what I'm doing here. */
-  SDL_Window *window;
+  GraphicsData graphicsData;
 
 
   /* Initialise SDL library (must be called before any other SDL_function),
@@ -31,16 +25,18 @@ SDL_Window *initialise(void){
         - The Y size like above
         - SDL configuration options which can be found online in the API documentation*/
 
-	window = SDL_CreateWindow(GAME_NAME,
-                          SDL_WINDOWPOS_UNDEFINED,
-                          SDL_WINDOWPOS_UNDEFINED,
-                          X_SIZE_OF_SCREEN, Y_SIZE_OF_SCREEN,
-                          SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
-
-
-
-  /* All we need to return here is the window pointer and we can work on it later*/
-  return window;
+	graphicsData.window = SDL_CreateWindow(PROGRAM_NAME,
+										   SDL_WINDOWPOS_UNDEFINED,
+                                           SDL_WINDOWPOS_UNDEFINED,
+                                           X_SIZE_OF_SCREEN, Y_SIZE_OF_SCREEN,
+                                           SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
+										   
+    graphicsData.renderer = SDL_CreateRenderer(graphicsData.window,
+                                               -1,
+                                               SDL_RENDERER_TARGETTEXTURE|SDL_RENDERER_SOFTWARE);
+	assert(graphicsData.renderer != NULL);
+	
+  return graphicsData;
 }
 
 void uninitialise(void){

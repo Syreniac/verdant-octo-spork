@@ -29,32 +29,11 @@
 #define NUM_OF_KEYS 30
 #define PANSPEEDMULTI 0.2
 
-typedef struct GraphicsData GraphicsData;
-
-enum Keybindings {ARROW_DOWN,
-                  ARROW_UP,
-				  ARROW_LEFT,
-				  ARROW_RIGHT,
-				  SPACE,
-				  MAX_KEYS};
-
-struct GraphicsData{
-  SDL_Window *window;
-  SDL_Surface *workerGraphic;
-  SDL_Surface *nodeGraphic;
-  SDL_Surface *hiveGraphic;
-  SDL_Rect navigationOffset;
-  SDL_Renderer *renderer;
-  SDL_Texture *workerTexture;
-  SDL_Texture *nodeTexture;
-  SDL_Texture *hiveTexture;
-  int keys[MAX_KEYS]; /*keybindings*/
-};
-
-typedef enum Keybindings Keybindings;
-
 int isPointInRect(int point_x, int point_y, SDL_Rect rect);
 int isRectEnclosedInRect(SDL_Rect rectA, SDL_Rect rectB);
 void ensureRectEnclosed(SDL_Rect *ensure, SDL_Rect *against);
-void blitGameObject(SDL_Rect objectRect, GraphicsData *graphicsData, SDL_Surface *graphic, SDL_Texture *texture);
 int testRectIntersection(SDL_Rect rectA, SDL_Rect rectB);
+float generateRandomCoordOffset(float radius);
+double getDistance2BetweenPoints(float p1X, float p1Y, float p2X, float p2Y);
+float square(float f);
+float randPi(void);

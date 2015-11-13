@@ -1,5 +1,4 @@
-
 #include "game.h"
 
-SDL_Window *initialise(void);
+GraphicsData initialise(void);
 void uninitialise(void);

@@ -1,40 +1,5 @@
 #include "game_objects.h"
 
-float randPi(void){
-  /* This returns a random value between PI and 0. It's very useful for working
-     trigonometric randomness. */
-  return 3.14159 * (float) rand() / (float) RAND_MAX;
-}
-
-float square(float f){
-  /* float f = the float to square
-
-     Simply returns f*f to simulate squaring a number */
-  return f*f;
-}
-
-double getDistance2BetweenPoints(float p1X, float p1Y, float p2X, float p2Y){
-  /* float p1X = the x position of the first point
-     float p1Y = the y position of the first point
-     float p2X = the x position of the second point
-     float p2Y = the y position of the second point
-
-     Distance2 is the non-square rooted distance value between two points. If
-     all we want is to check whether a point is within a radius of another,
-     doing Distance2 < radius^2 is just as good as Distance < radius */
-  return (square(p1X - p2X) + square(p1Y - p2Y));
-}
-
-float generateRandomCoordOffset(float radius){
-  /* float radius = the range to generate random numbers within
-
-     This function just generates a random x or y offset for a coordinate within
-     a given range. It's the cheap hack I'm using to make randomly spaced nodes
-     around a spawner. */
-  float return_value = (radius * ( (float) rand() - (float) RAND_MAX * 0.5 )/(float) RAND_MAX );
-  return(return_value);
-}
-
 ResourceNode *checkResourceNodeCollision(ResourceNodeSpawner **resourceNodeSpawnerPointer, GameObjectData *gameObjectData, ProgrammableWorker *programmableWorker){
   /* ResourceNodeSpawner **resourceNodeSpawnerPoint
                                     = this is a pointer to a pointer (I hate it
@@ -144,7 +109,7 @@ Hive createHive(void){
   return(hive);
 }
 
-void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, float ticks){
+void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
   /* ProgrammableWorker *programmableWorker = the ProgrammableWorker we're going
                                               to be updating
      GameObjectData *gameObjectData         = the pointer to the GameObjectData
@@ -253,7 +218,7 @@ void initResourceNode(ResourceNode *resourceNode){
   resourceNode->deathTime = -1;
 }
 
-void updateResourceNodeSpawner(ResourceNodeSpawner *spawner, float ticks){
+void updateResourceNodeSpawner(ResourceNodeSpawner *spawner, int ticks){
   /* ResourceNodeSpawner *spawner = the spawner that we are updating
      float ticks = the number of ticks we are updating over.
 
@@ -317,15 +282,10 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
      in game.c.*/
   int i = 0, j = 0;
 
-
-
-
   /* First, we need to draw the Hive in at the correct position. */
   blitGameObject(gameObjectData->hive.rect,
                  graphicsData,
-                 graphicsData->hiveGraphic,
                  graphicsData->hiveTexture);
-
         
   /* Second, we loop through all the ResourceNodeSpawners */
   while(i < gameObjectData->resourceNodeSpawnerCount){
@@ -338,12 +298,8 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
     /* Then we need to loop through the attached ResourceNodes and draw them */
    while(j < gameObjectData->resourceNodeSpawners[i].maximumNodeCount){
       if(gameObjectData->resourceNodeSpawners[i].resourceNodes[j].alive){
-
-     
-
         blitGameObject(gameObjectData->resourceNodeSpawners[i].resourceNodes[j].rect,
                        graphicsData,
-                       graphicsData->nodeGraphic,
                        graphicsData->nodeTexture);
       }
       j++;
@@ -353,7 +309,8 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
   /* Thirdly, we loop through all the ProgrammableWorkers and update them */
   /* AI thinking has been moved to a seperate function to prevent some circular
      inheritance issues. */
-     
+  /* Also, remember the important rule - AI should tell workers to do things rather
+     than directly doing things itself! */
      
   i = 0;
   while(i < gameObjectData->programmableWorkerCount){
@@ -362,13 +319,8 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
     }
     blitGameObject(gameObjectData->programmableWorkers[i].rect,
                    graphicsData,
-                   graphicsData->workerGraphic,
                    graphicsData->workerTexture);
 
     i++;
   }
-
-
-
-
 }

@@ -65,30 +65,39 @@ void ensureRectEnclosed(SDL_Rect *ensure, SDL_Rect *limit){
   ensure->y += yOffset;
 }
 
-void blitGameObject(SDL_Rect objectRect, GraphicsData *graphicsData, SDL_Surface *graphic, SDL_Texture *texture){
-  SDL_Rect tempRect;
 
 
-  
-  tempRect = objectRect;
-  tempRect.x += graphicsData->navigationOffset.x;
-  tempRect.y += graphicsData->navigationOffset.y;
-  
+float randPi(void){
+  /* This returns a random value between PI and 0. It's very useful for working
+     trigonometric randomness. */
+  return 3.14159 * (float) rand() / (float) RAND_MAX;
+}
 
+float square(float f){
+  /* float f = the float to square
 
-    /*this function copies the texture into the renderer, but is not put on screen until*/
-    /*SDL_RenderPresent is called in the gameloop of game.c*/
-    /*SDL_RenderPresent function must be called after all graphical changes have been made, including those*/
-    /*made by UIrender, also found in the gameloop*/
-  SDL_RenderCopy(graphicsData->renderer, texture, &graphic->clip_rect, &tempRect);
+     Simply returns f*f to simulate squaring a number */
+  return f*f;
+}
 
+double getDistance2BetweenPoints(float p1X, float p1Y, float p2X, float p2Y){
+  /* float p1X = the x position of the first point
+     float p1Y = the y position of the first point
+     float p2X = the x position of the second point
+     float p2Y = the y position of the second point
 
+     Distance2 is the non-square rooted distance value between two points. If
+     all we want is to check whether a point is within a radius of another,
+     doing Distance2 < radius^2 is just as good as Distance < radius */
+  return (square(p1X - p2X) + square(p1Y - p2Y));
+}
 
+float generateRandomCoordOffset(float radius){
+  /* float radius = the range to generate random numbers within
 
-
- /* SDL_BlitSurface(surface,
-                  NULL,
-                  SDL_GetWindowSurface(graphicsData->window),
-                  &tempRect);*/
-
+     This function just generates a random x or y offset for a coordinate within
+     a given range. It's the cheap hack I'm using to make randomly spaced nodes
+     around a spawner. */
+  float return_value = (radius * ( (float) rand() - (float) RAND_MAX * 0.5 )/(float) RAND_MAX );
+  return(return_value);
 }

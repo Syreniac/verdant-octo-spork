@@ -1,18 +1,18 @@
 #include "controls.h"
 
-void keydown(GraphicsData *graphicsData, GameObjectData *gameObjectData, SDL_Event *event){
+void keydown(ControlsData *controlsData, GameObjectData *gameObjectData, SDL_Event *event){
     switch (event->key.keysym.scancode){
         case (SDL_SCANCODE_DOWN):
-			graphicsData->keys[ARROW_DOWN] = 1;
+			controlsData->keys[ARROW_DOWN] = 1;
             break;
         case (SDL_SCANCODE_UP):
-			graphicsData->keys[ARROW_UP] = 1;
+			controlsData->keys[ARROW_UP] = 1;
             break;
         case (SDL_SCANCODE_RIGHT):
-			graphicsData->keys[ARROW_RIGHT] = 1;
+			controlsData->keys[ARROW_RIGHT] = 1;
             break;
         case (SDL_SCANCODE_LEFT):
-			graphicsData->keys[ARROW_LEFT] = 1;
+			controlsData->keys[ARROW_LEFT] = 1;
             break;
 		case (SDL_SCANCODE_P):
             gameObjectData->pause_status = 1 - gameObjectData->pause_status; /* 1 for pause, 0 for go on */
@@ -33,49 +33,58 @@ void keydown(GraphicsData *graphicsData, GameObjectData *gameObjectData, SDL_Eve
     }
 }
 
-void keyup(GraphicsData *graphicsData, GameObjectData *gameObjectData, SDL_Event *event){
+void keyup(ControlsData *controlsData, GameObjectData *gameObjectData, SDL_Event *event){
     switch (event->key.keysym.scancode){
         case (SDL_SCANCODE_DOWN):
-			graphicsData->keys[ARROW_DOWN] = 0;
+			controlsData->keys[ARROW_DOWN] = 0;
             break;
         case (SDL_SCANCODE_UP):
-			graphicsData->keys[ARROW_UP] = 0;
+			controlsData->keys[ARROW_UP] = 0;
             break;
 		case (SDL_SCANCODE_RIGHT):
-			graphicsData->keys[ARROW_RIGHT] = 0;
+			controlsData->keys[ARROW_RIGHT] = 0;
             break;
         case (SDL_SCANCODE_LEFT):
-			graphicsData->keys[ARROW_LEFT] = 0;
+			controlsData->keys[ARROW_LEFT] = 0;
             break;
         default:
             return;
     }
 }
 
-void panScreen(GraphicsData *graphicsData, float delta_t)
+void panScreen(GraphicsData *graphicsData, ControlsData *controlsData, int delta_t)
 {
-  if(graphicsData->keys[ARROW_DOWN]){
+  if(controlsData->keys[ARROW_DOWN]){
 	if(!(graphicsData->navigationOffset.y <= -Y_SIZE_OF_WORLD + Y_SIZE_OF_SCREEN)){
 		graphicsData->navigationOffset.y -= floor(delta_t * PANSPEEDMULTI);
 	}
   }
   
-  if(graphicsData->keys[ARROW_UP]){
+  if(controlsData->keys[ARROW_UP]){
     if(!(graphicsData->navigationOffset.y >= Y_SIZE_OF_WORLD - Y_SIZE_OF_SCREEN)){
 		graphicsData->navigationOffset.y += floor(delta_t * PANSPEEDMULTI);
 	}
   }
 
-if(graphicsData->keys[ARROW_RIGHT]){
+if(controlsData->keys[ARROW_RIGHT]){
 	if(!(graphicsData->navigationOffset.x <= -X_SIZE_OF_WORLD + X_SIZE_OF_SCREEN)){
+		printf("graphicsData offset x %d\n",graphicsData->navigationOffset.x);
 		graphicsData->navigationOffset.x -= floor(delta_t * PANSPEEDMULTI);
 	}
   }
   
-  if(graphicsData->keys[ARROW_LEFT]){
+  if(controlsData->keys[ARROW_LEFT]){
     if(!(graphicsData->navigationOffset.x >= X_SIZE_OF_WORLD - X_SIZE_OF_SCREEN)){
          graphicsData->navigationOffset.x += floor(delta_t * PANSPEEDMULTI);
 	}
   }
 		
+}
+
+void zeroControlKeys(ControlsData *controlsData){
+	int i = 0;
+	while(i < MAX_KEYS){
+		controlsData->keys[i] = 0;
+		i++;
+	}
 }

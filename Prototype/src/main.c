@@ -8,12 +8,12 @@ int main(int argc, char *argv[]){
      from Windows (or something?), so the functionality is split between other
      functions from other modules */
 
-  SDL_Window *window;
+  GraphicsData graphicsData;
 
   printf("main\n");
-  window  = initialise();
+  graphicsData  = initialise();
   printf("initialised\n");
-  gameStart(window);
+  gameStart(graphicsData);
   uninitialise();
   exit(0);
 }

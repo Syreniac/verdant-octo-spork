@@ -1,4 +1,4 @@
-#include "generic.h"
+#include "graphics.h"
 
 enum ProgrammableWorkerStatus {LEAVING = 1,
                                RETURNING = 2,
@@ -36,7 +36,7 @@ struct ResourceNodeSpawner{
   float xPosition;
   float yPosition;
   /* make a note of the time when the spawner was last updated. */
-  float ticksSinceSpawn;
+  int ticksSinceSpawn;
   int spawnDelay;
   float spawnRadius;
   /* rather than specify a hard array, we'll calloc something up to go here
@@ -78,13 +78,8 @@ struct GameObjectData{
   int pause_status;
 };
 
-float generateRandomCoordOffset(float radius);
-float randPi(void);
-float square(float f);
-double getDistance2BetweenPoints(float p1X, float p1Y, float p2X, float p2Y);
-
 ProgrammableWorker createProgrammableWorker(void);
-void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, float ticks);
+void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks);
 
 Hive createHive(void);
 
@@ -96,7 +91,7 @@ Hive createHive(void);
 
 int getFirstDeadResourceNode(ResourceNodeSpawner *resourceNodeSpawner);
 ResourceNodeSpawner createResourceNodeSpawner(int maximumNodeCount, float xPosition, float yPosition, float radius);
-void updateResourceNodeSpawner(ResourceNodeSpawner *spawner, float ticks);
+void updateResourceNodeSpawner(ResourceNodeSpawner *spawner, int ticks);
 
 void initResourceNode(ResourceNode *resourceNode);
 ResourceNode createResourceNode(ResourceNodeSpawner *parentSpawner, int resourceUnits);

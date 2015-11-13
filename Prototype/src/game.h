@@ -5,14 +5,15 @@ struct GameData{
   int number;
   SDL_Window *window;
   Uint32 gameStartTime;
-  float gameRunTime;
+  int gameRunTime;
 
   AIData aiData;
   GraphicsData graphicsData;
   GameObjectData gameObjectData;
   UIData uiData;
+  ControlsData controlsData;
 };
 
-int gameStart(SDL_Window *window);
+int gameStart(GraphicsData graphicsData);
 int gameLoop(GameData *gameData);
-float calculateDt(float previousRunTime);
+int calculateDt(int previousRunTime);
