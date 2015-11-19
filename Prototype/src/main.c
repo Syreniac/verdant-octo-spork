@@ -13,7 +13,7 @@ int main(int argc, char *argv[]){
   printf("main\n");
   graphicsData  = initialise();
   printf("initialised\n");
-  gameStart(graphicsData);
+  game_welcome_page(graphicsData);
   uninitialise();
   exit(0);
 }

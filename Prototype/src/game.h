@@ -14,6 +14,7 @@ struct GameData{
   ControlsData controlsData;
 };
 
+int game_welcome_page(GraphicsData graphicsData);
 int gameStart(GraphicsData graphicsData);
 int gameLoop(GameData *gameData);
 int calculateDt(int previousRunTime);

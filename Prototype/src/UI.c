@@ -21,7 +21,7 @@ UI_Element createUI_Clickable(SDL_Rect rect, char *message,int r, int g, int b){
   /*element.clickable.colour = colour;*/
   element.clickable.message = message;
   element.clickable.parent = NULL;
-  
+
   element.clickable.r = r;
   element.clickable.g = g;
   element.clickable.b = b;
@@ -38,7 +38,7 @@ UI_Element createUI_Expandable(SDL_Rect s_rect, SDL_Rect b_rect,
   element.expandable.msToSmall = msToSmall;
   element.expandable.msTimer = 0;
   /*element.expandable.colour = colour;*/
-  
+
   element.expandable.r = r;
   element.expandable.g = g;
   element.expandable.b = b;
@@ -52,7 +52,7 @@ UI_Element createUI_Draggable(SDL_Rect rect, UI_Element *parent, int r, int g, i
   element.draggable.status = ROOTED;
   element.draggable.parent = parent;
   /*element.draggable.colour = colour;*/
-  
+
   element.draggable.r = r;
   element.draggable.g = g;
   element.draggable.b = b;
@@ -85,12 +85,12 @@ void renderUIElement(GraphicsData *graphicsData, UI_Element *element){
       SDL_SetRenderDrawColor(graphicsData->renderer,
                              element->panel.r,
                              element->panel.g,
-                             element->panel.b, 
+                             element->panel.b,
                              SDL_ALPHA_OPAQUE);
-      
+
       SDL_RenderFillRect(graphicsData->renderer,
                    getUIElementRect(element));
-/*                       
+/*
       SDL_FillRect(SDL_GetWindowSurface(graphicsData->window),
                    getUIElementRect(element),
                    element->panel.colour);*/
@@ -99,12 +99,13 @@ void renderUIElement(GraphicsData *graphicsData, UI_Element *element){
       break;
   }
 }
-void clickOnUIElement(UI_Element *element, SDL_Event *event){
+int clickOnUIElement(UI_Element *element, SDL_Event *event){
   switch(element->type){
     case CLICKABLE:
     {
       if(isPointInRect(event->button.x, event->button.y,*getUIElementRect(element))){
         printf("clicked on clickable\n");
+        return 1;
       }
 	  break;
     }
@@ -113,12 +114,14 @@ void clickOnUIElement(UI_Element *element, SDL_Event *event){
       if(isPointInRect(event->button.x, event->button.y,*getUIElementRect(element))){
         element->draggable.status = GRABBED;
         printf("clicked on draggable\n");
+        return 1;
       }
 	  break;
     }
 	default:
-	  return;
+	  return 0;
   }
+  return 0;
 }
 void clickupOnUIElement(UI_Element *element, SDL_Event *event){
   switch(element->type){
@@ -145,12 +148,14 @@ void mousemoveOnUIElement(UI_Element *element, SDL_Event *event){
   }
 }
 
-void clickOnUI(UIData *uiData, SDL_Event *event){
+int clickOnUI(UIData *uiData, SDL_Event *event){
   int i = 0;
+  int j = 0;
   while(i < uiData->numberOfUIElements){
-    clickOnUIElement(&uiData->UIElements[i],event);
+    j+=clickOnUIElement(&uiData->UIElements[i],event);
     i++;
   }
+  return j;
 }
 void clickupOnUI(UIData *uiData, SDL_Event *event){
   int i = 0;

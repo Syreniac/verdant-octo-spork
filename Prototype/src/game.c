@@ -8,11 +8,13 @@ int calculateDt(int previousRunTime){
   return SDL_GetTicks() - previousRunTime;
 }
 
+
+
 int gameStart(GraphicsData graphicsData){
   /* SDL_Window *window = the pointer to the program's window
      This function will start the game looping.
      The return should be 0 unless there's an error we need to catch.*/
-	 
+
   /* Only things that can only be done when the game is started should go here.
      Things like graphics & audio initialisation should go in init.c instead.
 	 Ideally, we also want this to be mostly function calls rather than actually doing
@@ -25,13 +27,13 @@ int gameStart(GraphicsData graphicsData){
   int gameLoopReturn;
   SDL_Rect rect;
   SDL_Rect rect2;
-  
+
   gameLoopReturn = 1;
-  
+
   gameData.graphicsData = graphicsData;
 
   gameData.gameObjectData.pause_status = 0;
-  
+
   zeroControlKeys(&gameData.controlsData);
 
   /* initialise navigationOffset values */
@@ -39,7 +41,7 @@ int gameStart(GraphicsData graphicsData){
   gameData.graphicsData.navigationOffset.y = -(Y_SIZE_OF_WORLD/2)+(Y_SIZE_OF_SCREEN/2); /*setting initial y offset ot center of world*/
   gameData.graphicsData.navigationOffset.w = X_SIZE_OF_WORLD;
   gameData.graphicsData.navigationOffset.h = Y_SIZE_OF_WORLD;
-  
+
 
 
   /* We also need some time information to make things run smoothly */
@@ -72,8 +74,8 @@ int gameStart(GraphicsData graphicsData){
 
   gameData.uiData.UIElements[2] = createUI_Draggable(rect,&gameData.uiData.UIElements[1],0,136,64);
   gameData.uiData.numberOfUIElements = 3;
-  
-  
+
+
   /* Create some ResourceNodeSpawners to fill our world with ResourceNodes */
   generateResourceNodeSpawners(&gameData.gameObjectData);
 
@@ -83,14 +85,14 @@ int gameStart(GraphicsData graphicsData){
   /* This doesn't actually do much, but it lets us give the workers somewhere
      to return home to */
   generateHive(&gameData.gameObjectData);
-  
+
   gameData.graphicsData.nodeTexture = loadTextureFromFile("images/blueFlower.bmp",
 														  &gameData.graphicsData);
   gameData.graphicsData.workerTexture = loadTextureFromFile("images/bee.bmp",
 														  &gameData.graphicsData);
   gameData.graphicsData.hiveTexture = loadTextureFromFile("images/beehive.bmp",
 														  &gameData.graphicsData);
-    
+
   gameData.aiData.blockFunctionRoots = calloc(1, sizeof(BlockFunctionRoot));
   file = fopen("GenericWorkerAI.txt","r");
   makeBlockFunctionRootFromFile(&(gameData.aiData.blockFunctionRoots[0]), file);
@@ -113,18 +115,18 @@ int gameLoop(GameData *gameData){
      function ran */
   int delta_t;
   SDL_Event event;
-  
+
   /* Storing the number of milliseconds since the program was run helps keep it
      moving smoothly by calculating delta_t */
   delta_t = calculateDt(gameData->gameRunTime);
   gameData->gameRunTime = SDL_GetTicks();
   printf("%ddt done\n",delta_t);
-  
-  
+
+
   /*clear helps get rid of things on the screen that shouldn't be there anymore
   and is also essential due to the way that render buffers can change unpredictably
   after the function SDL_RenderPresent*/
-  
+
 
   panScreen(&gameData->graphicsData, &gameData->controlsData, delta_t);
   if(SDL_RenderClear(gameData->graphicsData.renderer) == -1){
@@ -135,14 +137,14 @@ int gameLoop(GameData *gameData){
   updateGameObjects(&gameData->gameObjectData, &gameData->graphicsData, delta_t);
   runAI(&gameData->aiData,&gameData->gameObjectData);
   renderUI(&gameData->uiData, &gameData->graphicsData);
-  
+
   /*This function is like the blit function, putting pixels to the screen.
   but it needs to be called after all of the graphicall changes have been made,
   including those in the renderUI() function. After the call to render present
   the pixel buffer becomes unpredictable and should be followed by SDL_RenderClear
   (as above in this loop)*/
   SDL_RenderPresent(gameData->graphicsData.renderer);
-				
+
   /* At the end of the loop we need to update the main application window to
      reflect the changes we've made to the graphics */
   /*SDL_UpdateWindowSurface(gameData->graphicsData.window);*/

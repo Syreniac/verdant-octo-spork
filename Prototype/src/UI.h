@@ -94,11 +94,11 @@ UI_Element createUI_Panel(SDL_Rect rect, int r, int g, int b);
 SDL_Rect *getUIElementRect(UI_Element *element);
 
 void renderUIElement(GraphicsData *graphicsData,UI_Element *element);
-void clickOnUIElement(UI_Element *element, SDL_Event *event);
+int clickOnUIElement(UI_Element *element, SDL_Event *event);
 void clickupOnUIElement(UI_Element *element, SDL_Event *event);
 void mousemoveOnUIElement(UI_Element *element, SDL_Event *event);
 
-void clickOnUI(UIData *uiData, SDL_Event *event);
+int clickOnUI(UIData *uiData, SDL_Event *event);
 void clickupOnUI(UIData *uiData, SDL_Event *event);
 void moveMouseOnUi(UIData *uiData, SDL_Event *event);
 void renderUI(UIData *uiData, GraphicsData *graphicsData);
