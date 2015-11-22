@@ -1,13 +1,13 @@
 #include "graphics.h"
 
-void blitGameObject(SDL_Rect objectRect, GraphicsData *graphicsData, SDL_Texture *texture){
+void blitGameObject(SDL_Rect objectRect, GraphicsData *graphicsData, SDL_Texture *texture, double angle, SDL_Point *center, SDL_RendererFlip flip){
   SDL_Rect tempRect;
 
   tempRect = objectRect;
   tempRect.x += graphicsData->navigationOffset.x;
   tempRect.y += graphicsData->navigationOffset.y;
   
-  SDL_RenderCopy(graphicsData->renderer, texture, NULL, &tempRect);
+  SDL_RenderCopyEx(graphicsData->renderer, texture, NULL, &tempRect, angle, NULL, SDL_FLIP_NONE);
 }
 
 SDL_Texture *loadTextureFromFile(char *file_name, GraphicsData *graphicsData){

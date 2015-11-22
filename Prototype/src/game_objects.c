@@ -285,7 +285,10 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
   /* First, we need to draw the Hive in at the correct position. */
   blitGameObject(gameObjectData->hive.rect,
                  graphicsData,
-                 graphicsData->hiveTexture);
+                 graphicsData->hiveTexture,
+                 0,
+                 NULL,
+                 SDL_FLIP_NONE);
         
   /* Second, we loop through all the ResourceNodeSpawners */
   while(i < gameObjectData->resourceNodeSpawnerCount){
@@ -300,7 +303,10 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
       if(gameObjectData->resourceNodeSpawners[i].resourceNodes[j].alive){
         blitGameObject(gameObjectData->resourceNodeSpawners[i].resourceNodes[j].rect,
                        graphicsData,
-                       graphicsData->nodeTexture);
+                       graphicsData->nodeTexture,
+                       0,
+                       NULL,
+                       SDL_FLIP_NONE);
       }
       j++;
     }
@@ -319,7 +325,10 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
     }
     blitGameObject(gameObjectData->programmableWorkers[i].rect,
                    graphicsData,
-                   graphicsData->workerTexture);
+                   graphicsData->workerTexture,
+                   gameObjectData->programmableWorkers[i].heading * (DEGREESINCIRCLE / 2*PI),
+                   NULL,
+                   SDL_FLIP_NONE);
 
     i++;
   }

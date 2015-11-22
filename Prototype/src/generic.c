@@ -70,7 +70,7 @@ void ensureRectEnclosed(SDL_Rect *ensure, SDL_Rect *limit){
 float randPi(void){
   /* This returns a random value between PI and 0. It's very useful for working
      trigonometric randomness. */
-  return 3.14159 * (float) rand() / (float) RAND_MAX;
+  return (float)(PI * (float) rand() / (float) RAND_MAX);
 }
 
 float square(float f){

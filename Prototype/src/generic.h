@@ -29,6 +29,9 @@
 #define NUM_OF_KEYS 30
 #define PANSPEEDMULTI 0.2
 
+#define PI 3.14159
+#define DEGREESINCIRCLE 360
+
 int isPointInRect(int point_x, int point_y, SDL_Rect rect);
 int isRectEnclosedInRect(SDL_Rect rectA, SDL_Rect rectB);
 void ensureRectEnclosed(SDL_Rect *ensure, SDL_Rect *against);
