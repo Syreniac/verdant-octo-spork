@@ -1,2 +1,3 @@
-# Ignore .o files
 *.o
+*.idea
+bin*
