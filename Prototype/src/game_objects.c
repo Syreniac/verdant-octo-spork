@@ -193,7 +193,7 @@ ResourceNodeSpawner createResourceNodeSpawner(int maximumNodeCount, float xPosit
   resourceNodeSpawner.collisionRect.h = (int)floor(radius);
 
   /* calloc up an array for us to use here */
-  resourceNodeSpawner.resourceNodes = calloc(maximumNodeCount, sizeof(ResourceNode));
+  resourceNodeSpawner.resourceNodes = calloc((size_t)maximumNodeCount, sizeof(ResourceNode));
   while(i<maximumNodeCount){
     /* run through it and init the resourceNodes */
      initResourceNode(&resourceNodeSpawner.resourceNodes[i]);
