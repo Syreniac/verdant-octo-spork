@@ -95,4 +95,4 @@ void updateResourceNodeSpawner(ResourceNodeSpawner *spawner, int ticks);
 
 void initResourceNode(ResourceNode *resourceNode);
 ResourceNode createResourceNode(ResourceNodeSpawner *parentSpawner, int resourceUnits);
-void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsData, float ticks);
+void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsData, int ticks);

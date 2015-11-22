@@ -54,27 +54,27 @@ int blockFunction_IfWorkerOutsideOfBounds(BlockFunctionArgs *arguments, Programm
 }
 
 int blockFunction_IfWorkerWithinDistanceOfHive(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
-	float d2 = getDistance2BetweenPoints(programmableWorker->rect.x + programmableWorker->rect.w/2,
-                               programmableWorker->rect.y + programmableWorker->rect.h/2,
-                               gameObjectData->hive.rect.x + gameObjectData->hive.rect.w/2,
-                               gameObjectData->hive.rect.y + gameObjectData->hive.rect.h/2);
+	double d2 = getDistance2BetweenPoints((float)(programmableWorker->rect.x + programmableWorker->rect.w/2),
+                                       (float)(programmableWorker->rect.y + programmableWorker->rect.h/2),
+                                       (float)(gameObjectData->hive.rect.x + gameObjectData->hive.rect.w/2),
+                                       (float)(gameObjectData->hive.rect.y + gameObjectData->hive.rect.h/2));
 	printf("AI bounce %f v %f\n",arguments->floats[0],d2);
-  if(d2 <= arguments->floats[0]){
+  if(d2 <= (double)(arguments->floats[0])){
     return(1);
   }
   return(2);
 }
 
 int blockFunction_SetWorkerHeadingRandomly(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
-  programmableWorker->heading = randPi() * 2;
+  programmableWorker->heading = (double)(randPi() * 2);
   programmableWorker->status = LEAVING;
   return(1);
 }
 
 
 int blockFunction_WorkerReturnToHive(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
-  programmableWorker->heading = atan2(gameObjectData->hive.rect.x + gameObjectData->hive.rect.w/2 - programmableWorker->rect.w/2 - programmableWorker->rect.x,
-									  gameObjectData->hive.rect.y + gameObjectData->hive.rect.h/2 - programmableWorker->rect.h/2 - programmableWorker->rect.y);
+  programmableWorker->heading = atan2((double)(gameObjectData->hive.rect.x + gameObjectData->hive.rect.w/2 - programmableWorker->rect.w/2 - programmableWorker->rect.x),
+                                      (double)(gameObjectData->hive.rect.y + gameObjectData->hive.rect.h/2 - programmableWorker->rect.h/2 - programmableWorker->rect.y));
   programmableWorker->status = RETURNING;
   return(1);
 }
@@ -360,7 +360,7 @@ void makeBlockFunctionRootFromFile(BlockFunctionRoot *blockFunctionRoot, FILE *f
       }
       else if(strncmp(&(read_line[stringWhiteSpaceShift]),"integers =", 10) == 0){
         presumedNumOfInts = countCharsInString(&(read_line[stringWhiteSpaceShift]),',') + 1;
-        integers = calloc(presumedNumOfInts,sizeof(int));
+        integers = calloc((size_t)presumedNumOfInts,sizeof(int));
         intReadOffset = 0;
         numOfInts = 0;
         while(sscanf(&(read_line[stringWhiteSpaceShift+intReadOffset+11]),"%d",&readInt) > 0 && numOfInts < presumedNumOfInts){
@@ -376,7 +376,7 @@ void makeBlockFunctionRootFromFile(BlockFunctionRoot *blockFunctionRoot, FILE *f
       }
       else if(strncmp(&(read_line[stringWhiteSpaceShift]),"floats =", 8) == 0){
         presumedNumOfFloats = countCharsInString(&(read_line[stringWhiteSpaceShift]),',') + 1;
-        floats = calloc(presumedNumOfFloats,sizeof(float));
+        floats = calloc((size_t)presumedNumOfFloats,sizeof(float));
         floatReadOffset = 0;
         numOfFloats = 0;
         while(sscanf(&(read_line[stringWhiteSpaceShift+floatReadOffset+9]),"%f",&readFloat) > 0 && numOfFloats < presumedNumOfFloats){

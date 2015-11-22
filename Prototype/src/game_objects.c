@@ -132,8 +132,8 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
      we're updating */
   programmableWorker->rawX += newX;
   programmableWorker->rawY += newY;
-  programmableWorker->rect.x = floor(programmableWorker->rawX);
-  programmableWorker->rect.y = floor(programmableWorker->rawY);
+  programmableWorker->rect.x = (int)floor(programmableWorker->rawX);
+  programmableWorker->rect.y = (int)floor(programmableWorker->rawY);
 
   if(getDistance2BetweenPoints(programmableWorker->rect.x + programmableWorker->rect.w/2,
 							   programmableWorker->rect.y + programmableWorker->rect.h/2,
@@ -183,14 +183,14 @@ ResourceNodeSpawner createResourceNodeSpawner(int maximumNodeCount, float xPosit
   resourceNodeSpawner.yPosition = yPosition;
 
   /* Set the ticksSinceSpawn to 0 because we haven't spawned anything yet */
-  resourceNodeSpawner.ticksSinceSpawn = 0.0;
+  resourceNodeSpawner.ticksSinceSpawn = 0;
   resourceNodeSpawner.spawnDelay = DEFAULT_SPAWNDELAY;
   resourceNodeSpawner.spawnRadius = radius;
   
-  resourceNodeSpawner.collisionRect.x = xPosition - radius/2;
-  resourceNodeSpawner.collisionRect.y = yPosition - radius/2;
-  resourceNodeSpawner.collisionRect.w = radius;
-  resourceNodeSpawner.collisionRect.h = radius;
+  resourceNodeSpawner.collisionRect.x = (int)floor(xPosition - radius/2);
+  resourceNodeSpawner.collisionRect.y = (int)floor(yPosition - radius/2);
+  resourceNodeSpawner.collisionRect.w = (int)floor(radius);
+  resourceNodeSpawner.collisionRect.h = (int)floor(radius);
 
   /* calloc up an array for us to use here */
   resourceNodeSpawner.resourceNodes = calloc(maximumNodeCount, sizeof(ResourceNode));
@@ -260,14 +260,14 @@ ResourceNode createResourceNode(ResourceNodeSpawner *parentSpawner, int resource
   resourceNode.resourceUnits = resourceUnits;
   /* We use a randomly generated offset value for now to distribute the
      ResourceNode around the ResourceNodeSpawner. This can be improved. */
-  resourceNode.rect.x = parentSpawner->xPosition + generateRandomCoordOffset(parentSpawner->spawnRadius) - X_SIZE_OF_NODE/2;
-  resourceNode.rect.y = parentSpawner->yPosition + generateRandomCoordOffset(parentSpawner->spawnRadius) - Y_SIZE_OF_NODE/2;
+  resourceNode.rect.x = (int)floor(parentSpawner->xPosition + generateRandomCoordOffset(parentSpawner->spawnRadius) - X_SIZE_OF_NODE/2);
+  resourceNode.rect.y = (int)floor(parentSpawner->yPosition + generateRandomCoordOffset(parentSpawner->spawnRadius) - Y_SIZE_OF_NODE/2);
   resourceNode.rect.w = 20;
   resourceNode.rect.h = 20;
   return resourceNode;
 }
 
-void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsData, float ticks){
+void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsData, int ticks){
   /* GameObjectData *gameObjectData = the pointer to the GameObjectData struct
                                       that holds all the information about our
                                       GameObjects.
