@@ -4,13 +4,30 @@ BlockFunction_IfWorkerStatusEqual
 	secondary = 4
 BlockFunction_IfWorkerWithinDistanceOfHive
 	floats = 1.0
-	primary = 3
+	primary = 12
 	secondary = 4
 BlockFunction_SetWorkerHeadingRandomly
 BlockFunction_IfWorkerCargoGreaterThan
 	integers = 0
-	primary = 5
+	primary = 11
 	secondary = 6
 BlockFunction_WorkerReturnToHive
 BlockFunction_IfWorkerOutsideOfBounds
+	primary = 7
+BlockFunction_IfNumOfFlowersInRadius
+	primary = 8
+	secondary = 5
+	integers = 3
+	floats = 25000.0
+BlockFunction_RememberCurrentLocation
 	primary = 5
+BlockFunction_ForgetRememberedLocation
+BlockFunction_GoToRememberedLocation
+	primary = 9
+	secondary = 3
+BlockFunction_IfWorkerStatusEqual
+	integers = 1
+	primary = 7
+BlockFunction_RandomShiftRememberedLocation
+	integers = 50
+	primary = 10
