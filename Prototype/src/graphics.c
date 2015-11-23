@@ -6,16 +6,14 @@ void blitGameObject(SDL_Rect objectRect, GraphicsData *graphicsData, SDL_Texture
   tempRect = objectRect;
   tempRect.x += graphicsData->navigationOffset.x;
   tempRect.y += graphicsData->navigationOffset.y;
-  
-  printf("%lf\n",angle);
-  
+
   SDL_RenderCopyEx(graphicsData->renderer, texture, NULL, &tempRect, angle, NULL, SDL_FLIP_NONE);
 }
 
 SDL_Texture *loadTextureFromFile(char *file_name, GraphicsData *graphicsData){
 	SDL_Surface *image;
 	SDL_Texture *texture;
-	
+
 	printf("loading texture file %s\n",file_name);
 	image = SDL_LoadBMP(file_name);
 	if(image == NULL){
@@ -39,17 +37,15 @@ void paintBackground(GraphicsData *graphicsData, int r, int g, int b){
        I'm putting it in anyway! */
 	Uint8 o_r,o_g,o_b,o_a;
 	SDL_Rect rect;
-	
+
 	rect.x = 0;
 	rect.y = 0;
 	/* This reads the width and height of the window into the space shown by
 	   the pointers */
 	SDL_GetWindowSize(graphicsData->window,&rect.w,&rect.h);
-	
+
 	SDL_GetRenderDrawColor(graphicsData->renderer,&o_r,&o_g,&o_b,&o_a);
 	SDL_SetRenderDrawColor(graphicsData->renderer,r,g,b,SDL_ALPHA_OPAQUE);
 	SDL_RenderFillRect(graphicsData->renderer, &rect);
     SDL_SetRenderDrawColor(graphicsData->renderer,o_r,o_g,o_b,o_a);
 }
-	
-	

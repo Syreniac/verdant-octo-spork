@@ -123,10 +123,6 @@ int gameLoop(GameData *gameData){
      moving smoothly by calculating delta_t */
   delta_t = calculateDt(gameData->gameRunTime);
   gameData->gameRunTime = SDL_GetTicks();
-<<<<<<< HEAD
-=======
-  printf("%ddt done\n",delta_t);
->>>>>>> e18d7cc362cf4868db7852cfb8419b23dc4b6b80
 
 
   /*clear helps get rid of things on the screen that shouldn't be there anymore

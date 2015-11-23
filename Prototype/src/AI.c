@@ -62,18 +62,13 @@ int blockFunction_IfWorkerOutsideOfBounds(BlockFunctionArgs *arguments, Programm
 
   if(programmableWorker->rect.x > (X_SIZE_OF_WORLD - programmableWorker->rect.w) || programmableWorker->rect.x <= 0 ||
      programmableWorker->rect.y > (Y_SIZE_OF_WORLD - programmableWorker->rect.h) || programmableWorker->rect.y <= 0){
-       printf("worker outside of bounds\n");
        return(1);
     }
     return(2);
 }
 
 int blockFunction_IfWorkerWithinDistanceOfHive(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
-	double d2 = getDistance2BetweenPoints((float)(programmableWorker->rect.x + programmableWorker->rect.w/2),
-                                       (float)(programmableWorker->rect.y + programmableWorker->rect.h/2),
-                                       (float)(gameObjectData->hive.rect.x + gameObjectData->hive.rect.w/2),
-                                       (float)(gameObjectData->hive.rect.y + gameObjectData->hive.rect.h/2));
-	printf("AI bounce %f v %f\n",arguments->floats[0],d2);
+	double d2 = getDistance2BetweenRects(programmableWorker->rect,gameObjectData->hive.rect);
   if(d2 <= (double)(arguments->floats[0])){
     return(1);
   }
@@ -92,6 +87,64 @@ int blockFunction_WorkerReturnToHive(BlockFunctionArgs *arguments, ProgrammableW
                                       (double)(gameObjectData->hive.rect.y + gameObjectData->hive.rect.h/2 - programmableWorker->rect.h/2 - programmableWorker->rect.y));
   programmableWorker->status = RETURNING;
   return(1);
+}
+
+int blockFunction_IfNumOfFlowersInRadius(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
+  int count = 0;
+  int i = 0;
+  int j = 0;
+  while(i < gameObjectData->resourceNodeSpawnerCount){
+    j = 0;
+    /* Then we need to loop through the attached ResourceNodes and draw them */
+    while(j < gameObjectData->resourceNodeSpawners[i].maximumNodeCount){
+      if(gameObjectData->resourceNodeSpawners[i].resourceNodes[j].alive &&
+         (arguments->floats[0] >= getDistance2BetweenRects(programmableWorker->rect,gameObjectData->resourceNodeSpawners[i].resourceNodes[j].rect))){
+        count++;
+      }
+      j++;
+    }
+    i++;
+  }
+  if(count >= arguments->integers[0]){
+    return 1;
+  }
+  return 2;
+}
+
+int blockFunction_RememberCurrentLocation(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
+  programmableWorker->brain.remembered_point.x = programmableWorker->rect.x;
+  programmableWorker->brain.remembered_point.y = programmableWorker->rect.y;
+  programmableWorker->brain.is_point_remembered = 1;
+  printf("remembering location %d,%d\n",programmableWorker->rect.y,programmableWorker->rect.x);
+  return 1;
+}
+
+int blockFunction_GoToRememberedLocation(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
+    if(!programmableWorker->brain.is_point_remembered){
+      return 2;
+    }
+    programmableWorker->heading = atan2((double)(programmableWorker->brain.remembered_point.x - programmableWorker->rect.x),
+                                        (double)(programmableWorker->brain.remembered_point.y - programmableWorker->rect.y));
+    programmableWorker->status = LEAVING;
+    return 1;
+}
+
+int blockFunction_IfWorkerWithinDistanceOfRememberedLocation(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
+  double d2;
+  if(!programmableWorker->brain.is_point_remembered){
+    return 2;
+  }
+  d2 = getDistance2BetweenPoints(programmableWorker->rect.x,programmableWorker->rect.y,
+                                 programmableWorker->brain.remembered_point.x,programmableWorker->brain.remembered_point.y);
+  if(d2 <= arguments->floats[0]){
+    return 1;
+  }
+  return 2;
+}
+
+int blockFunction_ForgetRememberedLocation(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
+  programmableWorker->brain.is_point_remembered = 1;
+  return 1;
 }
 
 void runBlockFunctionRootOverWorker(BlockFunctionRoot *blockFunctionRoot, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
@@ -229,6 +282,21 @@ blockFunction_WrappedFunction getBlockFunctionByName(char *blockFunctionName){
   }
   if(strcmp(blockFunctionName,"BlockFunction_WorkerReturnToHive") == 0){
     return &blockFunction_WorkerReturnToHive;
+  }
+  if(strcmp(blockFunctionName,"BlockFunction_IfNumOfFlowersInRadius") == 0){
+    return &blockFunction_IfNumOfFlowersInRadius;
+  }
+  if(strcmp(blockFunctionName,"BlockFunction_RememberCurrentLocation") == 0){
+    return &blockFunction_RememberCurrentLocation;
+  }
+  if(strcmp(blockFunctionName,"BlockFunction_ForgetRememberedLocation") == 0){
+    return &blockFunction_ForgetRememberedLocation;
+  }
+  if(strcmp(blockFunctionName,"BlockFunction_GoToRememberedLocation") == 0){
+    return &blockFunction_GoToRememberedLocation;
+  }
+  if(strcmp(blockFunctionName,"BlockFunction_IfWorkerWithinDistanceOfRememberedLocation") == 0){
+    return &blockFunction_IfWorkerWithinDistanceOfRememberedLocation;
   }
   printf("ERROR: Unrecognised function name: \"%s\".\n Substituting a print function.\n",blockFunctionName);
   return &blockFunction_Print;
@@ -380,6 +448,7 @@ void makeBlockFunctionRootFromFile(BlockFunctionRoot *blockFunctionRoot, FILE *f
         numOfInts = 0;
         while(sscanf(&(read_line[stringWhiteSpaceShift+intReadOffset+11]),"%d",&readInt) > 0 && numOfInts < presumedNumOfInts){
           /* Add some offset until we find the next comma */
+          printf("reading int %d\n",readInt);
           integers[numOfInts] = readInt;
           numOfInts++;
           while(presumedNumOfInts > numOfInts && read_line[stringWhiteSpaceShift+intReadOffset+11] != ','){

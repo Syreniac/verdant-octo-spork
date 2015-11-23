@@ -106,6 +106,8 @@ ProgrammableWorker *createProgrammableWorker(GameObjectData *gameObjectData){
   /* This is an enum detailed in game_objects.h */
   programmableWorker->status = LEAVING;
   programmableWorker->next = NULL;
+  programmableWorker->brain.is_point_remembered = 0;
+  programmableWorker->brain.followTarget = NULL;
   return(programmableWorker);
 }
 
@@ -117,6 +119,8 @@ Hive createHive(void){
   hive.rect.h = 80;
   hive.rect.x = X_SIZE_OF_WORLD/2 - hive.rect.w/2;
   hive.rect.y = Y_SIZE_OF_WORLD/2 - hive.rect.h/2;
+  printf("created hive at %d,%d",hive.rect.x,hive.rect.y);
+  hive.flowers_collected = 0;
   return(hive);
 }
 
@@ -150,8 +154,11 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
 							   programmableWorker->rect.y + programmableWorker->rect.h/2,
 							   gameObjectData->hive.rect.x + gameObjectData->hive.rect.w/2,
 							   gameObjectData->hive.rect.y + gameObjectData->hive.rect.h/2) < 10.0 && programmableWorker->status == RETURNING){
-								   printf("dropped off cargo\n");
-    programmableWorker->cargo = 0;
+    if(programmableWorker->cargo != 0){
+      programmableWorker->cargo = 0;
+      gameObjectData->hive.flowers_collected++;
+      printf("We've now collected %d flowers!\n",gameObjectData->hive.flowers_collected);
+    }
   }
   if(programmableWorker->status == LEAVING){
     /* status being 1 means that the bee heading away from the center */
@@ -197,19 +204,10 @@ ResourceNodeSpawner createResourceNodeSpawner(int maximumNodeCount, float xPosit
   resourceNodeSpawner.ticksSinceSpawn = 0;
   resourceNodeSpawner.spawnDelay = DEFAULT_SPAWNDELAY;
   resourceNodeSpawner.spawnRadius = radius;
-<<<<<<< HEAD
-
-  resourceNodeSpawner.collisionRect.x = xPosition - radius/2;
-  resourceNodeSpawner.collisionRect.y = yPosition - radius/2;
-  resourceNodeSpawner.collisionRect.w = radius;
-  resourceNodeSpawner.collisionRect.h = radius;
-=======
-
   resourceNodeSpawner.collisionRect.x = (int)floor(xPosition - radius/2);
   resourceNodeSpawner.collisionRect.y = (int)floor(yPosition - radius/2);
   resourceNodeSpawner.collisionRect.w = (int)floor(radius);
   resourceNodeSpawner.collisionRect.h = (int)floor(radius);
->>>>>>> e18d7cc362cf4868db7852cfb8419b23dc4b6b80
 
   /* calloc up an array for us to use here */
   resourceNodeSpawner.resourceNodes = calloc((size_t)maximumNodeCount, sizeof(ResourceNode));
@@ -305,16 +303,11 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
   /* First, we need to draw the Hive in at the correct position. */
   blitGameObject(gameObjectData->hive.rect,
                  graphicsData,
-<<<<<<< HEAD
-                 graphicsData->hiveTexture);
-
-=======
                  graphicsData->hiveTexture,
                  0,
                  NULL,
                  SDL_FLIP_NONE);
 
->>>>>>> e18d7cc362cf4868db7852cfb8419b23dc4b6b80
   /* Second, we loop through all the ResourceNodeSpawners */
   while(i < gameObjectData->resourceNodeSpawnerCount){
     j = 0;
@@ -347,10 +340,10 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
     if(!gameObjectData->pause_status){
       updateProgrammableWorker(programmableWorker,gameObjectData,ticks);
     }
-    blitGameObject(gameObjectData->programmableWorkers[i].rect,
+    blitGameObject(programmableWorker->rect,
                    graphicsData,
                    graphicsData->workerTexture,
-                   DEGREESINCIRCLE-(gameObjectData->programmableWorkers[i].heading * RADIANSTODEGREES),
+                   DEGREESINCIRCLE-(programmableWorker->heading * RADIANSTODEGREES),
                    NULL,
                    SDL_FLIP_NONE);
 

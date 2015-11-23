@@ -66,6 +66,22 @@ int blockFunction_WorkerReturnToHive(BlockFunctionArgs *arguments,
                                      ProgrammableWorker *programmableWorker,
                                      GameObjectData *gameObjectData);
 
+int blockFunction_IfNumOfFlowersInRadius(BlockFunctionArgs *arguments,
+                                     ProgrammableWorker *programmableWorker,
+                                     GameObjectData *gameObjectData);
+
+int blockFunction_RememberCurrentLocation(BlockFunctionArgs *arguments,
+                                          ProgrammableWorker *programmableWorker,
+                                          GameObjectData *gameObjectData);
+
+int blockFunction_GoToRememberedLocation(BlockFunctionArgs *arguments,
+                                         ProgrammableWorker *programmableWorker,
+                                         GameObjectData *gameObjectData);
+
+int blockFunction_ForgetRememberedLocation(BlockFunctionArgs *arguments,
+                                           ProgrammableWorker *programmableWorker,
+                                           GameObjectData *gameObjectData);
+
 void runBlockFunctionRootOverWorker(BlockFunctionRoot *blockFunctionRoot,
                                    ProgrammableWorker *programmbleWorker,
                                    GameObjectData *gameObjectData);
@@ -73,6 +89,7 @@ void runBlockFunctionRootOverWorker(BlockFunctionRoot *blockFunctionRoot,
 int runBlockFunctionOverWorker(BlockFunction *blockFunction,
                                ProgrammableWorker *programmableWorker,
                                GameObjectData *gameObjectData);
+
 
 BlockFunctionRoot generateGenericWorkerOrders(void);
 

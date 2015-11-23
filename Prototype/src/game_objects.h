@@ -5,11 +5,17 @@ enum ProgrammableWorkerStatus {LEAVING = 1,
                                WANTING_TO_RETURN = 3,
                                BLANK = -1};
 
+typedef struct ProgrammableWorker ProgrammableWorker;
+typedef struct ResourceNode ResourceNode;
+typedef struct ResourceNodeSpawner ResourceNodeSpawner;
+typedef struct ProgrammableWorkerBrain ProgrammableWorkerBrain;
+typedef struct Hive Hive;
+typedef struct GameObjectData GameObjectData;
+
 /* I'm calling them resource nodes rather than flowers because it makes the
    game more easily adaptable to other themes if we want. Otherwise they are
    identical. */
 
-typedef struct ResourceNode ResourceNode;
 struct ResourceNode{
   /* this is a 1/0 boolean to see whether the flower is alive or dead. */
   int alive;
@@ -26,7 +32,6 @@ struct ResourceNode{
      hierarchical layout based around spawners, we can do some wizardry to make
      the collision detection system and respawn system more effecient */
 
-typedef struct ResourceNodeSpawner ResourceNodeSpawner;
 struct ResourceNodeSpawner{
   /* These two values will control how many nodes the spawner has and will
      create */
@@ -45,7 +50,12 @@ struct ResourceNodeSpawner{
   SDL_Rect collisionRect;
 };
 
-typedef struct ProgrammableWorker ProgrammableWorker;
+struct ProgrammableWorkerBrain{
+  SDL_Point remembered_point;
+  int is_point_remembered;
+  ProgrammableWorker *followTarget;
+};
+
 struct ProgrammableWorker{
   SDL_Rect rect;
 
@@ -60,16 +70,16 @@ struct ProgrammableWorker{
   int type;
   enum ProgrammableWorkerStatus status;
   ProgrammableWorker *next;
+  ProgrammableWorkerBrain brain;
 };
 
-typedef struct Hive Hive;
 struct Hive{
   float xPosition;
   float yPosition;
   SDL_Rect rect;
+  int flowers_collected;
 };
 
-typedef struct GameObjectData GameObjectData;
 struct GameObjectData{
   Hive hive;
   ResourceNodeSpawner resourceNodeSpawners[5];

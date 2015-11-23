@@ -101,3 +101,12 @@ float generateRandomCoordOffset(float radius){
   float return_value = (radius * ( (float) rand() - (float) RAND_MAX * 0.5 )/(float) RAND_MAX );
   return(return_value);
 }
+
+double getDistance2BetweenRects(SDL_Rect rectA, SDL_Rect rectB){
+  int rectAXC = rectA.x + rectA.w/2;
+  int rectAYC = rectA.y + rectA.h/2;
+  int rectBXC = rectB.x + rectB.w/2;
+  int rectBYC = rectB.y + rectB.h/2;
+  double dist = getDistance2BetweenPoints(rectAXC,rectAYC,rectBXC,rectBYC);
+  return dist;
+}

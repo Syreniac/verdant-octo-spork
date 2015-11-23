@@ -54,29 +54,45 @@ void keyup(ControlsData *controlsData, GameObjectData *gameObjectData, SDL_Event
 
 void panScreen(GraphicsData *graphicsData, ControlsData *controlsData, int delta_t)
 {
-  if(controlsData->keys[ARROW_DOWN]){
-	if(!(graphicsData->navigationOffset.y <= -Y_SIZE_OF_WORLD + Y_SIZE_OF_SCREEN)){
-		graphicsData->navigationOffset.y -= floor(delta_t * PANSPEEDMULTI);
-	}
-  }
+  int window_x,window_y;
+  SDL_GetWindowSize(graphicsData->window,&window_x,&window_y);
 
-  if(controlsData->keys[ARROW_UP]){
-    if(!(graphicsData->navigationOffset.y >= - Y_SIZE_OF_SCREEN)){
-		graphicsData->navigationOffset.y += floor(delta_t * PANSPEEDMULTI);
-	}
+  if(window_x > X_SIZE_OF_WORLD){
+    graphicsData->navigationOffset.x = -(X_SIZE_OF_WORLD - window_x)/2;
   }
+  else{
 
-if(controlsData->keys[ARROW_RIGHT]){
-	if(!(graphicsData->navigationOffset.x <= -X_SIZE_OF_WORLD + X_SIZE_OF_SCREEN)){
-		printf("graphicsData offset x %d\n",graphicsData->navigationOffset.x);
-		graphicsData->navigationOffset.x -= floor(delta_t * PANSPEEDMULTI);
-	}
-  }
+    if(controlsData->keys[ARROW_RIGHT]){
+    	if(graphicsData->navigationOffset.x > -X_SIZE_OF_WORLD + window_x){
+    		graphicsData->navigationOffset.x -= floor(delta_t * PANSPEEDMULTI);
+    	}
+    }
 
-  if(controlsData->keys[ARROW_LEFT]){
-    if(!(graphicsData->navigationOffset.x >= - X_SIZE_OF_SCREEN)){
+    if(controlsData->keys[ARROW_LEFT]){
+      if(graphicsData->navigationOffset.x < 0){
          graphicsData->navigationOffset.x += floor(delta_t * PANSPEEDMULTI);
-	}
+      }
+    }
+
+  }
+
+  if(window_y > Y_SIZE_OF_WORLD){
+    graphicsData->navigationOffset.y = -(Y_SIZE_OF_WORLD - window_y)/2;
+  }
+  else{
+
+    if(controlsData->keys[ARROW_DOWN]){
+    	if(graphicsData->navigationOffset.y > -Y_SIZE_OF_WORLD + window_y){
+    		graphicsData->navigationOffset.y -= floor(delta_t * PANSPEEDMULTI);
+    	}
+    }
+
+    if(controlsData->keys[ARROW_UP]){
+      if(graphicsData->navigationOffset.y < 0){
+  		    graphicsData->navigationOffset.y += floor(delta_t * PANSPEEDMULTI);
+  	  }
+    }
+
   }
 
 }
