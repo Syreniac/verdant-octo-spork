@@ -30,7 +30,7 @@
 #define PANSPEEDMULTI 0.2
 
 #define PI 3.14159
-#define DEGREESINCIRCLE 360
+#define DEGREESINCIRCLE 360.0
 
 int isPointInRect(int point_x, int point_y, SDL_Rect rect);
 int isRectEnclosedInRect(SDL_Rect rectA, SDL_Rect rectB);

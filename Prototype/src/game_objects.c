@@ -323,10 +323,11 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
     if(!gameObjectData->pause_status){
       updateProgrammableWorker(&gameObjectData->programmableWorkers[i],gameObjectData,ticks);
     }
+	printf("%f",gameObjectData->programmableWorkers[i].heading);
     blitGameObject(gameObjectData->programmableWorkers[i].rect,
                    graphicsData,
                    graphicsData->workerTexture,
-                   gameObjectData->programmableWorkers[i].heading * (DEGREESINCIRCLE / 2*PI),
+                   360-(gameObjectData->programmableWorkers[i].heading * 57.2958),
                    NULL,
                    SDL_FLIP_NONE);
 

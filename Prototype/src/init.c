@@ -33,7 +33,7 @@ GraphicsData initialise(void){
 
     graphicsData.renderer = SDL_CreateRenderer(graphicsData.window,
                                                -1,
-                                               SDL_RENDERER_TARGETTEXTURE|SDL_RENDERER_SOFTWARE);
+                                               SDL_RENDERER_TARGETTEXTURE|SDL_RENDERER_ACCELERATED);
 	assert(graphicsData.renderer != NULL);
 
   return graphicsData;
