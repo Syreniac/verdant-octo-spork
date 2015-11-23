@@ -327,7 +327,7 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
     blitGameObject(gameObjectData->programmableWorkers[i].rect,
                    graphicsData,
                    graphicsData->workerTexture,
-                   360-(gameObjectData->programmableWorkers[i].heading * 57.2958),
+                   DEGREESINCIRCLE-(gameObjectData->programmableWorkers[i].heading * RADIANSTODEGREES),
                    NULL,
                    SDL_FLIP_NONE);
 
