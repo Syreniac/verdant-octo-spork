@@ -6,6 +6,21 @@
     function.
   - Take the same arguments to ensure pointer compatibility */
 
+FILE *fopenAndVerify(char *file_name, char *permission){
+  FILE *file;
+
+  printf("loading non-image file such as AI: %s\n",file_name);
+  file = fopen(file_name, permission);
+  if(file == NULL){
+    printf("File loading has failed: %s. Errno reports: %d.\n", file_name, errno);
+    printf("See errno.h to look up key of error values.\n");
+    assert(file != NULL);
+  }
+
+  return file;
+}
+
+
 int blockFunction_Print(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
   int i = 0;
   printf("PRINTING OUT BLOCK FUNCTION DATA\n");

@@ -18,12 +18,15 @@ SDL_Texture *loadTextureFromFile(char *file_name, GraphicsData *graphicsData){
 	
 	printf("loading texture file %s\n",file_name);
 	image = SDL_LoadBMP(file_name);
-	assert(image!=NULL); /* Change this to handle NULL images later */
-	SDL_SetColorKey(image, SDL_TRUE,SDL_MapRGB(image->format, 255, 255, 255));
-	texture = SDL_CreateTextureFromSurface(graphicsData->renderer,image);
+	if(image == NULL){
+		printf("Image loading has failed: %s\n", SDL_GetError());
+		assert(image != NULL);
+	}
+	SDL_SetColorKey(image, SDL_TRUE, SDL_MapRGB(image->format, 255, 255, 255));
+	texture = SDL_CreateTextureFromSurface(graphicsData->renderer, image);
 	if(texture == NULL){
-		printf("Texture conversion has failed: %s\n",SDL_GetError());
-		assert(texture!=NULL);
+		printf("Texture conversion has failed: %s\n", SDL_GetError());
+		assert(texture != NULL);
 	}
 	SDL_FreeSurface(image);
 	return texture;

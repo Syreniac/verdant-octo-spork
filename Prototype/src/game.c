@@ -94,7 +94,7 @@ int gameStart(GraphicsData graphicsData){
 														  &gameData.graphicsData);
 
   gameData.aiData.blockFunctionRoots = calloc(1, sizeof(BlockFunctionRoot));
-  file = fopen("GenericWorkerAI.txt","r");
+  file = fopenAndVerify("GenericWorkerAI.txt", "r");
   makeBlockFunctionRootFromFile(&(gameData.aiData.blockFunctionRoots[0]), file);
   fclose(file);
 
@@ -130,7 +130,7 @@ int gameLoop(GameData *gameData){
 
   panScreen(&gameData->graphicsData, &gameData->controlsData, delta_t);
   if(SDL_RenderClear(gameData->graphicsData.renderer) == -1){
-	printf("Error clearing renderer: %s\n",SDL_GetError());
+	printf("Error clearing renderer: %s\n", SDL_GetError());
 	assert(1==2);
   }
   paintBackground(&gameData->graphicsData,0,200,100);

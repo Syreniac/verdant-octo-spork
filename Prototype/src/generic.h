@@ -6,6 +6,7 @@
 #include <SDL2/SDL.h>
 #include <string.h>
 #include <assert.h>
+#include <errno.h>
 
 #define PROGRAM_NAME "Prototype"
 #define X_SIZE_OF_SCREEN 640

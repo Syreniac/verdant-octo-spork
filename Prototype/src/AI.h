@@ -36,6 +36,7 @@ struct AIData{
   BlockFunctionRoot *blockFunctionRoots;
 };
 
+FILE *fopenAndVerify(char *file_name, char *permission);
 
 int blockFunction_Print(BlockFunctionArgs *arguments,
                                             ProgrammableWorker *programmableWorker,
