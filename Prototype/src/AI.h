@@ -82,6 +82,10 @@ int blockFunction_ForgetRememberedLocation(BlockFunctionArgs *arguments,
                                            ProgrammableWorker *programmableWorker,
                                            GameObjectData *gameObjectData);
 
+int blockFunction_RandomShiftRememberedLocation(BlockFunctionArgs *arguments,
+                                                ProgrammableWorker *programmableWorker,
+                                                GameObjectData *gameObjectData);
+
 void runBlockFunctionRootOverWorker(BlockFunctionRoot *blockFunctionRoot,
                                    ProgrammableWorker *programmbleWorker,
                                    GameObjectData *gameObjectData);

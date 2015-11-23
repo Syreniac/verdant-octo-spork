@@ -21,6 +21,12 @@ void generateProgrammableWorkers(GameObjectData *gameObjectData){
   /* Create two ProgrammableWorkers */
 
   createProgrammableWorker(gameObjectData);
+    createProgrammableWorker(gameObjectData);
+      createProgrammableWorker(gameObjectData);
+        createProgrammableWorker(gameObjectData);
+          createProgrammableWorker(gameObjectData);
+            createProgrammableWorker(gameObjectData);
+              createProgrammableWorker(gameObjectData);
   /*gameObjectData->programmableWorkers[0] = createProgrammableWorker();*/
   /* Make sure the count is correct */
   gameObjectData->programmableWorkerCount = 1;

@@ -143,7 +143,18 @@ int blockFunction_IfWorkerWithinDistanceOfRememberedLocation(BlockFunctionArgs *
 }
 
 int blockFunction_ForgetRememberedLocation(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
-  programmableWorker->brain.is_point_remembered = 1;
+  programmableWorker->brain.is_point_remembered = 0;
+  return 1;
+}
+
+int blockFunction_RandomShiftRememberedLocation(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
+  int x_shift = rand() % arguments->integers[0];
+  int y_shift = rand() % arguments->integers[0];
+
+  x_shift -= arguments->integers[0];
+  y_shift -= arguments->integers[0];
+  programmableWorker->brain.remembered_point.x += x_shift;
+  programmableWorker->brain.remembered_point.y += y_shift;
   return 1;
 }
 
@@ -297,6 +308,9 @@ blockFunction_WrappedFunction getBlockFunctionByName(char *blockFunctionName){
   }
   if(strcmp(blockFunctionName,"BlockFunction_IfWorkerWithinDistanceOfRememberedLocation") == 0){
     return &blockFunction_IfWorkerWithinDistanceOfRememberedLocation;
+  }
+  if(strcmp(blockFunctionName, "BlockFunction_RandomShiftRememberedLocation") == 0){
+    return &blockFunction_RandomShiftRememberedLocation;
   }
   printf("ERROR: Unrecognised function name: \"%s\".\n Substituting a print function.\n",blockFunctionName);
   return &blockFunction_Print;
