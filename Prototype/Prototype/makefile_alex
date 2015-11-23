@@ -1,0 +1,38 @@
+# Please run the clean command detailed at the bottom before running: make -f makefile_alex
+
+CFLAGS = -pedantic -Wall -Wextra -Wno-unused-variable -Wno-unused-parameter
+# Your computer doesn't need SDL_FLAGS because it seems to find them within the system just fine.
+#TTF_FLAGS = -ISDL_ttf_lab/include -LSDL_ttf_lab/lib
+LFLAGS = -lSDL2 -lm
+# Once we have TTF working, $(TTF_FLAGS) needs to go in at start, and -lSDL_ttf needs to go in at end.
+
+# List all the files here
+ASSETS_CONTENTS = assets/.
+OBJS = main.o init.o game.o world_generation.o game_objects.o AI.o UI.o generic.o controls.o graphics.o
+BIN = bin
+PROG = $(BIN)/Prototype
+CXX = gcc
+
+# top-level rule to create the program.
+all: $(PROG)
+
+# compiling other source files.
+%.o: src/%.c src/%.h
+	$(CXX) $(CFLAGS) $(LFLAGS) -c -s $<
+
+# linking the program. | $(BIN) makes the bin/ directory if it does not yet exist.
+$(PROG): $(OBJS) | $(BIN)
+	$(CXX) $(OBJS) -o $(PROG) $(LFLAGS)
+
+# makes the bin/ directory and copies assets to bin/ so we don't have to drag them in manually.
+# $@ is merely a variable provided by makefile which effectively substitutes in the rule "$(BIN)".
+$(BIN):
+	mkdir $@
+	cp -R $(ASSETS_CONTENTS) $@
+
+# cleans everything that can be automatically recreated with "make".
+# To do this, run the following command in verdant-octo-spork/Prototype: make -f makefile_lab clean
+clean:
+	rm $(PROG) *.o
+	rm -r $(BIN)
+
