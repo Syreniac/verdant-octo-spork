@@ -5,7 +5,6 @@ void paintWeatherLayer(GraphicsData *graphicsData, enum WeatherStatus present_we
 	/* This function creates a Weather struct and fills in the default
      values. Many of these are defined in generic.h */
 	Uint8 o_r,o_g,o_b, o_a = 155;
-	SDL_Rect rect;
 
 	printf("Current weather is: %d\n", present_weather);
 
@@ -40,15 +39,11 @@ void paintWeatherLayer(GraphicsData *graphicsData, enum WeatherStatus present_we
 			exit(1);
 	}
 
-	/* This reads the width and height of the window into the space shown by
-	   the pointers */
-	SDL_GetWindowSize(graphicsData->window,&rect.w,&rect.h);
-
 	/* SDL_GetRenderDrawColor(graphicsData->renderer,&o_r,&o_g,&o_b,&o_a); */
 	SDL_SetRenderDrawColor(graphicsData->renderer,o_r,o_g,o_b,o_a);
 	SDL_SetRenderDrawBlendMode(graphicsData->renderer, SDL_BLENDMODE_BLEND);
 	SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND); /* Only blending worker textures currently */
-	SDL_RenderFillRect(graphicsData->renderer, &rect);
+	SDL_RenderFillRect(graphicsData->renderer, NULL);
 	/* SDL_SetRenderDrawColor(graphicsData->renderer,o_r,o_g,o_b,o_a); */
 }
 
@@ -66,13 +61,8 @@ void blitGameObject(SDL_Rect objectRect, GraphicsData *graphicsData, SDL_Texture
 void blitTiledBackground(GraphicsData *graphicsData, SDL_Texture *texture){
 	int i, j, xbgShifter, ybgShifter, nextSeed = rand();
 
-
-
-
 	xbgShifter = (graphicsData->navigationOffset.x - X_INITIAL_SCREEN_OFFSET) % GRASS_TILE_WIDTH;
 	ybgShifter = (graphicsData->navigationOffset.y - Y_INITIAL_SCREEN_OFFSET) % GRASS_TILE_HEIGHT;
-
-
 
 	for(i = -GRASS_TILE_WIDTH; i < X_SIZE_OF_SCREEN; i+= GRASS_TILE_WIDTH){
 		for(j = -GRASS_TILE_HEIGHT; j < Y_SIZE_OF_SCREEN; j+= GRASS_TILE_HEIGHT){
