@@ -9,8 +9,14 @@ struct GraphicsData{
   SDL_Texture *workerTexture;
   SDL_Texture *nodeTexture;
   SDL_Texture *hiveTexture;
-  SDL_Texture *grassTexture;
+  struct GrassCollection *grassCollection;
 };
+
+typedef struct GrassCollection{
+  SDL_Texture *grass1Texture;
+  SDL_Texture *grass2Texture;
+  SDL_Texture *grass3Texture;
+}GrassCollection;
 
 void blitGameObject(SDL_Rect objectRect,
                     GraphicsData *graphicsData,
@@ -21,7 +27,7 @@ void blitGameObject(SDL_Rect objectRect,
                     
 void blitTiledBackground(SDL_Rect objectRect,
 						 GraphicsData *graphicsData,
-						 SDL_Texture *texture);                 
+						 GrassCollection *grassCollection);                 
 					
 SDL_Texture *loadTextureFromFile(char *file_name, GraphicsData *graphicsData);
 void paintBackground(GraphicsData *graphicsData, int r, int g, int b);
