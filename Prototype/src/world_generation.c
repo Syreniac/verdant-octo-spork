@@ -4,17 +4,24 @@ void generateResourceNodeSpawners(GameObjectData *gameObjectData){
 
   /* Create two ResourceNodeSpawners at 'random' positions */
   gameObjectData->resourceNodeSpawners[0] = createResourceNodeSpawner(DEFAULT_MAXNODECOUNT,
-                                                                      500,
-                                                                      300,
+                                                                      rand()%X_SIZE_OF_WORLD,
+                                                                      rand()%Y_SIZE_OF_WORLD,
                                                                       DEFAULT_SPAWNRADIUS);
 
   gameObjectData->resourceNodeSpawners[1] = createResourceNodeSpawner(DEFAULT_MAXNODECOUNT,
-                                                                      X_SIZE_OF_SCREEN/4,
-                                                                      Y_SIZE_OF_SCREEN/4,
+                                                                      rand()%X_SIZE_OF_WORLD,
+                                                                      rand()%Y_SIZE_OF_WORLD,
                                                                       DEFAULT_SPAWNRADIUS);
+
+
+  gameObjectData->resourceNodeSpawners[2] = createResourceNodeSpawner(DEFAULT_MAXNODECOUNT*2,
+                                                                      rand()%X_SIZE_OF_WORLD,
+                                                                      rand()%Y_SIZE_OF_WORLD,
+                                                                      DEFAULT_SPAWNRADIUS);
+
   /* We need to keep a record of how many resourceNodeSpawners we have active
      so that we can loop through them later */
-  gameObjectData->resourceNodeSpawnerCount = 2;
+  gameObjectData->resourceNodeSpawnerCount = 3;
 }
 
 void generateProgrammableWorkers(GameObjectData *gameObjectData){

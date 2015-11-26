@@ -9,6 +9,7 @@ struct GraphicsData{
   SDL_Texture *workerTexture;
   SDL_Texture *nodeTexture;
   SDL_Texture *hiveTexture;
+  SDL_Texture *grassTexture;
 };
 
 void blitGameObject(SDL_Rect objectRect,
@@ -17,6 +18,10 @@ void blitGameObject(SDL_Rect objectRect,
                     double angle,
                     SDL_Point *center,
                     SDL_RendererFlip flip);
+                    
+void blitTiledBackground(SDL_Rect objectRect,
+						 GraphicsData *graphicsData,
+						 SDL_Texture *texture);                 
 					
 SDL_Texture *loadTextureFromFile(char *file_name, GraphicsData *graphicsData);
 void paintBackground(GraphicsData *graphicsData, int r, int g, int b);

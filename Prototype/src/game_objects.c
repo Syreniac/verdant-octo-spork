@@ -299,6 +299,8 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
      in game.c.*/
   int i = 0, j = 0;
   ProgrammableWorker *programmableWorker;
+  
+  blitTiledBackground(gameObjectData->hive.rect, graphicsData, graphicsData->grassTexture);
 
   /* First, we need to draw the Hive in at the correct position. */
   blitGameObject(gameObjectData->hive.rect,

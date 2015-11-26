@@ -10,6 +10,28 @@ void blitGameObject(SDL_Rect objectRect, GraphicsData *graphicsData, SDL_Texture
   SDL_RenderCopyEx(graphicsData->renderer, texture, NULL, &tempRect, angle, NULL, SDL_FLIP_NONE);
 }
 
+
+void blitTiledBackground(SDL_Rect objectRect, GraphicsData *graphicsData, SDL_Texture *texture){
+  int i, j;
+  for(i = 0; i < X_SIZE_OF_WORLD; i+= objectRect.w){
+     for(j = 0; j < Y_SIZE_OF_WORLD; j+= objectRect.h){
+
+           SDL_Rect dstRect;
+           dstRect.x = i;
+           dstRect.y = j;
+	   dstRect.w = objectRect.w;
+	   dstRect.h = objectRect.h;
+
+ 	   dstRect.x += graphicsData->navigationOffset.x;
+  	   dstRect.y += graphicsData->navigationOffset.y;
+  
+  	   SDL_RenderCopy(graphicsData->renderer, texture, NULL, &dstRect);
+                        
+     }
+  }
+}
+
+
 SDL_Texture *loadTextureFromFile(char *file_name, GraphicsData *graphicsData){
 	SDL_Surface *image;
 	SDL_Texture *texture;
