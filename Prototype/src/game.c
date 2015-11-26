@@ -90,7 +90,7 @@ int gameStart(GraphicsData graphicsData){
   generateHive(&gameData.gameObjectData);
   generateWeatherLayer(&gameData.gameObjectData);
 
-  gameData.graphicsData.grassTexture = loadTextureFromFile("images/grass/grass1.bmp",&gameData.graphicsData);
+  gameData.graphicsData.grassTexture = loadTextureFromFile("images/grass/grass4.bmp",&gameData.graphicsData);
 
   gameData.graphicsData.nodeTexture = loadTextureFromFile("images/blueFlower.bmp",
 														  &gameData.graphicsData);
