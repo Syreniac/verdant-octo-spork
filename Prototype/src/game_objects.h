@@ -10,6 +10,7 @@ typedef struct ResourceNode ResourceNode;
 typedef struct ResourceNodeSpawner ResourceNodeSpawner;
 typedef struct ProgrammableWorkerBrain ProgrammableWorkerBrain;
 typedef struct Hive Hive;
+typedef struct Weather Weather;
 typedef struct GameObjectData GameObjectData;
 
 /* I'm calling them resource nodes rather than flowers because it makes the
@@ -80,7 +81,13 @@ struct Hive{
   int flowers_collected;
 };
 
+struct Weather{
+  enum WeatherStatus present_weather;
+  int ticksSinceSpawn;
+};
+
 struct GameObjectData{
+  Weather weather;
   Hive hive;
   ResourceNodeSpawner resourceNodeSpawners[5];
   int resourceNodeSpawnerCount;
@@ -93,6 +100,7 @@ ProgrammableWorker *createProgrammableWorker(GameObjectData *gameObjectData);
 void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks);
 
 Hive createHive(void);
+Weather createWeatherLayer(void);
 
 /* I think that it will be better to do static respawning objects through
    creating spawners rather than directly into the world.
@@ -103,6 +111,7 @@ Hive createHive(void);
 int getFirstDeadResourceNode(ResourceNodeSpawner *resourceNodeSpawner);
 ResourceNodeSpawner createResourceNodeSpawner(int maximumNodeCount, float xPosition, float yPosition, float radius);
 void updateResourceNodeSpawner(ResourceNodeSpawner *spawner, int ticks);
+void updateWeather(Weather *weather, int ticks);
 
 void initResourceNode(ResourceNode *resourceNode);
 ResourceNode createResourceNode(ResourceNodeSpawner *parentSpawner, int resourceUnits);

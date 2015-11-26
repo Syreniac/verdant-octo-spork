@@ -111,6 +111,16 @@ ProgrammableWorker *createProgrammableWorker(GameObjectData *gameObjectData){
   return(programmableWorker);
 }
 
+Weather createWeatherLayer(void){
+  /* This function creates a Weather struct and fills in the default
+     values. Many of these are defined in generic.h */
+  Weather weather;
+  printf("Created weather layer.");
+  weather.present_weather = Rain;
+  return(weather);
+}
+
+
 Hive createHive(void){
   /* This function creates a Hive struct and fills in the default
      values. Many of these are defined in generic.h */
@@ -265,6 +275,33 @@ void updateResourceNodeSpawner(ResourceNodeSpawner *spawner, int ticks){
   }
 }
 
+void updateWeather(Weather *weather, int ticks){
+  /* Advance weather every TICKSPERWEATHER ticks; this may be semi-random due to tick-skipping. */
+    weather->ticksSinceSpawn += ticks;
+    if(weather->ticksSinceSpawn % TICKSPERWEATHER == 0){
+      switch (weather->present_weather)
+      {
+        /* Closing the Window will exit the program */
+        case Rain:
+          weather->present_weather = Sun;
+          break;
+        case Sun:
+          weather->present_weather = Snow;
+          break;
+        case Snow:
+          weather->present_weather = Cloud;
+          break;
+        case Cloud:
+          weather->present_weather = Rain;
+          break;
+        default:
+          fprintf(stderr,"Weather wasn't recognised in updateWeather.\n");
+          fflush(stderr);
+          exit(1);
+      }
+    }
+}
+
 ResourceNode createResourceNode(ResourceNodeSpawner *parentSpawner, int resourceUnits){
   /* ResourceNodeSpawner *parentSpawner = the spawner which this resource node
                                           is attached to
@@ -299,7 +336,6 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
      in game.c.*/
   int i = 0, j = 0;
   ProgrammableWorker *programmableWorker;
-  
   blitTiledBackground(graphicsData, graphicsData->grassTexture);
 
   /* First, we need to draw the Hive in at the correct position. */
@@ -351,4 +387,6 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 
     i++;
   }
+  updateWeather(&gameObjectData->weather, ticks);
+  paintWeatherLayer(graphicsData, gameObjectData->weather.present_weather, graphicsData->workerTexture); /* Only blending worker textures currently */
 }

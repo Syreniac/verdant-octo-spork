@@ -1,6 +1,14 @@
 #include "generic.h"		
 
+
 typedef struct GraphicsData GraphicsData;
+
+enum WeatherStatus {/*Should belong in game_objects.h, but graphics.c needs to access it*/
+  Rain = 0,
+  Sun = 1,
+  Snow = 2,
+  Cloud = 3
+};
 
 struct GraphicsData{
   SDL_Window *window;
@@ -13,7 +21,7 @@ struct GraphicsData{
 };
 
 
-
+void paintWeatherLayer(GraphicsData *graphicsData, enum WeatherStatus present_weather, SDL_Texture *texture);
 
 void blitGameObject(SDL_Rect objectRect,
                     GraphicsData *graphicsData,
@@ -21,8 +29,7 @@ void blitGameObject(SDL_Rect objectRect,
                     double angle,
                     SDL_Point *center,
                     SDL_RendererFlip flip);
-                    
-void blitTiledBackground(GraphicsData *graphicsData, SDL_Texture *texture);                 
-					
+
+void blitTiledBackground(GraphicsData *graphicsData, SDL_Texture *texture);
 SDL_Texture *loadTextureFromFile(char *file_name, GraphicsData *graphicsData);
 void paintBackground(GraphicsData *graphicsData, int r, int g, int b);

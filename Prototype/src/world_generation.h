@@ -9,3 +9,5 @@ void generateResourceNodeSpawners(GameObjectData *gameObjectData);
 void generateProgrammableWorkers(GameObjectData *gameObjectData);
 
 void generateHive(GameObjectData *gameObjectData);
+
+void generateWeatherLayer(GameObjectData *gameObjectData);

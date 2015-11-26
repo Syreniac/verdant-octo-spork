@@ -88,9 +88,9 @@ int gameStart(GraphicsData graphicsData){
   /* This doesn't actually do much, but it lets us give the workers somewhere
      to return home to */
   generateHive(&gameData.gameObjectData);
+  generateWeatherLayer(&gameData.gameObjectData);
 
-  gameData.graphicsData.grassTexture = loadTextureFromFile("images/grass/grass1.bmp",
-  														   &gameData.graphicsData);
+  gameData.graphicsData.grassTexture = loadTextureFromFile("images/grass/grass1.bmp",&gameData.graphicsData);
 
   gameData.graphicsData.nodeTexture = loadTextureFromFile("images/blueFlower.bmp",
 														  &gameData.graphicsData);
@@ -137,7 +137,7 @@ int gameLoop(GameData *gameData){
   panScreen(&gameData->graphicsData, &gameData->controlsData, delta_t);
   if(SDL_RenderClear(gameData->graphicsData.renderer) == -1){
 	printf("Error clearing renderer: %s\n", SDL_GetError());
-	assert(1==2);
+	assert(1 == 2);
   }
   paintBackground(&gameData->graphicsData,0,200,100);
   updateGameObjects(&gameData->gameObjectData, &gameData->graphicsData, delta_t);

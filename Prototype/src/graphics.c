@@ -1,5 +1,57 @@
 #include "graphics.h"
 
+
+void paintWeatherLayer(GraphicsData *graphicsData, enum WeatherStatus present_weather, SDL_Texture *texture){
+	/* This function creates a Weather struct and fills in the default
+     values. Many of these are defined in generic.h */
+	Uint8 o_r,o_g,o_b, o_a = 155;
+	SDL_Rect rect;
+
+	printf("Current weather is: %d\n", present_weather);
+
+	switch (present_weather)
+			{
+		/* Closing the Window will exit the program */
+		case Rain:
+			o_r = 107;
+			o_g = 107;
+			o_b = 115;
+			/* Tint o_r,o_g,o_b to dark blue */
+			break;
+		case Sun:
+			o_a = 0;
+			/* No tint (could set o_a to 0) */
+			break;
+		case Snow:
+			o_r = 200;
+			o_g = 200;
+			o_b = 200;
+			/* Tint o_r,o_g,o_b to light blue-grey */
+			break;
+		case Cloud:
+			o_r = 123;
+			o_g = 123;
+			o_b = 123;
+			/* Tint o_r,o_g,o_b to grey */
+			break;
+		default:
+			fprintf(stderr,"Weather wasn't recognised.\n");
+			fflush(stderr);
+			exit(1);
+	}
+
+	/* This reads the width and height of the window into the space shown by
+	   the pointers */
+	SDL_GetWindowSize(graphicsData->window,&rect.w,&rect.h);
+
+	/* SDL_GetRenderDrawColor(graphicsData->renderer,&o_r,&o_g,&o_b,&o_a); */
+	SDL_SetRenderDrawColor(graphicsData->renderer,o_r,o_g,o_b,o_a);
+	SDL_SetRenderDrawBlendMode(graphicsData->renderer, SDL_BLENDMODE_BLEND);
+	SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND); /* Only blending worker textures currently */
+	SDL_RenderFillRect(graphicsData->renderer, &rect);
+	/* SDL_SetRenderDrawColor(graphicsData->renderer,o_r,o_g,o_b,o_a); */
+}
+
 void blitGameObject(SDL_Rect objectRect, GraphicsData *graphicsData, SDL_Texture *texture, double angle, SDL_Point *center, SDL_RendererFlip flip){
   SDL_Rect tempRect;
 
@@ -12,32 +64,32 @@ void blitGameObject(SDL_Rect objectRect, GraphicsData *graphicsData, SDL_Texture
 
 
 void blitTiledBackground(GraphicsData *graphicsData, SDL_Texture *texture){
-  int i, j, xbgShifter, ybgShifter, nextSeed = rand();
-  
+	int i, j, xbgShifter, ybgShifter, nextSeed = rand();
 
-  
-  
-  xbgShifter = (graphicsData->navigationOffset.x - X_INITIAL_SCREEN_OFFSET) % GRASS_TILE_WIDTH;
-  ybgShifter = (graphicsData->navigationOffset.y - Y_INITIAL_SCREEN_OFFSET) % GRASS_TILE_HEIGHT;
-  
 
-  
-  for(i = -GRASS_TILE_WIDTH; i < X_SIZE_OF_SCREEN; i+= GRASS_TILE_WIDTH){
-     for(j = -GRASS_TILE_HEIGHT; j < Y_SIZE_OF_SCREEN; j+= GRASS_TILE_HEIGHT){
-	   
-       SDL_Rect dstRect;
-       dstRect.x = i;
-       dstRect.y = j;
-	   dstRect.w = GRASS_TILE_WIDTH;
-	   dstRect.h = GRASS_TILE_HEIGHT;
 
-	   dstRect.x += xbgShifter;
-	   dstRect.y += ybgShifter;
-	   
-	   SDL_RenderCopy(graphicsData->renderer, texture, NULL, &dstRect);
-                        
-     }
-  }
+
+	xbgShifter = (graphicsData->navigationOffset.x - X_INITIAL_SCREEN_OFFSET) % GRASS_TILE_WIDTH;
+	ybgShifter = (graphicsData->navigationOffset.y - Y_INITIAL_SCREEN_OFFSET) % GRASS_TILE_HEIGHT;
+
+
+
+	for(i = -GRASS_TILE_WIDTH; i < X_SIZE_OF_SCREEN; i+= GRASS_TILE_WIDTH){
+		for(j = -GRASS_TILE_HEIGHT; j < Y_SIZE_OF_SCREEN; j+= GRASS_TILE_HEIGHT){
+
+			SDL_Rect dstRect;
+			dstRect.x = i;
+			dstRect.y = j;
+			dstRect.w = GRASS_TILE_WIDTH;
+			dstRect.h = GRASS_TILE_HEIGHT;
+
+			dstRect.x += xbgShifter;
+			dstRect.y += ybgShifter;
+
+			SDL_RenderCopy(graphicsData->renderer, texture, NULL, &dstRect);
+
+		}
+	}
 }
 
 

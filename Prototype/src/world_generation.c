@@ -43,3 +43,8 @@ void generateHive(GameObjectData *gameObjectData){
   /* Create a Hive */
   gameObjectData->hive = createHive();
 }
+
+void generateWeatherLayer(GameObjectData *gameObjectData){
+  /* Create a Hive */
+  gameObjectData->weather = createWeatherLayer();
+}
