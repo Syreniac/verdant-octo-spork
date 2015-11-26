@@ -89,8 +89,12 @@ int gameStart(GraphicsData graphicsData){
      to return home to */
   generateHive(&gameData.gameObjectData);
 
-  gameData.graphicsData.grassTexture = loadTextureFromFile("images/grass/grass1.bmp",
-  														  &gameData.graphicsData);
+  gameData.graphicsData.grassCollection->grass1Texture = loadTextureFromFile("images/grass/grass1.bmp",
+  														  					&gameData.graphicsData);
+  gameData.graphicsData.grassCollection->grass2Texture = loadTextureFromFile("images/grass/grass2.bmp",
+  														  					&gameData.graphicsData);     
+  gameData.graphicsData.grassCollection->grass3Texture = loadTextureFromFile("images/grass/grass3.bmp",
+  																			&gameData.graphicsData);			
   gameData.graphicsData.nodeTexture = loadTextureFromFile("images/blueFlower.bmp",
 														  &gameData.graphicsData);
   gameData.graphicsData.workerTexture = loadTextureFromFile("images/bee.bmp",

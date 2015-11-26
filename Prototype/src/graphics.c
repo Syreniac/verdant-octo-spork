@@ -11,21 +11,33 @@ void blitGameObject(SDL_Rect objectRect, GraphicsData *graphicsData, SDL_Texture
 }
 
 
-void blitTiledBackground(SDL_Rect objectRect, GraphicsData *graphicsData, SDL_Texture *texture){
+void blitTiledBackground(SDL_Rect objectRect, GraphicsData *graphicsData, GrassCollection *grassCollection){
   int i, j;
+  srand(0);
+  
   for(i = 0; i < X_SIZE_OF_WORLD; i+= objectRect.w){
      for(j = 0; j < Y_SIZE_OF_WORLD; j+= objectRect.h){
-
-           SDL_Rect dstRect;
-           dstRect.x = i;
-           dstRect.y = j;
+	   
+       SDL_Rect dstRect;
+       dstRect.x = i;
+       dstRect.y = j;
 	   dstRect.w = objectRect.w;
 	   dstRect.h = objectRect.h;
 
  	   dstRect.x += graphicsData->navigationOffset.x;
   	   dstRect.y += graphicsData->navigationOffset.y;
-  
-  	   SDL_RenderCopy(graphicsData->renderer, texture, NULL, &dstRect);
+  	   
+  	   switch (rand()%3){
+	      case 0:
+	      	 SDL_RenderCopy(graphicsData->renderer, grassCollection->grass1Texture, NULL, &dstRect);
+	         break;
+	      case 1:
+	         SDL_RenderCopy(graphicsData->renderer, grassCollection->grass2Texture, NULL, &dstRect);
+	         break;
+	      case 2:
+	         SDL_RenderCopy(graphicsData->renderer, grassCollection->grass3Texture, NULL, &dstRect);
+	         break;
+	   }
                         
      }
   }
