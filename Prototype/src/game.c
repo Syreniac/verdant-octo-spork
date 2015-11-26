@@ -38,8 +38,8 @@ int gameStart(GraphicsData graphicsData){
   zeroControlKeys(&gameData.controlsData);
 
   /* initialise navigationOffset values */
-  gameData.graphicsData.navigationOffset.x = -(X_SIZE_OF_WORLD/2)+(X_SIZE_OF_SCREEN/2); /*setting initial x offset to center of world*/
-  gameData.graphicsData.navigationOffset.y = -(Y_SIZE_OF_WORLD/2)+(Y_SIZE_OF_SCREEN/2); /*setting initial y offset ot center of world*/
+  gameData.graphicsData.navigationOffset.x = X_INITIAL_SCREEN_OFFSET; /*setting initial x offset to center of world*/
+  gameData.graphicsData.navigationOffset.y = Y_INITIAL_SCREEN_OFFSET; /*setting initial y offset ot center of world*/
   gameData.graphicsData.navigationOffset.w = X_SIZE_OF_WORLD;
   gameData.graphicsData.navigationOffset.h = Y_SIZE_OF_WORLD;
 
@@ -89,12 +89,9 @@ int gameStart(GraphicsData graphicsData){
      to return home to */
   generateHive(&gameData.gameObjectData);
 
-  gameData.graphicsData.grassCollection->grass1Texture = loadTextureFromFile("images/grass/grass1.bmp",
-  														  					&gameData.graphicsData);
-  gameData.graphicsData.grassCollection->grass2Texture = loadTextureFromFile("images/grass/grass2.bmp",
-  														  					&gameData.graphicsData);     
-  gameData.graphicsData.grassCollection->grass3Texture = loadTextureFromFile("images/grass/grass3.bmp",
-  																			&gameData.graphicsData);			
+  gameData.graphicsData.grassTexture = loadTextureFromFile("images/grass/grass1.bmp",
+  														   &gameData.graphicsData);
+
   gameData.graphicsData.nodeTexture = loadTextureFromFile("images/blueFlower.bmp",
 														  &gameData.graphicsData);
   gameData.graphicsData.workerTexture = loadTextureFromFile("images/bee.bmp",
@@ -124,6 +121,7 @@ int gameLoop(GameData *gameData){
      function ran */
   int delta_t;
   SDL_Event event;
+  
 
   /* Storing the number of milliseconds since the program was run helps keep it
      moving smoothly by calculating delta_t */

@@ -11,33 +11,30 @@ void blitGameObject(SDL_Rect objectRect, GraphicsData *graphicsData, SDL_Texture
 }
 
 
-void blitTiledBackground(SDL_Rect objectRect, GraphicsData *graphicsData, GrassCollection *grassCollection){
-  int i, j;
-  srand(0);
+void blitTiledBackground(GraphicsData *graphicsData, SDL_Texture *texture){
+  int i, j, xbgShifter, ybgShifter, nextSeed = rand();
   
-  for(i = 0; i < X_SIZE_OF_WORLD; i+= objectRect.w){
-     for(j = 0; j < Y_SIZE_OF_WORLD; j+= objectRect.h){
+
+  
+  
+  xbgShifter = (graphicsData->navigationOffset.x - X_INITIAL_SCREEN_OFFSET) % GRASS_TILE_WIDTH;
+  ybgShifter = (graphicsData->navigationOffset.y - Y_INITIAL_SCREEN_OFFSET) % GRASS_TILE_HEIGHT;
+  
+
+  
+  for(i = -GRASS_TILE_WIDTH; i < X_SIZE_OF_SCREEN; i+= GRASS_TILE_WIDTH){
+     for(j = -GRASS_TILE_HEIGHT; j < Y_SIZE_OF_SCREEN; j+= GRASS_TILE_HEIGHT){
 	   
        SDL_Rect dstRect;
        dstRect.x = i;
        dstRect.y = j;
-	   dstRect.w = objectRect.w;
-	   dstRect.h = objectRect.h;
+	   dstRect.w = GRASS_TILE_WIDTH;
+	   dstRect.h = GRASS_TILE_HEIGHT;
 
- 	   dstRect.x += graphicsData->navigationOffset.x;
-  	   dstRect.y += graphicsData->navigationOffset.y;
-  	   
-  	   switch (rand()%3){
-	      case 0:
-	      	 SDL_RenderCopy(graphicsData->renderer, grassCollection->grass1Texture, NULL, &dstRect);
-	         break;
-	      case 1:
-	         SDL_RenderCopy(graphicsData->renderer, grassCollection->grass2Texture, NULL, &dstRect);
-	         break;
-	      case 2:
-	         SDL_RenderCopy(graphicsData->renderer, grassCollection->grass3Texture, NULL, &dstRect);
-	         break;
-	   }
+	   dstRect.x += xbgShifter;
+	   dstRect.y += ybgShifter;
+	   
+	   SDL_RenderCopy(graphicsData->renderer, texture, NULL, &dstRect);
                         
      }
   }
