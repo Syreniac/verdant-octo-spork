@@ -44,6 +44,16 @@ void generateHive(GameObjectData *gameObjectData){
   gameObjectData->hive = createHive();
 }
 
+void generateTrees(GameObjectData *gameObjectData){
+  /* Create a Tree */
+  int i;
+  for(i = 0; i < NUMBER_OF_TREES; i++){
+  
+     gameObjectData->tree[i] = createTree();
+  
+  }
+}
+
 void generateWeatherLayer(GameObjectData *gameObjectData){
   /* Create a Hive */
   gameObjectData->weather = createWeatherLayer();

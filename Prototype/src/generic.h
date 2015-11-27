@@ -24,6 +24,9 @@
 #define GRASS_TILE_WIDTH 350
 #define GRASS_TILE_HEIGHT 76
 
+#define SIZE_OF_TREE 200
+#define NUMBER_OF_TREES 5
+
 #define X_SIZE_OF_WORKER 40
 #define Y_SIZE_OF_WORKER 40
 

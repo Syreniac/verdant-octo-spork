@@ -17,6 +17,7 @@ struct GraphicsData{
   SDL_Texture *workerTexture;
   SDL_Texture *nodeTexture;
   SDL_Texture *hiveTexture;
+  SDL_Texture *treeTexture;
   SDL_Texture *grassTexture;
 };
 

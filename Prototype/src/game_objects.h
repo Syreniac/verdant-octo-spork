@@ -10,6 +10,7 @@ typedef struct ResourceNode ResourceNode;
 typedef struct ResourceNodeSpawner ResourceNodeSpawner;
 typedef struct ProgrammableWorkerBrain ProgrammableWorkerBrain;
 typedef struct Hive Hive;
+typedef struct Tree Tree;
 typedef struct Weather Weather;
 typedef struct GameObjectData GameObjectData;
 
@@ -81,6 +82,13 @@ struct Hive{
   int flowers_collected;
 };
 
+struct Tree{
+  float xPosition;
+  float yPosition;
+  SDL_Rect rect;
+  int bees_taking_shelter;
+};
+
 struct Weather{
   enum WeatherStatus present_weather;
   int ticksSinceSpawn;
@@ -89,6 +97,7 @@ struct Weather{
 struct GameObjectData{
   Weather weather;
   Hive hive;
+  Tree tree[NUMBER_OF_TREES];
   ResourceNodeSpawner resourceNodeSpawners[5];
   int resourceNodeSpawnerCount;
   ProgrammableWorker *first_programmable_worker;
@@ -100,6 +109,7 @@ ProgrammableWorker *createProgrammableWorker(GameObjectData *gameObjectData);
 void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks);
 
 Hive createHive(void);
+Tree createTree(void);
 Weather createWeatherLayer(void);
 
 /* I think that it will be better to do static respawning objects through

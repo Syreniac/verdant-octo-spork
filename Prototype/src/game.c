@@ -88,10 +88,11 @@ int gameStart(GraphicsData graphicsData){
   /* This doesn't actually do much, but it lets us give the workers somewhere
      to return home to */
   generateHive(&gameData.gameObjectData);
+  generateTrees(&gameData.gameObjectData);
   generateWeatherLayer(&gameData.gameObjectData);
 
   gameData.graphicsData.grassTexture = loadTextureFromFile("images/grass/grass4.bmp",&gameData.graphicsData);
-
+  gameData.graphicsData.treeTexture = loadTextureFromFile("images/tree.bmp",&gameData.graphicsData);
   gameData.graphicsData.nodeTexture = loadTextureFromFile("images/blueFlower.bmp",
 														  &gameData.graphicsData);
   gameData.graphicsData.workerTexture = loadTextureFromFile("images/bee.bmp",

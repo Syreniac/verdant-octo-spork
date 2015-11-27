@@ -134,6 +134,16 @@ Hive createHive(void){
   return(hive);
 }
 
+Tree createTree(void){
+  Tree tree;
+  tree.rect.w = SIZE_OF_TREE;
+  tree.rect.h = SIZE_OF_TREE;
+  tree.rect.x = rand() % X_SIZE_OF_WORLD - SIZE_OF_TREE/2;
+  tree.rect.y = rand() % Y_SIZE_OF_WORLD - SIZE_OF_TREE/2;
+  tree.bees_taking_shelter = 0;
+  return tree;
+}
+
 void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
   /* ProgrammableWorker *programmableWorker = the ProgrammableWorker we're going
                                               to be updating
@@ -321,6 +331,8 @@ ResourceNode createResourceNode(ResourceNodeSpawner *parentSpawner, int resource
   return resourceNode;
 }
 
+
+
 void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsData, int ticks){
   /* GameObjectData *gameObjectData = the pointer to the GameObjectData struct
                                       that holds all the information about our
@@ -345,6 +357,8 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
                  0,
                  NULL,
                  SDL_FLIP_NONE);
+                         
+
 
   /* Second, we loop through all the ResourceNodeSpawners */
   while(i < gameObjectData->resourceNodeSpawnerCount){
@@ -387,6 +401,18 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 
     i++;
   }
+  
+  /* render tree tops last, so that they appear above everything else*/
+  for(i = 0; i < NUMBER_OF_TREES; i++){
+  
+     blitGameObject(gameObjectData->tree[i].rect,
+                    graphicsData,
+                    graphicsData->treeTexture,
+                    0,
+                    NULL,
+                    SDL_FLIP_NONE);
+  }        
+  
   updateWeather(&gameObjectData->weather, ticks);
   paintWeatherLayer(graphicsData, gameObjectData->weather.present_weather, graphicsData->workerTexture); /* Only blending worker textures currently */
 }

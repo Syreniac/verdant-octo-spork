@@ -10,4 +10,6 @@ void generateProgrammableWorkers(GameObjectData *gameObjectData);
 
 void generateHive(GameObjectData *gameObjectData);
 
+void generateTrees(GameObjectData *gameObjectData);
+
 void generateWeatherLayer(GameObjectData *gameObjectData);
