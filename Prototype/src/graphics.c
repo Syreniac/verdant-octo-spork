@@ -58,6 +58,30 @@ void blitGameObject(SDL_Rect objectRect, GraphicsData *graphicsData, SDL_Texture
 }
 
 
+void blitParallaxTreeTops(SDL_Rect objectRect, GraphicsData *graphicsData, SDL_Texture *texture, double angle, SDL_Point *center, SDL_RendererFlip flip){
+  SDL_Rect tempRect;
+  int xParallaxOffset = 0, yParallaxOffset = 0;
+
+  tempRect = objectRect;
+  tempRect.x += graphicsData->navigationOffset.x;
+  tempRect.y += graphicsData->navigationOffset.y;
+  
+  xParallaxOffset -= X_SIZE_OF_SCREEN/2;
+  xParallaxOffset += tempRect.x;
+  xParallaxOffset /= PARALLAX_INTENSITY;
+  
+  yParallaxOffset -= Y_SIZE_OF_SCREEN/2;
+  yParallaxOffset += tempRect.y;
+  yParallaxOffset /= PARALLAX_INTENSITY;
+  
+  printf("xParallaxOffset = %d\n", xParallaxOffset);
+  tempRect.x += xParallaxOffset;
+  tempRect.y += yParallaxOffset;
+  
+  SDL_RenderCopyEx(graphicsData->renderer, texture, NULL, &tempRect, angle, NULL, SDL_FLIP_NONE);
+}
+
+
 void blitTiledBackground(GraphicsData *graphicsData, SDL_Texture *texture){
 	int i, j, xbgShifter, ybgShifter, nextSeed = rand();
 

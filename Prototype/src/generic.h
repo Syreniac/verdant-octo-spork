@@ -24,6 +24,9 @@
 #define GRASS_TILE_WIDTH 350
 #define GRASS_TILE_HEIGHT 76
 
+/*higher values result in lower levels of parallax*/
+#define PARALLAX_INTENSITY 20
+
 #define SIZE_OF_TREE 200
 #define NUMBER_OF_TREES 5
 

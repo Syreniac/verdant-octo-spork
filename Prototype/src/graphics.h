@@ -30,7 +30,15 @@ void blitGameObject(SDL_Rect objectRect,
                     double angle,
                     SDL_Point *center,
                     SDL_RendererFlip flip);
+                    
+void blitParallaxTreeTops(SDL_Rect objectRect,
+						  GraphicsData *graphicsData,
+						  SDL_Texture *texture,
+						  double angle,
+						  SDL_Point *center,
+						  SDL_RendererFlip flip);
 
 void blitTiledBackground(GraphicsData *graphicsData, SDL_Texture *texture);
 SDL_Texture *loadTextureFromFile(char *file_name, GraphicsData *graphicsData);
 void paintBackground(GraphicsData *graphicsData, int r, int g, int b);
+

@@ -405,7 +405,7 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
   /* render tree tops last, so that they appear above everything else*/
   for(i = 0; i < NUMBER_OF_TREES; i++){
   
-     blitGameObject(gameObjectData->tree[i].rect,
+     blitParallaxTreeTops(gameObjectData->tree[i].rect,
                     graphicsData,
                     graphicsData->treeTexture,
                     0,
