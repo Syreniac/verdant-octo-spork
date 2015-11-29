@@ -24,6 +24,10 @@
 #define GRASS_TILE_WIDTH 350
 #define GRASS_TILE_HEIGHT 76
 
+#define RAIN_TILE_WIDTH 6
+#define RAIN_TILE_HEIGHT 6
+#define RAIN_FRAME_DELAY 4
+
 /*higher values result in lower levels of parallax*/
 #define PARALLAX_INTENSITY 20
 
@@ -45,7 +49,7 @@
 #define DEFAULT_SPAWNDELAY 3000
 #define DEFAULT_SPAWNRADIUS 200.0
 #define DEFAULT_MAXNODECOUNT 10
-#define TICKSPERWEATHER 250
+#define TICKSPERWEATHER 2500
 #define FRAME_TIME 20
 
 #define NUM_OF_KEYS 30

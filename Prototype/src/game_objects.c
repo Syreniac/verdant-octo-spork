@@ -133,7 +133,7 @@ Weather createWeatherLayer(void){
      values. Many of these are defined in generic.h */
   Weather weather;
   printf("Created weather layer.");
-  weather.present_weather = Rain;
+  weather.present_weather = Sun;
   return(weather);
 }
 
@@ -380,22 +380,26 @@ void updateResourceNodeSpawner(ResourceNodeSpawner *spawner, int ticks){
 
 void updateWeather(Weather *weather, int ticks){
   /* Advance weather every TICKSPERWEATHER ticks; this may be semi-random due to tick-skipping. */
-    weather->ticksSinceSpawn += ticks;
-    if(weather->ticksSinceSpawn % TICKSPERWEATHER == 0){
+    weather->tickCount += ticks;
+
+    if(weather->tickCount > TICKSPERWEATHER){
+    	weather->tickCount = 0;
+    
+    printf("weather changed\n");
       switch (weather->present_weather)
       {
         /* Closing the Window will exit the program */
-        case Rain:
-          weather->present_weather = Sun;
-          break;
         case Sun:
-          weather->present_weather = Snow;
-          break;
-        case Snow:
-          weather->present_weather = Cloud;
+          weather->present_weather = (rand() % CHANCE_OF_CLOUD == 0) ? Cloud : Sun;
           break;
         case Cloud:
-          weather->present_weather = Rain;
+          weather->present_weather = (rand() % CHANCE_OF_RAIN == 0) ? Rain : Sun;
+          break;
+        case Rain:
+          weather->present_weather = (rand() % CHANCE_OF_CLOUD == 0) ? Cloud : Sun;
+          break;
+        case Snow:
+          /*honey stocks should be built up first. WINTER IS COMING.. (haha game of drones).*/
           break;
         default:
           fprintf(stderr,"Weather wasn't recognised in updateWeather.\n");
@@ -554,11 +558,13 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
   
      blitParallaxTreeTops(gameObjectData->tree[i].rect,
                     graphicsData,
-                    graphicsData->treeTexture,
-                    0,
-                    NULL,
-                    SDL_FLIP_NONE);
+                    graphicsData->treeTexture);
   }        
+  
+  /*finally render a layer or rain splatter if its raining*/
+  if(gameObjectData->weather.present_weather == Rain){
+    blitRainRandomly(graphicsData);
+  }
   
   updateWeather(&gameObjectData->weather, ticks);
   

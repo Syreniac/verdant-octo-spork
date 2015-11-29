@@ -111,7 +111,7 @@ struct IceCreamPerson{
 
 struct Weather{
   enum WeatherStatus present_weather;
-  int ticksSinceSpawn;
+  int tickCount;
 };
 
 struct GameObjectData{

@@ -6,7 +6,7 @@ void paintWeatherLayer(GraphicsData *graphicsData, enum WeatherStatus present_we
      values. Many of these are defined in generic.h */
 	Uint8 o_r,o_g,o_b, o_a = 155;
 
-	printf("Current weather is: %d\n", present_weather);
+
 
 	switch (present_weather)
 			{
@@ -57,8 +57,39 @@ void blitGameObject(SDL_Rect objectRect, GraphicsData *graphicsData, SDL_Texture
   SDL_RenderCopyEx(graphicsData->renderer, texture, NULL, &tempRect, angle, NULL, SDL_FLIP_NONE);
 }
 
+void blitRainRandomly(GraphicsData *graphicsData){
 
-void blitParallaxTreeTops(SDL_Rect objectRect, GraphicsData *graphicsData, SDL_Texture *texture, double angle, SDL_Point *center, SDL_RendererFlip flip){
+	SDL_Rect dstRect;
+	int i;
+	
+
+
+
+	dstRect.w = RAIN_TILE_WIDTH;
+	dstRect.h = RAIN_TILE_HEIGHT;
+	
+	for(i = 0; i < 100; i++){
+	
+	   dstRect.x = rand()% X_SIZE_OF_WORLD;
+	   dstRect.y = rand()% Y_SIZE_OF_WORLD;
+	   
+	   if(rand()%30){
+	      SDL_RenderCopy(graphicsData->renderer,
+						 graphicsData->rainy->graphic[rand()%4],
+						 NULL,
+						 &dstRect);
+	   }else{
+	      SDL_RenderCopy(graphicsData->renderer,
+						 graphicsData->rainy->graphic[(rand()%2)+3],
+						 NULL,
+						 &dstRect);	
+	   }	      
+	}
+	
+}
+
+
+void blitParallaxTreeTops(SDL_Rect objectRect, GraphicsData *graphicsData, SDL_Texture *texture){
   SDL_Rect tempRect;
   int xParallaxOffset = 0, yParallaxOffset = 0;
 
@@ -77,12 +108,12 @@ void blitParallaxTreeTops(SDL_Rect objectRect, GraphicsData *graphicsData, SDL_T
   tempRect.x += xParallaxOffset;
   tempRect.y += yParallaxOffset;
   
-  SDL_RenderCopyEx(graphicsData->renderer, texture, NULL, &tempRect, angle, NULL, SDL_FLIP_NONE);
+  SDL_RenderCopyEx(graphicsData->renderer, texture, NULL, &tempRect, 0, NULL, SDL_FLIP_NONE);
 }
 
 
 void blitTiledBackground(GraphicsData *graphicsData, SDL_Texture *texture){
-	int i, j, xbgShifter, ybgShifter, nextSeed = rand();
+	int i, j, xbgShifter, ybgShifter;
 
 	xbgShifter = (graphicsData->navigationOffset.x - X_INITIAL_SCREEN_OFFSET) % GRASS_TILE_WIDTH;
 	ybgShifter = (graphicsData->navigationOffset.y - Y_INITIAL_SCREEN_OFFSET) % GRASS_TILE_HEIGHT;
