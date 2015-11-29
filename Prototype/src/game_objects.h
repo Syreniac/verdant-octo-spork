@@ -101,6 +101,8 @@ struct IceCreamPerson{
   int countDownToStride;
   int currentGraphicIndex;
   
+  int going_home;
+  
   int has_ice_cream;
   int currently_on_screen;
   int stung_count;

@@ -220,8 +220,24 @@ void updateIceCreamPerson(GameObjectData *gameObjectData, int ticks){
   double newX,newY;
   int i;
   
+  /*set iceCreamPerson to going home if sun has gone, or he has lost his ice cream*/
+  if(!(gameObjectData->weather.present_weather == Sun &&
+  gameObjectData->iceCreamPerson->has_ice_cream)){
+  	gameObjectData->iceCreamPerson->going_home = 1;
+  }
+  
+  /*set iceCreamPerson->currently_on_screen to false if he has walked off screen*/
+  if(gameObjectData->iceCreamPerson->xPosition > X_SIZE_OF_WORLD ||
+  gameObjectData->iceCreamPerson->yPosition > Y_SIZE_OF_WORLD ||
+  gameObjectData->iceCreamPerson->xPosition < 0 - PERSON_WIDTH ||
+  gameObjectData->iceCreamPerson->yPosition < 0 - PERSON_HEIGHT){
+    gameObjectData->iceCreamPerson->currently_on_screen = 0;
+  }
+  
+  /*decrement countDownToStride*/
   gameObjectData->iceCreamPerson->countDownToStride--;
-    	printf("%d\n", gameObjectData->iceCreamPerson->countDownToStride);
+
+  /*if countDownToStride equals zero, reset count, and change stride image*/ 
   if(gameObjectData->iceCreamPerson->countDownToStride <= 0){
   	gameObjectData->iceCreamPerson->countDownToStride =
   	(double)STRIDE_FREQUENCY / gameObjectData->iceCreamPerson->speed;
@@ -249,8 +265,7 @@ void updateIceCreamPerson(GameObjectData *gameObjectData, int ticks){
   gameObjectData->iceCreamPerson->rect.x = (int)floor(gameObjectData->iceCreamPerson->xPosition);
   gameObjectData->iceCreamPerson->rect.y = (int)floor(gameObjectData->iceCreamPerson->yPosition);
   
-  if(gameObjectData->weather.present_weather == Sun && 
-  gameObjectData->iceCreamPerson->has_ice_cream){
+  if(!gameObjectData->iceCreamPerson->going_home){
   
   	if(gameObjectData->iceCreamPerson->xPosition >= X_SIZE_OF_WORLD - PERSON_WIDTH){
   	  /*world border has been reached and sun is still out, change direction*/
@@ -403,6 +418,7 @@ void reInitialiseIceCreamPerson(IceCreamPerson *iceCreamPerson){
   iceCreamPerson->rect.y = iceCreamPerson->yPosition;
 
   iceCreamPerson->has_ice_cream = 1;
+  iceCreamPerson->going_home = 0;
   iceCreamPerson->speed = 0.05; /*pixels per millisecond*/
   iceCreamPerson->stung_count = 0;
   
@@ -413,6 +429,8 @@ void reInitialiseIceCreamPerson(IceCreamPerson *iceCreamPerson){
   
   iceCreamPerson->strings_until_ice_cream_drop = (rand() % 5) + 1;
 }
+
+
 
 ResourceNode createResourceNode(ResourceNodeSpawner *parentSpawner, int resourceUnits){
   /* ResourceNodeSpawner *parentSpawner = the spawner which this resource node
@@ -460,28 +478,7 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
                  NULL,
                  SDL_FLIP_NONE);
                          
-  /*determine if iceCreamPerson is on screen and needs animating*/
-  if(gameObjectData->iceCreamPerson->currently_on_screen){
-  
-      if(!gameObjectData->pause_status){
-         updateIceCreamPerson(gameObjectData, ticks);
-      }
 
-     blitGameObject(gameObjectData->iceCreamPerson->rect,
-                    graphicsData,
-                    graphicsData->person->graphic[gameObjectData->iceCreamPerson->currentGraphicIndex],
-                    DEGREESINCIRCLE-(gameObjectData->iceCreamPerson->heading * RADIANSTODEGREES),
-                    NULL,
-                    SDL_FLIP_NONE);  	
-  
-  }else{ /*small probability of re-initialising iceCreamPerson and setting location to on-screen*/ 
-    if((gameObjectData->weather.present_weather == Sun) &&
-    (rand() % ICE_CREAM_PERSON_PROB == 0)){
-    
-    	reInitialiseIceCreamPerson(gameObjectData->iceCreamPerson);
-
-    }
-  }
 
 
   /* Second, we loop through all the ResourceNodeSpawners */
@@ -506,6 +503,32 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
     }
     i++;
   }
+  
+  
+   /*determine if iceCreamPerson is on screen and needs animating*/
+  if(gameObjectData->iceCreamPerson->currently_on_screen){
+  
+      if(!gameObjectData->pause_status){
+         updateIceCreamPerson(gameObjectData, ticks);
+      }
+
+     blitGameObject(gameObjectData->iceCreamPerson->rect,
+                    graphicsData,
+                    graphicsData->person->graphic[gameObjectData->iceCreamPerson->currentGraphicIndex],
+                    DEGREESINCIRCLE-(gameObjectData->iceCreamPerson->heading * RADIANSTODEGREES),
+                    NULL,
+                    SDL_FLIP_NONE);  	
+  
+  }else{ /*small probability of re-initialising iceCreamPerson and setting location to on-screen*/ 
+    if((gameObjectData->weather.present_weather == Sun) &&
+    (rand() % ICE_CREAM_PERSON_PROB == 0)){
+    
+    	reInitialiseIceCreamPerson(gameObjectData->iceCreamPerson);
+
+    }
+  } 
+  
+  
   /* Thirdly, we loop through all the ProgrammableWorkers and update them */
   /* AI thinking has been moved to a seperate function to prevent some circular
      inheritance issues. */
