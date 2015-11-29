@@ -76,7 +76,7 @@ int gameStart(GraphicsData graphicsData){
   gameData.uiData.UIElements[2] = createUI_Draggable(rect,&gameData.uiData.UIElements[1],0,136,64);
   gameData.uiData.numberOfUIElements = 3;
 
-
+  
   /* Create some ResourceNodeSpawners to fill our world with ResourceNodes */
   generateResourceNodeSpawners(&gameData.gameObjectData);
 
@@ -90,11 +90,23 @@ int gameStart(GraphicsData graphicsData){
   generateHive(&gameData.gameObjectData);
   generateTrees(&gameData.gameObjectData);
   generateWeatherLayer(&gameData.gameObjectData);
+  
+  generateIceCreamPerson(&gameData.gameObjectData);
+  
 
   gameData.graphicsData.grassTexture = loadTextureFromFile("images/grass/grass4.bmp",&gameData.graphicsData);
   gameData.graphicsData.treeTexture = loadTextureFromFile("images/tree.bmp",&gameData.graphicsData);
   gameData.graphicsData.nodeTexture = loadTextureFromFile("images/blueFlower.bmp",
 														  &gameData.graphicsData);
+														  
+  gameData.graphicsData.person->graphic[WITH_ICE_CREAM_STRIDE1] =
+  loadTextureFromFile("images/person/withIceCream1.bmp",
+					  &gameData.graphicsData);
+					  
+  gameData.graphicsData.person->graphic[WITH_ICE_CREAM_STRIDE2] =
+  loadTextureFromFile("images/person/withIceCream2.bmp",
+					  &gameData.graphicsData);
+														  
   gameData.graphicsData.workerTexture = loadTextureFromFile("images/bee.bmp",
 														  &gameData.graphicsData);
   gameData.graphicsData.hiveTexture = loadTextureFromFile("images/beehive.bmp",

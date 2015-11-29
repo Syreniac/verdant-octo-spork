@@ -11,6 +11,7 @@ typedef struct ResourceNodeSpawner ResourceNodeSpawner;
 typedef struct ProgrammableWorkerBrain ProgrammableWorkerBrain;
 typedef struct Hive Hive;
 typedef struct Tree Tree;
+typedef struct IceCreamPerson IceCreamPerson;
 typedef struct Weather Weather;
 typedef struct GameObjectData GameObjectData;
 
@@ -89,6 +90,23 @@ struct Tree{
   int bees_taking_shelter;
 };
 
+struct IceCreamPerson{
+  float xPosition;
+  float yPosition;
+  SDL_Rect rect;
+  
+  double heading;
+  double speed;
+  
+  int countDownToStride;
+  int currentGraphicIndex;
+  
+  int has_ice_cream;
+  int currently_on_screen;
+  int stung_count;
+  int strings_until_ice_cream_drop;
+};
+
 struct Weather{
   enum WeatherStatus present_weather;
   int ticksSinceSpawn;
@@ -99,6 +117,7 @@ struct GameObjectData{
   Hive hive;
   Tree tree[NUMBER_OF_TREES];
   ResourceNodeSpawner resourceNodeSpawners[5];
+  IceCreamPerson *iceCreamPerson;
   int resourceNodeSpawnerCount;
   ProgrammableWorker *first_programmable_worker;
   int programmableWorkerCount;
@@ -107,6 +126,7 @@ struct GameObjectData{
 
 ProgrammableWorker *createProgrammableWorker(GameObjectData *gameObjectData);
 void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks);
+void updateIceCreamPerson(GameObjectData *gameObjectData, int ticks);
 
 Hive createHive(void);
 Tree createTree(void);
@@ -125,4 +145,6 @@ void updateWeather(Weather *weather, int ticks);
 
 void initResourceNode(ResourceNode *resourceNode);
 ResourceNode createResourceNode(ResourceNodeSpawner *parentSpawner, int resourceUnits);
+IceCreamPerson *createIceCreamPerson(void);
+void reInitialiseIceCreamPerson(IceCreamPerson *iceCreamPerson);
 void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsData, int ticks);

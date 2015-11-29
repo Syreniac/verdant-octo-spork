@@ -27,6 +27,14 @@
 /*higher values result in lower levels of parallax*/
 #define PARALLAX_INTENSITY 20
 
+#define PERSON_HEIGHT 54
+#define PERSON_WIDTH 50
+/*probability that the iceCreamPerson will appear each time that*/
+/*the updateGameObjects function is called, if it is also sunny and*/
+/*he is not already on screen */
+#define ICE_CREAM_PERSON_PROB 100
+#define STRIDE_FREQUENCY 0.75
+
 #define SIZE_OF_TREE 200
 #define NUMBER_OF_TREES 5
 
@@ -46,6 +54,8 @@
 #define PI 3.14159
 #define DEGREESINCIRCLE 360.0
 #define RADIANSTODEGREES 57.2958
+
+typedef enum personGraphic {WITH_ICE_CREAM_STRIDE1, WITH_ICE_CREAM_STRIDE2} personGraphic;
 
 int isPointInRect(int point_x, int point_y, SDL_Rect rect);
 int isRectEnclosedInRect(SDL_Rect rectA, SDL_Rect rectB);

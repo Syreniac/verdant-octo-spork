@@ -2,6 +2,7 @@
 
 
 typedef struct GraphicsData GraphicsData;
+typedef struct Person Person;
 
 enum WeatherStatus {/*Should belong in game_objects.h, but graphics.c needs to access it*/
   Rain = 0,
@@ -19,6 +20,11 @@ struct GraphicsData{
   SDL_Texture *hiveTexture;
   SDL_Texture *treeTexture;
   SDL_Texture *grassTexture;
+  struct Person *person;
+};
+
+struct Person{
+	SDL_Texture *graphic[2];
 };
 
 

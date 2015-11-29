@@ -74,7 +74,6 @@ void blitParallaxTreeTops(SDL_Rect objectRect, GraphicsData *graphicsData, SDL_T
   yParallaxOffset += tempRect.y;
   yParallaxOffset /= PARALLAX_INTENSITY;
   
-  printf("xParallaxOffset = %d\n", xParallaxOffset);
   tempRect.x += xParallaxOffset;
   tempRect.y += yParallaxOffset;
   

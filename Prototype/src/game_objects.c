@@ -111,6 +111,23 @@ ProgrammableWorker *createProgrammableWorker(GameObjectData *gameObjectData){
   return(programmableWorker);
 }
 
+IceCreamPerson *createIceCreamPerson(void){
+  IceCreamPerson *iceCreamPerson = (IceCreamPerson*) malloc(sizeof(IceCreamPerson));
+  iceCreamPerson->rect.w = PERSON_HEIGHT;
+  iceCreamPerson->rect.h = PERSON_WIDTH;
+  /*set initial location to ensure no interaction or existence inside world*/
+  /* (when the time is right for the person to appear, x y co-ordinates*/
+  /*can be reassigned values that exist inside the world boundaries)*/
+  iceCreamPerson->rect.x = X_SIZE_OF_WORLD * 2;
+  iceCreamPerson->rect.y = Y_SIZE_OF_WORLD * 2;
+  iceCreamPerson->currently_on_screen = 0;
+  iceCreamPerson->has_ice_cream = 0;
+  iceCreamPerson->speed = 0;
+  iceCreamPerson->stung_count = 0;
+  iceCreamPerson->strings_until_ice_cream_drop = 0;
+  return iceCreamPerson;
+}
+
 Weather createWeatherLayer(void){
   /* This function creates a Weather struct and fills in the default
      values. Many of these are defined in generic.h */
@@ -196,6 +213,67 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
       programmableWorker->cargo++;
     }
   }
+}
+
+
+void updateIceCreamPerson(GameObjectData *gameObjectData, int ticks){
+  double newX,newY;
+  int i;
+  
+  gameObjectData->iceCreamPerson->countDownToStride--;
+    	printf("%d\n", gameObjectData->iceCreamPerson->countDownToStride);
+  if(gameObjectData->iceCreamPerson->countDownToStride <= 0){
+  	gameObjectData->iceCreamPerson->countDownToStride =
+  	(double)STRIDE_FREQUENCY / gameObjectData->iceCreamPerson->speed;
+
+  	
+  	switch(gameObjectData->iceCreamPerson->currentGraphicIndex){
+  	  case 0:
+  	  	gameObjectData->iceCreamPerson->currentGraphicIndex = WITH_ICE_CREAM_STRIDE2;
+  	    break;
+  	  case 1:
+  	  	gameObjectData->iceCreamPerson->currentGraphicIndex = WITH_ICE_CREAM_STRIDE1;
+  	  	break;
+  	}   
+  }
+
+  /*use trig to find new locations based on heading angle (radians)*/
+  newX = sin(gameObjectData->iceCreamPerson->heading);
+  newY = cos(gameObjectData->iceCreamPerson->heading);
+  newX *= gameObjectData->iceCreamPerson->speed * ticks;
+  newY *= gameObjectData->iceCreamPerson->speed * ticks;
+  
+  /*update new position*/
+  gameObjectData->iceCreamPerson->xPosition += newX;
+  gameObjectData->iceCreamPerson->yPosition += newY;
+  gameObjectData->iceCreamPerson->rect.x = (int)floor(gameObjectData->iceCreamPerson->xPosition);
+  gameObjectData->iceCreamPerson->rect.y = (int)floor(gameObjectData->iceCreamPerson->yPosition);
+  
+  if(gameObjectData->weather.present_weather == Sun && 
+  gameObjectData->iceCreamPerson->has_ice_cream){
+  
+  	if(gameObjectData->iceCreamPerson->xPosition >= X_SIZE_OF_WORLD - PERSON_WIDTH){
+  	  /*world border has been reached and sun is still out, change direction*/
+      gameObjectData->iceCreamPerson->heading = 3.142 + ((rand()%4)+ 0.069813);/*random facing away from border*/  
+      	
+  	}else if(gameObjectData->iceCreamPerson->xPosition <= 0){
+  	  /*world border has been reached and sun is still out, change direction*/
+      gameObjectData->iceCreamPerson->heading = ((rand()%4)+ 0.069813);/*random facing away from border*/  	 
+       	
+  	}else if(gameObjectData->iceCreamPerson->yPosition >= Y_SIZE_OF_WORLD - PERSON_HEIGHT){
+  	  /*world border has been reached and sun is still out, change direction*/
+      gameObjectData->iceCreamPerson->heading = 1.5708 + ((rand()%4)+ 0.069813);/*random facing away from border*/
+      	
+  	}else if(gameObjectData->iceCreamPerson->yPosition <= 0){
+  	  /*world border has been reached and sun is still out, change direction*/
+      gameObjectData->iceCreamPerson->heading = 4.7124 + ((rand()%4)+ 0.069813);/*random facing away from border*/
+      
+    }else if(rand() % 1000 == 0){
+      /*randomly change direction, just for the hell of it*/
+   	  gameObjectData->iceCreamPerson->heading += ((double)(rand() % 30) / (double)10) - 1.5;
+   	}
+  }
+
 }
 
 ResourceNodeSpawner createResourceNodeSpawner(int maximumNodeCount, float xPosition, float yPosition, float radius){
@@ -312,6 +390,30 @@ void updateWeather(Weather *weather, int ticks){
     }
 }
 
+
+void reInitialiseIceCreamPerson(IceCreamPerson *iceCreamPerson){
+  iceCreamPerson->currently_on_screen = 1;
+  
+  iceCreamPerson->heading = (double)(randPi() * 2); /*set heading randomly*/
+  
+  /*random chance of appearing in top left or right, or bottom left or right corner of world*/
+  iceCreamPerson->xPosition = (rand()%2) ? X_SIZE_OF_WORLD - PERSON_WIDTH : 0;
+  iceCreamPerson->yPosition = (rand()%2) ? Y_SIZE_OF_WORLD - PERSON_HEIGHT : 0;
+  iceCreamPerson->rect.x = iceCreamPerson->xPosition;
+  iceCreamPerson->rect.y = iceCreamPerson->yPosition;
+
+  iceCreamPerson->has_ice_cream = 1;
+  iceCreamPerson->speed = 0.05; /*pixels per millisecond*/
+  iceCreamPerson->stung_count = 0;
+  
+  iceCreamPerson->countDownToStride = (double)STRIDE_FREQUENCY / iceCreamPerson->speed;
+ 
+  iceCreamPerson->currentGraphicIndex = 0;
+
+  
+  iceCreamPerson->strings_until_ice_cream_drop = (rand() % 5) + 1;
+}
+
 ResourceNode createResourceNode(ResourceNodeSpawner *parentSpawner, int resourceUnits){
   /* ResourceNodeSpawner *parentSpawner = the spawner which this resource node
                                           is attached to
@@ -358,6 +460,28 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
                  NULL,
                  SDL_FLIP_NONE);
                          
+  /*determine if iceCreamPerson is on screen and needs animating*/
+  if(gameObjectData->iceCreamPerson->currently_on_screen){
+  
+      if(!gameObjectData->pause_status){
+         updateIceCreamPerson(gameObjectData, ticks);
+      }
+
+     blitGameObject(gameObjectData->iceCreamPerson->rect,
+                    graphicsData,
+                    graphicsData->person->graphic[gameObjectData->iceCreamPerson->currentGraphicIndex],
+                    DEGREESINCIRCLE-(gameObjectData->iceCreamPerson->heading * RADIANSTODEGREES),
+                    NULL,
+                    SDL_FLIP_NONE);  	
+  
+  }else{ /*small probability of re-initialising iceCreamPerson and setting location to on-screen*/ 
+    if((gameObjectData->weather.present_weather == Sun) &&
+    (rand() % ICE_CREAM_PERSON_PROB == 0)){
+    
+    	reInitialiseIceCreamPerson(gameObjectData->iceCreamPerson);
+
+    }
+  }
 
 
   /* Second, we loop through all the ResourceNodeSpawners */
@@ -414,5 +538,6 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
   }        
   
   updateWeather(&gameObjectData->weather, ticks);
+  
   paintWeatherLayer(graphicsData, gameObjectData->weather.present_weather, graphicsData->workerTexture); /* Only blending worker textures currently */
 }

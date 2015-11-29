@@ -12,4 +12,6 @@ void generateHive(GameObjectData *gameObjectData);
 
 void generateTrees(GameObjectData *gameObjectData);
 
+void generateIceCreamPerson(GameObjectData *gameObjectData);
+
 void generateWeatherLayer(GameObjectData *gameObjectData);

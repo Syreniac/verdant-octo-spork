@@ -39,6 +39,12 @@ void generateProgrammableWorkers(GameObjectData *gameObjectData){
   gameObjectData->programmableWorkerCount = 1;
 }
 
+
+void generateIceCreamPerson(GameObjectData *gameObjectData){
+/*create iceCreamPerson at initial location outside of world boundaries*/
+  gameObjectData->iceCreamPerson = createIceCreamPerson();
+}
+
 void generateHive(GameObjectData *gameObjectData){
   /* Create a Hive */
   gameObjectData->hive = createHive();
@@ -53,6 +59,8 @@ void generateTrees(GameObjectData *gameObjectData){
   
   }
 }
+
+
 
 void generateWeatherLayer(GameObjectData *gameObjectData){
   /* Create a Hive */
