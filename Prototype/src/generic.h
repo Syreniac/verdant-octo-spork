@@ -24,8 +24,8 @@
 #define GRASS_TILE_WIDTH 350
 #define GRASS_TILE_HEIGHT 76
 
-#define RAIN_TILE_WIDTH 6
-#define RAIN_TILE_HEIGHT 6
+#define RAIN_TILE_WIDTH 9
+#define RAIN_TILE_HEIGHT 9
 #define RAIN_FRAME_DELAY 4
 
 /*higher values result in lower levels of parallax*/

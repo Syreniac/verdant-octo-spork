@@ -61,17 +61,14 @@ void blitRainRandomly(GraphicsData *graphicsData){
 
 	SDL_Rect dstRect;
 	int i;
-	
-
-
 
 	dstRect.w = RAIN_TILE_WIDTH;
 	dstRect.h = RAIN_TILE_HEIGHT;
 	
-	for(i = 0; i < 100; i++){
+	for(i = 0; i < 20; i++){
 	
-	   dstRect.x = rand()% X_SIZE_OF_WORLD;
-	   dstRect.y = rand()% Y_SIZE_OF_WORLD;
+	   dstRect.x = (rand()% X_SIZE_OF_SCREEN);
+	   dstRect.y = (rand()% Y_SIZE_OF_SCREEN);
 	   
 	   if(rand()%30){
 	      SDL_RenderCopy(graphicsData->renderer,

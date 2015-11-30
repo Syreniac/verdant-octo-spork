@@ -225,6 +225,12 @@ void updateIceCreamPerson(GameObjectData *gameObjectData, int ticks){
   gameObjectData->iceCreamPerson->has_ice_cream)){
   	gameObjectData->iceCreamPerson->going_home = 1;
   }
+  /*set iceCreamPerson to running if it is raining*/
+  if(gameObjectData->weather.present_weather == Rain){
+    gameObjectData->iceCreamPerson->speed = 0.1;
+  }else{
+    gameObjectData->iceCreamPerson->speed = 0.05;
+  }
   
   /*set iceCreamPerson->currently_on_screen to false if he has walked off screen*/
   if(gameObjectData->iceCreamPerson->xPosition > X_SIZE_OF_WORLD ||
