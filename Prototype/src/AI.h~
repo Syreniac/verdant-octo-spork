@@ -3,7 +3,7 @@
 typedef struct BlockFunctionArgs BlockFunctionArgs;
 typedef struct BlockFunction BlockFunction;
 typedef struct BlockFunctionRoot BlockFunctionRoot;
-typedef struct AIData AIData; 
+typedef struct AIData AIData;
 
 typedef int(*blockFunction_WrappedFunction)(BlockFunctionArgs *arguments,
                                             ProgrammableWorker *programmableWorker,

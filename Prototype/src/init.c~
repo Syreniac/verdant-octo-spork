@@ -21,7 +21,7 @@ GraphicsData initialise(void){
         - The window's name
         - X coords to open the window at (we don't need to specify something)
         - Y coords like above
-        - The X size of the window in pixels 
+        - The X size of the window in pixels
         - The Y size like above
         - SDL configuration options which can be found online in the API documentation*/
 

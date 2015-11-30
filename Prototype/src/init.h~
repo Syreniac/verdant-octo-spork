@@ -9,6 +9,6 @@ struct InitData{
 };
 
 typedef struct InitData InitData;
- 
+
 
 int game_welcome_page(GraphicsData graphicsData);

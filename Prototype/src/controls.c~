@@ -4,7 +4,7 @@ void keydown(ControlsData *controlsData, GameObjectData *gameObjectData, SDL_Eve
     switch (event->key.keysym.scancode){
         case (SDL_SCANCODE_DOWN):
 			controlsData->keys[ARROW_DOWN] = 1;
-            break; 
+            break;
         case (SDL_SCANCODE_UP):
 			controlsData->keys[ARROW_UP] = 1;
             break;

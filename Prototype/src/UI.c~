@@ -79,7 +79,7 @@ void renderUIElement(GraphicsData *graphicsData, UI_Element *element){
   switch(element->type){
     case CLICKABLE:
     case DRAGGABLE:
-    case PANEL: 
+    case PANEL:
     case EXPANDABLE:
 
       SDL_SetRenderDrawColor(graphicsData->renderer,

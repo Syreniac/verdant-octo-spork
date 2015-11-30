@@ -220,7 +220,7 @@ BlockFunctionRoot generateGenericWorkerOrders(void){
   blockFunction3.wrapped_function = &blockFunction_SetWorkerHeadingRandomly;
   blockFunction3.arguments = blockFunctionArgs3;
   /* Putting the primary link to NULL will break the AI recursion
-     after this function */ 
+     after this function */
 
   /* This is the "check to see if the bee picked anything up part" */
   strcpy(blockFunction4.name,"blockFunction_IfWorkerCargoGreaterThan");

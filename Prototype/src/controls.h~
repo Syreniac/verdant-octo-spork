@@ -8,7 +8,7 @@ enum Keybindings {ARROW_DOWN,
 				  MAX_KEYS};
 
 typedef enum Keybindings Keybindings;
- 
+
 struct ControlsData{
 	int keys[MAX_KEYS];
 };

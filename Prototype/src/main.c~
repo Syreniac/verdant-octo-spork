@@ -16,4 +16,4 @@ int main(int argc, char *argv[]){
   game_welcome_page(graphicsData);
   uninitialise();
   exit(0);
-} 
+}

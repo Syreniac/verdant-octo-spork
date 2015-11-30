@@ -43,7 +43,7 @@ void generateProgrammableWorkers(GameObjectData *gameObjectData){
 void generateIceCreamPerson(GameObjectData *gameObjectData){
 /*create iceCreamPerson at initial location outside of world boundaries*/
   gameObjectData->iceCreamPerson = createIceCreamPerson();
-} 
+}
 
 void generateHive(GameObjectData *gameObjectData){
   /* Create a Hive */

@@ -214,7 +214,7 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
     }
   }
 }
- 
+
 
 void updateIceCreamPerson(GameObjectData *gameObjectData, int ticks){
   double newX,newY;

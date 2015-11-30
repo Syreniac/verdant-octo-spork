@@ -73,7 +73,7 @@ float randPi(void){
   return (float)(PI * (float) rand() / (float) RAND_MAX);
 }
 
-float square(float f){ 
+float square(float f){
   /* float f = the float to square
 
      Simply returns f*f to simulate squaring a number */

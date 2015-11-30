@@ -11,7 +11,7 @@
 #define PROGRAM_NAME "Prototype"
 #define X_SIZE_OF_SCREEN 640
 #define Y_SIZE_OF_SCREEN 480
- 
+
 #define X_SIZE_OF_WORLD 840
 #define Y_SIZE_OF_WORLD 680
 

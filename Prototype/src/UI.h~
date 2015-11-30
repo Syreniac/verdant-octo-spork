@@ -62,7 +62,7 @@ struct Expandable{
   int b;
   SDL_Rect small_rect;
   SDL_Rect rect;
-  int msToBig; 
+  int msToBig;
   int msToSmall;
   int msTimer;
   enum ExpandableStatus status;
