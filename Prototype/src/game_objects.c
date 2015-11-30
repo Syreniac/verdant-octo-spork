@@ -517,14 +517,23 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
   
    /*determine if iceCreamPerson is on screen and needs animating*/
   if(gameObjectData->iceCreamPerson->currently_on_screen){
-  
+  	  SDL_Texture *temp;
+  	  
+  	  switch(gameObjectData->iceCreamPerson->currentGraphicIndex){
+  	    case 0:
+  	    	temp = graphicsData->person->graphic1;
+  	      break;
+  	    case 1:
+  	    	temp = graphicsData->person->graphic2;
+  	      break;
+  	  }
       if(!gameObjectData->pause_status){
          updateIceCreamPerson(gameObjectData, ticks);
       }
 
      blitGameObject(gameObjectData->iceCreamPerson->rect,
                     graphicsData,
-                    graphicsData->person->graphic[gameObjectData->iceCreamPerson->currentGraphicIndex],
+					temp,
                     DEGREESINCIRCLE-(gameObjectData->iceCreamPerson->heading * RADIANSTODEGREES),
                     NULL,
                     SDL_FLIP_NONE);  	

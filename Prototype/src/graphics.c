@@ -70,16 +70,49 @@ void blitRainRandomly(GraphicsData *graphicsData){
 	   dstRect.x = (rand()% X_SIZE_OF_SCREEN);
 	   dstRect.y = (rand()% Y_SIZE_OF_SCREEN);
 	   
-	   if(rand()%30){
-	      SDL_RenderCopy(graphicsData->renderer,
-						 graphicsData->rainy->graphic[rand()%4],
-						 NULL,
-						 &dstRect);
+	   if(rand()%30){ /*1 in 30 chance or rendering graphic 5 or 6 (rain splatter in stead or rain fall)*/
+	      switch(rand()%4){
+	        case 0:
+	           SDL_RenderCopy(graphicsData->renderer,
+						      graphicsData->rainy->graphic1,
+						      NULL,
+						      &dstRect);	           
+	           break;
+	        case 1:
+	           SDL_RenderCopy(graphicsData->renderer,
+						      graphicsData->rainy->graphic2,
+						      NULL,
+						      &dstRect);	           
+	           break;
+	        case 2:
+	           SDL_RenderCopy(graphicsData->renderer,
+						      graphicsData->rainy->graphic3,
+						      NULL,
+						      &dstRect);	           
+	           break;	  
+	        case 3:
+	           SDL_RenderCopy(graphicsData->renderer,
+						      graphicsData->rainy->graphic4,
+						      NULL,
+						      &dstRect);	           
+	           break;		             	                    	           
+	      }
+
 	   }else{
-	      SDL_RenderCopy(graphicsData->renderer,
-						 graphicsData->rainy->graphic[(rand()%2)+3],
-						 NULL,
-						 &dstRect);	
+	   	  switch(rand()%2){
+	        case 0:
+	           SDL_RenderCopy(graphicsData->renderer,
+						      graphicsData->rainy->graphic5,
+						      NULL,
+						      &dstRect);	           
+	           break;	  	   	  
+	        case 1:
+	           SDL_RenderCopy(graphicsData->renderer,
+						      graphicsData->rainy->graphic6,
+						      NULL,
+						      &dstRect);	           
+	           break;	  	   	  
+	   	  }
 	   }	      
 	}
 	

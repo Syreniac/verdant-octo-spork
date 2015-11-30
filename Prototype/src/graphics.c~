@@ -135,7 +135,7 @@ void blitTiledBackground(GraphicsData *graphicsData, SDL_Texture *texture){
 
 
 SDL_Texture *loadTextureFromFile(char *file_name, GraphicsData *graphicsData){
-	SDL_Surface *image;
+	SDL_Surface *image; 
 	SDL_Texture *texture;
 
 	printf("loading texture file %s\n",file_name);

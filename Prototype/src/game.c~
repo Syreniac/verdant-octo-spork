@@ -87,7 +87,7 @@ int gameStart(GraphicsData graphicsData){
 
   /* This doesn't actually do much, but it lets us give the workers somewhere
      to return home to */
-  generateHive(&gameData.gameObjectData);
+  generateHive(&gameData.gameObjectData); 
   generateTrees(&gameData.gameObjectData);
   generateWeatherLayer(&gameData.gameObjectData);
   

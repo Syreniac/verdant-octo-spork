@@ -99,20 +99,20 @@ int gameStart(GraphicsData graphicsData){
   gameData.graphicsData.nodeTexture = loadTextureFromFile("images/blueFlower.bmp",
 														  &gameData.graphicsData);
 														  
-  gameData.graphicsData.person->graphic[WITH_ICE_CREAM_STRIDE1] =
+  gameData.graphicsData.person->graphic1 =
   loadTextureFromFile("images/person/withIceCream1.bmp",
 					  &gameData.graphicsData);
 					  
-  gameData.graphicsData.person->graphic[WITH_ICE_CREAM_STRIDE2] =
+  gameData.graphicsData.person->graphic2 =
   loadTextureFromFile("images/person/withIceCream2.bmp",
 					  &gameData.graphicsData);
 					  
-  gameData.graphicsData.rainy->graphic[0] = loadTextureFromFile("images/rain/rain1.bmp", &gameData.graphicsData);
-  gameData.graphicsData.rainy->graphic[1] = loadTextureFromFile("images/rain/rain2.bmp", &gameData.graphicsData);
-  gameData.graphicsData.rainy->graphic[2] = loadTextureFromFile("images/rain/rain3.bmp", &gameData.graphicsData);
-  gameData.graphicsData.rainy->graphic[3] = loadTextureFromFile("images/rain/rain4.bmp", &gameData.graphicsData);
-  gameData.graphicsData.rainy->graphic[4] = loadTextureFromFile("images/rain/rain5.bmp", &gameData.graphicsData);
-  gameData.graphicsData.rainy->graphic[5] = loadTextureFromFile("images/rain/rain6.bmp", &gameData.graphicsData);  
+  gameData.graphicsData.rainy->graphic1 = loadTextureFromFile("images/rain/rain1.bmp", &gameData.graphicsData);
+  gameData.graphicsData.rainy->graphic2 = loadTextureFromFile("images/rain/rain2.bmp", &gameData.graphicsData);
+  gameData.graphicsData.rainy->graphic3 = loadTextureFromFile("images/rain/rain3.bmp", &gameData.graphicsData);
+  gameData.graphicsData.rainy->graphic4 = loadTextureFromFile("images/rain/rain4.bmp", &gameData.graphicsData);
+  gameData.graphicsData.rainy->graphic5 = loadTextureFromFile("images/rain/rain5.bmp", &gameData.graphicsData);
+  gameData.graphicsData.rainy->graphic6 = loadTextureFromFile("images/rain/rain6.bmp", &gameData.graphicsData);  
    
   gameData.graphicsData.workerTexture = loadTextureFromFile("images/bee.bmp",
 														  &gameData.graphicsData);

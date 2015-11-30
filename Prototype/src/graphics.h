@@ -32,11 +32,19 @@ struct GraphicsData{
 };
 
 struct Person{
-	SDL_Texture *graphic[2]; 
+/*would have used an array here but seems to be causing problems on other platforms*/
+	SDL_Texture *graphic1; 
+	SDL_Texture *graphic2;
 };
 
 struct Rainy{
-	SDL_Texture *graphic[6];
+/*would have used an array here but seems to be causing problems on other platforms*/
+	SDL_Texture *graphic1;
+	SDL_Texture *graphic2;
+	SDL_Texture *graphic3;		
+	SDL_Texture *graphic4;
+	SDL_Texture *graphic5;
+	SDL_Texture *graphic6;		
 };
 
 
