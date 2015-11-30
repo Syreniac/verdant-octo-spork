@@ -98,6 +98,8 @@ int gameStart(GraphicsData graphicsData){
   gameData.graphicsData.treeTexture = loadTextureFromFile("images/tree.bmp",&gameData.graphicsData);
   gameData.graphicsData.nodeTexture = loadTextureFromFile("images/blueFlower.bmp",
 														  &gameData.graphicsData);
+  
+  gameData.graphicsData.person = (Person*) malloc(sizeof(Person));
 														  
   gameData.graphicsData.person->graphic[WITH_ICE_CREAM_STRIDE1] =
   loadTextureFromFile("images/person/withIceCream1.bmp",
@@ -106,6 +108,8 @@ int gameStart(GraphicsData graphicsData){
   gameData.graphicsData.person->graphic[WITH_ICE_CREAM_STRIDE2] =
   loadTextureFromFile("images/person/withIceCream2.bmp",
 					  &gameData.graphicsData);
+					  
+  gameData.graphicsData.rainy = (Rainy*) malloc(sizeof(Rainy));				  
 					  
   gameData.graphicsData.rainy->graphic[0] = loadTextureFromFile("images/rain/rain1.bmp", &gameData.graphicsData);
   gameData.graphicsData.rainy->graphic[1] = loadTextureFromFile("images/rain/rain2.bmp", &gameData.graphicsData);
