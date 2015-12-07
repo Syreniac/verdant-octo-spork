@@ -112,11 +112,15 @@ void blitParallaxTreeTops(SDL_Rect objectRect, GraphicsData *graphicsData, SDL_T
 void blitTiledBackground(GraphicsData *graphicsData, SDL_Texture *texture){
 	int i, j, xbgShifter, ybgShifter;
 
+	int window_x, window_y;
+
+	SDL_GetWindowSize(graphicsData->window,&window_x,&window_y);
+
 	xbgShifter = (graphicsData->navigationOffset.x - X_INITIAL_SCREEN_OFFSET) % GRASS_TILE_WIDTH;
 	ybgShifter = (graphicsData->navigationOffset.y - Y_INITIAL_SCREEN_OFFSET) % GRASS_TILE_HEIGHT;
 
-	for(i = -GRASS_TILE_WIDTH; i < X_SIZE_OF_SCREEN; i+= GRASS_TILE_WIDTH){
-		for(j = -GRASS_TILE_HEIGHT; j < Y_SIZE_OF_SCREEN; j+= GRASS_TILE_HEIGHT){
+	for(i = -GRASS_TILE_WIDTH; i < window_x; i+= GRASS_TILE_WIDTH){
+		for(j = -GRASS_TILE_HEIGHT; j < window_y; j+= GRASS_TILE_HEIGHT){
 
 			SDL_Rect dstRect;
 			dstRect.x = i;
@@ -171,5 +175,5 @@ void paintBackground(GraphicsData *graphicsData, int r, int g, int b){
 	SDL_GetRenderDrawColor(graphicsData->renderer,&o_r,&o_g,&o_b,&o_a);
 	SDL_SetRenderDrawColor(graphicsData->renderer,r,g,b,SDL_ALPHA_OPAQUE);
 	SDL_RenderFillRect(graphicsData->renderer, &rect);
-    SDL_SetRenderDrawColor(graphicsData->renderer,o_r,o_g,o_b,o_a);
+    	SDL_SetRenderDrawColor(graphicsData->renderer,o_r,o_g,o_b,o_a);
 }

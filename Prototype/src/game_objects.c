@@ -456,6 +456,7 @@ ResourceNode createResourceNode(ResourceNodeSpawner *parentSpawner, int resource
      ResourceNode around the ResourceNodeSpawner. This can be improved. */
   resourceNode.rect.x = (int)floor(parentSpawner->xPosition + generateRandomCoordOffset(parentSpawner->spawnRadius) - X_SIZE_OF_NODE/2);
   resourceNode.rect.y = (int)floor(parentSpawner->yPosition + generateRandomCoordOffset(parentSpawner->spawnRadius) - Y_SIZE_OF_NODE/2);
+  fitRectToWorld(&resourceNode.rect);
   resourceNode.rect.w = 20;
   resourceNode.rect.h = 20;
   return resourceNode;

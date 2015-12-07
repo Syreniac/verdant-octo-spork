@@ -70,3 +70,4 @@ double getDistance2BetweenPoints(float p1X, float p1Y, float p2X, float p2Y);
 double getDistance2BetweenRects(SDL_Rect rectA, SDL_Rect rectB);
 float square(float f);
 float randPi(void);
+inline void fitRectToWorld(SDL_Rect *rect);

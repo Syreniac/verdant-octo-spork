@@ -92,6 +92,21 @@ double getDistance2BetweenPoints(float p1X, float p1Y, float p2X, float p2Y){
   return (square(p1X - p2X) + square(p1Y - p2Y));
 }
 
+inline void fitRectToWorld(SDL_Rect *rect){
+  if(rect->x + rect->w > X_SIZE_OF_WORLD){
+	rect->x = X_SIZE_OF_WORLD - 1;
+  }
+  else if(rect->x < 0){
+	rect->x = 0;
+  }
+  if(rect->y + rect->h > Y_SIZE_OF_WORLD){
+	rect->y = Y_SIZE_OF_WORLD - 1;
+  }
+  else if(rect->y < 0){
+	rect->y = 0;
+  }
+}
+
 float generateRandomCoordOffset(float radius){
   /* float radius = the range to generate random numbers within
 

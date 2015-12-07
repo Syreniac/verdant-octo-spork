@@ -49,32 +49,7 @@ int gameStart(GraphicsData graphicsData){
   gameData.gameStartTime = SDL_GetTicks();
   gameData.gameRunTime = gameData.gameStartTime;
 
-  rect.x = 0;
-  rect.y = 0;
-  rect.w = 40;
-  rect.h = 40;
-
-  gameData.uiData.UIElements[0] = createUI_Clickable(rect, "Hello", 50,50,150);
-
-  rect.x = 100;
-  rect.y = 100;
-  rect.w = 40;
-  rect.h = 40;
-
-  rect2.x = 100;
-  rect2.y = 100;
-  rect2.w = 160;
-  rect2.h = 160;
-
-  gameData.uiData.UIElements[1] = createUI_Expandable(rect,rect2,1000,1000, 0, 0, 200);
-
-  rect.x = 100;
-  rect.y = 100;
-  rect.w = 20;
-  rect.h = 20;
-
-  gameData.uiData.UIElements[2] = createUI_Draggable(rect,&gameData.uiData.UIElements[1],0,136,64);
-  gameData.uiData.numberOfUIElements = 3;
+  gameData.uiData.numberOfUIElements = 0;
 
   
   /* Create some ResourceNodeSpawners to fill our world with ResourceNodes */
