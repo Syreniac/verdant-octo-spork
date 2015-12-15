@@ -125,3 +125,15 @@ double getDistance2BetweenRects(SDL_Rect rectA, SDL_Rect rectB){
   double dist = getDistance2BetweenPoints(rectAXC,rectAYC,rectBXC,rectBYC);
   return dist;
 }
+
+inline double getAngleBetweenRects(SDL_Rect *rectA, SDL_Rect *rectB){
+  return atan2((double)(rectA->x + rectA->w/2 - rectB->w/2 - rectB->x),
+               (double)(rectA->y + rectA->h/2 - rectB->h/2 - rectB->y));
+}
+
+inline SDL_Point getCenterOfRect(SDL_Rect rect){
+  SDL_Point point;
+  point.x = rect.x + rect.w/2;
+  point.y = rect.y + rect.h/2;
+  return point;
+}

@@ -3,7 +3,7 @@
 CFLAGS = -pedantic -Wall -Wextra -Wno-unused-variable -Wno-unused-parameter
 SDL_FLAGS = -I/opt/SDL/2.0.3/include -L/opt/SDL/2.0.3/lib
 TTF_FLAGS = -ISDL_ttf_lab/include -LSDL_ttf_lab/lib
-IMAGE_FLAGS = -ISDL2_Image_lab/include -LSDL2_Image_lab/lib
+IMAGE_FLAGS = -ISDL_Image_lab/include -LSDL_Image_lab/lib
 LFLAGS = $(SDL_FLAGS) $(TTF_FLAGS) $(IMAGE_FLAGS) -Wl,-rpath,/opt/SDL/2.0.3/lib -lSDL2 -lSDL2_Image -lSDL_ttf -lfreetype -lm
 DELETE = rm
 DELETE_RECURSIVE = rm -r

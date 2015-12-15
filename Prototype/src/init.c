@@ -51,6 +51,7 @@ int game_welcome_page(GraphicsData graphicsData){
    int menuRunning = 1;
    SDL_Rect rect;
    SDL_Event event;
+   UI_Element *element;
 
    initData.graphicsData = graphicsData;
 
@@ -67,8 +68,26 @@ int game_welcome_page(GraphicsData graphicsData){
    rect.h = 40;
 
 
-   initData.uiData.UIElements[0] = createUI_Clickable(rect, "Hello", 100,100,200);
-   initData.uiData.numberOfUIElements = 1;
+   initData.uiData.root = calloc(1,sizeof(UI_Element));
+
+   element = calloc(1,sizeof(UI_Element));
+
+   element->rect.x = 100;
+   element->rect.y = 100;
+   element->rect.w = 50;
+   element->rect.h = 50;
+   element->actions = malloc(sizeof(UI_Action)*3);
+   element->num_of_actions = 3;
+   element->parent = NULL;
+   element->child = NULL;
+   element->sibling = NULL;
+
+   UIConfigure_FillRect(element,&element->actions[0],0,100,100);
+   UIConfigure_Counter(element,&element->actions[1]);
+   UIConfigure_LeftClickRect(element,&element->actions[2]);
+       UITrigger_Bind(&element->actions[2],&element->actions[1],-1,UITRIGGER_PLUSONE);
+
+   UIElement_Reparent(element,initData.uiData.root);
 
 
    /* create box 2 (start), expanded*/
@@ -79,10 +98,11 @@ int game_welcome_page(GraphicsData graphicsData){
 
    while(menuRunning){
 
+      UIRoot_Execute(&initData.uiData,UPDATE);
 
       paintBackground(&initData.graphicsData,0,200,100);
+      UIRoot_Execute(&initData.uiData,RENDER_BASE,&initData.graphicsData);
 
-      renderUI(&initData.uiData, &initData.graphicsData);
       SDL_RenderPresent(initData.graphicsData.renderer);
     	while (SDL_PollEvent(&event))
     	{
@@ -90,15 +110,16 @@ int game_welcome_page(GraphicsData graphicsData){
     		{
     			/* Closing the Window will exit the program */
     			case SDL_MOUSEBUTTONDOWN:
-   				menuRunning = clickOnUI(&initData.uiData, &event);
-               printf("%d\n",menuRunning);
-               menuRunning = !menuRunning;
-   				break;
+   				   UIRoot_Execute(&initData.uiData,LEFT_CLICK,&event);
+             printf("execute\n");
+   				   break;
     			case SDL_QUIT:
     				exit(0);
     				break;
     		}
     	}
+      menuRunning = (!initData.uiData.root->child->actions[1].status);
+      //menuRunning = !&initData.uiData.root->child->actions[1].status;
    } /*delay 2s first*/
 
    gameStart(graphicsData);

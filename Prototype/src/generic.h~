@@ -7,8 +7,6 @@
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
-#include <SDL2_Image.h>
-#include <SDL_ttf.h>
 
 #define VERBOSE 1
 
@@ -79,4 +77,3 @@ float square(float f);
 float randPi(void);
 inline void fitRectToWorld(SDL_Rect *rect);
 inline double getAngleBetweenRects(SDL_Rect *rectA, SDL_Rect *rectB);
-inline SDL_Point getCenterOfRect(SDL_Rect rect);

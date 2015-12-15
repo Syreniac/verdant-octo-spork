@@ -86,8 +86,16 @@ int blockFunction_RandomShiftRememberedLocation(BlockFunctionArgs *arguments,
                                                 ProgrammableWorker *programmableWorker,
                                                 GameObjectData *gameObjectData);
 
+int blockFunction_IfNodeFound(BlockFunctionArgs *arguments,
+                              ProgrammableWorker *programmableWorker,
+                              GameObjectData *gameObjectData);
+
+int blockFunction_HeadToFoundNode(BlockFunctionArgs *arguments,
+                                  ProgrammableWorker *programmableWorker,
+                                  GameObjectData *gameObjectData);
+
 void runBlockFunctionRootOverWorker(BlockFunctionRoot *blockFunctionRoot,
-                                   ProgrammableWorker *programmbleWorker,
+                                   ProgrammableWorker *programmableWorker,
                                    GameObjectData *gameObjectData);
 
 int runBlockFunctionOverWorker(BlockFunction *blockFunction,

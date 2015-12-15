@@ -3,6 +3,7 @@
 enum ProgrammableWorkerStatus {LEAVING = 1,
                                RETURNING = 2,
                                WANTING_TO_RETURN = 3,
+                               NODE_FOUND = 4,
                                BLANK = -1};
 
 typedef struct ProgrammableWorker ProgrammableWorker;
@@ -55,6 +56,7 @@ struct ResourceNodeSpawner{
 
 struct ProgrammableWorkerBrain{
   SDL_Point remembered_point;
+  ResourceNode *foundNode;
   int is_point_remembered;
   ProgrammableWorker *followTarget;
 };
@@ -94,15 +96,15 @@ struct IceCreamPerson{
   float xPosition;
   float yPosition;
   SDL_Rect rect;
-  
+
   double heading;
   double speed;
-  
+
   int countDownToStride;
   int currentGraphicIndex;
-  
+
   int going_home;
-  
+
   int has_ice_cream;
   int currently_on_screen;
   int stung_count;
@@ -118,7 +120,7 @@ struct GameObjectData{
   Weather weather;
   Hive hive;
   Tree tree[NUMBER_OF_TREES];
-  ResourceNodeSpawner resourceNodeSpawners[5];
+  ResourceNodeSpawner resourceNodeSpawners[NUMBER_OF_FLOWER_PATCHES];
   IceCreamPerson *iceCreamPerson;
   int resourceNodeSpawnerCount;
   ProgrammableWorker *first_programmable_worker;
@@ -150,3 +152,4 @@ ResourceNode createResourceNode(ResourceNodeSpawner *parentSpawner, int resource
 IceCreamPerson *createIceCreamPerson(void);
 void reInitialiseIceCreamPerson(IceCreamPerson *iceCreamPerson);
 void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsData, int ticks);
+int countProgrammableWorkersInRange(GameObjectData *gameObjectData, SDL_Point center, double radius);

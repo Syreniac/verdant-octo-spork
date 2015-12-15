@@ -49,15 +49,12 @@ int gameStart(GraphicsData graphicsData){
   gameData.gameStartTime = SDL_GetTicks();
   gameData.gameRunTime = gameData.gameStartTime;
 
-  gameData.uiData.numberOfUIElements = 0;
 
-  
   /* Create some ResourceNodeSpawners to fill our world with ResourceNodes */
   generateResourceNodeSpawners(&gameData.gameObjectData);
 
   /* Create some ProgammableWorkers to carry out our tasks */
 
-  printf("%p\n",gameData.gameObjectData.first_programmable_worker);
   generateProgrammableWorkers(&gameData.gameObjectData);
 
   /* This doesn't actually do much, but it lets us give the workers somewhere
@@ -65,34 +62,34 @@ int gameStart(GraphicsData graphicsData){
   generateHive(&gameData.gameObjectData);
   generateTrees(&gameData.gameObjectData);
   generateWeatherLayer(&gameData.gameObjectData);
-  
+
   generateIceCreamPerson(&gameData.gameObjectData);
-  
+
 
   gameData.graphicsData.grassTexture = loadTextureFromFile("images/grass/grass4.bmp",&gameData.graphicsData);
   gameData.graphicsData.treeTexture = loadTextureFromFile("images/tree.bmp",&gameData.graphicsData);
   gameData.graphicsData.nodeTexture = loadTextureFromFile("images/blueFlower.bmp",
 														  &gameData.graphicsData);
-  
+
   gameData.graphicsData.person = (Person*) malloc(sizeof(Person));
-														  
+
   gameData.graphicsData.person->graphic[WITH_ICE_CREAM_STRIDE1] =
   loadTextureFromFile("images/person/withIceCream1.bmp",
 					  &gameData.graphicsData);
-					  
+
   gameData.graphicsData.person->graphic[WITH_ICE_CREAM_STRIDE2] =
   loadTextureFromFile("images/person/withIceCream2.bmp",
 					  &gameData.graphicsData);
-					  
-  gameData.graphicsData.rainy = (Rainy*) malloc(sizeof(Rainy));				  
-					  
+
+  gameData.graphicsData.rainy = (Rainy*) malloc(sizeof(Rainy));
+
   gameData.graphicsData.rainy->graphic[0] = loadTextureFromFile("images/rain/rain1.bmp", &gameData.graphicsData);
   gameData.graphicsData.rainy->graphic[1] = loadTextureFromFile("images/rain/rain2.bmp", &gameData.graphicsData);
   gameData.graphicsData.rainy->graphic[2] = loadTextureFromFile("images/rain/rain3.bmp", &gameData.graphicsData);
   gameData.graphicsData.rainy->graphic[3] = loadTextureFromFile("images/rain/rain4.bmp", &gameData.graphicsData);
   gameData.graphicsData.rainy->graphic[4] = loadTextureFromFile("images/rain/rain5.bmp", &gameData.graphicsData);
-  gameData.graphicsData.rainy->graphic[5] = loadTextureFromFile("images/rain/rain6.bmp", &gameData.graphicsData);  
-   
+  gameData.graphicsData.rainy->graphic[5] = loadTextureFromFile("images/rain/rain6.bmp", &gameData.graphicsData);
+
   gameData.graphicsData.workerTexture = loadTextureFromFile("images/bee.bmp",
 														  &gameData.graphicsData);
   gameData.graphicsData.hiveTexture = loadTextureFromFile("images/beehive.bmp",
@@ -120,7 +117,7 @@ int gameLoop(GameData *gameData){
      function ran */
   int delta_t;
   SDL_Event event;
-  
+
 
   /* Storing the number of milliseconds since the program was run helps keep it
      moving smoothly by calculating delta_t */
@@ -141,7 +138,6 @@ int gameLoop(GameData *gameData){
   paintBackground(&gameData->graphicsData,0,200,100);
   updateGameObjects(&gameData->gameObjectData, &gameData->graphicsData, delta_t);
   runAI(&gameData->aiData,&gameData->gameObjectData);
-  renderUI(&gameData->uiData, &gameData->graphicsData);
 
   /*This function is like the blit function, putting pixels to the screen.
   but it needs to be called after all of the graphicall changes have been made,
@@ -162,19 +158,16 @@ int gameLoop(GameData *gameData){
 		{
 			/* Closing the Window will exit the program */
 			case SDL_MOUSEMOTION:
-				moveMouseOnUi(&gameData->uiData,&event);
 				break;
 			case SDL_MOUSEBUTTONUP:
-				clickupOnUI(&gameData->uiData, &event);
 				break;
 			case SDL_MOUSEBUTTONDOWN:
-				clickOnUI(&gameData->uiData, &event);
 				break;
 			case SDL_KEYDOWN:
-				keydown(&gameData->controlsData, &gameData->gameObjectData, &event);
+        keydown(&gameData->controlsData,&gameData->gameObjectData,&event);
 				break;
 			case SDL_KEYUP:
-				keyup(&gameData->controlsData, &gameData->gameObjectData, &event);
+        keyup(&gameData->controlsData,&gameData->gameObjectData,&event);
 				break;
 			case SDL_QUIT:
 				exit(0);

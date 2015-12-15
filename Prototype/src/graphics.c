@@ -64,12 +64,12 @@ void blitRainRandomly(GraphicsData *graphicsData){
 
 	dstRect.w = RAIN_TILE_WIDTH;
 	dstRect.h = RAIN_TILE_HEIGHT;
-	
+
 	for(i = 0; i < 20; i++){
-	
+
 	   dstRect.x = (rand()% X_SIZE_OF_SCREEN);
 	   dstRect.y = (rand()% Y_SIZE_OF_SCREEN);
-	   
+
 	   if(rand()%30){
 	      SDL_RenderCopy(graphicsData->renderer,
 						 graphicsData->rainy->graphic[rand()%4],
@@ -79,10 +79,10 @@ void blitRainRandomly(GraphicsData *graphicsData){
 	      SDL_RenderCopy(graphicsData->renderer,
 						 graphicsData->rainy->graphic[(rand()%2)+3],
 						 NULL,
-						 &dstRect);	
-	   }	      
+						 &dstRect);
+	   }
 	}
-	
+
 }
 
 
@@ -93,18 +93,18 @@ void blitParallaxTreeTops(SDL_Rect objectRect, GraphicsData *graphicsData, SDL_T
   tempRect = objectRect;
   tempRect.x += graphicsData->navigationOffset.x;
   tempRect.y += graphicsData->navigationOffset.y;
-  
+
   xParallaxOffset -= X_SIZE_OF_SCREEN/2;
   xParallaxOffset += tempRect.x;
   xParallaxOffset /= PARALLAX_INTENSITY;
-  
+
   yParallaxOffset -= Y_SIZE_OF_SCREEN/2;
   yParallaxOffset += tempRect.y;
   yParallaxOffset /= PARALLAX_INTENSITY;
-  
+
   tempRect.x += xParallaxOffset;
   tempRect.y += yParallaxOffset;
-  
+
   SDL_RenderCopyEx(graphicsData->renderer, texture, NULL, &tempRect, 0, NULL, SDL_FLIP_NONE);
 }
 
@@ -119,8 +119,8 @@ void blitTiledBackground(GraphicsData *graphicsData, SDL_Texture *texture){
 	xbgShifter = (graphicsData->navigationOffset.x - X_INITIAL_SCREEN_OFFSET) % GRASS_TILE_WIDTH;
 	ybgShifter = (graphicsData->navigationOffset.y - Y_INITIAL_SCREEN_OFFSET) % GRASS_TILE_HEIGHT;
 
-	for(i = -GRASS_TILE_WIDTH; i < window_x; i+= GRASS_TILE_WIDTH){
-		for(j = -GRASS_TILE_HEIGHT; j < window_y; j+= GRASS_TILE_HEIGHT){
+	for(i = -GRASS_TILE_WIDTH; i < window_x + GRASS_TILE_WIDTH; i+= GRASS_TILE_WIDTH){
+		for(j = -GRASS_TILE_HEIGHT; j < window_y + GRASS_TILE_HEIGHT; j+= GRASS_TILE_HEIGHT){
 
 			SDL_Rect dstRect;
 			dstRect.x = i;

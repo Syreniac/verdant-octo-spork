@@ -1,5 +1,44 @@
 #include "game_objects.h"
 
+static ResourceNode *chooseNodeRandomly(ResourceNodeSpawner *resourceNodeSpawner);
+static void shuffleAliveNodes(ResourceNodeSpawner *resourceNodeSpawner);
+
+static ResourceNode *chooseNodeRandomly(ResourceNodeSpawner *resourceNodeSpawner){
+  int i = 0, r = rand();
+  if(resourceNodeSpawner->currentNodeCount > 0){
+    r = r % (resourceNodeSpawner->currentNodeCount);
+    while(i < resourceNodeSpawner->currentNodeCount){
+      if(resourceNodeSpawner->resourceNodes[i].alive){
+        if(r == 0){
+          return &resourceNodeSpawner->resourceNodes[i];
+        }
+        r--;
+      }
+      i++;
+    }
+  }
+  return NULL;
+}
+
+static void shuffleAliveNodes(ResourceNodeSpawner *resourceNodeSpawner){
+  int start = 0;
+  int end = resourceNodeSpawner->maximumNodeCount;
+
+  while(start < end){
+    if(!resourceNodeSpawner->resourceNodes[start].alive && resourceNodeSpawner->resourceNodes[end].alive){
+      resourceNodeSpawner->resourceNodes[start] = resourceNodeSpawner->resourceNodes[end];
+      resourceNodeSpawner->resourceNodes[end].alive = 0;
+    }
+    if(resourceNodeSpawner->resourceNodes[start].alive){
+      start++;
+    }
+    if(!resourceNodeSpawner->resourceNodes[end].alive){
+      end--;
+    }
+  }
+
+}
+
 ResourceNode *checkResourceNodeCollision(ResourceNodeSpawner **resourceNodeSpawnerPointer, GameObjectData *gameObjectData, ProgrammableWorker *programmableWorker){
   /* ResourceNodeSpawner **resourceNodeSpawnerPoint
                                     = this is a pointer to a pointer (I hate it
@@ -28,6 +67,7 @@ ResourceNode *checkResourceNodeCollision(ResourceNodeSpawner **resourceNodeSpawn
     if(testRectIntersection(programmableWorker->rect, gameObjectData->resourceNodeSpawners[i].collisionRect)){
       /* Reset j every time */
       j = 0;
+      *resourceNodeSpawnerPointer = &gameObjectData->resourceNodeSpawners[i];
       /* Loop through the ResourceNodes on the resourceNodeSpawner and check
          collisions */
       while(j < gameObjectData->resourceNodeSpawners[i].maximumNodeCount){
@@ -39,7 +79,6 @@ ResourceNode *checkResourceNodeCollision(ResourceNodeSpawner **resourceNodeSpawn
 		   programmableWorker->rect)
 			&& gameObjectData->resourceNodeSpawners[i].resourceNodes[j].alive){
           /* Both these values are essentially returned */
-          *resourceNodeSpawnerPointer = &gameObjectData->resourceNodeSpawners[i];
           return(&gameObjectData->resourceNodeSpawners[i].resourceNodes[j]);
         }
         j++;
@@ -48,6 +87,22 @@ ResourceNode *checkResourceNodeCollision(ResourceNodeSpawner **resourceNodeSpawn
     i++;
   }
   return(NULL);
+}
+
+int countProgrammableWorkersInRange(GameObjectData *gameObjectData, SDL_Point center, double radius){
+  int i = 0;
+  ProgrammableWorker *worker = gameObjectData->first_programmable_worker;
+  SDL_Point point;
+  radius = radius * radius;
+  while(worker != NULL){
+    point = getCenterOfRect(worker->rect);
+    if(getDistance2BetweenPoints(center.x,center.y,point.x,point.y) <= radius){
+      i++;
+    }
+    worker = worker->next;
+  }
+  printf("found %d workers in range\n",i);
+  return i;
 }
 
 int getFirstDeadResourceNode(ResourceNodeSpawner *resourceNodeSpawner){
@@ -99,7 +154,7 @@ ProgrammableWorker *createProgrammableWorker(GameObjectData *gameObjectData){
   /* heading is measured in radians because maths in C all take radians */
   programmableWorker->heading = 0.0;
   /* This is basically pixels/milliseconds */
-  programmableWorker->speed = 0.1;
+  programmableWorker->speed = WORKER_SPEED;
   /* I don't think this is used yet... */
   programmableWorker->type = 1;
   programmableWorker->cargo = 0;
@@ -108,6 +163,7 @@ ProgrammableWorker *createProgrammableWorker(GameObjectData *gameObjectData){
   programmableWorker->next = NULL;
   programmableWorker->brain.is_point_remembered = 0;
   programmableWorker->brain.followTarget = NULL;
+  programmableWorker->brain.foundNode = NULL;
   return(programmableWorker);
 }
 
@@ -170,8 +226,9 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
      float ticks                            = The number of ticks to update for.*/
   double newX,newY;
   int i;
-  ResourceNodeSpawner *resourceNodeSpawner;
+  ResourceNodeSpawner *resourceNodeSpawner = NULL;
   ResourceNode *resourceNode;
+
 
   /* Because we're using a heading/velocity movement system here, we have to use
      some trigonometry to work out the new positions */
@@ -187,23 +244,28 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
   programmableWorker->rect.x = (int)floor(programmableWorker->rawX);
   programmableWorker->rect.y = (int)floor(programmableWorker->rawY);
 
+  if(programmableWorker->brain.foundNode != NULL && !programmableWorker->brain.foundNode->alive){
+    programmableWorker->brain.foundNode = NULL;
+  }
+
+  printf("worker status: %d\n",programmableWorker->status);
+
   if(getDistance2BetweenPoints(programmableWorker->rect.x + programmableWorker->rect.w/2,
 							   programmableWorker->rect.y + programmableWorker->rect.h/2,
 							   gameObjectData->hive.rect.x + gameObjectData->hive.rect.w/2,
-							   gameObjectData->hive.rect.y + gameObjectData->hive.rect.h/2) < 10.0 && programmableWorker->status == RETURNING){
+							   gameObjectData->hive.rect.y + gameObjectData->hive.rect.h/2) < 50.0 && programmableWorker->status == RETURNING){
     if(programmableWorker->cargo != 0){
       programmableWorker->cargo = 0;
       gameObjectData->hive.flowers_collected++;
       printf("We've now collected %d flowers!\n",gameObjectData->hive.flowers_collected);
     }
   }
-  if(programmableWorker->status == LEAVING){
+  else if(programmableWorker->status == LEAVING){
     /* status being 1 means that the bee heading away from the center */
 
     /* We want to get back the ResourceNode and ResourceNodeSpawner (if any)
        that we are colliding with */
     resourceNode = checkResourceNodeCollision(&resourceNodeSpawner,gameObjectData,programmableWorker);
-
     /* resourceNode will be NULL if there are no collisions, so test that */
     if(resourceNode != NULL){
       /* Kill the ResourceNode */
@@ -211,6 +273,10 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
       /* Make sure the ResourceNodeSpawner knows that it's lost a ResourceNode */
       resourceNodeSpawner->currentNodeCount--;
       programmableWorker->cargo++;
+      programmableWorker->brain.foundNode = NULL;
+    }
+    else if(programmableWorker->brain.foundNode == NULL && resourceNodeSpawner != NULL){
+      programmableWorker->brain.foundNode = chooseNodeRandomly(resourceNodeSpawner);
     }
   }
 }
@@ -219,7 +285,9 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
 void updateIceCreamPerson(GameObjectData *gameObjectData, int ticks){
   double newX,newY;
   int i;
-  
+  int distanceFromYBorder;
+  int distanceFromXBorder;
+
   /*set iceCreamPerson to going home if sun has gone, or he has lost his ice cream*/
   if(!(gameObjectData->weather.present_weather == Sun &&
   gameObjectData->iceCreamPerson->has_ice_cream)){
@@ -231,7 +299,7 @@ void updateIceCreamPerson(GameObjectData *gameObjectData, int ticks){
   }else{
     gameObjectData->iceCreamPerson->speed = 0.05;
   }
-  
+
   /*set iceCreamPerson->currently_on_screen to false if he has walked off screen*/
   if(gameObjectData->iceCreamPerson->xPosition > X_SIZE_OF_WORLD ||
   gameObjectData->iceCreamPerson->yPosition > Y_SIZE_OF_WORLD ||
@@ -239,16 +307,16 @@ void updateIceCreamPerson(GameObjectData *gameObjectData, int ticks){
   gameObjectData->iceCreamPerson->yPosition < 0 - PERSON_HEIGHT){
     gameObjectData->iceCreamPerson->currently_on_screen = 0;
   }
-  
+
   /*decrement countDownToStride*/
   gameObjectData->iceCreamPerson->countDownToStride--;
 
-  /*if countDownToStride equals zero, reset count, and change stride image*/ 
+  /*if countDownToStride equals zero, reset count, and change stride image*/
   if(gameObjectData->iceCreamPerson->countDownToStride <= 0){
   	gameObjectData->iceCreamPerson->countDownToStride =
   	(double)STRIDE_FREQUENCY / gameObjectData->iceCreamPerson->speed;
 
-  	
+
   	switch(gameObjectData->iceCreamPerson->currentGraphicIndex){
   	  case 0:
   	  	gameObjectData->iceCreamPerson->currentGraphicIndex = WITH_ICE_CREAM_STRIDE2;
@@ -256,7 +324,7 @@ void updateIceCreamPerson(GameObjectData *gameObjectData, int ticks){
   	  case 1:
   	  	gameObjectData->iceCreamPerson->currentGraphicIndex = WITH_ICE_CREAM_STRIDE1;
   	  	break;
-  	}   
+  	}
   }
 
   /*use trig to find new locations based on heading angle (radians)*/
@@ -264,35 +332,56 @@ void updateIceCreamPerson(GameObjectData *gameObjectData, int ticks){
   newY = cos(gameObjectData->iceCreamPerson->heading);
   newX *= gameObjectData->iceCreamPerson->speed * ticks;
   newY *= gameObjectData->iceCreamPerson->speed * ticks;
-  
+
   /*update new position*/
   gameObjectData->iceCreamPerson->xPosition += newX;
   gameObjectData->iceCreamPerson->yPosition += newY;
   gameObjectData->iceCreamPerson->rect.x = (int)floor(gameObjectData->iceCreamPerson->xPosition);
   gameObjectData->iceCreamPerson->rect.y = (int)floor(gameObjectData->iceCreamPerson->yPosition);
-  
-  if(!gameObjectData->iceCreamPerson->going_home){
-  
+
+  if(countProgrammableWorkersInRange(gameObjectData, getCenterOfRect(gameObjectData->iceCreamPerson->rect), 250.0) == 0 && !gameObjectData->iceCreamPerson->going_home){
+
   	if(gameObjectData->iceCreamPerson->xPosition >= X_SIZE_OF_WORLD - PERSON_WIDTH){
   	  /*world border has been reached and sun is still out, change direction*/
-      gameObjectData->iceCreamPerson->heading = 3.142 + ((rand()%4)+ 0.069813);/*random facing away from border*/  
-      	
+      gameObjectData->iceCreamPerson->heading = 3.142 + ((rand()%4)+ 0.069813);/*random facing away from border*/
+
   	}else if(gameObjectData->iceCreamPerson->xPosition <= 0){
   	  /*world border has been reached and sun is still out, change direction*/
-      gameObjectData->iceCreamPerson->heading = ((rand()%4)+ 0.069813);/*random facing away from border*/  	 
-       	
+      gameObjectData->iceCreamPerson->heading = ((rand()%4)+ 0.069813);/*random facing away from border*/
+
   	}else if(gameObjectData->iceCreamPerson->yPosition >= Y_SIZE_OF_WORLD - PERSON_HEIGHT){
   	  /*world border has been reached and sun is still out, change direction*/
       gameObjectData->iceCreamPerson->heading = 1.5708 + ((rand()%4)+ 0.069813);/*random facing away from border*/
-      	
+
   	}else if(gameObjectData->iceCreamPerson->yPosition <= 0){
   	  /*world border has been reached and sun is still out, change direction*/
       gameObjectData->iceCreamPerson->heading = 4.7124 + ((rand()%4)+ 0.069813);/*random facing away from border*/
-      
+
     }else if(rand() % 1000 == 0){
       /*randomly change direction, just for the hell of it*/
    	  gameObjectData->iceCreamPerson->heading += ((double)(rand() % 30) / (double)10) - 1.5;
    	}
+  }
+  else{
+    printf("forceing run away\n");
+    distanceFromYBorder = gameObjectData->iceCreamPerson->yPosition - Y_SIZE_OF_WORLD/2;
+    distanceFromXBorder = gameObjectData->iceCreamPerson->xPosition - X_SIZE_OF_WORLD/2;
+    if(abs(distanceFromXBorder) > abs(distanceFromYBorder)){
+      if(distanceFromXBorder > 0){
+        gameObjectData->iceCreamPerson->heading = PI * 0.75 + 0.069813;
+      }
+      else{
+        gameObjectData->iceCreamPerson->heading = PI * 0.25 + 0.069813;
+      }
+    }
+    else{
+      if(distanceFromYBorder > 0){
+        gameObjectData->iceCreamPerson->heading = 0 + 0.069813;
+      }
+      else{
+        gameObjectData->iceCreamPerson->heading = PI * 0.5 + 0.069813;
+      }
+    }
   }
 
 }
@@ -365,6 +454,7 @@ void updateResourceNodeSpawner(ResourceNodeSpawner *spawner, int ticks){
   /* If the amount of nodes attached to the ResourceNodeSpawner is less than
      the maximumNode count, then we want to spawn more in. */
   if(spawner->currentNodeCount < spawner->maximumNodeCount){
+
     /* We use a timer to delay respawning ResourceNodes, so add the new ticks
        to it. */
     spawner->ticksSinceSpawn += ticks;
@@ -390,7 +480,7 @@ void updateWeather(Weather *weather, int ticks){
 
     if(weather->tickCount > TICKSPERWEATHER){
     	weather->tickCount = 0;
-    
+
     printf("weather changed\n");
       switch (weather->present_weather)
       {
@@ -418,9 +508,9 @@ void updateWeather(Weather *weather, int ticks){
 
 void reInitialiseIceCreamPerson(IceCreamPerson *iceCreamPerson){
   iceCreamPerson->currently_on_screen = 1;
-  
+
   iceCreamPerson->heading = (double)(randPi() * 2); /*set heading randomly*/
-  
+
   /*random chance of appearing in top left or right, or bottom left or right corner of world*/
   iceCreamPerson->xPosition = (rand()%2) ? X_SIZE_OF_WORLD - PERSON_WIDTH : 0;
   iceCreamPerson->yPosition = (rand()%2) ? Y_SIZE_OF_WORLD - PERSON_HEIGHT : 0;
@@ -431,12 +521,12 @@ void reInitialiseIceCreamPerson(IceCreamPerson *iceCreamPerson){
   iceCreamPerson->going_home = 0;
   iceCreamPerson->speed = 0.05; /*pixels per millisecond*/
   iceCreamPerson->stung_count = 0;
-  
+
   iceCreamPerson->countDownToStride = (double)STRIDE_FREQUENCY / iceCreamPerson->speed;
- 
+
   iceCreamPerson->currentGraphicIndex = 0;
 
-  
+
   iceCreamPerson->strings_until_ice_cream_drop = (rand() % 5) + 1;
 }
 
@@ -488,7 +578,7 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
                  0,
                  NULL,
                  SDL_FLIP_NONE);
-                         
+
 
 
 
@@ -514,11 +604,11 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
     }
     i++;
   }
-  
-  
+
+
    /*determine if iceCreamPerson is on screen and needs animating*/
   if(gameObjectData->iceCreamPerson->currently_on_screen){
-  
+
       if(!gameObjectData->pause_status){
          updateIceCreamPerson(gameObjectData, ticks);
       }
@@ -528,18 +618,18 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
                     graphicsData->person->graphic[gameObjectData->iceCreamPerson->currentGraphicIndex],
                     DEGREESINCIRCLE-(gameObjectData->iceCreamPerson->heading * RADIANSTODEGREES),
                     NULL,
-                    SDL_FLIP_NONE);  	
-  
-  }else{ /*small probability of re-initialising iceCreamPerson and setting location to on-screen*/ 
+                    SDL_FLIP_NONE);
+
+  }else{ /*small probability of re-initialising iceCreamPerson and setting location to on-screen*/
     if((gameObjectData->weather.present_weather == Sun) &&
     (rand() % ICE_CREAM_PERSON_PROB == 0)){
-    
+
     	reInitialiseIceCreamPerson(gameObjectData->iceCreamPerson);
 
     }
-  } 
-  
-  
+  }
+
+
   /* Thirdly, we loop through all the ProgrammableWorkers and update them */
   /* AI thinking has been moved to a seperate function to prevent some circular
      inheritance issues. */
@@ -559,21 +649,21 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 
     i++;
   }
-  
+
   /* render tree tops last, so that they appear above everything else*/
   for(i = 0; i < NUMBER_OF_TREES; i++){
-  
+
      blitParallaxTreeTops(gameObjectData->tree[i].rect,
                     graphicsData,
                     graphicsData->treeTexture);
-  }        
-  
+  }
+
   /*finally render a layer or rain splatter if its raining*/
   if(gameObjectData->weather.present_weather == Rain){
     blitRainRandomly(graphicsData);
   }
-  
+
   updateWeather(&gameObjectData->weather, ticks);
-  
+
   paintWeatherLayer(graphicsData, gameObjectData->weather.present_weather, graphicsData->workerTexture); /* Only blending worker textures currently */
 }

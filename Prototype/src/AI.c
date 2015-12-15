@@ -60,8 +60,8 @@ int blockFunction_IfWorkerStatusEqual(BlockFunctionArgs *arguments, Programmable
 
 int blockFunction_IfWorkerOutsideOfBounds(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
 
-  if(programmableWorker->rect.x > (X_SIZE_OF_WORLD - programmableWorker->rect.w) || programmableWorker->rect.x <= 0 ||
-     programmableWorker->rect.y > (Y_SIZE_OF_WORLD - programmableWorker->rect.h) || programmableWorker->rect.y <= 0){
+  if(programmableWorker->rect.x >= (X_SIZE_OF_WORLD - programmableWorker->rect.w) || programmableWorker->rect.x <= 0 ||
+     programmableWorker->rect.y >= (Y_SIZE_OF_WORLD - programmableWorker->rect.h) || programmableWorker->rect.y <= 0){
        return(1);
     }
     return(2);
@@ -83,8 +83,7 @@ int blockFunction_SetWorkerHeadingRandomly(BlockFunctionArgs *arguments, Program
 
 
 int blockFunction_WorkerReturnToHive(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
-  programmableWorker->heading = atan2((double)(gameObjectData->hive.rect.x + gameObjectData->hive.rect.w/2 - programmableWorker->rect.w/2 - programmableWorker->rect.x),
-                                      (double)(gameObjectData->hive.rect.y + gameObjectData->hive.rect.h/2 - programmableWorker->rect.h/2 - programmableWorker->rect.y));
+  programmableWorker->heading = getAngleBetweenRects(&gameObjectData->hive.rect,&programmableWorker->rect);
   programmableWorker->status = RETURNING;
   return(1);
 }
@@ -155,6 +154,20 @@ int blockFunction_RandomShiftRememberedLocation(BlockFunctionArgs *arguments, Pr
   y_shift -= arguments->integers[0];
   programmableWorker->brain.remembered_point.x += x_shift;
   programmableWorker->brain.remembered_point.y += y_shift;
+  return 1;
+}
+
+int blockFunction_IfNodeFound(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
+  if(programmableWorker->brain.foundNode != NULL){
+    return 1;
+  }
+  return 2;
+}
+
+int blockFunction_HeadToFoundNode(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
+  if(programmableWorker->brain.foundNode != NULL){
+    programmableWorker->heading = getAngleBetweenRects(&programmableWorker->brain.foundNode->rect,&programmableWorker->rect);
+  }
   return 1;
 }
 
@@ -311,6 +324,12 @@ blockFunction_WrappedFunction getBlockFunctionByName(char *blockFunctionName){
   }
   if(strcmp(blockFunctionName, "BlockFunction_RandomShiftRememberedLocation") == 0){
     return &blockFunction_RandomShiftRememberedLocation;
+  }
+  if(strcmp(blockFunctionName, "BlockFunction_IfNodeFound") == 0){
+    return &blockFunction_IfNodeFound;
+  }
+  if(strcmp(blockFunctionName, "BlockFunction_HeadToFoundNode") == 0){
+    return &blockFunction_HeadToFoundNode;
   }
   printf("ERROR: Unrecognised function name: \"%s\".\n Substituting a print function.\n",blockFunctionName);
   return &blockFunction_Print;

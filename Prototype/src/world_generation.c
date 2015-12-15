@@ -3,40 +3,30 @@
 void generateResourceNodeSpawners(GameObjectData *gameObjectData){
 
   /* Create two ResourceNodeSpawners at 'random' positions */
-  gameObjectData->resourceNodeSpawners[0] = createResourceNodeSpawner(DEFAULT_MAXNODECOUNT,
-                                                                      rand()%X_SIZE_OF_WORLD,
-                                                                      rand()%Y_SIZE_OF_WORLD,
-                                                                      DEFAULT_SPAWNRADIUS);
-
-  gameObjectData->resourceNodeSpawners[1] = createResourceNodeSpawner(DEFAULT_MAXNODECOUNT,
-                                                                      rand()%X_SIZE_OF_WORLD,
-                                                                      rand()%Y_SIZE_OF_WORLD,
-                                                                      DEFAULT_SPAWNRADIUS);
-
-
-  gameObjectData->resourceNodeSpawners[2] = createResourceNodeSpawner(DEFAULT_MAXNODECOUNT*2,
-                                                                      rand()%X_SIZE_OF_WORLD,
-                                                                      rand()%Y_SIZE_OF_WORLD,
-                                                                      DEFAULT_SPAWNRADIUS);
+  int i = 0;
+  while(i < NUMBER_OF_FLOWER_PATCHES){
+    gameObjectData->resourceNodeSpawners[i] = createResourceNodeSpawner(DEFAULT_MAXNODECOUNT,
+                                                                        rand()%X_SIZE_OF_WORLD,
+                                                                        rand()%Y_SIZE_OF_WORLD,
+                                                                        DEFAULT_SPAWNRADIUS);
+    i++;
+  }
 
   /* We need to keep a record of how many resourceNodeSpawners we have active
      so that we can loop through them later */
-  gameObjectData->resourceNodeSpawnerCount = 3;
+  gameObjectData->resourceNodeSpawnerCount = 0;
 }
 
 void generateProgrammableWorkers(GameObjectData *gameObjectData){
   /* Create two ProgrammableWorkers */
 
   createProgrammableWorker(gameObjectData);
-    createProgrammableWorker(gameObjectData);
-      createProgrammableWorker(gameObjectData);
-        createProgrammableWorker(gameObjectData);
-          createProgrammableWorker(gameObjectData);
-            createProgrammableWorker(gameObjectData);
-              createProgrammableWorker(gameObjectData);
-  /*gameObjectData->programmableWorkers[0] = createProgrammableWorker();*/
-  /* Make sure the count is correct */
-  gameObjectData->programmableWorkerCount = 1;
+  /*createProgrammableWorker(gameObjectData);
+  createProgrammableWorker(gameObjectData);
+  createProgrammableWorker(gameObjectData);
+  createProgrammableWorker(gameObjectData);
+  createProgrammableWorker(gameObjectData);
+  createProgrammableWorker(gameObjectData);*/
 }
 
 
@@ -54,9 +44,9 @@ void generateTrees(GameObjectData *gameObjectData){
   /* Create a Tree */
   int i;
   for(i = 0; i < NUMBER_OF_TREES; i++){
-  
+
      gameObjectData->tree[i] = createTree();
-  
+
   }
 }
 
