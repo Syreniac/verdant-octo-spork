@@ -7,8 +7,8 @@
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
-#include <SDL2_Image.h>
-#include <SDL_ttf.h>
+#include <SDL2/SDL_Mixer.h>
+#include <time.h>
 
 #define VERBOSE 1
 
@@ -77,6 +77,6 @@ double getDistance2BetweenPoints(float p1X, float p1Y, float p2X, float p2Y);
 double getDistance2BetweenRects(SDL_Rect rectA, SDL_Rect rectB);
 float square(float f);
 float randPi(void);
-inline void fitRectToWorld(SDL_Rect *rect);
-inline double getAngleBetweenRects(SDL_Rect *rectA, SDL_Rect *rectB);
-inline SDL_Point getCenterOfRect(SDL_Rect rect);
+void fitRectToWorld(SDL_Rect *rect);
+double getAngleBetweenRects(SDL_Rect *rectA, SDL_Rect *rectB);
+SDL_Point getCenterOfRect(SDL_Rect rect);

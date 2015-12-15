@@ -10,7 +10,7 @@ int calculateDt(int previousRunTime){
 
 
 
-int gameStart(GraphicsData graphicsData){
+int gameStart(GraphicsData graphicsData, AudioData audioData){
   /* SDL_Window *window = the pointer to the program's window
      This function will start the game looping.
      The return should be 0 unless there's an error we need to catch.*/
@@ -31,6 +31,7 @@ int gameStart(GraphicsData graphicsData){
   gameLoopReturn = 1;
 
   gameData.graphicsData = graphicsData;
+  gameData.audioData = audioData;
 
   gameData.gameObjectData.pause_status = 0;
   gameData.gameObjectData.first_programmable_worker = NULL;
@@ -102,6 +103,7 @@ int gameStart(GraphicsData graphicsData){
 
   /* Then run the gameLoop until it returns 0 or exits */
   printf("gameStarted %d\n",gameLoopReturn);
+  playMusic(&gameData.audioData,1);
   while(gameLoopReturn){
     gameLoopReturn = gameLoop(&gameData);
   }

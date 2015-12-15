@@ -10,7 +10,7 @@ CFLAGS = -pedantic -Wall -Wextra -Wno-unused-variable -Wno-unused-parameter
 
 # File structure variables
 ASSETS_CONTENTS = assets
-OBJS = main.o init.o game.o world_generation.o game_objects.o AI.o UI.o generic.o controls.o graphics.o
+OBJS = main.o init.o game.o world_generation.o game_objects.o AI.o UI.o generic.o controls.o graphics.o audio.o
 BIN = bin
 PROG = $(BIN)/Prototype
 CXX = gcc
@@ -23,7 +23,7 @@ ifeq ($(OS),Windows_NT)
 		SDL_FLAGS = -ISDL2_x32/include -LSDL2_x32/lib
 		DLL_LOCATION = SDL2_x32
 	endif
-	LFLAGS =  $(SDL_FLAGS) -lmingw32 -lSDL2main -lSDL2 -lm
+	LFLAGS =  $(SDL_FLAGS) -lmingw32 -lSDL2main -lSDL2 -lSDL2_mixer  -lm
 	DELETE = del
 	DELETE_RECURSIVE = del /s
 	DLL_COPY_COMMAND = xcopy $(DLL_LOCATION) $(BIN) /C /Y

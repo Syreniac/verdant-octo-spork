@@ -8,12 +8,13 @@ int main(int argc, char *argv[]){
      from Windows (or something?), so the functionality is split between other
      functions from other modules */
 
-  GraphicsData graphicsData;
-
+  InitData initData;
+	 
   printf("main\n");
-  graphicsData  = initialise();
+  initData  = initialise();
   printf("initialised\n");
-  game_welcome_page(graphicsData);
+  game_welcome_page(initData.graphicsData,initData.audioData);
   uninitialise();
   exit(0);
 }
+

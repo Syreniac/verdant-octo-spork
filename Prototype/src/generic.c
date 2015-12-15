@@ -92,7 +92,7 @@ double getDistance2BetweenPoints(float p1X, float p1Y, float p2X, float p2Y){
   return (square(p1X - p2X) + square(p1Y - p2Y));
 }
 
-inline void fitRectToWorld(SDL_Rect *rect){
+void fitRectToWorld(SDL_Rect *rect){
   if(rect->x + rect->w > X_SIZE_OF_WORLD){
 	rect->x = X_SIZE_OF_WORLD - 1;
   }
@@ -126,12 +126,12 @@ double getDistance2BetweenRects(SDL_Rect rectA, SDL_Rect rectB){
   return dist;
 }
 
-inline double getAngleBetweenRects(SDL_Rect *rectA, SDL_Rect *rectB){
+double getAngleBetweenRects(SDL_Rect *rectA, SDL_Rect *rectB){
   return atan2((double)(rectA->x + rectA->w/2 - rectB->w/2 - rectB->x),
                (double)(rectA->y + rectA->h/2 - rectB->h/2 - rectB->y));
 }
 
-inline SDL_Point getCenterOfRect(SDL_Rect rect){
+SDL_Point getCenterOfRect(SDL_Rect rect){
   SDL_Point point;
   point.x = rect.x + rect.w/2;
   point.y = rect.y + rect.h/2;

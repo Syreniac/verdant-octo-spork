@@ -12,9 +12,9 @@ struct GameData{
   GameObjectData gameObjectData;
   UIData uiData;
   ControlsData controlsData;
+  AudioData audioData;
 };
 
-int game_welcome_page(GraphicsData graphicsData);
-int gameStart(GraphicsData graphicsData);
+int gameStart(GraphicsData graphicsData, AudioData audioData);
 int gameLoop(GameData *gameData);
 int calculateDt(int previousRunTime);
