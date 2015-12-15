@@ -103,7 +103,7 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
 
   /* Then run the gameLoop until it returns 0 or exits */
   printf("gameStarted %d\n",gameLoopReturn);
-  playMusic(&gameData.audioData,1);
+
   while(gameLoopReturn){
     gameLoopReturn = gameLoop(&gameData);
   }
