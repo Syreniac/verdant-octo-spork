@@ -40,8 +40,9 @@ InitData initialise(void){
 	/*Audio needs to be initialized at the very start too.*/
 	audioSystem(&initData.audioData);
 	
-	loadMusic("music01.wav" , 1, &initData.audioData);
+	loadMusic("music01.wav" , 0, &initData.audioData);
 	loadMusic("music02.wav" , 1, &initData.audioData);
+	loadMusic("music03.wav" , 1, &initData.audioData);
 	
   return initData;
 }
@@ -125,7 +126,7 @@ int game_welcome_page(GraphicsData graphicsData, AudioData audioData){
 
    /* create box 4 (tutorial) not expanded*/
 
-   playMusic(&initData.audioData,1);   
+   playMusic(&initData.audioData,0);   
    
    while(menuRunning){
 
@@ -153,6 +154,7 @@ int game_welcome_page(GraphicsData graphicsData, AudioData audioData){
       //menuRunning = !&initData.uiData.root->child->actions[1].status;
    } /*delay 2s first*/
 
+   stopMusic(&initData.audioData, 0);
    gameStart(graphicsData,audioData);
    return 0;
 }

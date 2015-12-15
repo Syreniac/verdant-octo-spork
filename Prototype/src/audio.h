@@ -30,3 +30,4 @@ struct SoundEffect{
 
 void loadMusic(char *music, int season, AudioData *audioData);
 void playMusic(AudioData *audioData, int season);
+void stopMusic(AudioData *audioData, int season);

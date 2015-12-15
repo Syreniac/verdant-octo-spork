@@ -52,6 +52,10 @@ void playMusic(AudioData *audioData, int season) {
 	}
 	
 	fprintf(stderr,"No music for season %d\n",season);
+		
+}
+
+void stopMusic(AudioData *audioData, int season) {
 	
-	
+	Mix_HaltChannel(-1);	
 }
