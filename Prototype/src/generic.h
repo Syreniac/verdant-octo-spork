@@ -7,7 +7,7 @@
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
-#include <SDL2/SDL_Mixer.h>
+#include <SDL_mixer.h>
 #include <time.h>
 
 #define VERBOSE 1
