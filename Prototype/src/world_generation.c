@@ -21,12 +21,12 @@ void generateProgrammableWorkers(GameObjectData *gameObjectData){
   /* Create two ProgrammableWorkers */
 
   createProgrammableWorker(gameObjectData);
-  /*createProgrammableWorker(gameObjectData);
   createProgrammableWorker(gameObjectData);
   createProgrammableWorker(gameObjectData);
   createProgrammableWorker(gameObjectData);
   createProgrammableWorker(gameObjectData);
-  createProgrammableWorker(gameObjectData);*/
+  createProgrammableWorker(gameObjectData);
+  createProgrammableWorker(gameObjectData);/**/
 }
 
 

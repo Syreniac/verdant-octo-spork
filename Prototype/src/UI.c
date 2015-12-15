@@ -19,7 +19,6 @@
 
 static void freeUIAction(UI_Action *action);
 static void UITrigger_Execute(UI_Trigger *trigger);
-static void getCenterOfRect(SDL_Rect *rect, int *x, int *y);
 static int isLinked(UI_Element *test, UI_Element *to);
 
 int UIAction_Counter(UI_Action *action, va_list copy_from){
@@ -28,7 +27,8 @@ int UIAction_Counter(UI_Action *action, va_list copy_from){
 }
 
 int UIAction_RenderLine(UI_Action *action, va_list copy_from){
-	int ax,ay,bx,by;
+	int bx,by;
+	SDL_Point center;
 	GraphicsData *graphicsData;
 	va_list vargs;
 	va_copy(vargs,copy_from);
@@ -49,8 +49,8 @@ int UIAction_RenderLine(UI_Action *action, va_list copy_from){
 										255,
 										255,
 										255);
-		getCenterOfRect(&action->element->rect,&ax,&ay);
-		SDL_RenderDrawLine(graphicsData->renderer,ax,ay,
+		center = getCenterOfRect(action->element->rect);
+		SDL_RenderDrawLine(graphicsData->renderer,center.x,center.y,
 									action->integers[0],action->integers[1]);
 		return 1;
 	}
@@ -63,11 +63,11 @@ int UIAction_RenderLine(UI_Action *action, va_list copy_from){
 										255,
 										255,
 										255);
-		ax = action->element->rect.x + action->element->rect.w/2;
-		ay = action->element->rect.y + action->element->rect.h;
+		center.x = action->element->rect.x + action->element->rect.w/2;
+		center.y = action->element->rect.y + action->element->rect.h;
 		bx = action->external->rect.x + action->element->rect.w/2;
 		by = action->external->rect.y;
-		SDL_RenderDrawLine(graphicsData->renderer,ax,ay,
+		SDL_RenderDrawLine(graphicsData->renderer,center.x,center.y,
 									bx,by);
 		return 1;
 	}
@@ -662,11 +662,6 @@ void UIElement_DeExternalise(UI_Element *element){
 		}
 		child = child->sibling;
 	}
-}
-
-static void getCenterOfRect(SDL_Rect *rect, int *x, int *y){
-	*x = rect->x + rect->w/2;
-	*y = rect->y + rect->h/2;
 }
 
 void UIElement_Execute(UI_Element *element, enum Response response, va_list vargs){
