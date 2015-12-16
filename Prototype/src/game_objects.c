@@ -101,7 +101,6 @@ int countProgrammableWorkersInRange(GameObjectData *gameObjectData, SDL_Point ce
     }
     worker = worker->next;
   }
-  printf("found %d workers in range\n",i);
   return i;
 }
 
@@ -188,6 +187,7 @@ Weather createWeatherLayer(void){
   /* This function creates a Weather struct and fills in the default
      values. Many of these are defined in generic.h */
   Weather weather;
+  weather.tickCount = 0;
   printf("Created weather layer.");
   weather.present_weather = Sun;
   return(weather);
@@ -248,7 +248,6 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
     programmableWorker->brain.foundNode = NULL;
   }
 
-  printf("worker status: %d\n",programmableWorker->status);
 
   if(getDistance2BetweenPoints(programmableWorker->rect.x + programmableWorker->rect.w/2,
 							   programmableWorker->rect.y + programmableWorker->rect.h/2,
@@ -363,7 +362,6 @@ void updateIceCreamPerson(GameObjectData *gameObjectData, int ticks){
    	}
   }
   else{
-    printf("forceing run away\n");
     distanceFromYBorder = gameObjectData->iceCreamPerson->yPosition - Y_SIZE_OF_WORLD/2;
     distanceFromXBorder = gameObjectData->iceCreamPerson->xPosition - X_SIZE_OF_WORLD/2;
     if(abs(distanceFromXBorder) > abs(distanceFromYBorder)){
@@ -440,7 +438,6 @@ void initResourceNode(ResourceNode *resourceNode){
   resourceNode->rect.y = 0;
   resourceNode->rect.w = X_SIZE_OF_NODE;
   resourceNode->rect.h = Y_SIZE_OF_NODE;
-  resourceNode->deathTime = -1;
 }
 
 void updateResourceNodeSpawner(ResourceNodeSpawner *spawner, int ticks){

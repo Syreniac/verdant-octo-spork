@@ -1,5 +1,12 @@
 #include "UI.h"
 
+/* I know that there are technically more than two, but we only need to know
+   about two of them */
+
+#define NUM_OF_MOUSE_BUTTONS 2
+#define RIGHT_CLICK_BUTTON 1
+#define LEFT_CLICK_BUTTON 0
+
 enum Keybindings {ARROW_DOWN,
                   ARROW_UP,
 				  ARROW_LEFT,
@@ -11,10 +18,12 @@ typedef enum Keybindings Keybindings;
 
 struct ControlsData{
 	int keys[MAX_KEYS];
+  int mouseButtons[NUM_OF_MOUSE_BUTTONS];
 };
 typedef struct ControlsData ControlsData;
 
-void keydown(ControlsData *controlsData, GameObjectData *gameObjectData, SDL_Event *event);
-void keyup(ControlsData *controlsData, GameObjectData *gameObjectData, SDL_Event *event);
+void keydown(ControlsData *controlsData, GameObjectData *gameObjectData, UIData *uiData, SDL_Event *event);
+void keyup(ControlsData *controlsData, GameObjectData *gameObjectData, UIData *uiData, SDL_Event *event);
 void panScreen(GraphicsData *graphicsData, ControlsData *controlsData, int delta_t);
-void zeroControlKeys(ControlsData *controlsData);
+void initControlData(ControlsData *controlsData);
+int handleEvent(SDL_Event *event, GameObjectData *gameObjectData, UIData *uiData, ControlsData *controlsData);

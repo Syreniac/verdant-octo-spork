@@ -1,4 +1,4 @@
-#include "generic.h"		
+#include "generic.h"
 
 
 typedef struct GraphicsData GraphicsData;
@@ -27,6 +27,7 @@ struct GraphicsData{
   SDL_Texture *hiveTexture;
   SDL_Texture *treeTexture;
   SDL_Texture *grassTexture;
+  TTF_Font *fonts[2];
   struct Rainy *rainy;
   struct Person *person;
 };
@@ -48,12 +49,11 @@ void blitGameObject(SDL_Rect objectRect,
                     double angle,
                     SDL_Point *center,
                     SDL_RendererFlip flip);
-                    
+
 void blitParallaxTreeTops(SDL_Rect objectRect, GraphicsData *graphicsData, SDL_Texture *texture);
-						  
+
 void blitRainRandomly(GraphicsData *graphicsData);
 
 void blitTiledBackground(GraphicsData *graphicsData, SDL_Texture *texture);
 SDL_Texture *loadTextureFromFile(char *file_name, GraphicsData *graphicsData);
 void paintBackground(GraphicsData *graphicsData, int r, int g, int b);
-

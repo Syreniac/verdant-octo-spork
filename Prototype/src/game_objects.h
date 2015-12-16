@@ -27,9 +27,6 @@ struct ResourceNode{
   int resourceUnits;
   /* standard positioning data - x,y coords */
   SDL_Rect rect;
-  /* This is how we know when to respawn it once it dies. The value stored here
-     will be the SDL_GetTicks() at the time of the flowers death. */
-  int deathTime;
 };
 
 /*   Rather than having an array with just resourceNodes in, if we have a

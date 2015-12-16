@@ -1,6 +1,63 @@
 #include "controls.h"
 
-void keydown(ControlsData *controlsData, GameObjectData *gameObjectData, SDL_Event *event){
+static int isMouseFree(ControlsData *controlsData);
+
+static int isMouseFree(ControlsData *controlsData){
+	int i = 0;
+	while(i < NUM_OF_MOUSE_BUTTONS){
+		if(controlsData->mouseButtons[i]){return 0;}
+		i++;
+	}
+	return 1;
+}
+
+int handleEvent(SDL_Event *event, GameObjectData *gameObjectData, UIData *uiData, ControlsData *controlsData){
+
+		switch (event->type)
+		{
+			/* Closing the Window will exit the program */
+			case SDL_MOUSEMOTION:
+        UIRoot_Execute(uiData,MOTION,event);
+				break;
+			case SDL_MOUSEBUTTONDOWN:
+				if(isMouseFree(controlsData)){
+					/* We only want to catch new mouse clicks if the mouse is not having
+					   a button held down */
+					/* trust me */
+	        if(event->button.button == SDL_BUTTON_LEFT){
+	          UIRoot_Execute(uiData,LEFT_CLICK,event);
+						controlsData->mouseButtons[LEFT_CLICK_BUTTON] = 1;
+	        }
+	        else if(event->button.button == SDL_BUTTON_RIGHT){
+	          UIRoot_Execute(uiData,RIGHT_CLICK,event);
+						controlsData->mouseButtons[RIGHT_CLICK_BUTTON] = 1;
+	        }
+				}
+				break;
+			case SDL_MOUSEBUTTONUP:
+        if(event->button.button == SDL_BUTTON_LEFT){
+          UIRoot_Execute(uiData,LEFT_RELEASE,event);
+					controlsData->mouseButtons[LEFT_CLICK_BUTTON] = 0;
+        }
+        else if(event->button.button == SDL_BUTTON_RIGHT){
+          UIRoot_Execute(uiData,RIGHT_RELEASE,event);
+					controlsData->mouseButtons[RIGHT_CLICK_BUTTON] = 0;
+        }
+				break;
+			case SDL_KEYDOWN:
+        keydown(controlsData,gameObjectData,uiData,event);
+				break;
+			case SDL_KEYUP:
+        keyup(controlsData,gameObjectData,uiData,event);
+				break;
+			case SDL_QUIT:
+				exit(0);
+				break;
+		}
+		return 1;
+}
+
+void keydown(ControlsData *controlsData, GameObjectData *gameObjectData, UIData *uiData, SDL_Event *event){
     switch (event->key.keysym.scancode){
         case (SDL_SCANCODE_DOWN):
 			controlsData->keys[ARROW_DOWN] = 1;
@@ -16,24 +73,14 @@ void keydown(ControlsData *controlsData, GameObjectData *gameObjectData, SDL_Eve
             break;
 		case (SDL_SCANCODE_P):
             gameObjectData->pause_status = 1 - gameObjectData->pause_status; /* 1 for pause, 0 for go on */
-            if (gameObjectData->pause_status){
-               /*put a big recentage in the middle of the screen, with a big PAUSE*/
-               printf("Test1: %d\n", gameObjectData->pause_status);
-               /*output pause_status to other part of program*/
-
-            }
-            else{
-               /*remove the big recentage in the middle of the screen, and continue the clock*/
-               printf("Test2: %d\n", gameObjectData->pause_status);
-               /*output pause_status to other part of program*/
-            }
+						UIRoot_Execute(uiData,RESPONSE_PAUSE);
             break;
         default:
 			return;
     }
 }
 
-void keyup(ControlsData *controlsData, GameObjectData *gameObjectData, SDL_Event *event){
+void keyup(ControlsData *controlsData, GameObjectData *gameObjectData, UIData *uiData, SDL_Event *event){
     switch (event->key.keysym.scancode){
         case (SDL_SCANCODE_DOWN):
 			controlsData->keys[ARROW_DOWN] = 0;
@@ -97,10 +144,15 @@ void panScreen(GraphicsData *graphicsData, ControlsData *controlsData, int delta
 
 }
 
-void zeroControlKeys(ControlsData *controlsData){
+void initControlData(ControlsData *controlsData){
 	int i = 0;
 	while(i < MAX_KEYS){
 		controlsData->keys[i] = 0;
+		i++;
+	}
+	i = 0;
+	while(i < NUM_OF_MOUSE_BUTTONS){
+		controlsData->mouseButtons[i] = 0;
 		i++;
 	}
 }
