@@ -1,0 +1,54 @@
+# Please run the clean command detailed at the bottom before running: make -f makefile_win64
+
+# This make file works. Please do not modify it unless you're at a windows computer and can test it.
+# Linux terminal commands are not the same as windows ones - many of the make commands that were
+# in here were not workined at all on Windows.
+
+
+# These are system independent
+CFLAGS = -pedantic -Wall -Wextra -Wno-unused-variable -Wno-unused-parameter -g
+
+# File structure variables
+ASSETS_CONTENTS = assets
+OBJS = main.o init.o game.o world_generation.o game_objects.o AI.o UI.o generic.o controls.o
+BIN = bin
+PROG = $(BIN)/Prototype3
+CXX = gcc
+
+ifeq ($(PROCESSOR_ARCHITECTURE),AMD64)
+	DLL_LOCATION = SDL2_x64
+endif
+ifeq ($(PROCESSOR_ARCHITECTURE),x86)
+	DLL_LOCATION = SDL2_x32
+endif
+LFLAGS = -IC:\msys64\mingw64\include\SDL2 -LC:\msys64\mingw64\lib -lmingw32 -lSDL2main -lSDL2 -lm -mwindows 
+DELETE = del
+DELETE_RECURSIVE = del /s
+DLL_COPY_COMMAND = xcopy $(DLL_LOCATION) $(BIN) /C /Y
+ASSET_COPY_COMMAND = xcopy $(ASSETS_CONTENTS) $(BIN) /C /E /Y
+
+# List all the files here
+
+# top-level rule to create the program.
+all: $(PROG)
+
+
+# compiling other source files.
+%.o: src/%.c src/%.h
+	$(CXX) $(CFLAGS) $(LFLAGS) -c -s $<
+
+# linking the program. | $(BIN) makes the bin/ directory if it does not yet exist.
+$(PROG): $(OBJS) | $(BIN)
+	$(CXX) $(OBJS) -o $(PROG) $(LFLAGS) -g
+
+# makes bin/ directory and copies assets to bin/ so we don't have to drag them in manually.
+$(BIN):
+	mkdir $@
+	$(DLL_COPY_COMMAND)
+	$(ASSET_COPY_COMMAND)
+
+# cleans everything that can be automatically recreated with "make".
+# To do this, run the following command in verdant-octo-spork/Prototype: make -f makefile_win64 clean
+clean:
+	$(DELETE_RECURSIVE) $(BIN)
+	$(DELETE) *.o
