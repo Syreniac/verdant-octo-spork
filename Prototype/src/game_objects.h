@@ -71,6 +71,9 @@ struct ProgrammableWorker{
   float speed;
   
   int currentGraphicIndex;
+  
+  int wet_and_cant_fly;
+  int currently_under_tree;
 
   int cargo;
 

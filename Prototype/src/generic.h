@@ -32,6 +32,14 @@
 #define RAIN_TILE_HEIGHT 9
 #define RAIN_FRAME_DELAY 4
 
+/*lower values result in a higher chance of bees regaining flight when wet, with
+each call to updateProgrammableWorker*/
+#define CHANCE_OF_REGAINING_FLIGHT 1000
+
+/*lower values result in a higher chance of bees falling during rain, with
+each call to updateProgrammableWorker*/
+#define CHANCE_OF_FALLING_IN_RAIN 100
+
 /*higher values result in lower levels of parallax*/
 #define PARALLAX_INTENSITY 10
 

@@ -152,6 +152,9 @@ ProgrammableWorker *createProgrammableWorker(GameObjectData *gameObjectData){
   programmableWorker->rect.w = X_SIZE_OF_WORKER;
   programmableWorker->rect.h = Y_SIZE_OF_WORKER;
   
+  programmableWorker->wet_and_cant_fly = 0;
+  programmableWorker->currently_under_tree = 0;
+  
   programmableWorker->currentGraphicIndex = BEE_FLAP_GRAPHIC_1;
   /* heading is measured in radians because maths in C all take radians */
   programmableWorker->heading = 0.0;
@@ -231,57 +234,75 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
   ResourceNodeSpawner *resourceNodeSpawner = NULL;
   ResourceNode *resourceNode;
   
-  programmableWorker->currentGraphicIndex = (programmableWorker->currentGraphicIndex + 1) % 2;
+  if(!programmableWorker->wet_and_cant_fly){ /*programmable worker has not been caught in rain recently*/
+  	printf("moo\n");
+  	programmableWorker->currentGraphicIndex = (programmableWorker->currentGraphicIndex + 1) % 2;
+  	
+  	if(gameObjectData->weather.present_weather == Rain && !programmableWorker->currently_under_tree){
+  		programmableWorker->wet_and_cant_fly = 1; /*true*/
+  	}
 
 
-  /* Because we're using a heading/velocity movement system here, we have to use
+  	/* Because we're using a heading/velocity movement system here, we have to use
      some trigonometry to work out the new positions */
-  newX = sin(programmableWorker->heading);
-  newY = cos(programmableWorker->heading);
-  newX *= programmableWorker->speed * ticks;
-  newY *= programmableWorker->speed * ticks;
+  	newX = sin(programmableWorker->heading);
+  	newY = cos(programmableWorker->heading);
+  	newX *= programmableWorker->speed * ticks;
+  	newY *= programmableWorker->speed * ticks;
 
-  /* These are then the tentative final new positions for the ProgrammableWorker
+ 	 /* These are then the tentative final new positions for the ProgrammableWorker
      we're updating */
-  programmableWorker->rawX += newX;
-  programmableWorker->rawY += newY;
-  programmableWorker->rect.x = (int)floor(programmableWorker->rawX);
-  programmableWorker->rect.y = (int)floor(programmableWorker->rawY);
+  	programmableWorker->rawX += newX;
+  	programmableWorker->rawY += newY;
+  	programmableWorker->rect.x = (int)floor(programmableWorker->rawX);
+ 	programmableWorker->rect.y = (int)floor(programmableWorker->rawY);
 
-  if(programmableWorker->brain.foundNode != NULL && !programmableWorker->brain.foundNode->alive){
-    programmableWorker->brain.foundNode = NULL;
-  }
+  	if(programmableWorker->brain.foundNode != NULL && !programmableWorker->brain.foundNode->alive){
+    	programmableWorker->brain.foundNode = NULL;
+  	}
 
-  printf("worker status: %d\n",programmableWorker->status);
+  	printf("worker status: %d\n",programmableWorker->status);
 
-  if(getDistance2BetweenPoints(programmableWorker->rect.x + programmableWorker->rect.w/2,
-							   programmableWorker->rect.y + programmableWorker->rect.h/2,
-							   gameObjectData->hive.rect.x + gameObjectData->hive.rect.w/2,
-							   gameObjectData->hive.rect.y + gameObjectData->hive.rect.h/2) < 50.0 && programmableWorker->status == RETURNING){
-    if(programmableWorker->cargo != 0){
-      programmableWorker->cargo = 0;
-      gameObjectData->hive.flowers_collected++;
-      printf("We've now collected %d flowers!\n",gameObjectData->hive.flowers_collected);
-    }
-  }
-  else if(programmableWorker->status == LEAVING){
-    /* status being 1 means that the bee heading away from the center */
-
-    /* We want to get back the ResourceNode and ResourceNodeSpawner (if any)
-       that we are colliding with */
-    resourceNode = checkResourceNodeCollision(&resourceNodeSpawner,gameObjectData,programmableWorker);
-    /* resourceNode will be NULL if there are no collisions, so test that */
-    if(resourceNode != NULL){
-      /* Kill the ResourceNode */
-      resourceNode->alive = 0;
-      /* Make sure the ResourceNodeSpawner knows that it's lost a ResourceNode */
-      resourceNodeSpawner->currentNodeCount--;
-      programmableWorker->cargo++;
-      programmableWorker->brain.foundNode = NULL;
-    }
-    else if(programmableWorker->brain.foundNode == NULL && resourceNodeSpawner != NULL){
-      programmableWorker->brain.foundNode = chooseNodeRandomly(resourceNodeSpawner);
-    }
+  	if(getDistance2BetweenPoints(programmableWorker->rect.x + programmableWorker->rect.w/2,
+							   	programmableWorker->rect.y + programmableWorker->rect.h/2,
+							   	gameObjectData->hive.rect.x + gameObjectData->hive.rect.w/2,
+							   	gameObjectData->hive.rect.y + gameObjectData->hive.rect.h/2) < 50.0 &&
+							   	programmableWorker->status == RETURNING){
+    	if(programmableWorker->cargo != 0){
+    	  programmableWorker->cargo = 0;
+    	  gameObjectData->hive.flowers_collected++;
+    	  printf("We've now collected %d flowers!\n",gameObjectData->hive.flowers_collected);
+    	}
+  	}
+  	else if(programmableWorker->status == LEAVING){
+    	/* status being 1 means that the bee heading away from the center */
+	
+    	/* We want to get back the ResourceNode and ResourceNodeSpawner (if any)
+    	   that we are colliding with */
+    	resourceNode = checkResourceNodeCollision(&resourceNodeSpawner,gameObjectData,programmableWorker);
+    	/* resourceNode will be NULL if there are no collisions, so test that */
+    	if(resourceNode != NULL){
+    	  /* Kill the ResourceNode */
+    	  resourceNode->alive = 0;
+    	  /* Make sure the ResourceNodeSpawner knows that it's lost a ResourceNode */
+    	  resourceNodeSpawner->currentNodeCount--;
+    	  programmableWorker->cargo++;
+    	  programmableWorker->brain.foundNode = NULL;
+    	}
+    	else if(programmableWorker->brain.foundNode == NULL && resourceNodeSpawner != NULL){
+    	  programmableWorker->brain.foundNode = chooseNodeRandomly(resourceNodeSpawner);
+    	}
+  	}
+  }else{ /*programmable worker has been caught in rain and hasn't regained ability to fly yet*/
+	int flapChance;
+  	if(!(rand() % CHANCE_OF_REGAINING_FLIGHT)){
+  		programmableWorker->wet_and_cant_fly = 0;
+  	}
+  	if((flapChance = rand() % 100)){
+  		if(!(rand() % flapChance)){
+  			programmableWorker->currentGraphicIndex = (programmableWorker->currentGraphicIndex + 1) % 2;
+  		}
+  	}
   }
 }
 
@@ -609,29 +630,47 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
     i++;
   }
 
+	/*BEES ON GROUND NEED RENDERING BEFORE PERSON*/
+  for(programmableWorker = gameObjectData->first_programmable_worker; programmableWorker != NULL ; programmableWorker = programmableWorker->next){
+  	if(programmableWorker->wet_and_cant_fly){
+    	if(!gameObjectData->pause_status){
+    	  updateProgrammableWorker(programmableWorker,gameObjectData,ticks);
+    	}
 
+    	blitGameObject(programmableWorker->rect,
+                   	graphicsData,
+                   	graphicsData->bee->graphic[programmableWorker->currentGraphicIndex],
+                   	DEGREESINCIRCLE-(programmableWorker->heading * RADIANSTODEGREES),
+                   	NULL,
+                   	SDL_FLIP_NONE);
+
+    	i++;
+    }
+  }
+  	
    /*determine if iceCreamPerson is on screen and needs animating*/
   if(gameObjectData->iceCreamPerson->currently_on_screen){
 
-      if(!gameObjectData->pause_status){
-         updateIceCreamPerson(gameObjectData, ticks);
-      }
+   	if(!gameObjectData->pause_status){
+       	updateIceCreamPerson(gameObjectData, ticks);
+   	}
 
-     blitGameObject(gameObjectData->iceCreamPerson->rect,
-                    graphicsData,
-                    graphicsData->person->graphic[gameObjectData->iceCreamPerson->currentGraphicIndex],
-                    DEGREESINCIRCLE-(gameObjectData->iceCreamPerson->heading * RADIANSTODEGREES),
-                    NULL,
-                    SDL_FLIP_NONE);
+   	blitGameObject(gameObjectData->iceCreamPerson->rect,
+                  	graphicsData,
+                   	graphicsData->person->graphic[gameObjectData->iceCreamPerson->currentGraphicIndex],
+                   	DEGREESINCIRCLE-(gameObjectData->iceCreamPerson->heading * RADIANSTODEGREES),
+                   	NULL,
+                   	SDL_FLIP_NONE);
 
   }else{ /*small probability of re-initialising iceCreamPerson and setting location to on-screen*/
-    if((gameObjectData->weather.present_weather == Sun) &&
-    (rand() % ICE_CREAM_PERSON_PROB == 0)){
+   	if((gameObjectData->weather.present_weather == Sun) &&
+ 	(rand() % ICE_CREAM_PERSON_PROB == 0)){
 
-    	reInitialiseIceCreamPerson(gameObjectData->iceCreamPerson);
+   		reInitialiseIceCreamPerson(gameObjectData->iceCreamPerson);
 
-    }
-  }
+   }
+ }
+
 
 
   /* Thirdly, we loop through all the ProgrammableWorkers and update them */
@@ -641,19 +680,25 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
      than directly doing things itself! */
 
   for(programmableWorker = gameObjectData->first_programmable_worker; programmableWorker != NULL ; programmableWorker = programmableWorker->next){
-    if(!gameObjectData->pause_status){
-      updateProgrammableWorker(programmableWorker,gameObjectData,ticks);
+  	if(!programmableWorker->wet_and_cant_fly){
+    	if(!gameObjectData->pause_status){
+    	  updateProgrammableWorker(programmableWorker,gameObjectData,ticks);
+    	}
+
+    	blitGameObject(programmableWorker->rect,
+                   	graphicsData,
+                   	graphicsData->bee->graphic[programmableWorker->currentGraphicIndex],
+                   	DEGREESINCIRCLE-(programmableWorker->heading * RADIANSTODEGREES),
+                   	NULL,
+                   	SDL_FLIP_NONE);
+
+    	i++;
     }
-
-    blitGameObject(programmableWorker->rect,
-                   graphicsData,
-                   graphicsData->bee->graphic[programmableWorker->currentGraphicIndex],
-                   DEGREESINCIRCLE-(programmableWorker->heading * RADIANSTODEGREES),
-                   NULL,
-                   SDL_FLIP_NONE);
-
-    i++;
   }
+  
+
+  
+  
 
   /* render tree tops last, so that they appear above everything else*/
   for(i = 0; i < NUMBER_OF_TREES; i++){
