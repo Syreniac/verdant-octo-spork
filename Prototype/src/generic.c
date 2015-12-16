@@ -94,13 +94,13 @@ double getDistance2BetweenPoints(float p1X, float p1Y, float p2X, float p2Y){
 
 void fitRectToWorld(SDL_Rect *rect){
   if(rect->x + rect->w > X_SIZE_OF_WORLD){
-	rect->x = X_SIZE_OF_WORLD - 1;
+	rect->x = X_SIZE_OF_WORLD - rect->w;
   }
   else if(rect->x < 0){
 	rect->x = 0;
   }
   if(rect->y + rect->h > Y_SIZE_OF_WORLD){
-	rect->y = Y_SIZE_OF_WORLD - 1;
+	rect->y = Y_SIZE_OF_WORLD - rect->h;
   }
   else if(rect->y < 0){
 	rect->y = 0;

@@ -4,7 +4,8 @@
 void paintWeatherLayer(GraphicsData *graphicsData, enum WeatherStatus present_weather){
 	/* This function creates a Weather struct and fills in the default
      values. Many of these are defined in generic.h */
-	Uint8 o_r,o_g,o_b, o_a = 155;
+	Uint8 o_r = 0,o_g = 0,o_b = 0;
+	Uint8 o_a = 155;
 
 
 

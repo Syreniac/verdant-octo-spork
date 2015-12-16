@@ -18,7 +18,7 @@
 
 static void UIAction_Init(UI_Element *element, UI_Action *action);
 static void freeUIAction(UI_Action *action);
-static void UITrigger_Execute(UI_Trigger *trigger);
+static void UITrigger_Execute(UI_Action *action);
 static int isLinked(UI_Element *test, UI_Element *to);
 static int UIElement_isVisible(UI_Element *element);
 
@@ -50,29 +50,23 @@ int UIAction_DisplayImage(UI_Action *action, va_list copy_from){
 	if(action->status){
 		SDL_RenderCopy(graphicsData->renderer,action->texture,NULL,&action->element->rect);
 	}
+	return 1;
 }
 
 int UIAction_Auto(UI_Action *action, va_list copy_from){
 	int i = 0;
 	printf("go auto\n");
 	if(action->status){
-		while(i < action->num_of_triggers){
-			printf("%d\n",action->triggers[i].action->status);
-			UITrigger_Execute(&action->triggers[i]);
-			printf("%d\n",action->triggers[i].action->status);
-			i++;
-		}
+		UITrigger_Execute(action);
 	}
+	printf("------------\n");
 	return action->status;
 }
 
 int UIAction_External(UI_Action *action, va_list copy_from){
 	int i = 0;
 	if(action->status == 1 && action->external != NULL){
-		while(i < action->num_of_triggers){
-			UITrigger_Execute(&action->triggers[i]);
-			i++;
-		}
+		UITrigger_Execute(action);
 		action->status = 0;
 		return 1;
 	}
@@ -195,7 +189,6 @@ int UIAction_Counter(UI_Action *action, va_list copy_from){
 
 int UIAction_RenderLine(UI_Action *action, va_list copy_from){
 	int bx,by;
-	SDL_Point center;
 	GraphicsData *graphicsData;
 	va_list vargs;
 	va_copy(vargs,copy_from);
@@ -219,7 +212,6 @@ int UIAction_RenderLine(UI_Action *action, va_list copy_from){
 										255,
 										255,
 										255);
-		center = getCenterOfRect(action->element->rect);
 		SDL_RenderDrawLine(graphicsData->renderer,action->element->rect.x+action->integers[2],action->element->rect.y+action->integers[3],
 									action->integers[0],action->integers[1]);
 		return 1;
@@ -233,8 +225,6 @@ int UIAction_RenderLine(UI_Action *action, va_list copy_from){
 										255,
 										255,
 										255);
-		center.x = action->element->rect.x + action->element->rect.w/2;
-		center.y = action->element->rect.y + action->element->rect.h;
 		bx = action->external->rect.x + action->element->rect.w/2;
 		by = action->external->rect.y;
 		SDL_RenderDrawLine(graphicsData->renderer,action->element->rect.x+action->integers[2],action->element->rect.y+action->integers[3],
@@ -254,10 +244,7 @@ int UIAction_RenderLine(UI_Action *action, va_list copy_from){
 int UIAction_ClickAnywhere(UI_Action *action, va_list copy_from){
 	int i = 0;
 	if(action->status == 1){
-		while(i < action->num_of_triggers){
-			UITrigger_Execute(&action->triggers[i]);
-			i++;
-		}
+		UITrigger_Execute(action);
 		return 1;
 	}
 	return 0;
@@ -266,10 +253,7 @@ int UIAction_ClickAnywhere(UI_Action *action, va_list copy_from){
 int UIAction_ReleaseAnywhere(UI_Action *action, va_list copy_from){
 	int i = 0;
 	if(action->status == 1){
-		while(i < action->num_of_triggers){
-			UITrigger_Execute(&action->triggers[i]);
-			i++;
-		}
+		UITrigger_Execute(action);
 		return 1;
 	}
 	return 0;
@@ -326,7 +310,7 @@ int UIAction_FillRect(UI_Action *action, va_list copy_from){
 	va_copy(vargs,copy_from);
 	graphicsData = va_arg(vargs,GraphicsData*);
 	va_end(vargs);
-	if(action->status){
+	if(action->status != 0){
 		SDL_SetRenderDrawColor(graphicsData->renderer,action->RENDERRECT_R,
 		                                action->RENDERRECT_G,
 		                                action->RENDERRECT_B,
@@ -345,7 +329,6 @@ int UIAction_ClickRect(UI_Action *action, va_list copy_from){
 	event = va_arg(vargs,SDL_Event*);
 	va_end(vargs);
 
-	printf("clickrect\n");
 	if(action->status == 0){return 0;}
 
 	if(event->button.x < action->element->rect.x || event->button.x > action->element->rect.x + action->element->rect.w){
@@ -354,10 +337,7 @@ int UIAction_ClickRect(UI_Action *action, va_list copy_from){
 	if(event->button.y < action->element->rect.y || event->button.y > action->element->rect.y + action->element->rect.h){
 	  return 0;
 	}
-	while(i < action->num_of_triggers){
-	  UITrigger_Execute(&action->triggers[i]);
-	  i++;
-	}
+	UITrigger_Execute(action);
 	return 1;
 }
 
@@ -785,18 +765,21 @@ void UIConfigure_DisplayImage(UI_Element *element, UI_Action *action, SDL_Textur
 	action->texture = image;
 }
 
-static void UITrigger_Execute(UI_Trigger *trigger){
-	if(trigger->action == NULL){
-		return;
-	}
-	if(trigger->status_from == -1 || trigger->action->status == trigger->status_from){
-		printf("executing trigger\n");
-		if(trigger->status_to == UITRIGGER_PLUSONE){
-			trigger->action->status++;
+static void UITrigger_Execute(UI_Action *action){
+	UI_Trigger *trigger = action->triggers;
+	while(trigger!=NULL){
+		if(trigger->action != NULL){
+			if(trigger->status_from == -1 || trigger->action->status == trigger->status_from){
+				printf("executing trigger\n");
+				if(trigger->status_to == UITRIGGER_PLUSONE){
+					trigger->action->status++;
+				}
+				else{
+					trigger->action->status = trigger->status_to;
+				}
+			}
 		}
-		else{
-			trigger->action->status = trigger->status_to;
-		}
+		trigger = trigger->next;
 	}
 }
 
@@ -886,13 +869,29 @@ static int isLinked(UI_Element *test, UI_Element *to){
 }
 
 void UITrigger_Bind(UI_Action *action, UI_Action *target, int status_from, int status_to){
-	UI_Trigger trigger;
-	trigger.action = target;
-	trigger.status_from = status_from;
-	trigger.status_to = status_to;
+	UI_Trigger *trigger = malloc(sizeof(UI_Trigger));
+	UI_Trigger *movingPointer = NULL;
+	
+	trigger->action = target;
+	trigger->status_from = status_from;
+	trigger->status_to = status_to;
+	trigger->next = NULL;
+	
 	action->num_of_triggers++;
-	action->triggers = realloc(action->triggers, sizeof(UI_Trigger) * action->num_of_triggers);
-	action->triggers[action->num_of_triggers-1] = trigger;
+	
+	if(action->triggers == NULL){
+		action->triggers = trigger;
+	}
+	else{
+		movingPointer = action->triggers;
+		while(movingPointer->next != NULL){
+			movingPointer = movingPointer->next;
+		}
+		movingPointer->next = trigger;
+	}
+	
+	//action->triggers = realloc(action->triggers, sizeof(UI_Trigger) * action->num_of_triggers);
+	printf("trigger bound\n");
 }
 
 void UIRoot_Execute(UIData *uiData, enum Response response, ...){

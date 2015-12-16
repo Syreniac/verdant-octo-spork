@@ -10,6 +10,7 @@
 #include <SDL_mixer.h>
 #include <time.h>
 #include <SDL_ttf.h>
+#include <stdarg.h>
 
 #define VERBOSE 1
 
@@ -65,7 +66,7 @@ each call to updateProgrammableWorker*/
 #define WORKER_SPEED 0.4
 
 #define DEFAULT_RESOURCEUNITS 100
-#define DEFAULT_SPAWNDELAY 100*60
+#define DEFAULT_SPAWNDELAY 500*60
 #define DEFAULT_SPAWNRADIUS 200.0
 #define DEFAULT_MAXNODECOUNT 10
 #define TICKSPERWEATHER 25000

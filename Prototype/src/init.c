@@ -83,9 +83,9 @@ int game_welcome_page(GraphicsData graphicsData, AudioData audioData){
    InitData initData;
 
    int menuRunning = 1;
-   SDL_Rect rect;
    SDL_Event event;
    UI_Element *element;
+   UI_Element *element2;
 
    int win_x,win_y;
 
@@ -98,11 +98,6 @@ int game_welcome_page(GraphicsData graphicsData, AudioData audioData){
 
 
    /* create box 1 (title), size fixed*/
-
-   rect.x = 0;
-   rect.y = 0;
-   rect.w = 40;
-   rect.h = 40;
 
    SDL_GetWindowSize(graphicsData.window,&win_x,&win_y);
 
@@ -123,21 +118,11 @@ int game_welcome_page(GraphicsData graphicsData, AudioData audioData){
     UIConfigure_FillRect(element,&element->actions[0],100,100,0);
     UIElement_Reparent(element,initData.uiData.root);*/
 
-    element = UIElement_Create((win_x - 30), win_y - 30, 30, 30, 1);
-    UIConfigure_FillRect(element, &element->actions[0],228,240,3);
-    UIElement_Reparent(element,initData.uiData.root);
+    element2 = UIElement_Create((win_x - 30), win_y - 30, 30, 30, 1);
+    UIConfigure_FillRect(element2, &element2->actions[0],228,240,3);
+    UIElement_Reparent(element2,initData.uiData.root);
 
     printf("made ui\n");
-
-
-   /* create box 2 (start), expanded*/
-
-   /* create box 3 (load), not expanded*/
-
-   /* create box 4 (tutorial) not expanded*/
-
-   //playMusic(&initData.audioData,1);
-   printf("can play music\n");
 
    while(menuRunning){
 
@@ -162,10 +147,8 @@ int game_welcome_page(GraphicsData graphicsData, AudioData audioData){
     		}
     	}
       menuRunning = (!initData.uiData.root->child->actions[0].status);
-      //menuRunning = !&initData.uiData.root->child->actions[1].status;
-   } /*delay 2s first*/
+   }
 
-   UIRoot_Destroy(&initData.uiData);
    gameStart(graphicsData,audioData);
    return 0;
 }

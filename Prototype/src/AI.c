@@ -388,23 +388,23 @@ void makeBlockFunctionRootFromFile(BlockFunctionRoot *blockFunctionRoot, FILE *f
   int stringWhiteSpaceShift = 0;
   char read_line[255];
   char *read_line2;
-  int *integers;
+  int *integers = NULL;
   int intReadOffset = 0;
   int readInt;
   int presumedNumOfInts;
-  int numOfInts;
-  float *floats;
+  int numOfInts = 0;
+  float *floats = NULL;
   int floatReadOffset = 0;
   float readFloat;
   int presumedNumOfFloats;
-  int numOfFloats;
+  int numOfFloats = 0;
   int maxDescLength;
   int primaryRef = -1;
   int secondaryRef = -1;
   int initialRun = 1;
   int functionBlockCount = getNumberOfTextStoredBlocks(file,&maxDescLength);
   char name[255];
-  blockFunction_WrappedFunction wrapped_function;
+  blockFunction_WrappedFunction wrapped_function = NULL;
 
   printf("number of function blocks in file = %d\n",functionBlockCount);
 
