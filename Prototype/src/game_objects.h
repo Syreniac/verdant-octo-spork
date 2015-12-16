@@ -69,6 +69,8 @@ struct ProgrammableWorker{
 
   double heading;
   float speed;
+  
+  int currentGraphicIndex;
 
   int cargo;
 

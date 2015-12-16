@@ -151,6 +151,8 @@ ProgrammableWorker *createProgrammableWorker(GameObjectData *gameObjectData){
   programmableWorker->rect.y = 100;
   programmableWorker->rect.w = X_SIZE_OF_WORKER;
   programmableWorker->rect.h = Y_SIZE_OF_WORKER;
+  
+  programmableWorker->currentGraphicIndex = BEE_FLAP_GRAPHIC_1;
   /* heading is measured in radians because maths in C all take radians */
   programmableWorker->heading = 0.0;
   /* This is basically pixels/milliseconds */
@@ -228,6 +230,8 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
   int i;
   ResourceNodeSpawner *resourceNodeSpawner = NULL;
   ResourceNode *resourceNode;
+  
+  programmableWorker->currentGraphicIndex = (programmableWorker->currentGraphicIndex + 1) % 2;
 
 
   /* Because we're using a heading/velocity movement system here, we have to use
@@ -640,9 +644,10 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
     if(!gameObjectData->pause_status){
       updateProgrammableWorker(programmableWorker,gameObjectData,ticks);
     }
+
     blitGameObject(programmableWorker->rect,
                    graphicsData,
-                   graphicsData->workerTexture,
+                   graphicsData->bee->graphic[programmableWorker->currentGraphicIndex],
                    DEGREESINCIRCLE-(programmableWorker->heading * RADIANSTODEGREES),
                    NULL,
                    SDL_FLIP_NONE);
@@ -665,5 +670,6 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 
   updateWeather(&gameObjectData->weather, ticks);
 
-  paintWeatherLayer(graphicsData, gameObjectData->weather.present_weather, graphicsData->workerTexture); /* Only blending worker textures currently */
+  paintWeatherLayer(graphicsData, gameObjectData->weather.present_weather);
+
 }
