@@ -153,7 +153,7 @@ ProgrammableWorker *createProgrammableWorker(GameObjectData *gameObjectData){
   programmableWorker->rect.h = Y_SIZE_OF_WORKER;
   
   programmableWorker->wet_and_cant_fly = 0;
-  programmableWorker->currently_under_tree = 0;
+
   
   programmableWorker->currentGraphicIndex = BEE_FLAP_GRAPHIC_1;
   /* heading is measured in radians because maths in C all take radians */
@@ -238,8 +238,19 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
   	printf("moo\n");
   	programmableWorker->currentGraphicIndex = (programmableWorker->currentGraphicIndex + 1) % 2;
   	
-  	if(gameObjectData->weather.present_weather == Rain && !programmableWorker->currently_under_tree){
-  		programmableWorker->wet_and_cant_fly = 1; /*true*/
+  	
+
+  	
+  	if(gameObjectData->weather.present_weather == Rain){
+  		int i, j = 0;
+  		for(i = 0; i < NUMBER_OF_TREES; i++){
+  			if(!testRectIntersection(programmableWorker->rect, gameObjectData->tree[i].rect)){
+  				j++;
+  			}
+  		}
+  		if(j == NUMBER_OF_TREES){
+  			programmableWorker->wet_and_cant_fly = 1; /*true*/
+  		}
   	}
 
 
