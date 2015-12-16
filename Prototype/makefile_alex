@@ -1,14 +1,17 @@
 # Please run the clean command detailed at the bottom before running: make -f makefile_alex
 
 CFLAGS = -pedantic -Wall -Wextra -Wno-unused-variable -Wno-unused-parameter
-# Your computer doesn't need SDL_FLAGS because it seems to find them within the system just fine.
-#TTF_FLAGS = -ISDL_ttf_lab/include -LSDL_ttf_lab/lib
-LFLAGS = -lSDL2 -lm
+SDL_FLAGS = -I/opt/SDL/2.0.3/include -L/opt/SDL/2.0.3/lib
+
+MIXER_FLAGS = -I./SDL_Mixer_alex/include -L./SDL_Mixer_alex/lib
+LFLAGS = $(SDL_FLAGS) $(MIXER_FLAGS) -Wl,-rpath,/opt/SDL/2.0.3/lib -lSDL2 -lSDL_Mixer -lm
+DELETE = rm
+DELETE_RECURSIVE = rm -r
 # Once we have TTF working, $(TTF_FLAGS) needs to go in at start, and -lSDL_ttf needs to go in at end.
 
 # List all the files here
 ASSETS_CONTENTS = assets/.
-OBJS = main.o init.o game.o world_generation.o game_objects.o AI.o UI.o generic.o controls.o graphics.o
+OBJS = main.o init.o game.o world_generation.o game_objects.o AI.o UI.o generic.o controls.o graphics.o audio.o
 BIN = bin
 PROG = $(BIN)/Prototype
 CXX = gcc

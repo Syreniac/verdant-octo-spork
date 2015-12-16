@@ -95,8 +95,14 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
   gameData.graphicsData.rainy->graphic[4] = loadTextureFromFile("images/rain/rain5.bmp", &gameData.graphicsData);
   gameData.graphicsData.rainy->graphic[5] = loadTextureFromFile("images/rain/rain6.bmp", &gameData.graphicsData);
 
-  gameData.graphicsData.workerTexture = loadTextureFromFile("images/bee.bmp",
+  gameData.graphicsData.bee = (Bee*) malloc(sizeof(Bee));
+
+
+  gameData.graphicsData.bee->graphic[BEE_FLAP_GRAPHIC_1] = loadTextureFromFile("images/bee.bmp",
 														  &gameData.graphicsData);
+  gameData.graphicsData.bee->graphic[BEE_FLAP_GRAPHIC_2] = loadTextureFromFile("images/bee1.bmp",
+														  &gameData.graphicsData);
+
   gameData.graphicsData.hiveTexture = loadTextureFromFile("images/beehive.bmp",
 														  &gameData.graphicsData);
 

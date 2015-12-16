@@ -4,6 +4,7 @@
 typedef struct GraphicsData GraphicsData;
 typedef struct Person Person;
 typedef struct Rainy Rainy;
+typedef struct Bee Bee;
 
 enum WeatherStatus {/*Should belong in game_objects.h, but graphics.c needs to access it*/
   Sun = 0,
@@ -17,19 +18,26 @@ enum WeatherStatus {/*Should belong in game_objects.h, but graphics.c needs to a
 /*chance of sun turning to cloud after TICKSPERWEATHER*/
 #define CHANCE_OF_CLOUD 3
 
+#define BEE_FLAP_GRAPHIC_1 0
+#define BEE_FLAP_GRAPHIC_2 1
+
 
 struct GraphicsData{
   SDL_Window *window;
   SDL_Rect navigationOffset;
   SDL_Renderer *renderer;
-  SDL_Texture *workerTexture;
   SDL_Texture *nodeTexture;
   SDL_Texture *hiveTexture;
   SDL_Texture *treeTexture;
   SDL_Texture *grassTexture;
   TTF_Font *fonts[2];
+  struct Bee *bee;
   struct Rainy *rainy;
   struct Person *person;
+};
+
+struct Bee{
+	SDL_Texture *graphic[2];
 };
 
 struct Person{
@@ -41,7 +49,7 @@ struct Rainy{
 };
 
 
-void paintWeatherLayer(GraphicsData *graphicsData, enum WeatherStatus present_weather, SDL_Texture *texture);
+void paintWeatherLayer(GraphicsData *graphicsData, enum WeatherStatus present_weather);
 
 void blitGameObject(SDL_Rect objectRect,
                     GraphicsData *graphicsData,

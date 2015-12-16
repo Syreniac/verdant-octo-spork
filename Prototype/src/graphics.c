@@ -1,7 +1,7 @@
 #include "graphics.h"
 
 
-void paintWeatherLayer(GraphicsData *graphicsData, enum WeatherStatus present_weather, SDL_Texture *texture){
+void paintWeatherLayer(GraphicsData *graphicsData, enum WeatherStatus present_weather){
 	/* This function creates a Weather struct and fills in the default
      values. Many of these are defined in generic.h */
 	Uint8 o_r,o_g,o_b, o_a = 155;
@@ -42,7 +42,6 @@ void paintWeatherLayer(GraphicsData *graphicsData, enum WeatherStatus present_we
 	/* SDL_GetRenderDrawColor(graphicsData->renderer,&o_r,&o_g,&o_b,&o_a); */
 	SDL_SetRenderDrawColor(graphicsData->renderer,o_r,o_g,o_b,o_a);
 	SDL_SetRenderDrawBlendMode(graphicsData->renderer, SDL_BLENDMODE_BLEND);
-	SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND); /* Only blending worker textures currently */
 	SDL_RenderFillRect(graphicsData->renderer, NULL);
 	/* SDL_SetRenderDrawColor(graphicsData->renderer,o_r,o_g,o_b,o_a); */
 }
