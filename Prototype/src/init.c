@@ -37,6 +37,8 @@ InitData initialise(void){
                                                SDL_RENDERER_TARGETTEXTURE|SDL_RENDERER_PRESENTVSYNC);
 	assert(initData.graphicsData.renderer != NULL);
 
+  initData.graphicsData.mainMenuImage = loadTextureFromFile("mainMenuImage.bmp", &initData.graphicsData);
+
 	/*Audio needs to be initialized at the very start too.*/
 	audioSystem(&initData.audioData);
 
@@ -104,23 +106,28 @@ int game_welcome_page(GraphicsData graphicsData, AudioData audioData){
 
    SDL_GetWindowSize(graphicsData.window,&win_x,&win_y);
 
-   initData.uiData.root = calloc(1,sizeof(UI_Element));
+   initData.uiData.root = UIElement_Create(0,0,win_x,win_y,1);
+   UIConfigure_DisplayImage(initData.uiData.root,&initData.uiData.root->actions[0],graphicsData.mainMenuImage);
 
-   element = UIElement_Create((win_x * 3)/4 - 100, (win_y * 3)/4 - 80, 150, 50, 3);
-   UIConfigure_FillRect(element,&element->actions[0],0,100,100);
-   UIConfigure_Counter(element,&element->actions[1]);
-   UIConfigure_LeftClickRect(element,&element->actions[2]);
-       UITrigger_Bind(&element->actions[2],&element->actions[1],-1,UITRIGGER_PLUSONE);
+   printf("made the background image\n");
+
+   element = UIElement_Create(710, 670, 450, 80, 2);
+   /*UIConfigure_FillRect(element,&element->actions[0],0,100,100);*/
+   UIConfigure_Counter(element,&element->actions[0]);
+   UIConfigure_LeftClickRect(element,&element->actions[1]);
+       UITrigger_Bind(&element->actions[1],&element->actions[0],-1,UITRIGGER_PLUSONE);
 
    UIElement_Reparent(element,initData.uiData.root);
 
-    element = UIElement_Create((win_x *3)/4 - 100, (win_y * 3)/4, 150, 50, 1);
+    /*element = UIElement_Create((win_x *3)/4 - 100, (win_y * 3)/4, 150, 50, 1);
     UIConfigure_FillRect(element,&element->actions[0],100,100,0);
-    UIElement_Reparent(element,initData.uiData.root);
+    UIElement_Reparent(element,initData.uiData.root);*/
 
     element = UIElement_Create((win_x - 30), win_y - 30, 30, 30, 1);
     UIConfigure_FillRect(element, &element->actions[0],228,240,3);
     UIElement_Reparent(element,initData.uiData.root);
+
+    printf("made ui\n");
 
 
    /* create box 2 (start), expanded*/
@@ -129,14 +136,15 @@ int game_welcome_page(GraphicsData graphicsData, AudioData audioData){
 
    /* create box 4 (tutorial) not expanded*/
 
-   playMusic(&initData.audioData,1);
+   //playMusic(&initData.audioData,1);
+   printf("can play music\n");
 
    while(menuRunning){
 
       UIRoot_Execute(&initData.uiData,UPDATE);
 
       paintBackground(&initData.graphicsData,0,200,100);
-      UIRoot_Execute(&initData.uiData,RENDER_BASE,&initData.graphicsData);
+      UIRoot_Execute(&initData.uiData,RENDER,&initData.graphicsData);
 
       SDL_RenderPresent(initData.graphicsData.renderer);
     	while (SDL_PollEvent(&event))
@@ -153,7 +161,7 @@ int game_welcome_page(GraphicsData graphicsData, AudioData audioData){
     				break;
     		}
     	}
-      menuRunning = (!initData.uiData.root->child->actions[1].status);
+      menuRunning = (!initData.uiData.root->child->actions[0].status);
       //menuRunning = !&initData.uiData.root->child->actions[1].status;
    } /*delay 2s first*/
 

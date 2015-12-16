@@ -51,6 +51,7 @@ int handleEvent(SDL_Event *event, GameObjectData *gameObjectData, UIData *uiData
         keyup(controlsData,gameObjectData,uiData,event);
 				break;
 			case SDL_QUIT:
+				printf("exiting\n");
 				exit(0);
 				break;
 		}

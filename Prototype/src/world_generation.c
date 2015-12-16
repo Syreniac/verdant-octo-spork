@@ -20,14 +20,21 @@ void generateResourceNodeSpawners(GameObjectData *gameObjectData){
 
 void generateProgrammableWorkers(GameObjectData *gameObjectData){
   /* Create two ProgrammableWorkers */
-
-  createProgrammableWorker(gameObjectData);
-  createProgrammableWorker(gameObjectData);
-  createProgrammableWorker(gameObjectData);
-  createProgrammableWorker(gameObjectData);
-  createProgrammableWorker(gameObjectData);
-  createProgrammableWorker(gameObjectData);
-  createProgrammableWorker(gameObjectData);/**/
+  void *p;
+  p = createProgrammableWorker(gameObjectData);
+  printf("%p\n",p);
+  p = createProgrammableWorker(gameObjectData);
+  printf("%p\n",p);
+  p = createProgrammableWorker(gameObjectData);
+  printf("%p\n",p);
+  p = createProgrammableWorker(gameObjectData);
+  printf("%p\n",p);
+  p = createProgrammableWorker(gameObjectData);
+  printf("%p\n",p);
+  p = createProgrammableWorker(gameObjectData);
+  printf("%p\n",p);
+  p = createProgrammableWorker(gameObjectData);
+  printf("%p\n",p);/**/
 }
 
 

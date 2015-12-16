@@ -235,7 +235,6 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
   ResourceNode *resourceNode;
 
   if(!programmableWorker->wet_and_cant_fly){ /*programmable worker has not been caught in rain recently*/
-  	printf("moo\n");
   	programmableWorker->currentGraphicIndex = (programmableWorker->currentGraphicIndex + 1) % 2;
 
   	if(gameObjectData->weather.present_weather == Rain && !programmableWorker->currently_under_tree){
@@ -260,8 +259,6 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
   	if(programmableWorker->brain.foundNode != NULL && !programmableWorker->brain.foundNode->alive){
     	programmableWorker->brain.foundNode = NULL;
   	}
-
-  	printf("worker status: %d\n",programmableWorker->status);
 
   	if(getDistance2BetweenPoints(programmableWorker->rect.x + programmableWorker->rect.w/2,
 							   	programmableWorker->rect.y + programmableWorker->rect.h/2,

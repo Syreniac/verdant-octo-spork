@@ -40,6 +40,18 @@ UI_Element *UIElement_Create(int x, int y, int w, int h, int num_of_actions){
 		 return element;
 }
 
+int UIAction_DisplayImage(UI_Action *action, va_list copy_from){
+	va_list vargs;
+	GraphicsData *graphicsData;
+	va_copy(vargs, copy_from);
+	graphicsData = va_arg(vargs,GraphicsData*);
+	va_end(vargs);
+
+	if(action->status){
+		SDL_RenderCopy(graphicsData->renderer,action->texture,NULL,&action->element->rect);
+	}
+}
+
 int UIAction_Auto(UI_Action *action, va_list copy_from){
 	int i = 0;
 	printf("go auto\n");
@@ -122,7 +134,7 @@ int UIAction_DisplayNumber(UI_Action *action, va_list copy_from){
 		temp = TTF_RenderText_Solid(graphicsData->fonts[action->integers[2]],action->strings[0],colour);
 		action->texture = SDL_CreateTextureFromSurface(graphicsData->renderer,temp);
 	}
-	if(UIElement_isVisible(action->element) && action->status != 0){
+	if(UIElement_isVisible(action->element) && action->status != 0 && action->texture != NULL){
 		temp_rect.x = action->element->rect.x;
 		temp_rect.y = action->element->rect.y;
 		TTF_SizeText(graphicsData->fonts[action->integers[2]], action->strings[0], &temp_rect.w, &temp_rect.h);
@@ -146,10 +158,11 @@ int UIAction_DisplayString(UI_Action *action, va_list copy_from){
 	if(action->strings[0] != NULL && action->strings[1] != NULL && strcmp(action->strings[0],action->strings[1]) != 0){
 		strcpy(action->strings[0],action->strings[1]);
 		SDL_DestroyTexture(action->texture);
+		printf("attempting to render string: \'%s\'\n",action->strings[0]);
 		temp = TTF_RenderText_Solid(graphicsData->fonts[action->integers[0]],action->strings[0],colour);
 		action->texture = SDL_CreateTextureFromSurface(graphicsData->renderer,temp);
 	}
-	if(UIElement_isVisible(action->element) && action->status != 0){
+	if(UIElement_isVisible(action->element) && action->status != 0 && action->texture != NULL){
 		temp_rect.x = action->element->rect.x;
 		temp_rect.y = action->element->rect.y;
 		TTF_SizeText(graphicsData->fonts[action->integers[0]], action->strings[0], &temp_rect.w, &temp_rect.h);
@@ -502,7 +515,7 @@ void UIConfigure_GenerateAIString(UI_Element *element, UI_Action *action, char *
 void UIConfigure_FillRect(UI_Element *element, UI_Action *action, int r, int g, int b){
 	printf("UIConfigure_FillRect\n");
 	UIAction_Init(element,action);
-	action->response = RENDER_BASE;
+	action->response = RENDER;
 	action->function = UIAction_FillRect;
 	action->integers = malloc(sizeof(int) * 3);
 	action->num_of_integers = 3;
@@ -573,7 +586,7 @@ void UIConfigure_DraggableRectOverride(UI_Element *element, UI_Action *action, i
 void UIConfigure_RenderLine(UI_Element *element, UI_Action *action, enum LineOrigins origin, UI_Element *external){
 	printf("UIConfigure_RenderLine\n");
 	UIAction_Init(element,action);
-	action->response = RENDER_BASE;
+	action->response = RENDER;
 	action->function = UIAction_RenderLine;
 	action->external = external;
 	action->status = 2;
@@ -765,6 +778,13 @@ void UIConfigure_Auto(UI_Element *element, UI_Action *action, enum Response resp
 	action->function = UIAction_Auto;
 }
 
+void UIConfigure_DisplayImage(UI_Element *element, UI_Action *action, SDL_Texture *image){
+	UIAction_Init(element,action);
+	action->response = RENDER;
+	action->function = UIAction_DisplayImage;
+	action->texture = image;
+}
+
 static void UITrigger_Execute(UI_Trigger *trigger){
 	if(trigger->action == NULL){
 		return;
@@ -933,6 +953,7 @@ static int UIElement_isVisible(UI_Element *element){
 }
 
 void UIRoot_Destroy(UIData *uiData){
+	printf("destroying UI\n");
   UI_Element *queue[255] = {NULL};
   UI_Element *queue_element;
   UI_Element *queue_element_child;

@@ -102,6 +102,8 @@ void UIConfigure_DisplayNumber(UI_Element *element, UI_Action *action, int numbe
 void UIConfigure_ShrinkFitToParent(UI_Element *element, UI_Action *action);
 void UIConfigure_External(UI_Element *element, UI_Action *action, UI_Element *external);
 void UIConfigure_Auto(UI_Element *element, UI_Action *action, enum Response response);
+void UIConfigure_DisplayImage(UI_Element *element, UI_Action *action, SDL_Texture *image);
+
 
 void UITrigger_Bind(UI_Action *action, UI_Action *target, int state_from, int state_to);
 

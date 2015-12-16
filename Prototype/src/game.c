@@ -150,15 +150,17 @@ static void createGameUI(GameData *gameData){
     UITrigger_Bind(&element->actions[0],&element->actions[1],0,1);
     UITrigger_Bind(&element->actions[0],&element->actions[2],1,0);
     UITrigger_Bind(&element->actions[0],&element->actions[3],1,0);
-  element->actions[0].status = 1;
+  element->actions[0].status = 0;
   UIConfigure_Auto(element, &element->actions[1], RESPONSE_PAUSE);
     UITrigger_Bind(&element->actions[1],&element->actions[0],0,1);
     UITrigger_Bind(&element->actions[1],&element->actions[1],1,0);
     UITrigger_Bind(&element->actions[1],&element->actions[2],0,1);
     UITrigger_Bind(&element->actions[1],&element->actions[3],0,1);
-  element->actions[1].status = 0;
+  element->actions[1].status = 1;
   UIConfigure_FillRect(element, &element->actions[2],255,0,0);
-  UIConfigure_DisplayString(element, &element->actions[3],"PAUSED\n",0);
+  element->actions[2].status = 0;
+  UIConfigure_DisplayString(element, &element->actions[3],"PAUSED",0);
+  element->actions[3].status = 0;
   UIElement_Reparent(element,gameData->uiData.root);
 
   element = UIElement_Create(0,win_y-275,275,275,1);
@@ -316,7 +318,6 @@ int gameLoop(GameData *gameData){
   }
   paintBackground(&gameData->graphicsData,0,200,100);
   updateGameObjects(&gameData->gameObjectData, &gameData->graphicsData, delta_t);
-  UIRoot_Execute(&gameData->uiData,RENDER_BASE,&gameData->graphicsData);
   UIRoot_Execute(&gameData->uiData,RENDER,&gameData->graphicsData);
   runAI(&gameData->aiData,&gameData->gameObjectData);
 

@@ -34,6 +34,7 @@ struct GraphicsData{
   struct Bee *bee;
   struct Rainy *rainy;
   struct Person *person;
+  SDL_Texture *mainMenuImage;
 };
 
 struct Bee{
