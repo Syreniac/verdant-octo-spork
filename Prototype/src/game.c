@@ -1,5 +1,7 @@
 #include "game.h"
 
+static void createGameUI(GameData *gameData);
+
 int calculateDt(int previousRunTime){
   /* float previousRunTime = the milliseconds you want to calculate from
      This returns the difference in milliseconds between now and another time
@@ -32,11 +34,13 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
 
   gameData.graphicsData = graphicsData;
   gameData.audioData = audioData;
+  gameData.uiData.root = calloc(1, sizeof(UI_Element));
+  gameData.running = 1;
 
   gameData.gameObjectData.pause_status = 0;
   gameData.gameObjectData.first_programmable_worker = NULL;
 
-  zeroControlKeys(&gameData.controlsData);
+  initControlData(&gameData.controlsData);
 
   /* initialise navigationOffset values */
   gameData.graphicsData.navigationOffset.x = X_INITIAL_SCREEN_OFFSET; /*setting initial x offset to center of world*/
@@ -92,13 +96,13 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
   gameData.graphicsData.rainy->graphic[5] = loadTextureFromFile("images/rain/rain6.bmp", &gameData.graphicsData);
 
   gameData.graphicsData.bee = (Bee*) malloc(sizeof(Bee));
-  
-  
+
+
   gameData.graphicsData.bee->graphic[BEE_FLAP_GRAPHIC_1] = loadTextureFromFile("images/bee.bmp",
 														  &gameData.graphicsData);
   gameData.graphicsData.bee->graphic[BEE_FLAP_GRAPHIC_2] = loadTextureFromFile("images/bee1.bmp",
-														  &gameData.graphicsData);	
-														  													  
+														  &gameData.graphicsData);
+
   gameData.graphicsData.hiveTexture = loadTextureFromFile("images/beehive.bmp",
 														  &gameData.graphicsData);
 
@@ -107,13 +111,180 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
   makeBlockFunctionRootFromFile(&(gameData.aiData.blockFunctionRoots[0]), file);
   fclose(file);
 
+  createGameUI(&gameData);
+
   /* Then run the gameLoop until it returns 0 or exits */
   printf("gameStarted %d\n",gameLoopReturn);
 
+  playMusic(&gameData.audioData,1);
   while(gameLoopReturn){
     gameLoopReturn = gameLoop(&gameData);
   }
   return(0);
+}
+
+static void createGameUI(GameData *gameData){
+  UI_Element *element;
+  UI_Element *element2;
+  int win_x, win_y;
+
+  BlockFunction *array[255] = {NULL};
+  UI_Element *array2[255];
+  int i = 0;
+  int j = 0;
+  int k = 0;
+  int topX = 60;
+  int topY = 60;
+
+  SDL_GetWindowSize(gameData->graphicsData.window,&win_x, &win_y);
+
+  element = UIElement_Create(win_x-150,0,150,50,3);
+  UIConfigure_FillRect(element,&element->actions[0],255,255,255);
+  UIConfigure_DisplayNumber(element, &element->actions[1], 0,0);
+  UIConfigure_ResourceCounter(element, &element->actions[2],1,&element->actions[1]);
+  UIElement_Reparent(element,gameData->uiData.root);
+
+  element = UIElement_Create(win_x/2,win_y - 50,200,50,4);
+  UIConfigure_Auto(element, &element->actions[0], RESPONSE_PAUSE);
+    UITrigger_Bind(&element->actions[0],&element->actions[0],1,0);
+    UITrigger_Bind(&element->actions[0],&element->actions[1],0,1);
+    UITrigger_Bind(&element->actions[0],&element->actions[2],1,0);
+    UITrigger_Bind(&element->actions[0],&element->actions[3],1,0);
+  element->actions[0].status = 0;
+  UIConfigure_Auto(element, &element->actions[1], RESPONSE_PAUSE);
+    UITrigger_Bind(&element->actions[1],&element->actions[0],0,1);
+    UITrigger_Bind(&element->actions[1],&element->actions[1],1,0);
+    UITrigger_Bind(&element->actions[1],&element->actions[2],0,1);
+    UITrigger_Bind(&element->actions[1],&element->actions[3],0,1);
+  element->actions[1].status = 1;
+  UIConfigure_FillRect(element, &element->actions[2],255,0,0);
+  element->actions[2].status = 0;
+  UIConfigure_DisplayString(element, &element->actions[3],"PAUSED",0);
+  element->actions[3].status = 0;
+  UIElement_Reparent(element,gameData->uiData.root);
+
+  element = UIElement_Create(0,win_y-275,275,275,1);
+  UIConfigure_FillRect(element,&element->actions[0],255,255,255);
+  UIElement_Reparent(element,gameData->uiData.root);
+
+  element2 = UIElement_Create(150, win_y -150, 100,100,3);
+	UIConfigure_FillRect(element2,&element2->actions[0],0,100,100);
+	UIConfigure_LeftClickRect(element2,&element2->actions[1]);
+		UITrigger_Bind(&element2->actions[1],&element2->actions[2],0,1);
+    UITrigger_Bind(&element2->actions[1],&element2->actions[1],1,0);
+	UIConfigure_TwoRectOverride(element2,&element2->actions[2],150,win_y - 150, 100, 100,
+                                                             50, 50, win_x - 225, win_y - 150 - 200,
+                                                             300, 0, 0);
+  UIElement_Reparent(element2,element);
+
+  element = UIElement_Create(50 + win_x - 275, 50, 50, 50,4);
+  UIConfigure_FillRect(element, &element->actions[0],222,0,0);
+  UIConfigure_ShrinkFitToParent(element, &element->actions[1]);
+  UIConfigure_LeftClickRect(element, &element->actions[2]);
+    UITrigger_Bind(&element->actions[2],&element->actions[3],0,1);
+  UIConfigure_External(element, &element->actions[3],element2);
+    UITrigger_Bind(&element->actions[3], &element2->actions[2], 3,2);
+    UITrigger_Bind(&element->actions[3], &element2->actions[1], 0,1);
+  UIElement_Reparent(element,element2);
+
+  element = UIElement_Create(50,50,win_x - 275,win_y - 350,2);
+  UIConfigure_FillRect(element, &element->actions[0],0,222,0);
+  UIConfigure_ShrinkFitToParent(element, &element->actions[1]);
+  UIElement_Reparent(element,element2);
+
+  array[i] = &gameData->aiData.blockFunctionRoots[0].blockFunctions[i];
+  element2 = UIElement_Create(topX,topY,200,50,5);
+  UIConfigure_FillRect(element2,&element2->actions[0],123,321,123);
+  UIConfigure_ShrinkFitToParent(element2,&element2->actions[1]);
+  UIConfigure_RenderLine(element2,&element2->actions[2],BR_CORNER,NULL);
+  UIConfigure_RenderLine(element2,&element2->actions[3],BL_CORNER,NULL);
+  UIConfigure_DisplayString(element2, &element2->actions[4],&gameData->aiData.blockFunctionRoots[0].blockFunctions[i].name,1);
+  UIElement_Reparent(element2,element);
+  topX+=210;
+  array2[i] = element2;
+
+  i = 1;
+  while(i < gameData->aiData.blockFunctionRoots[0].numOfBlockFunctions){
+    printf("making something\n");
+    array[i] = &gameData->aiData.blockFunctionRoots[0].blockFunctions[i];
+    element2 = UIElement_Create(topX,topY,200,50,8);
+    UIConfigure_FillRect(element2,&element2->actions[0],123,321,123);
+    UIConfigure_ShrinkFitToParent(element2,&element2->actions[1]);
+  	UIConfigure_RightClickRect(element2, &element2->actions[2]);
+  		UITrigger_Bind(&element2->actions[2],&element2->actions[3],0,1);
+  		UITrigger_Bind(&element2->actions[2],&element2->actions[4],0,1);
+  		UITrigger_Bind(&element2->actions[2],&element2->actions[2],1,0);
+  	UIConfigure_RightReleaseAnywhere(element2, &element2->actions[3]);
+  		UITrigger_Bind(&element2->actions[3],&element2->actions[3],1,0);
+  		UITrigger_Bind(&element2->actions[3],&element2->actions[4],1,0);
+  		UITrigger_Bind(&element2->actions[3],&element2->actions[2],0,1);
+  	UIConfigure_DraggableRectOverride(element2, &element2->actions[4],1,&element2->actions[1]);
+    UIConfigure_RenderLine(element2,&element2->actions[5],BR_CORNER,NULL);
+    UIConfigure_RenderLine(element2,&element2->actions[6],BL_CORNER,NULL);
+    UIConfigure_DisplayString(element2, &element2->actions[7],&gameData->aiData.blockFunctionRoots[0].blockFunctions[i].name,1);
+    UIElement_Reparent(element2,element);
+    array2[i] = element2;
+    topX+=210;
+    if(topX > win_y - 350){
+      topX -= win_y -350;
+      topY+= 60;
+    }
+    i++;
+  }
+  printf("part 1 done\n");
+
+  i = 0;
+
+    j = -1;
+    k = -1;
+    if(gameData->aiData.blockFunctionRoots[0].blockFunctions[i].primary != NULL){
+      j = 0;
+      while(array[j] != gameData->aiData.blockFunctionRoots[0].blockFunctions[i].primary){
+        j++;
+      }
+      assert(array[j] != NULL);
+      element = array2[i];
+      element->actions[2].external = array2[j];
+      element->actions[2].status = 2;
+    }
+    if(gameData->aiData.blockFunctionRoots[0].blockFunctions[i].secondary != NULL){
+      j = 0;
+      while(array[j] != gameData->aiData.blockFunctionRoots[0].blockFunctions[i].secondary){
+        j++;
+      }
+      assert(array[j] != NULL);
+      element = array2[i];
+      element->actions[3].external = array2[j];
+      element->actions[3].status = 2;
+    }
+  i++;
+
+
+  while(i < gameData->aiData.blockFunctionRoots[0].numOfBlockFunctions){
+    j = -1;
+    k = -1;
+    if(gameData->aiData.blockFunctionRoots[0].blockFunctions[i].primary != NULL){
+      j = 0;
+      while(array[j] != gameData->aiData.blockFunctionRoots[0].blockFunctions[i].primary){
+        j++;
+      }
+      assert(array[j] != NULL);
+      element = array2[i];
+      element->actions[5].external = array2[j];
+      element->actions[5].status = 2;
+    }
+    if(gameData->aiData.blockFunctionRoots[0].blockFunctions[i].secondary != NULL){
+      j = 0;
+      while(array[j] != gameData->aiData.blockFunctionRoots[0].blockFunctions[i].secondary){
+        j++;
+      }
+      assert(array[j] != NULL);
+      element = array2[i];
+      element->actions[6].external = array2[j];
+      element->actions[5].status = 2;
+    }
+    i++;
+  }
 }
 
 int gameLoop(GameData *gameData){
@@ -125,6 +296,7 @@ int gameLoop(GameData *gameData){
      function ran */
   int delta_t;
   SDL_Event event;
+  int running;
 
 
   /* Storing the number of milliseconds since the program was run helps keep it
@@ -138,14 +310,17 @@ int gameLoop(GameData *gameData){
   after the function SDL_RenderPresent*/
 
 
+  UIRoot_Execute(&gameData->uiData,UPDATE,delta_t);
+
   panScreen(&gameData->graphicsData, &gameData->controlsData, delta_t);
   if(SDL_RenderClear(gameData->graphicsData.renderer) == -1){
-	printf("Error clearing renderer: %s\n", SDL_GetError());
-	assert(1 == 2);
+	   printf("Error clearing renderer: %s\n", SDL_GetError());
   }
   paintBackground(&gameData->graphicsData,0,200,100);
   updateGameObjects(&gameData->gameObjectData, &gameData->graphicsData, delta_t);
+  UIRoot_Execute(&gameData->uiData,RENDER,&gameData->graphicsData);
   runAI(&gameData->aiData,&gameData->gameObjectData);
+
 
   /*This function is like the blit function, putting pixels to the screen.
   but it needs to be called after all of the graphicall changes have been made,
@@ -153,6 +328,8 @@ int gameLoop(GameData *gameData){
   the pixel buffer becomes unpredictable and should be followed by SDL_RenderClear
   (as above in this loop)*/
   SDL_RenderPresent(gameData->graphicsData.renderer);
+  UIRoot_Execute(&gameData->uiData,GAME_OBJECT_UPDATE,&gameData->gameObjectData);
+  UIRoot_Execute(&gameData->uiData,EXTERNAL);
 
   /* At the end of the loop we need to update the main application window to
      reflect the changes we've made to the graphics */
@@ -162,25 +339,7 @@ int gameLoop(GameData *gameData){
   /* Don't worry too much about this for now */
 	while (SDL_PollEvent(&event))
 	{
-		switch (event.type)
-		{
-			/* Closing the Window will exit the program */
-			case SDL_MOUSEMOTION:
-				break;
-			case SDL_MOUSEBUTTONUP:
-				break;
-			case SDL_MOUSEBUTTONDOWN:
-				break;
-			case SDL_KEYDOWN:
-        keydown(&gameData->controlsData,&gameData->gameObjectData,&event);
-				break;
-			case SDL_KEYUP:
-        keyup(&gameData->controlsData,&gameData->gameObjectData,&event);
-				break;
-			case SDL_QUIT:
-				exit(0);
-				break;
-		}
+    running = handleEvent(&event,&gameData->gameObjectData,&gameData->uiData,&gameData->controlsData);
 	}
   delta_t = calculateDt(gameData->gameRunTime);
   gameData->gameRunTime = SDL_GetTicks();

@@ -6,6 +6,7 @@ struct GameData{
   SDL_Window *window;
   Uint32 gameStartTime;
   int gameRunTime;
+  int running;
 
   AIData aiData;
   GraphicsData graphicsData;

@@ -14,19 +14,27 @@ void generateResourceNodeSpawners(GameObjectData *gameObjectData){
 
   /* We need to keep a record of how many resourceNodeSpawners we have active
      so that we can loop through them later */
+  gameObjectData->resourceNodeSpawnerCount = NUMBER_OF_FLOWER_PATCHES;
   gameObjectData->resourceNodeSpawnerCount = 50;
 }
 
 void generateProgrammableWorkers(GameObjectData *gameObjectData){
   /* Create two ProgrammableWorkers */
-
-  createProgrammableWorker(gameObjectData);
-  createProgrammableWorker(gameObjectData);
-  createProgrammableWorker(gameObjectData);
-  createProgrammableWorker(gameObjectData);
-  createProgrammableWorker(gameObjectData);
-  createProgrammableWorker(gameObjectData);
-  createProgrammableWorker(gameObjectData);/**/
+  void *p;
+  p = createProgrammableWorker(gameObjectData);
+  printf("%p\n",p);
+  p = createProgrammableWorker(gameObjectData);
+  printf("%p\n",p);
+  p = createProgrammableWorker(gameObjectData);
+  printf("%p\n",p);
+  p = createProgrammableWorker(gameObjectData);
+  printf("%p\n",p);
+  p = createProgrammableWorker(gameObjectData);
+  printf("%p\n",p);
+  p = createProgrammableWorker(gameObjectData);
+  printf("%p\n",p);
+  p = createProgrammableWorker(gameObjectData);
+  printf("%p\n",p);/**/
 }
 
 

@@ -9,12 +9,13 @@
 #include <errno.h>
 #include <SDL_mixer.h>
 #include <time.h>
+#include <SDL_ttf.h>
 
 #define VERBOSE 1
 
 #define PROGRAM_NAME "Prototype"
-#define X_SIZE_OF_SCREEN 640
-#define Y_SIZE_OF_SCREEN 480
+#define X_SIZE_OF_SCREEN 1280
+#define Y_SIZE_OF_SCREEN 960
 
 #define X_SIZE_OF_WORLD 2100
 #define Y_SIZE_OF_WORLD 1700
@@ -67,7 +68,7 @@ each call to updateProgrammableWorker*/
 #define DEFAULT_SPAWNDELAY 100*60
 #define DEFAULT_SPAWNRADIUS 200.0
 #define DEFAULT_MAXNODECOUNT 10
-#define TICKSPERWEATHER 2500
+#define TICKSPERWEATHER 25000
 #define FRAME_TIME 20
 
 #define NUM_OF_KEYS 30

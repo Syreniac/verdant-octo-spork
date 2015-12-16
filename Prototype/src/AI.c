@@ -114,7 +114,6 @@ int blockFunction_RememberCurrentLocation(BlockFunctionArgs *arguments, Programm
   programmableWorker->brain.remembered_point.x = programmableWorker->rect.x;
   programmableWorker->brain.remembered_point.y = programmableWorker->rect.y;
   programmableWorker->brain.is_point_remembered = 1;
-  printf("remembering location %d,%d\n",programmableWorker->rect.y,programmableWorker->rect.x);
   return 1;
 }
 
@@ -422,7 +421,7 @@ void makeBlockFunctionRootFromFile(BlockFunctionRoot *blockFunctionRoot, FILE *f
     /* Work out whether we need to move onto the next block */
     if(read_line2[0] != '\t' && read_line2[0] != ' '){
       if(initialRun == 0){
-        strcpy(blockFunctionRoot->blockFunctions[blockFunctionIndex].name, name);
+        strcpy(blockFunctionRoot->blockFunctions[blockFunctionIndex].name, &name[14]);
         blockFunctionRoot->blockFunctions[blockFunctionIndex].wrapped_function = wrapped_function;
         if(primaryRef != -1){
           blockFunctionRoot->blockFunctions[blockFunctionIndex].primary = &blockFunctionRoot->blockFunctions[primaryRef-1];
@@ -481,7 +480,6 @@ void makeBlockFunctionRootFromFile(BlockFunctionRoot *blockFunctionRoot, FILE *f
         numOfInts = 0;
         while(sscanf(&(read_line[stringWhiteSpaceShift+intReadOffset+11]),"%d",&readInt) > 0 && numOfInts < presumedNumOfInts){
           /* Add some offset until we find the next comma */
-          printf("reading int %d\n",readInt);
           integers[numOfInts] = readInt;
           numOfInts++;
           while(presumedNumOfInts > numOfInts && read_line[stringWhiteSpaceShift+intReadOffset+11] != ','){
@@ -508,7 +506,7 @@ void makeBlockFunctionRootFromFile(BlockFunctionRoot *blockFunctionRoot, FILE *f
       }
     }
   }
-    strcpy(blockFunctionRoot->blockFunctions[blockFunctionIndex].name, name);
+    strcpy(blockFunctionRoot->blockFunctions[blockFunctionIndex].name, &name[14]);
     blockFunctionRoot->blockFunctions[blockFunctionIndex].wrapped_function = wrapped_function;
     if(primaryRef != -1){
       blockFunctionRoot->blockFunctions[blockFunctionIndex].primary = &blockFunctionRoot->blockFunctions[primaryRef-1];
@@ -526,6 +524,7 @@ void makeBlockFunctionRootFromFile(BlockFunctionRoot *blockFunctionRoot, FILE *f
     blockFunctionRoot->blockFunctions[blockFunctionIndex].arguments.numOfFloats = numOfFloats;
     blockFunctionRoot->blockFunctions[blockFunctionIndex].arguments.integers = integers;
     blockFunctionRoot->blockFunctions[blockFunctionIndex].arguments.numOfInts = numOfInts;
+    blockFunctionRoot->numOfBlockFunctions = 1 + blockFunctionIndex;
 }
 
 void runAI(AIData *aiData, GameObjectData *gameObjectData){

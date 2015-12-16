@@ -101,7 +101,6 @@ int countProgrammableWorkersInRange(GameObjectData *gameObjectData, SDL_Point ce
     }
     worker = worker->next;
   }
-  printf("found %d workers in range\n",i);
   return i;
 }
 
@@ -151,10 +150,12 @@ ProgrammableWorker *createProgrammableWorker(GameObjectData *gameObjectData){
   programmableWorker->rect.y = 100;
   programmableWorker->rect.w = X_SIZE_OF_WORKER;
   programmableWorker->rect.h = Y_SIZE_OF_WORKER;
-  
+
   programmableWorker->wet_and_cant_fly = 0;
 
-  
+
+
+
   programmableWorker->currentGraphicIndex = BEE_FLAP_GRAPHIC_1;
   /* heading is measured in radians because maths in C all take radians */
   programmableWorker->heading = 0.0;
@@ -193,6 +194,7 @@ Weather createWeatherLayer(void){
   /* This function creates a Weather struct and fills in the default
      values. Many of these are defined in generic.h */
   Weather weather;
+  weather.tickCount = 0;
   printf("Created weather layer.");
   weather.present_weather = Sun;
   return(weather);
@@ -233,10 +235,10 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
   int i;
   ResourceNodeSpawner *resourceNodeSpawner = NULL;
   ResourceNode *resourceNode;
-  
+
   if(!programmableWorker->wet_and_cant_fly){ /*programmable worker has not been caught in rain recently*/
-  	printf("moo\n");
   	programmableWorker->currentGraphicIndex = (programmableWorker->currentGraphicIndex + 1) % 2;
+
   	
   	
 
@@ -251,7 +253,7 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
   		if(j == NUMBER_OF_TREES){
   			programmableWorker->wet_and_cant_fly = 1; /*true*/
   		}
-  	}
+
 
 
   	/* Because we're using a heading/velocity movement system here, we have to use
@@ -272,8 +274,6 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
     	programmableWorker->brain.foundNode = NULL;
   	}
 
-  	printf("worker status: %d\n",programmableWorker->status);
-
   	if(getDistance2BetweenPoints(programmableWorker->rect.x + programmableWorker->rect.w/2,
 							   	programmableWorker->rect.y + programmableWorker->rect.h/2,
 							   	gameObjectData->hive.rect.x + gameObjectData->hive.rect.w/2,
@@ -287,7 +287,7 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
   	}
   	else if(programmableWorker->status == LEAVING){
     	/* status being 1 means that the bee heading away from the center */
-	
+
     	/* We want to get back the ResourceNode and ResourceNodeSpawner (if any)
     	   that we are colliding with */
     	resourceNode = checkResourceNodeCollision(&resourceNodeSpawner,gameObjectData,programmableWorker);
@@ -399,7 +399,6 @@ void updateIceCreamPerson(GameObjectData *gameObjectData, int ticks){
    	}
   }
   else{
-    printf("forceing run away\n");
     distanceFromYBorder = gameObjectData->iceCreamPerson->yPosition - Y_SIZE_OF_WORLD/2;
     distanceFromXBorder = gameObjectData->iceCreamPerson->xPosition - X_SIZE_OF_WORLD/2;
     if(abs(distanceFromXBorder) > abs(distanceFromYBorder)){
@@ -476,7 +475,6 @@ void initResourceNode(ResourceNode *resourceNode){
   resourceNode->rect.y = 0;
   resourceNode->rect.w = X_SIZE_OF_NODE;
   resourceNode->rect.h = Y_SIZE_OF_NODE;
-  resourceNode->deathTime = -1;
 }
 
 void updateResourceNodeSpawner(ResourceNodeSpawner *spawner, int ticks){
@@ -648,12 +646,12 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
   	smallerBeeRect.h = (int)((float)programmableWorker->rect.h/BEE_SHRINK_FACTOR_ON_GROUND);
   	smallerBeeRect.x = programmableWorker->rect.x;
   	smallerBeeRect.y = programmableWorker->rect.y;
-  	
+
   	if(programmableWorker->wet_and_cant_fly){
     	if(!gameObjectData->pause_status){
     	  updateProgrammableWorker(programmableWorker,gameObjectData,ticks);
     	}
-	
+
     	blitGameObject(smallerBeeRect,
                    	graphicsData,
                    	graphicsData->bee->graphic[programmableWorker->currentGraphicIndex],
@@ -664,7 +662,7 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
     	i++;
     }
   }
-  	
+
    /*determine if iceCreamPerson is on screen and needs animating*/
   if(gameObjectData->iceCreamPerson->currently_on_screen){
 
@@ -712,10 +710,10 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
     	i++;
     }
   }
-  
 
-  
-  
+
+
+
 
   /* render tree tops last, so that they appear above everything else*/
   for(i = 0; i < NUMBER_OF_TREES; i++){
