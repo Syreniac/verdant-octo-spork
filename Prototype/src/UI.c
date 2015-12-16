@@ -802,10 +802,6 @@ static void UITrigger_Execute(UI_Trigger *trigger){
 
 void UIElement_Free(UI_Element *element){
 	int i = 0;
-	if(element->parent != NULL){
-		UIElement_DeExternalise(element);
-		UIElement_Deparent(element);
-	}
 	while(i < element->num_of_actions){
 	  freeUIAction(&element->actions[i]);
 	  i++;
@@ -865,18 +861,7 @@ void UIElement_Deparent(UI_Element *element){
 void UIElement_DeExternalise(UI_Element *element){
 	/* Cleans all external references in actions to a given element,
 		 preventing segfaults */
-	UI_Element *child = element->parent->child;
-	int i = 0;
-	while(child != NULL){
-		i = 0;
-		while(i < child->num_of_actions){
-			if(child->actions[i].external == element){
-				child->actions[i].external = NULL;
-			}
-			i++;
-		}
-		child = child->sibling;
-	}
+	return;
 }
 
 void UIElement_Execute(UI_Element *element, enum Response response, va_list vargs){

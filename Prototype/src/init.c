@@ -27,8 +27,8 @@ InitData initialise(void){
         - SDL configuration options which can be found online in the API documentation*/
 
 	initData.graphicsData.window = SDL_CreateWindow(PROGRAM_NAME,
-										   SDL_WINDOWPOS_UNDEFINED,
-                                           SDL_WINDOWPOS_UNDEFINED,
+										   0,
+                                           0,
                                            X_SIZE_OF_SCREEN, Y_SIZE_OF_SCREEN,
                                            SDL_WINDOW_SHOWN);
 
