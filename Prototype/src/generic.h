@@ -40,6 +40,9 @@ each call to updateProgrammableWorker*/
 each call to updateProgrammableWorker*/
 #define CHANCE_OF_FALLING_IN_RAIN 100
 
+/*how much smaller are the bees when they are on the ground (further away from screen*/
+#define BEE_SHRINK_FACTOR_ON_GROUND 1.2
+
 /*higher values result in lower levels of parallax*/
 #define PARALLAX_INTENSITY 10
 

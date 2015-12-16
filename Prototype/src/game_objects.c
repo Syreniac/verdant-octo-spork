@@ -632,12 +632,18 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 
 	/*BEES ON GROUND NEED RENDERING BEFORE PERSON*/
   for(programmableWorker = gameObjectData->first_programmable_worker; programmableWorker != NULL ; programmableWorker = programmableWorker->next){
+  	SDL_Rect smallerBeeRect;
+  	smallerBeeRect.w = (int)((float)programmableWorker->rect.w/BEE_SHRINK_FACTOR_ON_GROUND);
+  	smallerBeeRect.h = (int)((float)programmableWorker->rect.h/BEE_SHRINK_FACTOR_ON_GROUND);
+  	smallerBeeRect.x = programmableWorker->rect.x;
+  	smallerBeeRect.y = programmableWorker->rect.y;
+  	
   	if(programmableWorker->wet_and_cant_fly){
     	if(!gameObjectData->pause_status){
     	  updateProgrammableWorker(programmableWorker,gameObjectData,ticks);
     	}
-
-    	blitGameObject(programmableWorker->rect,
+	
+    	blitGameObject(smallerBeeRect,
                    	graphicsData,
                    	graphicsData->bee->graphic[programmableWorker->currentGraphicIndex],
                    	DEGREESINCIRCLE-(programmableWorker->heading * RADIANSTODEGREES),
