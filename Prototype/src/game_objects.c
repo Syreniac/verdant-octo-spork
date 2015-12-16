@@ -1,7 +1,6 @@
 #include "game_objects.h"
 
 static ResourceNode *chooseNodeRandomly(ResourceNodeSpawner *resourceNodeSpawner);
-static void shuffleAliveNodes(ResourceNodeSpawner *resourceNodeSpawner);
 
 static ResourceNode *chooseNodeRandomly(ResourceNodeSpawner *resourceNodeSpawner){
   int i = 0, r = rand();
@@ -18,25 +17,6 @@ static ResourceNode *chooseNodeRandomly(ResourceNodeSpawner *resourceNodeSpawner
     }
   }
   return NULL;
-}
-
-static void shuffleAliveNodes(ResourceNodeSpawner *resourceNodeSpawner){
-  int start = 0;
-  int end = resourceNodeSpawner->maximumNodeCount;
-
-  while(start < end){
-    if(!resourceNodeSpawner->resourceNodes[start].alive && resourceNodeSpawner->resourceNodes[end].alive){
-      resourceNodeSpawner->resourceNodes[start] = resourceNodeSpawner->resourceNodes[end];
-      resourceNodeSpawner->resourceNodes[end].alive = 0;
-    }
-    if(resourceNodeSpawner->resourceNodes[start].alive){
-      start++;
-    }
-    if(!resourceNodeSpawner->resourceNodes[end].alive){
-      end--;
-    }
-  }
-
 }
 
 ResourceNode *checkResourceNodeCollision(ResourceNodeSpawner **resourceNodeSpawnerPointer, GameObjectData *gameObjectData, ProgrammableWorker *programmableWorker){
@@ -144,8 +124,8 @@ ProgrammableWorker *createProgrammableWorker(GameObjectData *gameObjectData){
   /* Because we're using trigonometry to move things around, if work purely with
      integers then Bad Things happen. Instead, we work first in doubles then
      copy the information to the integers in the rectangle. */
-  programmableWorker->rawX = 100.0;
-  programmableWorker->rawY = 100.0;
+  programmableWorker->rawX = X_SIZE_OF_WORLD/2;
+  programmableWorker->rawY = Y_SIZE_OF_WORLD/2;
   programmableWorker->rect.x = 100;
   programmableWorker->rect.y = 100;
   programmableWorker->rect.w = X_SIZE_OF_WORKER;
@@ -444,8 +424,8 @@ ResourceNodeSpawner createResourceNodeSpawner(int maximumNodeCount, float xPosit
   resourceNodeSpawner.yPosition = yPosition;
 
   /* Set the ticksSinceSpawn to 0 because we haven't spawned anything yet */
-  resourceNodeSpawner.ticksSinceSpawn = 0;
   resourceNodeSpawner.spawnDelay = DEFAULT_SPAWNDELAY;
+  resourceNodeSpawner.ticksSinceSpawn = rand() % resourceNodeSpawner.spawnDelay;
   resourceNodeSpawner.spawnRadius = radius;
   resourceNodeSpawner.collisionRect.x = (int)floor(xPosition - radius/2);
   resourceNodeSpawner.collisionRect.y = (int)floor(yPosition - radius/2);
@@ -574,15 +554,16 @@ ResourceNode createResourceNode(ResourceNodeSpawner *parentSpawner, int resource
      This creates a resource node attached to a spawner.*/
   ResourceNode resourceNode;
   resourceNode.alive = 1;
+  printf("creating resource node\n");
   /* The amout of resources (honey, etc...) the node holds */
   resourceNode.resourceUnits = resourceUnits;
   /* We use a randomly generated offset value for now to distribute the
      ResourceNode around the ResourceNodeSpawner. This can be improved. */
   resourceNode.rect.x = (int)floor(parentSpawner->xPosition + generateRandomCoordOffset(parentSpawner->spawnRadius) - X_SIZE_OF_NODE/2);
   resourceNode.rect.y = (int)floor(parentSpawner->yPosition + generateRandomCoordOffset(parentSpawner->spawnRadius) - Y_SIZE_OF_NODE/2);
-  fitRectToWorld(&resourceNode.rect);
   resourceNode.rect.w = 20;
   resourceNode.rect.h = 20;
+  fitRectToWorld(&resourceNode.rect);
   return resourceNode;
 }
 

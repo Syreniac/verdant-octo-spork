@@ -58,6 +58,7 @@ struct UI_Action{
 
 struct UI_Trigger{
   UI_Action *action;
+  UI_Trigger *next;
   int status_from;
   int status_to;
 };

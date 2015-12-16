@@ -113,6 +113,7 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
 
   createGameUI(&gameData);
 
+  SDL_Delay(10);
   /* Then run the gameLoop until it returns 0 or exits */
   printf("gameStarted %d\n",gameLoopReturn);
 
@@ -131,8 +132,8 @@ static void createGameUI(GameData *gameData){
   BlockFunction *array[255] = {NULL};
   UI_Element *array2[255];
   int i = 0;
-  int j = 0;
   int k = 0;
+  int j = 0;
   int topX = 60;
   int topY = 60;
 
@@ -198,7 +199,7 @@ static void createGameUI(GameData *gameData){
   UIConfigure_ShrinkFitToParent(element2,&element2->actions[1]);
   UIConfigure_RenderLine(element2,&element2->actions[2],BR_CORNER,NULL);
   UIConfigure_RenderLine(element2,&element2->actions[3],BL_CORNER,NULL);
-  UIConfigure_DisplayString(element2, &element2->actions[4],&gameData->aiData.blockFunctionRoots[0].blockFunctions[i].name,1);
+  UIConfigure_DisplayString(element2, &element2->actions[4],&gameData->aiData.blockFunctionRoots[0].blockFunctions[i].name[0],1);
   UIElement_Reparent(element2,element);
   topX+=210;
   array2[i] = element2;
@@ -211,9 +212,13 @@ static void createGameUI(GameData *gameData){
     UIConfigure_FillRect(element2,&element2->actions[0],123,321,123);
     UIConfigure_ShrinkFitToParent(element2,&element2->actions[1]);
   	UIConfigure_RightClickRect(element2, &element2->actions[2]);
+		printf("#\n");
   		UITrigger_Bind(&element2->actions[2],&element2->actions[3],0,1);
+		printf("#\n");
   		UITrigger_Bind(&element2->actions[2],&element2->actions[4],0,1);
+		printf("#\n");
   		UITrigger_Bind(&element2->actions[2],&element2->actions[2],1,0);
+		printf("#\n");
   	UIConfigure_RightReleaseAnywhere(element2, &element2->actions[3]);
   		UITrigger_Bind(&element2->actions[3],&element2->actions[3],1,0);
   		UITrigger_Bind(&element2->actions[3],&element2->actions[4],1,0);
@@ -221,7 +226,7 @@ static void createGameUI(GameData *gameData){
   	UIConfigure_DraggableRectOverride(element2, &element2->actions[4],1,&element2->actions[1]);
     UIConfigure_RenderLine(element2,&element2->actions[5],BR_CORNER,NULL);
     UIConfigure_RenderLine(element2,&element2->actions[6],BL_CORNER,NULL);
-    UIConfigure_DisplayString(element2, &element2->actions[7],&gameData->aiData.blockFunctionRoots[0].blockFunctions[i].name,1);
+    UIConfigure_DisplayString(element2, &element2->actions[7],&gameData->aiData.blockFunctionRoots[0].blockFunctions[i].name[0],1);
     UIElement_Reparent(element2,element);
     array2[i] = element2;
     topX+=210;
@@ -230,13 +235,12 @@ static void createGameUI(GameData *gameData){
       topY+= 60;
     }
     i++;
+	SDL_Delay(1);
   }
   printf("part 1 done\n");
 
   i = 0;
 
-    j = -1;
-    k = -1;
     if(gameData->aiData.blockFunctionRoots[0].blockFunctions[i].primary != NULL){
       j = 0;
       while(array[j] != gameData->aiData.blockFunctionRoots[0].blockFunctions[i].primary){
@@ -261,8 +265,6 @@ static void createGameUI(GameData *gameData){
 
 
   while(i < gameData->aiData.blockFunctionRoots[0].numOfBlockFunctions){
-    j = -1;
-    k = -1;
     if(gameData->aiData.blockFunctionRoots[0].blockFunctions[i].primary != NULL){
       j = 0;
       while(array[j] != gameData->aiData.blockFunctionRoots[0].blockFunctions[i].primary){
@@ -296,7 +298,6 @@ int gameLoop(GameData *gameData){
      function ran */
   int delta_t;
   SDL_Event event;
-  int running;
 
 
   /* Storing the number of milliseconds since the program was run helps keep it
@@ -339,7 +340,7 @@ int gameLoop(GameData *gameData){
   /* Don't worry too much about this for now */
 	while (SDL_PollEvent(&event))
 	{
-    running = handleEvent(&event,&gameData->gameObjectData,&gameData->uiData,&gameData->controlsData);
+    handleEvent(&event,&gameData->gameObjectData,&gameData->uiData,&gameData->controlsData);
 	}
   delta_t = calculateDt(gameData->gameRunTime);
   gameData->gameRunTime = SDL_GetTicks();
