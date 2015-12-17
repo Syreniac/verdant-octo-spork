@@ -30,3 +30,9 @@ struct SoundEffect{
 
 void loadMusic(char *music, int season, AudioData *audioData);
 void playMusic(AudioData *audioData, int season);
+void stopMusic(AudioData *audioData, int season);
+void fadeOutMusic(AudioData *audioData);
+void loadSoundEffect(char *sound, char *name, AudioData *audioData);
+void playSoundEffect(int channel, AudioData *audioData, char* name);
+void fadeOutChannel(int channel, AudioData *audioData);
+void fadeInChannel(int channel, AudioData *audioData, char* name);

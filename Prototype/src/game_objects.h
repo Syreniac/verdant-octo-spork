@@ -128,6 +128,8 @@ struct GameObjectData{
   ProgrammableWorker *first_programmable_worker;
   int programmableWorkerCount;
   int pause_status;
+  
+  AudioData audioData;
 };
 
 ProgrammableWorker *createProgrammableWorker(GameObjectData *gameObjectData);
@@ -147,7 +149,7 @@ Weather createWeatherLayer(void);
 int getFirstDeadResourceNode(ResourceNodeSpawner *resourceNodeSpawner);
 ResourceNodeSpawner createResourceNodeSpawner(int maximumNodeCount, float xPosition, float yPosition, float radius);
 void updateResourceNodeSpawner(ResourceNodeSpawner *spawner, int ticks);
-void updateWeather(Weather *weather, int ticks);
+void updateWeather(GameObjectData *gameObjectData, Weather *weather, int ticks);
 
 void initResourceNode(ResourceNode *resourceNode);
 ResourceNode createResourceNode(ResourceNodeSpawner *parentSpawner, int resourceUnits);
@@ -155,3 +157,5 @@ IceCreamPerson *createIceCreamPerson(void);
 void reInitialiseIceCreamPerson(IceCreamPerson *iceCreamPerson);
 void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsData, int ticks);
 int countProgrammableWorkersInRange(GameObjectData *gameObjectData, SDL_Point center, double radius);
+
+void initAudio(GameObjectData *gameObjectData, AudioData audioData);

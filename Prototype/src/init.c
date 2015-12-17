@@ -45,9 +45,20 @@ InitData initialise(void){
   TTF_Init();
   initData.graphicsData.fonts[0] = TTF_OpenFont("font/Aclonica.ttf",16);
   initData.graphicsData.fonts[1] = TTF_OpenFont("font/Aclonica.ttf",12);
+	
+	loadMusic("music01.wav" , 0, &initData.audioData);
+	loadMusic("music02.wav" , 1, &initData.audioData);
+	loadMusic("music03.wav" , 1, &initData.audioData);
+	printf("ALL MUSIC LOADED\n");
+	loadSoundEffect("returnFlower.wav", "returnFlower", &initData.audioData);
+	printf("FIRST SOUND EFFECT LOADED\n");
+	loadSoundEffect("thunder.wav", "thunder", &initData.audioData);
+	printf("ALL SOUND EFFECTS LOADED\n");
 
-	loadMusic("sound/music01.wav" , 1, &initData.audioData);
-	loadMusic("sound/music02.wav" , 1, &initData.audioData);
+    TTF_Init();
+    initData.graphicsData.fonts[0] = TTF_OpenFont("Aclonica.ttf",16);
+    initData.graphicsData.fonts[1] = TTF_OpenFont("Aclonica.ttf",12);
+>>>>>>> 6e5ce359ec149061c9633900b044dc62b7f3dc9e
 
   return initData;
 }
@@ -58,12 +69,13 @@ void uninitialise(void){
 }
 
 void audioSystem(AudioData *AudioSettings){
-
-	AudioSettings->audio_rate = 22050;
+	
+	AudioSettings->audio_rate = 44100;
 	AudioSettings->audio_format = AUDIO_S16SYS;
 	AudioSettings->audio_channels = 2;
 	AudioSettings->audio_buffers = 4096;
 	AudioSettings->music = NULL;
+	AudioSettings->soundEffect = NULL;
 
 	AudioSettings->seasonal_music_count[0] = 0;
 	AudioSettings->seasonal_music_count[1] = 0;
@@ -124,6 +136,8 @@ int game_welcome_page(GraphicsData graphicsData, AudioData audioData){
 
     printf("made ui\n");
 
+   playMusic(&initData.audioData,0);   
+   
    while(menuRunning){
 
       UIRoot_Execute(&initData.uiData,UPDATE);
@@ -146,9 +160,14 @@ int game_welcome_page(GraphicsData graphicsData, AudioData audioData){
     				break;
     		}
     	}
+		if (Mix_Playing(1) == 0) {
+			playMusic(&initData.audioData,0);
+		}
       menuRunning = (!initData.uiData.root->child->actions[0].status);
    }
 
+   fadeOutMusic(&initData.audioData);
+   /*stopMusic(&initData.audioData, 0);*/
    gameStart(graphicsData,audioData);
    return 0;
 }
