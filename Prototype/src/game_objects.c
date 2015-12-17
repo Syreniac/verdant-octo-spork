@@ -233,6 +233,7 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
   		if(j == NUMBER_OF_TREES){
   			programmableWorker->wet_and_cant_fly = 1; /*true*/
   		}
+  	}
 
 
 

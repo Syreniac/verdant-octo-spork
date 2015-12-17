@@ -1,10 +1,10 @@
 # Please run the clean command detailed at the bottom before running: make -f makefile_alex
 
 CFLAGS = -pedantic -Wall -Wextra -Wno-unused-variable -Wno-unused-parameter
-SDL_FLAGS = -I/opt/SDL/2.0.3/include -L/opt/SDL/2.0.3/lib
-
+TTF_FLAGS = -I./libraries_Alex/SDL_ttf/include -L./libraries_Alex/SDL_ttf/lib
+IMAGE_FLAGS = -I./libraries_Alex/SDL_Image/include -L./libraries_Alex/SDL_Image/lib
 MIXER_FLAGS = -I./SDL_Mixer_alex/include -L./SDL_Mixer_alex/lib
-LFLAGS = $(SDL_FLAGS) $(MIXER_FLAGS) -Wl,-rpath,/opt/SDL/2.0.3/lib -lSDL2 -lSDL_Mixer -lm
+LFLAGS = -g $(TTF_FLAGS) $(IMAGE_FLAGS) $(MIXER_FLAGS) -lSDL2 -lSDL2_Image -lSDL_ttf -lSDL_Mixer -lfreetype -lm
 DELETE = rm
 DELETE_RECURSIVE = rm -r
 # Once we have TTF working, $(TTF_FLAGS) needs to go in at start, and -lSDL_ttf needs to go in at end.
