@@ -37,7 +37,7 @@ InitData initialise(void){
                                                SDL_RENDERER_TARGETTEXTURE|SDL_RENDERER_PRESENTVSYNC);
 	assert(initData.graphicsData.renderer != NULL);
 
-  initData.graphicsData.mainMenuImage = loadTextureFromFile("mainMenuImage.bmp", &initData.graphicsData, 0);
+  initData.graphicsData.mainMenuImage = loadTextureFromFile("images/mainMenuImage.bmp", &initData.graphicsData, 0);
 
 	/*Audio needs to be initialized at the very start too.*/
 	audioSystem(&initData.audioData);
@@ -46,19 +46,14 @@ InitData initialise(void){
   initData.graphicsData.fonts[0] = TTF_OpenFont("font/Aclonica.ttf",16);
   initData.graphicsData.fonts[1] = TTF_OpenFont("font/Aclonica.ttf",12);
 	
-	loadMusic("music01.wav" , 0, &initData.audioData);
-	loadMusic("music02.wav" , 1, &initData.audioData);
-	loadMusic("music03.wav" , 1, &initData.audioData);
+	loadMusic("sound/music01.wav" , 0, &initData.audioData);
+	loadMusic("sound/music02.wav" , 1, &initData.audioData);
+	loadMusic("sound/music03.wav" , 1, &initData.audioData);
 	printf("ALL MUSIC LOADED\n");
-	loadSoundEffect("returnFlower.wav", "returnFlower", &initData.audioData);
+	loadSoundEffect("sound/returnFlower.wav", "returnFlower", &initData.audioData);
 	printf("FIRST SOUND EFFECT LOADED\n");
-	loadSoundEffect("thunder.wav", "thunder", &initData.audioData);
+	loadSoundEffect("sound/thunder.wav", "thunder", &initData.audioData);
 	printf("ALL SOUND EFFECTS LOADED\n");
-
-    TTF_Init();
-    initData.graphicsData.fonts[0] = TTF_OpenFont("Aclonica.ttf",16);
-    initData.graphicsData.fonts[1] = TTF_OpenFont("Aclonica.ttf",12);
->>>>>>> 6e5ce359ec149061c9633900b044dc62b7f3dc9e
 
   return initData;
 }
