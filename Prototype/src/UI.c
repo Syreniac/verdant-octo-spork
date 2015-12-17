@@ -436,7 +436,7 @@ int UIAction_GenerateAIString(UI_Action *action, va_list copy_from){
 	char working_space[300] = {'\0'};
 	UI_Element *worker = action->element->parent->child;
 	/* Copy in the default string */
-	action->strings[1] = realloc(action->strings[1],strlen(action->strings[0]));
+	action->strings[1] = realloc(action->strings[1],strlen(action->strings[0])+1);
 	strcpy(action->strings[1],action->strings[0]);
 	if(action->companions[0]->external != NULL){
 		memset(working_space, 0, 300);
@@ -450,7 +450,7 @@ int UIAction_GenerateAIString(UI_Action *action, va_list copy_from){
 		}
 		if(primary != 0){
 			sprintf(working_space,"\n\tprimary = %d",primary);
-			action->strings[1] = realloc(action->strings[1],strlen(action->strings[1]) + strlen(working_space)+1);
+			action->strings[1] = realloc(action->strings[1],strlen(action->strings[1]) + 1 + strlen(working_space)+1);
 			strcat(action->strings[1],working_space);
 		}
 	}
@@ -467,7 +467,7 @@ int UIAction_GenerateAIString(UI_Action *action, va_list copy_from){
 		}
 		if(secondary != 0){
 			sprintf(working_space,"\n\tsecondary = %d",secondary);
-			action->strings[1] = realloc(action->strings[1],strlen(action->strings[1]) + strlen(working_space)+1);
+			action->strings[1] = realloc(action->strings[1],strlen(action->strings[1]) + 1 + strlen(working_space)+1);
 			strcat(action->strings[1],working_space);
 		}
 	}
@@ -486,8 +486,8 @@ void UIConfigure_GenerateAIString(UI_Element *element, UI_Action *action, char *
 	action->companions[1] = linkSecondary;
 	action->num_of_companions = 2;
 	action->strings = malloc(sizeof(char*)*2);
-	action->strings[0] = malloc(strlen(string) * sizeof(char));
-	action->strings[1] = malloc(strlen(string) * sizeof(char));
+	action->strings[0] = malloc(strlen(string)+1 * sizeof(char));
+	action->strings[1] = malloc(strlen(string)+1 * sizeof(char));
 	strcpy(action->strings[0],string);
 	strcpy(action->strings[1],string);
 }
@@ -715,8 +715,8 @@ void UIConfigure_DisplayString(UI_Element *element, UI_Action *action, char *str
 	action->function = UIAction_DisplayString;
 	action->strings = malloc(sizeof(char*) * 2);
 	if(string != NULL){
-		action->strings[0] = calloc(strlen(string),sizeof(char));
-		action->strings[1] = calloc(strlen(string),sizeof(char));
+		action->strings[0] = calloc(strlen(string)+1,sizeof(char));
+		action->strings[1] = calloc(strlen(string)+1,sizeof(char));
 		strcpy(action->strings[1], string);
 	}
 	else{
@@ -871,14 +871,14 @@ static int isLinked(UI_Element *test, UI_Element *to){
 void UITrigger_Bind(UI_Action *action, UI_Action *target, int status_from, int status_to){
 	UI_Trigger *trigger = malloc(sizeof(UI_Trigger));
 	UI_Trigger *movingPointer = NULL;
-	
+
 	trigger->action = target;
 	trigger->status_from = status_from;
 	trigger->status_to = status_to;
 	trigger->next = NULL;
-	
+
 	action->num_of_triggers++;
-	
+
 	if(action->triggers == NULL){
 		action->triggers = trigger;
 	}
@@ -889,7 +889,7 @@ void UITrigger_Bind(UI_Action *action, UI_Action *target, int status_from, int s
 		}
 		movingPointer->next = trigger;
 	}
-	
+
 	//action->triggers = realloc(action->triggers, sizeof(UI_Trigger) * action->num_of_triggers);
 	printf("trigger bound\n");
 }

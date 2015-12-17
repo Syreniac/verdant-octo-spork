@@ -12,6 +12,13 @@
 #include <SDL_ttf.h>
 #include <stdarg.h>
 
+#define DEBUGGING 1
+#if DEBUGGING==1
+#define calloc(x,y) debug_calloc(__LINE__,__FILE__,x,y)
+#define malloc(x) debug_malloc(__LINE__,__FILE__,x)
+#define realloc(x,y) debug_realloc(__LINE__,__FILE__,x,y)
+#define free(x) debug_free(__LINE__,__FILE__,x)
+#endif
 #define VERBOSE 1
 
 #define PROGRAM_NAME "Prototype"
@@ -80,6 +87,13 @@ each call to updateProgrammableWorker*/
 #define RADIANSTODEGREES 57.2958
 
 typedef enum personGraphic {WITH_ICE_CREAM_STRIDE1, WITH_ICE_CREAM_STRIDE2} personGraphic;
+
+#if DEBUGGING==1
+void *debug_calloc(int line, char *filename, int itemCount, int itemSize);
+void *debug_malloc(int line, char *filename, int totalSize);
+void *debug_realloc(int line, char *filename, void* oldPointer, int newSize);
+void debug_free(int line, char *filename, void* pointer);
+#endif
 
 int isPointInRect(int point_x, int point_y, SDL_Rect rect);
 int isRectEnclosedInRect(SDL_Rect rectA, SDL_Rect rectB);

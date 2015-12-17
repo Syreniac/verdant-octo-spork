@@ -137,3 +137,44 @@ SDL_Point getCenterOfRect(SDL_Rect rect){
   point.y = rect.y + rect.h/2;
   return point;
 }
+
+#if DEBUGGING==1
+#undef calloc
+#undef malloc
+#undef realloc
+#undef free
+
+void *debug_calloc(int line, char *filename, int itemCount, int itemSize){
+  void *p;
+  printf("callocing @ %s:%d ",filename,line);
+  p = calloc(itemCount, itemSize);
+  printf("getting block %p of size %d\n",p,itemCount*itemSize);
+  return p;
+}
+
+void *debug_malloc(int line, char *filename, int totalSize){
+  void *p;
+  printf("mallocing @ %s:%d ",filename,line);
+  p = malloc(totalSize);
+  printf("getting block %p of size %d\n",p,totalSize);
+  return p;
+}
+
+
+void *debug_realloc(int line, char *filename, void* oldPointer, int newSize){
+  void *p;
+  printf("reallocing @ %s:%d from %p to ",filename,line,oldPointer);
+  p = realloc(oldPointer,newSize);
+  printf("getting block %p of size %d\n",p,newSize);
+  return p;
+}
+
+void debug_free(int line, char *filename, void* pointer){
+  printf("freeing @ %s:%d pointer %p\n",filename,line,pointer);
+  free(pointer);
+}
+#define calloc(x,y) debug_calloc(__LINE__,__FILE__,x,y)
+#define malloc(x) debug_malloc(__LINE__,__FILE__,x)
+#define realloc(x,y) debug_realloc(__LINE__,__FILE__,x,y)
+#define free(x) debug_free(__LINE__,__FILE__,x)
+#endif
