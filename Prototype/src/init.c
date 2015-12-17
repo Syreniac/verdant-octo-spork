@@ -43,6 +43,9 @@ InitData initialise(void){
 	loadMusic("music01.wav" , 0, &initData.audioData);
 	loadMusic("music02.wav" , 1, &initData.audioData);
 	loadMusic("music03.wav" , 1, &initData.audioData);
+	printf("ALL MUSIC LOADED\n");
+	loadSoundEffect("returnFlower.wav", "returnFlower", &initData.audioData);
+	loadSoundEffect("thunder.wav", "thunder", &initData.audioData);
 	
   return initData;
 }
@@ -54,7 +57,7 @@ void uninitialise(void){
 
 void audioSystem(AudioData *AudioSettings){
 	
-	AudioSettings->audio_rate = 22050;
+	AudioSettings->audio_rate = 44100;
 	AudioSettings->audio_format = AUDIO_S16SYS;
 	AudioSettings->audio_channels = 2;
 	AudioSettings->audio_buffers = 4096;
@@ -154,7 +157,8 @@ int game_welcome_page(GraphicsData graphicsData, AudioData audioData){
       //menuRunning = !&initData.uiData.root->child->actions[1].status;
    } /*delay 2s first*/
 
-   stopMusic(&initData.audioData, 0);
+   fadeOutMusic(&initData.audioData);
+   /*stopMusic(&initData.audioData, 0);*/
    gameStart(graphicsData,audioData);
    return 0;
 }

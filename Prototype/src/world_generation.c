@@ -14,7 +14,7 @@ void generateResourceNodeSpawners(GameObjectData *gameObjectData){
 
   /* We need to keep a record of how many resourceNodeSpawners we have active
      so that we can loop through them later */
-  gameObjectData->resourceNodeSpawnerCount = 0;
+  gameObjectData->resourceNodeSpawnerCount = NUMBER_OF_FLOWER_PATCHES;
 }
 
 void generateProgrammableWorkers(GameObjectData *gameObjectData){

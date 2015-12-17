@@ -3,6 +3,11 @@
 static ResourceNode *chooseNodeRandomly(ResourceNodeSpawner *resourceNodeSpawner);
 static void shuffleAliveNodes(ResourceNodeSpawner *resourceNodeSpawner);
 
+void initAudio(GameObjectData *gameObjectData, AudioData audioData){
+  gameObjectData->audioData = audioData;
+  printf("gameObjectData->audioData->name = \"%s\" ", gameObjectData->audioData.soundEffect->name);
+}
+
 static ResourceNode *chooseNodeRandomly(ResourceNodeSpawner *resourceNodeSpawner){
   int i = 0, r = rand();
   if(resourceNodeSpawner->currentNodeCount > 0){
@@ -86,6 +91,7 @@ ResourceNode *checkResourceNodeCollision(ResourceNodeSpawner **resourceNodeSpawn
     }
     i++;
   }
+  
   return(NULL);
 }
 
@@ -101,7 +107,6 @@ int countProgrammableWorkersInRange(GameObjectData *gameObjectData, SDL_Point ce
     }
     worker = worker->next;
   }
-  printf("found %d workers in range\n",i);
   return i;
 }
 
@@ -248,8 +253,6 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
     programmableWorker->brain.foundNode = NULL;
   }
 
-  printf("worker status: %d\n",programmableWorker->status);
-
   if(getDistance2BetweenPoints(programmableWorker->rect.x + programmableWorker->rect.w/2,
 							   programmableWorker->rect.y + programmableWorker->rect.h/2,
 							   gameObjectData->hive.rect.x + gameObjectData->hive.rect.w/2,
@@ -257,6 +260,7 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
     if(programmableWorker->cargo != 0){
       programmableWorker->cargo = 0;
       gameObjectData->hive.flowers_collected++;
+	  playSoundEffect(2, &gameObjectData->audioData, "returnFlower");
       printf("We've now collected %d flowers!\n",gameObjectData->hive.flowers_collected);
     }
   }
@@ -474,8 +478,10 @@ void updateResourceNodeSpawner(ResourceNodeSpawner *spawner, int ticks){
   }
 }
 
-void updateWeather(Weather *weather, int ticks){
+void updateWeather(GameObjectData *gameObjectData, Weather *weather, int ticks){
   /* Advance weather every TICKSPERWEATHER ticks; this may be semi-random due to tick-skipping. */
+	int weatherChannel = 3;
+  
     weather->tickCount += ticks;
 
     if(weather->tickCount > TICKSPERWEATHER){
@@ -490,9 +496,11 @@ void updateWeather(Weather *weather, int ticks){
           break;
         case Cloud:
           weather->present_weather = (rand() % CHANCE_OF_RAIN == 0) ? Rain : Sun;
+		  fadeInChannel(weatherChannel, &gameObjectData->audioData, "thunder");  
           break;
         case Rain:
           weather->present_weather = (rand() % CHANCE_OF_CLOUD == 0) ? Cloud : Sun;
+		  fadeOutChannel(weatherChannel, &gameObjectData->audioData);
           break;
         case Snow:
           /*honey stocks should be built up first. WINTER IS COMING.. (haha game of drones).*/
@@ -504,7 +512,6 @@ void updateWeather(Weather *weather, int ticks){
       }
     }
 }
-
 
 void reInitialiseIceCreamPerson(IceCreamPerson *iceCreamPerson){
   iceCreamPerson->currently_on_screen = 1;
@@ -663,7 +670,7 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
     blitRainRandomly(graphicsData);
   }
 
-  updateWeather(&gameObjectData->weather, ticks);
+  updateWeather(gameObjectData, &gameObjectData->weather, ticks);
 
   paintWeatherLayer(graphicsData, gameObjectData->weather.present_weather, graphicsData->workerTexture); /* Only blending worker textures currently */
 }

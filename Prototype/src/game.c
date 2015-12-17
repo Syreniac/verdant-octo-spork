@@ -32,6 +32,7 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
 
   gameData.graphicsData = graphicsData;
   gameData.audioData = audioData;
+  initAudio(&gameData.gameObjectData, gameData.audioData);	
 
   gameData.gameObjectData.pause_status = 0;
   gameData.gameObjectData.first_programmable_worker = NULL;
