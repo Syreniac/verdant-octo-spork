@@ -13,7 +13,7 @@ BlockFunction_IfWorkerCargoGreaterThan
 	secondary = 6
 BlockFunction_WorkerReturnToHive
 BlockFunction_IfWorkerOutsideOfBounds
-	primary = 7
+	primary = 5
 BlockFunction_IfNumOfFlowersInRadius
 	primary = 8
 	secondary = 5

@@ -28,6 +28,6 @@ BlockFunction_GoToRememberedLocation
 BlockFunction_IfWorkerStatusEqual
 	integers = 1
 	primary = 7
-BlockFunction_RandomiseLocation
+BlockFunction_RandomiseRememberedLocation
 	integers = 50
 	primary = 10
