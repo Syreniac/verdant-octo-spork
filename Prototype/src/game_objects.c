@@ -42,7 +42,6 @@ ResourceNode *checkResourceNodeCollision(ResourceNodeSpawner **resourceNodeSpawn
      attached, doing it simply by checking ResourceNodes will be 1 million
      checks at worst whilst this way will be 2000 checks at worst.*/
   int i = 0, j = 0;
-  double d2;
   /* Loop through all the resourceNodeSpawners in the gameObjectData we got
      passed */
   while(i < gameObjectData->resourceNodeSpawnerCount){
@@ -71,7 +70,7 @@ ResourceNode *checkResourceNodeCollision(ResourceNodeSpawner **resourceNodeSpawn
     }
     i++;
   }
-  
+
   return(NULL);
 }
 
@@ -218,17 +217,16 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
                                               determining collision
      float ticks                            = The number of ticks to update for.*/
   double newX,newY;
-  int i;
   ResourceNodeSpawner *resourceNodeSpawner = NULL;
   ResourceNode *resourceNode;
 
   if(!programmableWorker->wet_and_cant_fly){ /*programmable worker has not been caught in rain recently*/
   	programmableWorker->currentGraphicIndex = (programmableWorker->currentGraphicIndex + 1) % 2;
 
-  	
-  	
 
-  	
+
+
+
   	if(gameObjectData->weather.present_weather == Rain){
   		int i, j = 0;
   		for(i = 0; i < NUMBER_OF_TREES; i++){
@@ -308,7 +306,6 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
 
 void updateIceCreamPerson(GameObjectData *gameObjectData, int ticks){
   double newX,newY;
-  int i;
   int distanceFromYBorder;
   int distanceFromXBorder;
 
@@ -499,7 +496,7 @@ void updateResourceNodeSpawner(ResourceNodeSpawner *spawner, int ticks){
 void updateWeather(GameObjectData *gameObjectData, Weather *weather, int ticks){
   /* Advance weather every TICKSPERWEATHER ticks; this may be semi-random due to tick-skipping. */
 	int weatherChannel = 3;
-  
+
     weather->tickCount += ticks;
 
     if(weather->tickCount > TICKSPERWEATHER){
@@ -514,7 +511,7 @@ void updateWeather(GameObjectData *gameObjectData, Weather *weather, int ticks){
           break;
         case Cloud:
           weather->present_weather = (rand() % CHANCE_OF_RAIN == 0) ? Rain : Sun;
-		  fadeInChannel(weatherChannel, &gameObjectData->audioData, "thunder");  
+		  fadeInChannel(weatherChannel, &gameObjectData->audioData, "thunder");
           break;
         case Rain:
           weather->present_weather = (rand() % CHANCE_OF_CLOUD == 0) ? Cloud : Sun;

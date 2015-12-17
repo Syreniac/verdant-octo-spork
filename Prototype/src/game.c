@@ -27,8 +27,6 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
   GameData gameData;
   FILE *file;
   int gameLoopReturn;
-  SDL_Rect rect;
-  SDL_Rect rect2;
 
   gameLoopReturn = 1;
 
@@ -37,9 +35,9 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
 
   gameData.uiData.root = calloc(1, sizeof(UI_Element));
   gameData.running = 1;
-  
+
   initAudio(&gameData.gameObjectData, gameData.audioData);
-  
+
   gameData.gameObjectData.pause_status = 0;
   gameData.gameObjectData.first_programmable_worker = NULL;
 
@@ -135,7 +133,6 @@ static void createGameUI(GameData *gameData){
   BlockFunction *array[255] = {NULL};
   UI_Element *array2[255];
   int i = 0;
-  int k = 0;
   int j = 0;
   int topX = 60;
   int topY = 60;

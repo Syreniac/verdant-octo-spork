@@ -78,7 +78,6 @@ int UIAction_Auto(UI_Action *action, va_list copy_from){
 }
 
 int UIAction_External(UI_Action *action, va_list copy_from){
-	int i = 0;
 	if(action->status == 1 && action->external != NULL){
 		UITrigger_Execute(action);
 		action->status = 0;
@@ -167,8 +166,6 @@ int UIAction_DisplayString(UI_Action *action, va_list copy_from){
 		action->strings[0] = realloc(action->strings[0], strlen(action->strings[1] + 1));
 		strcpy(action->strings[0],action->strings[1]);
 		SDL_DestroyTexture(action->texture);
-		printf("font %p\n",graphicsData->fonts[action->integers[0]]);
-		printf("string %p\n",action->strings[0]);
 		temp = TTF_RenderText_Solid(graphicsData->fonts[action->integers[0]],action->strings[0],colour);
 		action->texture = SDL_CreateTextureFromSurface(graphicsData->renderer,temp);
 	}
@@ -257,7 +254,6 @@ int UIAction_RenderLine(UI_Action *action, va_list copy_from){
 }
 
 int UIAction_ClickAnywhere(UI_Action *action, va_list copy_from){
-	int i = 0;
 	if(action->status == 1){
 		UITrigger_Execute(action);
 		return 1;
@@ -266,7 +262,6 @@ int UIAction_ClickAnywhere(UI_Action *action, va_list copy_from){
 }
 
 int UIAction_ReleaseAnywhere(UI_Action *action, va_list copy_from){
-	int i = 0;
 	if(action->status == 1){
 		UITrigger_Execute(action);
 		return 1;
@@ -337,7 +332,6 @@ int UIAction_FillRect(UI_Action *action, va_list copy_from){
 int UIAction_ClickRect(UI_Action *action, va_list copy_from){
 	/* This should get a SDL_Event pointer */
 	SDL_Event *event;
-	int i = 0;
 	va_list vargs;
 	va_copy(vargs,copy_from);
 	event = va_arg(vargs,SDL_Event*);
@@ -604,8 +598,8 @@ void UIConfigure_StoreMousePosition(UI_Element *element, UI_Action *action, int 
 
 	action->companions = malloc(sizeof(UI_Action*) * num_of_companions);
 	while(i < num_of_companions){
-	action->companions[i] = va_arg(vargs,UI_Action*);
-	i++;
+		action->companions[i] = va_arg(vargs,UI_Action*);
+		i++;
 	}
 	action->num_of_companions = num_of_companions;
 
@@ -625,8 +619,8 @@ void UIConfigure_CalculateSibling(UI_Element *element, UI_Action *action, int nu
 
 	action->companions = malloc(sizeof(UI_Action*) * num_of_companions);
 	while(i < num_of_companions){
-	action->companions[i] = va_arg(vargs,UI_Action*);
-	i++;
+		action->companions[i] = va_arg(vargs,UI_Action*);
+		i++;
 	}
 	action->num_of_companions = num_of_companions;
 
