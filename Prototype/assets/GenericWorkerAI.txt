@@ -3,7 +3,7 @@ BlockFunction_IfWorkerStatusEqual
 	primary = 2
 	secondary = 4
 BlockFunction_IfWorkerWithinDistanceOfHive
-	floats = 1.0
+	floats = 50.0
 	primary = 12
 	secondary = 4
 BlockFunction_SetWorkerHeadingRandomly

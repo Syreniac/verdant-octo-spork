@@ -9,6 +9,11 @@ include_directories(/Library/Frameworks/SDL2_image.framework/Headers)
 link_directories(/Library/Frameworks/SDL2_image.framework)
 include_directories(/Library/Frameworks/SDL2_ttf.framework/Headers)
 link_directories(/Library/Frameworks/SDL2_ttf.framework)
+#find_package(SDL2_mixer REQUIRED)
+include_directories(/Library/Frameworks/SDL2_mixer.framework/Headers)
+link_directories(/Library/Frameworks/SDL2_mixer.framework)
+#include_directories(/Library/Frameworks/SDL_mixer.framework/Headers)
+#link_directories(/Library/Frameworks/SDL_mixer.framework)
 #Above lines are used to help find_library find the files if the default lookup path yields nothing
 #Ie. if you install the framework but don't reboot CLion or the system before building the executable.
 
@@ -16,6 +21,9 @@ find_library(math m)
 find_library(sdl SDL2)
 find_library(sdlimg SDL2_image)
 find_library(sdlttf SDL2_TTF)
+#find_library(sdlmixer SDL2_mixer)
+#find_library(sdlmixer SDL_mixer)
+#if find_library fails to locate the library folder, just pass the .framework folder directly into target_link_libraries.
 #Finds m and SDL2 from user's own frameworks folder
 
 #MESSAGE(WARNING PROJECT_SOURCE_DIR ${PROJECT_SOURCE_DIR})
@@ -23,6 +31,8 @@ find_library(sdlttf SDL2_TTF)
 set(SOURCE_FILES
     src/AI.c
     src/AI.h
+    src/audio.c
+    src/audio.h
     src/controls.c
     src/controls.h
     src/game.c
@@ -57,4 +67,4 @@ add_custom_target(copy-runtime-files
 
 add_executable(Prototype ${SOURCE_FILES})
 add_dependencies(Prototype copy-runtime-files)
-target_link_libraries(Prototype ${sdl} ${sdlimg} ${sdlttf} ${math})
+target_link_libraries(Prototype ${sdl} ${sdlimg} ${sdlttf} ${math} /Library/Frameworks/SDL2_mixer.framework)

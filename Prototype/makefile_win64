@@ -12,30 +12,27 @@ CFLAGS = -pedantic -Wall -Wextra -Wno-unused-variable -Wno-unused-parameter
 ASSETS_CONTENTS = assets
 OBJS = main.o init.o game.o world_generation.o game_objects.o AI.o UI.o generic.o controls.o graphics.o audio.o
 BIN = bin
-PROG = $(BIN)/Prototype
+PROG = $(BIN)/Prototype2
 CXX = gcc
-ifeq ($(OS),Windows_NT)
-	ifeq ($(PROCESSOR_ARCHITECTURE),AMD64)
-		SDL_FLAGS = -ISDL2_x64/include -LSDL2_x64/lib
-		DLL_LOCATION = SDL2_x64
-	endif
-	ifeq ($(PROCESSOR_ARCHITECTURE),x86)
-		SDL_FLAGS = -ISDL2_x32/include -LSDL2_x32/lib
-		DLL_LOCATION = SDL2_x32
-	endif
-	LFLAGS =  $(SDL_FLAGS) -lmingw32 -lSDL2main -lSDL2 -lSDL2_mixer  -lm
-	DELETE = del
-	DELETE_RECURSIVE = del /s
-	DLL_COPY_COMMAND = xcopy $(DLL_LOCATION) $(BIN) /C /Y
-	ASSET_COPY_COMMAND = xcopy $(ASSETS_CONTENTS) $(BIN) /C /E /Y
-else
-	SDL_FLAGS = -I/opt/SDL/2.0.3/include -L/opt/SDL/2.0.3/lib
-	LFLAGS = $(SDL_FLAGS) $(TTF_FLAGS) -Wl,-rpath,/opt/SDL/2.0.3/lib -lSDL2 -lm
-	DELETE = rm
-	DELETE_RECURSIVE = rm -r
-	DLL_COPY_COMMAND = echo "linux rocks"
-	ASSET_COPY_COMMAND = cp -R $(ASSETS_CONTENTS) $@
+
+ifeq ($(PROCESSOR_ARCHITECTURE),AMD64)
+	DEPENDENCY_FOLDER = libraries_x64
 endif
+ifeq ($(PROCESSOR_ARCHITECTURE),x86)
+	DEPENDENCY_FOLDER = libraries_x86
+endif
+
+DLL_LOCATION = $(DEPENDENCY_FOLDER)/DLLs
+SDL_FLAGS = -I$(DEPENDENCY_FOLDER)/SDL2/include/SDL2 -L$(DEPENDENCY_FOLDER)/SDL2/lib
+IMAGE_FLAGS = -I$(DEPENDENCY_FOLDER)/SDL_image/include -L$(DEPENDENCY_FOLDER)/SDL_image/lib
+TTF_FLAGS = -I$(DEPENDENCY_FOLDER)/SDL_ttf/include -L$(DEPENDENCY_FOLDER)/SDL_ttf/lib
+MIXER_FLAGS = -I$(DEPENDENCY_FOLDER)/SDL_mixer/include -L$(DEPENDENCY_FOLDER)/SDL_mixer/lib
+
+LFLAGS =  $(SDL_FLAGS) $(IMAGE_FLAGS) $(TTF_FLAGS) $(MIXER_FLAGS) -O3 -Wall -Wextra -pedantic -std=c99 -lmingw32 -lSDL2main -lSDL2 -lSDL_image -lSDL_mixer -lSDL_ttf -lm
+DELETE = del
+DELETE_RECURSIVE = del /s
+DLL_COPY_COMMAND = cp $(DLL_LOCATION) $(BIN)
+ASSET_COPY_COMMAND = cp $(ASSETS_CONTENTS) $(BIN)
 
 # List all the files here
 
@@ -48,11 +45,11 @@ all: $(PROG)
 	$(CXX) $(CFLAGS) $(LFLAGS) -c -s $<
 
 # linking the program. | $(BIN) makes the bin/ directory if it does not yet exist.
-$(PROG): $(OBJS) | $(BIN)
+$(PROG): $(BIN) | $(OBJS)
 	$(CXX) $(OBJS) -o $(PROG) $(LFLAGS)
 
 # makes bin/ directory and copies assets to bin/ so we don't have to drag them in manually.
-$(BIN):
+assets:
 	mkdir $@
 	$(DLL_COPY_COMMAND)
 	$(ASSET_COPY_COMMAND)

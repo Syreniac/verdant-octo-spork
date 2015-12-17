@@ -7,14 +7,23 @@
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
-#include <SDL2/SDL_Mixer.h>
+#include <SDL_mixer.h>
 #include <time.h>
+#include <SDL_ttf.h>
+#include <stdarg.h>
 
+#define DEBUGGING 0
+#if DEBUGGING==1
+#define calloc(x,y) debug_calloc(__LINE__,__FILE__,x,y)
+#define malloc(x) debug_malloc(__LINE__,__FILE__,x)
+#define realloc(x,y) debug_realloc(__LINE__,__FILE__,x,y)
+#define free(x) debug_free(__LINE__,__FILE__,x)
+#endif
 #define VERBOSE 1
 
 #define PROGRAM_NAME "Prototype"
-#define X_SIZE_OF_SCREEN 640
-#define Y_SIZE_OF_SCREEN 480
+#define X_SIZE_OF_SCREEN 1280
+#define Y_SIZE_OF_SCREEN 960
 
 #define X_SIZE_OF_WORLD 2100
 #define Y_SIZE_OF_WORLD 1700
@@ -32,8 +41,19 @@
 #define RAIN_TILE_HEIGHT 9
 #define RAIN_FRAME_DELAY 4
 
+/*lower values result in a higher chance of bees regaining flight when wet, with
+each call to updateProgrammableWorker*/
+#define CHANCE_OF_REGAINING_FLIGHT 1000
+
+/*lower values result in a higher chance of bees falling during rain, with
+each call to updateProgrammableWorker*/
+#define CHANCE_OF_FALLING_IN_RAIN 100
+
+/*how much smaller are the bees when they are on the ground (further away from screen*/
+#define BEE_SHRINK_FACTOR_ON_GROUND 1.2
+
 /*higher values result in lower levels of parallax*/
-#define PARALLAX_INTENSITY 5
+#define PARALLAX_INTENSITY 10
 
 #define PERSON_HEIGHT 54
 #define PERSON_WIDTH 50
@@ -50,10 +70,10 @@
 
 #define X_SIZE_OF_WORKER 40
 #define Y_SIZE_OF_WORKER 40
-#define WORKER_SPEED 0.4
+#define WORKER_SPEED 0.3
 
 #define DEFAULT_RESOURCEUNITS 100
-#define DEFAULT_SPAWNDELAY 100*60
+#define DEFAULT_SPAWNDELAY 500*60
 #define DEFAULT_SPAWNRADIUS 200.0
 #define DEFAULT_MAXNODECOUNT 10
 #define TICKSPERWEATHER 2500
@@ -67,6 +87,13 @@
 #define RADIANSTODEGREES 57.2958
 
 typedef enum personGraphic {WITH_ICE_CREAM_STRIDE1, WITH_ICE_CREAM_STRIDE2} personGraphic;
+
+#if DEBUGGING==1
+void *debug_calloc(int line, char *filename, int itemCount, int itemSize);
+void *debug_malloc(int line, char *filename, int totalSize);
+void *debug_realloc(int line, char *filename, void* oldPointer, int newSize);
+void debug_free(int line, char *filename, void* pointer);
+#endif
 
 int isPointInRect(int point_x, int point_y, SDL_Rect rect);
 int isRectEnclosedInRect(SDL_Rect rectA, SDL_Rect rectB);

@@ -1,0 +1,49 @@
+#include "main.h"
+
+int main(int argc, char *argv[]){
+  /* int argc = the number of arguments passed to the exe through the command line
+     char *argv[] = the strings passed to the .exe as arguments.
+
+     This is a fairly generic main function, but the SDL has to be hidden
+     from Windows (or something?), so the functionality is split between other
+     functions from other modules */
+
+  SDL_Window *window;
+
+
+
+
+  /* Initialise SDL library (must be called before any other SDL_function),
+  SDL_INIT_VIDEO flag initialise only the video SDL subsystem*/
+  if (SDL_Init(SDL_INIT_VIDEO) < 0)
+  {
+    /* If the SDL_Init function doesn't return -1, then something has gone wrong
+    and we should probably close (after giving a helpful error message!) */
+  	printf("Could not initialize SDL: %s\n", SDL_GetError());
+  	exit(1);
+  }
+
+  /* Now that SDL has been initialised by call SDL_Init, we can make the window
+     The arguments are:
+        - The window's name
+        - X coords to open the window at (we don't need to specify something)
+        - Y coords like above
+        - The X size of the window in pixels
+        - The Y size like above
+        - SDL configuration options which can be found online in the API documentation*/
+
+	window = SDL_CreateWindow(GAME_NAME,
+                          SDL_WINDOWPOS_UNDEFINED,
+                          SDL_WINDOWPOS_UNDEFINED,
+                          X_SIZE_OF_SCREEN, Y_SIZE_OF_SCREEN,
+                          SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
+
+
+
+  /* All we need to return here is the window pointer and we can work on it later*/
+  return window;
+  printf("initialised\n");
+  gameStart(window);
+  uninitialise();
+  exit(0);
+}

@@ -44,7 +44,7 @@ void playMusic(AudioData *audioData, int season) {
 		if(i == 0){
 			audioData->channel = Mix_PlayChannel(1, active->music, 0);
 			if(audioData->channel == 1) {
-				fprintf(stderr, "Unable to play WAV file: %s\n", Mix_GetError());
+				fprintf(stderr, "Unable to play music WAV file: %s\n", Mix_GetError());
 			}
 			return;
 		}
@@ -110,7 +110,7 @@ void playSoundEffect(int channel, AudioData *audioData, char* name) {
 		if(strcmp(active->name, name) == 0){
 			audioData->channel = Mix_PlayChannel(channel, active->sound, 0);
 			if(audioData->channel == channel) {
-				fprintf(stderr, "Unable to play WAV file: %s\n", Mix_GetError());
+				fprintf(stderr, "Unable to play soundEffect WAV file: %s\n", Mix_GetError());
 			}
 			return;
 		}

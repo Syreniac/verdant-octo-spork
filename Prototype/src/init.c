@@ -6,7 +6,7 @@ InitData initialise(void){
   InitData initData;
 
   srand(time(NULL));
-  
+
   /* Initialise SDL library (must be called before any other SDL_function),
   SDL_INIT_VIDEO flag initialise only the video SDL subsystem||SAM: audio must be called in a similar fashion||*/
   if (SDL_Init(SDL_INIT_VIDEO|SDL_INIT_AUDIO) < 0)
@@ -27,15 +27,17 @@ InitData initialise(void){
         - SDL configuration options which can be found online in the API documentation*/
 
 	initData.graphicsData.window = SDL_CreateWindow(PROGRAM_NAME,
-										   SDL_WINDOWPOS_UNDEFINED,
-                                           SDL_WINDOWPOS_UNDEFINED,
+										   0,
+                                           0,
                                            X_SIZE_OF_SCREEN, Y_SIZE_OF_SCREEN,
-                                           SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
-										   
+                                           SDL_WINDOW_SHOWN);
+
     initData.graphicsData.renderer = SDL_CreateRenderer(initData.graphicsData.window,
                                                -1,
                                                SDL_RENDERER_TARGETTEXTURE|SDL_RENDERER_PRESENTVSYNC);
 	assert(initData.graphicsData.renderer != NULL);
+
+  initData.graphicsData.mainMenuImage = loadTextureFromFile("mainMenuImage.bmp", &initData.graphicsData, 0);
 
 	/*Audio needs to be initialized at the very start too.*/
 	audioSystem(&initData.audioData);
@@ -45,8 +47,14 @@ InitData initialise(void){
 	loadMusic("music03.wav" , 1, &initData.audioData);
 	printf("ALL MUSIC LOADED\n");
 	loadSoundEffect("returnFlower.wav", "returnFlower", &initData.audioData);
+	printf("FIRST SOUND EFFECT LOADED\n");
 	loadSoundEffect("thunder.wav", "thunder", &initData.audioData);
-	
+	printf("ALL SOUND EFFECTS LOADED\n");
+
+    TTF_Init();
+    initData.graphicsData.fonts[0] = TTF_OpenFont("Aclonica.ttf",16);
+    initData.graphicsData.fonts[1] = TTF_OpenFont("Aclonica.ttf",12);
+
   return initData;
 }
 
@@ -62,7 +70,8 @@ void audioSystem(AudioData *AudioSettings){
 	AudioSettings->audio_channels = 2;
 	AudioSettings->audio_buffers = 4096;
 	AudioSettings->music = NULL;
-	
+	AudioSettings->soundEffect = NULL;
+
 	AudioSettings->seasonal_music_count[0] = 0;
 	AudioSettings->seasonal_music_count[1] = 0;
 	AudioSettings->seasonal_music_count[2] = 0;
@@ -73,7 +82,7 @@ void audioSystem(AudioData *AudioSettings){
 		fprintf(stderr, "Unable to initialize audio: %s\n", Mix_GetError());
 		exit(1);
 	}
-	
+
 }
 
 int game_welcome_page(GraphicsData graphicsData, AudioData audioData){
@@ -81,9 +90,11 @@ int game_welcome_page(GraphicsData graphicsData, AudioData audioData){
    InitData initData;
 
    int menuRunning = 1;
-   SDL_Rect rect;
    SDL_Event event;
    UI_Element *element;
+   UI_Element *element2;
+
+   int win_x,win_y;
 
    initData.graphicsData = graphicsData;
    initData.audioData = audioData;
@@ -95,39 +106,30 @@ int game_welcome_page(GraphicsData graphicsData, AudioData audioData){
 
    /* create box 1 (title), size fixed*/
 
-   rect.x = 0;
-   rect.y = 0;
-   rect.w = 40;
-   rect.h = 40;
+   SDL_GetWindowSize(graphicsData.window,&win_x,&win_y);
 
+   initData.uiData.root = UIElement_Create(0,0,win_x,win_y,1);
+   UIConfigure_DisplayImage(initData.uiData.root,&initData.uiData.root->actions[0],graphicsData.mainMenuImage);
 
-   initData.uiData.root = calloc(1,sizeof(UI_Element));
+   printf("made the background image\n");
 
-   element = calloc(1,sizeof(UI_Element));
-
-   element->rect.x = 100;
-   element->rect.y = 100;
-   element->rect.w = 50;
-   element->rect.h = 50;
-   element->actions = malloc(sizeof(UI_Action)*3);
-   element->num_of_actions = 3;
-   element->parent = NULL;
-   element->child = NULL;
-   element->sibling = NULL;
-
-   UIConfigure_FillRect(element,&element->actions[0],0,100,100);
-   UIConfigure_Counter(element,&element->actions[1]);
-   UIConfigure_LeftClickRect(element,&element->actions[2]);
-       UITrigger_Bind(&element->actions[2],&element->actions[1],-1,UITRIGGER_PLUSONE);
+   element = UIElement_Create(710, 670, 450, 80, 2);
+   /*UIConfigure_FillRect(element,&element->actions[0],0,100,100);*/
+   UIConfigure_Counter(element,&element->actions[0]);
+   UIConfigure_LeftClickRect(element,&element->actions[1]);
+       UITrigger_Bind(&element->actions[1],&element->actions[0],-1,UITRIGGER_PLUSONE);
 
    UIElement_Reparent(element,initData.uiData.root);
 
+    /*element = UIElement_Create((win_x *3)/4 - 100, (win_y * 3)/4, 150, 50, 1);
+    UIConfigure_FillRect(element,&element->actions[0],100,100,0);
+    UIElement_Reparent(element,initData.uiData.root);*/
 
-   /* create box 2 (start), expanded*/
+    element2 = UIElement_Create((win_x - 30), win_y - 30, 30, 30, 1);
+    UIConfigure_FillRect(element2, &element2->actions[0],228,240,3);
+    UIElement_Reparent(element2,initData.uiData.root);
 
-   /* create box 3 (load), not expanded*/
-
-   /* create box 4 (tutorial) not expanded*/
+    printf("made ui\n");
 
    playMusic(&initData.audioData,0);   
    
@@ -136,7 +138,7 @@ int game_welcome_page(GraphicsData graphicsData, AudioData audioData){
       UIRoot_Execute(&initData.uiData,UPDATE);
 
       paintBackground(&initData.graphicsData,0,200,100);
-      UIRoot_Execute(&initData.uiData,RENDER_BASE,&initData.graphicsData);
+      UIRoot_Execute(&initData.uiData,RENDER,&initData.graphicsData);
 
       SDL_RenderPresent(initData.graphicsData.renderer);
     	while (SDL_PollEvent(&event))
@@ -153,9 +155,8 @@ int game_welcome_page(GraphicsData graphicsData, AudioData audioData){
     				break;
     		}
     	}
-      menuRunning = (!initData.uiData.root->child->actions[1].status);
-      //menuRunning = !&initData.uiData.root->child->actions[1].status;
-   } /*delay 2s first*/
+      menuRunning = (!initData.uiData.root->child->actions[0].status);
+   }
 
    fadeOutMusic(&initData.audioData);
    /*stopMusic(&initData.audioData, 0);*/

@@ -1,17 +1,17 @@
 # Please run the clean command detailed at the bottom before running: make -f makefile_lab
 
-CFLAGS = -pedantic -Wall -Wextra -Wno-unused-variable -Wno-unused-parameter
-SDL_FLAGS = -I/opt/SDL/2.0.3/include -L/opt/SDL/2.0.3/lib
-TTF_FLAGS = -ISDL_ttf_lab/include -LSDL_ttf_lab/lib
-IMAGE_FLAGS = -ISDL2_Image_lab/include -LSDL2_Image_lab/lib
-LFLAGS = $(SDL_FLAGS) $(TTF_FLAGS) $(IMAGE_FLAGS) -Wl,-rpath,/opt/SDL/2.0.3/lib -lSDL2 -lSDL2_Image -lSDL_ttf -lfreetype -lm
+CFLAGS = -pedantic -Wall -Wextra -std=c99
+TTF_FLAGS = -Ilibraries_Lab/SDL_ttf/include -Llibraries_Lab/SDL_ttf/lib
+IMAGE_FLAGS = -Ilibraries_Lab/SDL_image/include -Llibraries_Lab/SDL_image/lib
+MIXER_FLAGS = -Ilibraries_Lab/SDL_mixer/include -Llibraries_Lab/SDL_mixer/lib
+LFLAGS = -g $(TTF_FLAGS) $(IMAGE_FLAGS) $(MIXER_FLAGS) -lSDL2 -lSDL2_Image -lSDL_ttf -lSDL_Mixer -lfreetype -lm
 DELETE = rm
 DELETE_RECURSIVE = rm -r
 
 # List all the files here
 #Add a /. after assets to copy only the contents inside, rather than the folder too.
 ASSETS_CONTENTS = assets/.
-OBJS = main.o init.o game.o world_generation.o game_objects.o AI.o UI.o generic.o controls.o graphics.o
+OBJS = main.o init.o game.o world_generation.o game_objects.o AI.o UI.o generic.o controls.o graphics.o audio.o
 BIN = bin
 PROG = $(BIN)/Prototype
 CXX = gcc
