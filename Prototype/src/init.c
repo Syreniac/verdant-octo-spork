@@ -37,7 +37,7 @@ InitData initialise(void){
                                                SDL_RENDERER_TARGETTEXTURE|SDL_RENDERER_PRESENTVSYNC);
 	assert(initData.graphicsData.renderer != NULL);
 
-  initData.graphicsData.mainMenuImage = loadTextureFromFile("mainMenuImage.bmp", &initData.graphicsData);
+  initData.graphicsData.mainMenuImage = loadTextureFromFile("mainMenuImage.bmp", &initData.graphicsData, 0);
 
 	/*Audio needs to be initialized at the very start too.*/
 	audioSystem(&initData.audioData);

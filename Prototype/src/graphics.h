@@ -64,5 +64,5 @@ void blitParallaxTreeTops(SDL_Rect objectRect, GraphicsData *graphicsData, SDL_T
 void blitRainRandomly(GraphicsData *graphicsData);
 
 void blitTiledBackground(GraphicsData *graphicsData, SDL_Texture *texture);
-SDL_Texture *loadTextureFromFile(char *file_name, GraphicsData *graphicsData);
+SDL_Texture *loadTextureFromFile(char *file_name, GraphicsData *graphicsData, char toggleAlpha);
 void paintBackground(GraphicsData *graphicsData, int r, int g, int b);
