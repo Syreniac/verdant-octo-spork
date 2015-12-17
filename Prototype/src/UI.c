@@ -71,7 +71,6 @@ int UIAction_DisplayImage(UI_Action *action, va_list copy_from){
 }
 
 int UIAction_Auto(UI_Action *action, va_list copy_from){
-	int i = 0;
 	if(action->status == 1){
 		UITrigger_Execute(action);
 	}
@@ -165,12 +164,15 @@ int UIAction_DisplayString(UI_Action *action, va_list copy_from){
 	graphicsData = va_arg(vargs,GraphicsData*);
 	va_end(vargs);
 	if(action->strings[0] != NULL && action->strings[1] != NULL && strcmp(action->strings[0],action->strings[1]) != 0){
+		action->strings[0] = realloc(action->strings[0], strlen(action->strings[1] + 1));
 		strcpy(action->strings[0],action->strings[1]);
 		SDL_DestroyTexture(action->texture);
+		printf("font %p\n",graphicsData->fonts[action->integers[0]]);
+		printf("string %p\n",action->strings[0]);
 		temp = TTF_RenderText_Solid(graphicsData->fonts[action->integers[0]],action->strings[0],colour);
 		action->texture = SDL_CreateTextureFromSurface(graphicsData->renderer,temp);
 	}
-	if(UIElement_isVisible(action->element) && action->status != 0 && action->texture != NULL){
+	if(UIElement_isVisible(action->element) && action->strings[0] != NULL && action->status != 0 && action->texture != NULL){
 		temp_rect.x = action->element->rect.x;
 		temp_rect.y = action->element->rect.y;
 		TTF_SizeText(graphicsData->fonts[action->integers[0]], action->strings[0], &temp_rect.w, &temp_rect.h);

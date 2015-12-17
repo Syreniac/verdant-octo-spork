@@ -2,7 +2,7 @@ BlockFunction_IfWorkerStatusEqual
 	integers = 2
 	primary = 2
 	secondary = 4
-BlockFunction_IfWorkerWithinDistanceOfHive
+BlockFunction_IfWorkerWithinXOfHive
 	floats = 50.0
 	primary = 12
 	secondary = 4
@@ -28,6 +28,6 @@ BlockFunction_GoToRememberedLocation
 BlockFunction_IfWorkerStatusEqual
 	integers = 1
 	primary = 7
-BlockFunction_RandomShiftRememberedLocation
+BlockFunction_RandomiseRememberedLocation
 	integers = 50
 	primary = 10
