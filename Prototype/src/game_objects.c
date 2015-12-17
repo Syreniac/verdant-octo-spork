@@ -151,7 +151,7 @@ ProgrammableWorker *createProgrammableWorker(GameObjectData *gameObjectData){
   programmableWorker->type = 1;
   programmableWorker->cargo = 0;
   /* This is an enum detailed in game_objects.h */
-  programmableWorker->status = LEAVING;
+  programmableWorker->status = RETURNING;
   programmableWorker->next = NULL;
   programmableWorker->brain.is_point_remembered = 0;
   programmableWorker->brain.followTarget = NULL;
@@ -269,7 +269,7 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
     	if(programmableWorker->cargo != 0){
     	  programmableWorker->cargo = 0;
     	  gameObjectData->hive.flowers_collected++;
-		  playSoundEffect(2, &gameObjectData->audioData, "returnFlower");
+		  if(gameObjectData->hive.flowers_collected % 50 == 0){playSoundEffect(2, &gameObjectData->audioData, "returnFlower");}
     	  printf("We've now collected %d flowers!\n",gameObjectData->hive.flowers_collected);
     	}
   	}
@@ -565,7 +565,6 @@ ResourceNode createResourceNode(ResourceNodeSpawner *parentSpawner, int resource
      This creates a resource node attached to a spawner.*/
   ResourceNode resourceNode;
   resourceNode.alive = 1;
-  printf("creating resource node\n");
   /* The amout of resources (honey, etc...) the node holds */
   resourceNode.resourceUnits = resourceUnits;
   /* We use a randomly generated offset value for now to distribute the

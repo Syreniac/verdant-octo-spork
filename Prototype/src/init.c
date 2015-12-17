@@ -30,7 +30,7 @@ InitData initialise(void){
 										   25,
                                            25,
                                            X_SIZE_OF_SCREEN, Y_SIZE_OF_SCREEN,
-                                           SDL_WINDOW_SHOWN);
+                                           SDL_WINDOW_SHOWN|SDL_WINDOW_RESIZABLE);
 
     initData.graphicsData.renderer = SDL_CreateRenderer(initData.graphicsData.window,
                                                -1,
@@ -113,11 +113,11 @@ int game_welcome_page(GraphicsData graphicsData, AudioData audioData){
 
    printf("made the background image\n");
 
-   element = UIElement_CreateByPercentage(0.56f,0.7f,0.35f,0.1f,win_x,win_y,3);
+   element = UIElement_CreateByPercentage(0.56f,0.7f,0.35f,0.1f,win_x,win_y,2);
    UIConfigure_Counter(element,&element->actions[0]);
    UIConfigure_LeftClickRect(element,&element->actions[1]);
        UITrigger_Bind(&element->actions[1],&element->actions[0],-1,UITRIGGER_PLUSONE);
-   UIConfigure_FillRect(element,&element->actions[2],255,255,255);
+   //UIConfigure_FillRect(element,&element->actions[2],255,255,255);
 
    UIElement_Reparent(element,initData.uiData.root);
 

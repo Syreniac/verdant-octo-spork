@@ -138,6 +138,7 @@ int UIAction_DisplayNumber(UI_Action *action, va_list copy_from){
 	va_end(vargs);
 	if(action->integers[0] != action->integers[1]){
 		action->integers[1] = action->integers[0];
+		sprintf(action->strings[0],"%d",action->integers[1]);
 		SDL_DestroyTexture(action->texture);
 		temp = TTF_RenderText_Solid(graphicsData->fonts[action->integers[2]],action->strings[0],colour);
 		action->texture = SDL_CreateTextureFromSurface(graphicsData->renderer,temp);
@@ -712,6 +713,7 @@ void UIConfigure_DisplayString(UI_Element *element, UI_Action *action, char *str
 void UIConfigure_DisplayNumber(UI_Element *element, UI_Action *action, int number, int font){
 	UIAction_Init(element,action);
 	action->response = RENDER;
+	action->status = 1;
 	action->function = UIAction_DisplayNumber;
 	action->integers = calloc(3, sizeof(int));
 	action->integers[0] = number;

@@ -19,10 +19,9 @@ void generateResourceNodeSpawners(GameObjectData *gameObjectData){
 
 void generateProgrammableWorkers(GameObjectData *gameObjectData){
   /* Create two ProgrammableWorkers */
-  int number_of_workers = 50;
   int i = 0;
   
-  while(i < number_of_workers){
+  while(i < NUMBER_OF_WORKERS){
 	createProgrammableWorker(gameObjectData);
 	i++;
   }

@@ -238,7 +238,6 @@ static void createGameUI(GameData *gameData){
       topY+= 60;
     }
     i++;
-	SDL_Delay(1);
   }
   printf("part 1 done\n");
 
