@@ -138,7 +138,7 @@ void blitTiledBackground(GraphicsData *graphicsData, SDL_Texture *texture){
 }
 
 
-SDL_Texture *loadTextureFromFile(char *file_name, GraphicsData *graphicsData){
+SDL_Texture *loadTextureFromFile(char *file_name, GraphicsData *graphicsData, char toggleAlpha){
 	SDL_Surface *image;
 	SDL_Texture *texture;
 
@@ -148,7 +148,9 @@ SDL_Texture *loadTextureFromFile(char *file_name, GraphicsData *graphicsData){
 		printf("Image loading has failed: %s\n", SDL_GetError());
 		assert(image != NULL);
 	}
-	SDL_SetColorKey(image, SDL_TRUE, SDL_MapRGB(image->format, 255, 255, 255));
+	if(toggleAlpha == 1){
+		SDL_SetColorKey(image, SDL_TRUE, SDL_MapRGB(image->format, 255, 255, 255));
+	}
 	texture = SDL_CreateTextureFromSurface(graphicsData->renderer, image);
 	if(texture == NULL){
 		printf("Texture conversion has failed: %s\n", SDL_GetError());

@@ -71,40 +71,40 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
   generateIceCreamPerson(&gameData.gameObjectData);
 
 
-  gameData.graphicsData.grassTexture = loadTextureFromFile("images/grass/grass4.bmp",&gameData.graphicsData);
-  gameData.graphicsData.treeTexture = loadTextureFromFile("images/tree.bmp",&gameData.graphicsData);
+  gameData.graphicsData.grassTexture = loadTextureFromFile("images/grass/grass4.bmp",&gameData.graphicsData, 0);
+  gameData.graphicsData.treeTexture = loadTextureFromFile("images/tree.bmp",&gameData.graphicsData, 1);
   gameData.graphicsData.nodeTexture = loadTextureFromFile("images/blueFlower.bmp",
-														  &gameData.graphicsData);
+														  &gameData.graphicsData, 1);
 
   gameData.graphicsData.person = (Person*) malloc(sizeof(Person));
 
   gameData.graphicsData.person->graphic[WITH_ICE_CREAM_STRIDE1] =
   loadTextureFromFile("images/person/withIceCream1.bmp",
-					  &gameData.graphicsData);
+					  &gameData.graphicsData, 1);
 
   gameData.graphicsData.person->graphic[WITH_ICE_CREAM_STRIDE2] =
   loadTextureFromFile("images/person/withIceCream2.bmp",
-					  &gameData.graphicsData);
+					  &gameData.graphicsData, 1);
 
   gameData.graphicsData.rainy = (Rainy*) malloc(sizeof(Rainy));
 
-  gameData.graphicsData.rainy->graphic[0] = loadTextureFromFile("images/rain/rain1.bmp", &gameData.graphicsData);
-  gameData.graphicsData.rainy->graphic[1] = loadTextureFromFile("images/rain/rain2.bmp", &gameData.graphicsData);
-  gameData.graphicsData.rainy->graphic[2] = loadTextureFromFile("images/rain/rain3.bmp", &gameData.graphicsData);
-  gameData.graphicsData.rainy->graphic[3] = loadTextureFromFile("images/rain/rain4.bmp", &gameData.graphicsData);
-  gameData.graphicsData.rainy->graphic[4] = loadTextureFromFile("images/rain/rain5.bmp", &gameData.graphicsData);
-  gameData.graphicsData.rainy->graphic[5] = loadTextureFromFile("images/rain/rain6.bmp", &gameData.graphicsData);
+  gameData.graphicsData.rainy->graphic[0] = loadTextureFromFile("images/rain/rain1.bmp", &gameData.graphicsData, 1);
+  gameData.graphicsData.rainy->graphic[1] = loadTextureFromFile("images/rain/rain2.bmp", &gameData.graphicsData, 1);
+  gameData.graphicsData.rainy->graphic[2] = loadTextureFromFile("images/rain/rain3.bmp", &gameData.graphicsData, 1);
+  gameData.graphicsData.rainy->graphic[3] = loadTextureFromFile("images/rain/rain4.bmp", &gameData.graphicsData, 1);
+  gameData.graphicsData.rainy->graphic[4] = loadTextureFromFile("images/rain/rain5.bmp", &gameData.graphicsData, 1);
+  gameData.graphicsData.rainy->graphic[5] = loadTextureFromFile("images/rain/rain6.bmp", &gameData.graphicsData, 1);
 
   gameData.graphicsData.bee = (Bee*) malloc(sizeof(Bee));
 
 
   gameData.graphicsData.bee->graphic[BEE_FLAP_GRAPHIC_1] = loadTextureFromFile("images/bee.bmp",
-														  &gameData.graphicsData);
+														  &gameData.graphicsData, 1);
   gameData.graphicsData.bee->graphic[BEE_FLAP_GRAPHIC_2] = loadTextureFromFile("images/bee1.bmp",
-														  &gameData.graphicsData);
+														  &gameData.graphicsData, 1);
 
   gameData.graphicsData.hiveTexture = loadTextureFromFile("images/beehive.bmp",
-														  &gameData.graphicsData);
+														  &gameData.graphicsData, 1);
 
   gameData.aiData.blockFunctionRoots = calloc(1, sizeof(BlockFunctionRoot));
   file = fopenAndVerify("GenericWorkerAI.txt", "r");
