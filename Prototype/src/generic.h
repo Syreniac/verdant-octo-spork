@@ -69,7 +69,7 @@ each call to updateProgrammableWorker*/
 #define DEFAULT_SPAWNDELAY 500*60
 #define DEFAULT_SPAWNRADIUS 200.0
 #define DEFAULT_MAXNODECOUNT 10
-#define TICKSPERWEATHER 25000
+#define TICKSPERWEATHER 2500
 #define FRAME_TIME 20
 
 #define NUM_OF_KEYS 30
