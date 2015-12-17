@@ -347,6 +347,9 @@ int gameLoop(GameData *gameData){
 	}
   delta_t = calculateDt(gameData->gameRunTime);
   gameData->gameRunTime = SDL_GetTicks();
+  if (Mix_Playing(1) == 0) {
+	 playMusic(&gameData->audioData,1);
+  }
   if(delta_t<FRAME_TIME){
 	SDL_Delay(FRAME_TIME-delta_t);
   }

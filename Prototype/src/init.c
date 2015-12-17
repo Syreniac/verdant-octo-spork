@@ -155,6 +155,9 @@ int game_welcome_page(GraphicsData graphicsData, AudioData audioData){
     				break;
     		}
     	}
+		if (Mix_Playing(1) == 0) {
+			playMusic(&initData.audioData,0);
+		}
       menuRunning = (!initData.uiData.root->child->actions[0].status);
    }
 
