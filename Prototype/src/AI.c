@@ -297,7 +297,7 @@ blockFunction_WrappedFunction getBlockFunctionByName(char *blockFunctionName){
   if(strcmp(blockFunctionName,"BlockFunction_IfWorkerOutsideOfBounds") == 0){
     return &blockFunction_IfWorkerOutsideOfBounds;
   }
-  if(strcmp(blockFunctionName,"BlockFunction_IfWorkerWithinDistanceOfHive") == 0){
+  if(strcmp(blockFunctionName,"BlockFunction_IfWorkerWithinXOfHive") == 0){
     return &blockFunction_IfWorkerWithinDistanceOfHive;
   }
   if(strcmp(blockFunctionName,"BlockFunction_SetWorkerHeadingRandomly") == 0){
@@ -321,7 +321,7 @@ blockFunction_WrappedFunction getBlockFunctionByName(char *blockFunctionName){
   if(strcmp(blockFunctionName,"BlockFunction_IfWorkerWithinDistanceOfRememberedLocation") == 0){
     return &blockFunction_IfWorkerWithinDistanceOfRememberedLocation;
   }
-  if(strcmp(blockFunctionName, "BlockFunction_RandomShiftRememberedLocation") == 0){
+  if(strcmp(blockFunctionName, "BlockFunction_RandomiseRememberedLocation") == 0){
     return &blockFunction_RandomShiftRememberedLocation;
   }
   if(strcmp(blockFunctionName, "BlockFunction_IfNodeFound") == 0){

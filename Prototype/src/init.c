@@ -27,8 +27,8 @@ InitData initialise(void){
         - SDL configuration options which can be found online in the API documentation*/
 
 	initData.graphicsData.window = SDL_CreateWindow(PROGRAM_NAME,
-										   0,
-                                           0,
+										   25,
+                                           25,
                                            X_SIZE_OF_SCREEN, Y_SIZE_OF_SCREEN,
                                            SDL_WINDOW_SHOWN);
 
@@ -43,11 +43,11 @@ InitData initialise(void){
 	audioSystem(&initData.audioData);
 
   TTF_Init();
-  initData.graphicsData.fonts[0] = TTF_OpenFont("Aclonica.ttf",16);
-  initData.graphicsData.fonts[1] = TTF_OpenFont("Aclonica.ttf",12);
+  initData.graphicsData.fonts[0] = TTF_OpenFont("font/Aclonica.ttf",16);
+  initData.graphicsData.fonts[1] = TTF_OpenFont("font/Aclonica.ttf",12);
 
-	loadMusic("music01.wav" , 1, &initData.audioData);
-	loadMusic("music02.wav" , 1, &initData.audioData);
+	loadMusic("sound/music01.wav" , 1, &initData.audioData);
+	loadMusic("sound/music02.wav" , 1, &initData.audioData);
 
   return initData;
 }
@@ -106,11 +106,11 @@ int game_welcome_page(GraphicsData graphicsData, AudioData audioData){
 
    printf("made the background image\n");
 
-   element = UIElement_Create(710, 670, 450, 80, 2);
-   /*UIConfigure_FillRect(element,&element->actions[0],0,100,100);*/
+   element = UIElement_CreateByPercentage(0.56f,0.7f,0.35f,0.1f,win_x,win_y,3);
    UIConfigure_Counter(element,&element->actions[0]);
    UIConfigure_LeftClickRect(element,&element->actions[1]);
        UITrigger_Bind(&element->actions[1],&element->actions[0],-1,UITRIGGER_PLUSONE);
+   UIConfigure_FillRect(element,&element->actions[2],255,255,255);
 
    UIElement_Reparent(element,initData.uiData.root);
 

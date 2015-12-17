@@ -114,6 +114,7 @@ void UIElement_Deparent(UI_Element *element);
 void UIElement_DeExternalise(UI_Element *element);
 void UIElement_Execute(UI_Element *element, enum Response response, va_list copy_from);
 UI_Element *UIElement_Create(int x, int y, int w, int h, int num_of_actions);
+UI_Element *UIElement_CreateByPercentage(float rx, float ry, float rw, float rh, int x, int y, int num_of_actions);
 
 void UIRoot_Execute(UIData *uiData, enum Response response, ...);
 void UIRoot_Destroy(UIData *uiData);

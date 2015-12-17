@@ -145,15 +145,15 @@ static void createGameUI(GameData *gameData){
   UIConfigure_ResourceCounter(element, &element->actions[2],1,&element->actions[1]);
   UIElement_Reparent(element,gameData->uiData.root);
 
-  element = UIElement_Create(win_x/2,win_y - 50,200,50,4);
+  element = UIElement_Create(win_x/2,win_y - 50,200,50,5);
   UIConfigure_Auto(element, &element->actions[0], RESPONSE_PAUSE);
-    UITrigger_Bind(&element->actions[0],&element->actions[0],1,0);
-    UITrigger_Bind(&element->actions[0],&element->actions[1],0,1);
-    UITrigger_Bind(&element->actions[0],&element->actions[2],1,0);
-    UITrigger_Bind(&element->actions[0],&element->actions[3],1,0);
+    UITrigger_Bind(&element->actions[0],&element->actions[0],-1,0);
+    UITrigger_Bind(&element->actions[0],&element->actions[1],0,2);
+    UITrigger_Bind(&element->actions[0],&element->actions[2],-1,0);
+    UITrigger_Bind(&element->actions[0],&element->actions[3],-1,0);
   element->actions[0].status = 0;
   UIConfigure_Auto(element, &element->actions[1], RESPONSE_PAUSE);
-    UITrigger_Bind(&element->actions[1],&element->actions[0],0,1);
+    UITrigger_Bind(&element->actions[1],&element->actions[0],0,2);
     UITrigger_Bind(&element->actions[1],&element->actions[1],1,0);
     UITrigger_Bind(&element->actions[1],&element->actions[2],0,1);
     UITrigger_Bind(&element->actions[1],&element->actions[3],0,1);
@@ -162,23 +162,23 @@ static void createGameUI(GameData *gameData){
   element->actions[2].status = 0;
   UIConfigure_DisplayString(element, &element->actions[3],"PAUSED",0);
   element->actions[3].status = 0;
+  UIConfigure_Auto(element,&element->actions[4],UPDATE);
+	UITrigger_Bind(&element->actions[4],&element->actions[0],2,1);
+	UITrigger_Bind(&element->actions[4],&element->actions[1],2,1);
   UIElement_Reparent(element,gameData->uiData.root);
 
-  element = UIElement_Create(0,win_y-275,275,275,1);
-  UIConfigure_FillRect(element,&element->actions[0],255,255,255);
-  UIElement_Reparent(element,gameData->uiData.root);
 
-  element2 = UIElement_Create(150, win_y -150, 100,100,3);
+  element2 = UIElement_Create(0, win_y - 100, 100,100,3);
 	UIConfigure_FillRect(element2,&element2->actions[0],0,100,100);
 	UIConfigure_LeftClickRect(element2,&element2->actions[1]);
 		UITrigger_Bind(&element2->actions[1],&element2->actions[2],0,1);
     UITrigger_Bind(&element2->actions[1],&element2->actions[1],1,0);
-	UIConfigure_TwoRectOverride(element2,&element2->actions[2],150,win_y - 150, 100, 100,
-                                                             50, 50, win_x - 225, win_y - 150 - 200,
-                                                             300, 0, 0);
-  UIElement_Reparent(element2,element);
+	UIConfigure_TwoRectOverride(element2,&element2->actions[2],0,win_y - 100, 100, 100,
+                                                               50, 50, win_x - 100, win_y - 200,
+                                                               200, 0, 0);
+  UIElement_Reparent(element2,gameData->uiData.root);
 
-  element = UIElement_Create(50 + win_x - 275, 50, 50, 50,4);
+  element = UIElement_Create(50 + win_x - 150, 50, 50, 50,4);
   UIConfigure_FillRect(element, &element->actions[0],222,0,0);
   UIConfigure_ShrinkFitToParent(element, &element->actions[1]);
   UIConfigure_LeftClickRect(element, &element->actions[2]);
@@ -188,7 +188,7 @@ static void createGameUI(GameData *gameData){
     UITrigger_Bind(&element->actions[3], &element2->actions[1], 0,1);
   UIElement_Reparent(element,element2);
 
-  element = UIElement_Create(50,50,win_x - 275,win_y - 350,2);
+  element = UIElement_Create(50,50,win_x - 150,win_y - 200,2);
   UIConfigure_FillRect(element, &element->actions[0],0,222,0);
   UIConfigure_ShrinkFitToParent(element, &element->actions[1]);
   UIElement_Reparent(element,element2);
