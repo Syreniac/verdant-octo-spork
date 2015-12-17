@@ -100,7 +100,7 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
 
   gameData.graphicsData.bee->graphic[BEE_FLAP_GRAPHIC_1] = loadTextureFromFile("images/bee.bmp",
 														  &gameData.graphicsData, 1);
-  gameData.graphicsData.bee->graphic[BEE_FLAP_GRAPHIC_2] = loadTextureFromFile("images/bee1.bmp",
+  gameData.graphicsData.bee->graphic[BEE_FLAP_GRAPHIC_2] = loadTextureFromFile("images/bee2.bmp",
 														  &gameData.graphicsData, 1);
 
   gameData.graphicsData.hiveTexture = loadTextureFromFile("images/beehive.bmp",

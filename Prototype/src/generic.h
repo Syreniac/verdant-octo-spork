@@ -63,7 +63,7 @@ each call to updateProgrammableWorker*/
 
 #define X_SIZE_OF_WORKER 40
 #define Y_SIZE_OF_WORKER 40
-#define WORKER_SPEED 0.4
+#define WORKER_SPEED 0.3
 
 #define DEFAULT_RESOURCEUNITS 100
 #define DEFAULT_SPAWNDELAY 500*60
