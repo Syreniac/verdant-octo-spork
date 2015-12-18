@@ -88,7 +88,10 @@ each call to updateProgrammableWorker*/
 #define DEGREESINCIRCLE 360.0
 #define RADIANSTODEGREES 57.2958
 
+#define SDL_InvRect SDL_Rect
+
 typedef enum personGraphic {WITH_ICE_CREAM_STRIDE1, WITH_ICE_CREAM_STRIDE2} personGraphic;
+
 
 #if DEBUGGING==1
 void *debug_calloc(int line, char *filename, int itemCount, int itemSize);
@@ -109,3 +112,5 @@ float randPi(void);
 void fitRectToWorld(SDL_Rect *rect);
 double getAngleBetweenRects(SDL_Rect *rectA, SDL_Rect *rectB);
 SDL_Point getCenterOfRect(SDL_Rect rect);
+SDL_Rect getRectFromInvRect(SDL_Window *window, int from_left, int from_top, int from_right, int from_bot);
+SDL_Rect getRectFromPercRect(SDL_Window *window, float from_left, float from_right, float from_top, float from_bot);

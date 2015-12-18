@@ -15,6 +15,7 @@ enum Response {NONE,
                EXTERNAL,											/* 10 */
 							 GAME_OBJECT_UPDATE,						/* 11 */
 							 RESPONSE_PAUSE,
+							 WINDOW_RESIZE,
                FREED};												/* 13 */
 
 enum LineOrigins{CENTER,BL_CORNER,BR_CORNER,TL_CORNER,TR_CORNER};
@@ -53,7 +54,9 @@ struct UI_Action{
   int num_of_triggers;
   char **strings;
   int num_of_strings;
-	SDL_Texture *texture;
+  SDL_Texture *texture;
+  float *floats;
+  int num_of_floats;
 };
 
 struct UI_Trigger{
@@ -104,7 +107,8 @@ void UIConfigure_ShrinkFitToParent(UI_Element *element, UI_Action *action);
 void UIConfigure_External(UI_Element *element, UI_Action *action, UI_Element *external);
 void UIConfigure_Auto(UI_Element *element, UI_Action *action, enum Response response);
 void UIConfigure_DisplayImage(UI_Element *element, UI_Action *action, SDL_Texture *image);
-
+void UIConfigure_InverseRect(UI_Element *element, UI_Action *action, int from_left, int from_top, int from_right, int from_bot);
+void UIConfigure_PercRect(UI_Element *element, UI_Action *action, float from_left, float from_right, float width, float height);
 
 void UITrigger_Bind(UI_Action *action, UI_Action *target, int state_from, int state_to);
 
@@ -118,3 +122,4 @@ UI_Element *UIElement_CreateByPercentage(float rx, float ry, float rw, float rh,
 
 void UIRoot_Execute(UIData *uiData, enum Response response, ...);
 void UIRoot_Destroy(UIData *uiData);
+void UIRoot_Pack(UIData *uiData, GraphicsData *graphicsData);

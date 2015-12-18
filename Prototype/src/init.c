@@ -108,16 +108,18 @@ int game_welcome_page(GraphicsData graphicsData, AudioData audioData){
 
    SDL_GetWindowSize(graphicsData.window,&win_x,&win_y);
 
-   initData.uiData.root = UIElement_Create(0,0,win_x,win_y,1);
+   initData.uiData.root = UIElement_Create(0,0,win_x,win_y,2);
    UIConfigure_DisplayImage(initData.uiData.root,&initData.uiData.root->actions[0],graphicsData.mainMenuImage);
+   UIConfigure_InverseRect(initData.uiData.root,&initData.uiData.root->actions[1],0,0,0,0);
 
    printf("made the background image\n");
 
-   element = UIElement_CreateByPercentage(0.56f,0.7f,0.35f,0.1f,win_x,win_y,2);
+   element = UIElement_CreateByPercentage(0.56f,0.7f,0.35f,0.1f,win_x,win_y,4);
    UIConfigure_Counter(element,&element->actions[0]);
    UIConfigure_LeftClickRect(element,&element->actions[1]);
        UITrigger_Bind(&element->actions[1],&element->actions[0],-1,UITRIGGER_PLUSONE);
-   //UIConfigure_FillRect(element,&element->actions[2],255,255,255);
+   UIConfigure_FillRect(element,&element->actions[2],255,255,255);
+   UIConfigure_PercRect(element,&element->actions[3],0.56f,0.7f,0.35f,0.1f);
 
    UIElement_Reparent(element,initData.uiData.root);
 
@@ -125,10 +127,12 @@ int game_welcome_page(GraphicsData graphicsData, AudioData audioData){
     UIConfigure_FillRect(element,&element->actions[0],100,100,0);
     UIElement_Reparent(element,initData.uiData.root);*/
 
-    element2 = UIElement_Create((win_x - 30), win_y - 30, 30, 30, 1);
+    element2 = UIElement_Create((win_x - 30), win_y - 30, 30, 30, 2);
     UIConfigure_FillRect(element2, &element2->actions[0],228,240,3);
+	UIConfigure_InverseRect(element2, &element2->actions[1],-30,-30,30,30);
     UIElement_Reparent(element2,initData.uiData.root);
 
+	UIRoot_Pack(&initData.uiData,&initData.graphicsData);
     printf("made ui\n");
 
    playMusic(&initData.audioData,0);   
@@ -145,6 +149,13 @@ int game_welcome_page(GraphicsData graphicsData, AudioData audioData){
     	{
     		switch (event.type)
     		{
+				case SDL_WINDOWEVENT:
+					switch (event.window.event){
+						case SDL_WINDOWEVENT_RESIZED:
+							printf("window resized\n");
+							UIRoot_Execute(&initData.uiData,WINDOW_RESIZE,&event);
+							break;
+					}
     			/* Closing the Window will exit the program */
     			case SDL_MOUSEBUTTONDOWN:
    				   UIRoot_Execute(&initData.uiData,LEFT_CLICK,&event);

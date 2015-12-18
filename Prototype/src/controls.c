@@ -16,8 +16,15 @@ int handleEvent(SDL_Event *event, GameObjectData *gameObjectData, UIData *uiData
 		switch (event->type)
 		{
 			/* Closing the Window will exit the program */
+			case SDL_WINDOWEVENT:
+				switch (event->window.event){
+					case SDL_WINDOWEVENT_RESIZED:
+						printf("window resized\n");
+						UIRoot_Execute(uiData,WINDOW_RESIZE,event);
+						break;
+				}
 			case SDL_MOUSEMOTION:
-        UIRoot_Execute(uiData,MOTION,event);
+				UIRoot_Execute(uiData,MOTION,event);
 				break;
 			case SDL_MOUSEBUTTONDOWN:
 				if(isMouseFree(controlsData)){
@@ -35,20 +42,20 @@ int handleEvent(SDL_Event *event, GameObjectData *gameObjectData, UIData *uiData
 				}
 				break;
 			case SDL_MOUSEBUTTONUP:
-        if(event->button.button == SDL_BUTTON_LEFT){
-          UIRoot_Execute(uiData,LEFT_RELEASE,event);
-					controlsData->mouseButtons[LEFT_CLICK_BUTTON] = 0;
-        }
-        else if(event->button.button == SDL_BUTTON_RIGHT){
-          UIRoot_Execute(uiData,RIGHT_RELEASE,event);
-					controlsData->mouseButtons[RIGHT_CLICK_BUTTON] = 0;
-        }
+				if(event->button.button == SDL_BUTTON_LEFT){
+				  UIRoot_Execute(uiData,LEFT_RELEASE,event);
+							controlsData->mouseButtons[LEFT_CLICK_BUTTON] = 0;
+				}
+				else if(event->button.button == SDL_BUTTON_RIGHT){
+				  UIRoot_Execute(uiData,RIGHT_RELEASE,event);
+							controlsData->mouseButtons[RIGHT_CLICK_BUTTON] = 0;
+				}
 				break;
 			case SDL_KEYDOWN:
-        keydown(controlsData,gameObjectData,uiData,event);
+				keydown(controlsData,gameObjectData,uiData,event);
 				break;
 			case SDL_KEYUP:
-        keyup(controlsData,gameObjectData,uiData,event);
+				keyup(controlsData,gameObjectData,uiData,event);
 				break;
 			case SDL_QUIT:
 				printf("exiting\n");

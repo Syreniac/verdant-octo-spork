@@ -179,3 +179,5 @@ void paintBackground(GraphicsData *graphicsData, int r, int g, int b){
 	SDL_RenderFillRect(graphicsData->renderer, &rect);
     	SDL_SetRenderDrawColor(graphicsData->renderer,o_r,o_g,o_b,o_a);
 }
+
+

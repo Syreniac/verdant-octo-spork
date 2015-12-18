@@ -57,6 +57,38 @@ UI_Element *UIElement_Create(int x, int y, int w, int h, int num_of_actions){
 		 return element;
 }
 
+int UIAction_PercRect(UI_Action *action, va_list copy_from){
+	va_list vargs;
+	SDL_Event *event;
+	va_copy(vargs, copy_from);
+	event = va_arg(vargs,SDL_Event*);
+	va_end(vargs);
+	if(action->status != 0){
+		action->element->rect = getRectFromPercRect(SDL_GetWindowFromID(event->window.windowID),
+												   action->floats[0],
+												   action->floats[1],
+												   action->floats[2],
+												   action->floats[3]);
+	}
+	return action->status;
+}
+	
+int UIAction_InverseRect(UI_Action *action, va_list copy_from){
+	va_list vargs;
+	SDL_Event *event;
+	va_copy(vargs, copy_from);
+	event = va_arg(vargs,SDL_Event*);
+	va_end(vargs);
+	if(action->status != 0){
+		action->element->rect = getRectFromInvRect(SDL_GetWindowFromID(event->window.windowID),
+												   action->integers[0],
+												   action->integers[1],
+												   action->integers[2],
+												   action->integers[3]);
+	}
+	return action->status;
+}
+
 int UIAction_DisplayImage(UI_Action *action, va_list copy_from){
 	va_list vargs;
 	GraphicsData *graphicsData;
@@ -744,6 +776,30 @@ void UIConfigure_DisplayImage(UI_Element *element, UI_Action *action, SDL_Textur
 	action->texture = image;
 }
 
+void UIConfigure_InverseRect(UI_Element *element, UI_Action *action, int from_left, int from_top, int from_right, int from_bot){
+	UIAction_Init(element, action);
+	action->response = WINDOW_RESIZE;
+	action->function = UIAction_InverseRect;
+	action->integers = malloc(sizeof(int) * 4);
+	action->integers[0] = from_left;
+	action->integers[1] = from_top;
+	action->integers[2] = from_right;
+	action->integers[3] = from_bot;
+	action->num_of_integers = 4;
+}
+
+void UIConfigure_PercRect(UI_Element *element, UI_Action *action, float from_left, float from_top, float width, float height){
+	UIAction_Init(element,action);
+	action->response = WINDOW_RESIZE;
+	action->function = UIAction_PercRect;
+	action->floats = malloc(sizeof(float) * 4);
+	action->floats[0] = from_left;
+	action->floats[1] = from_top;
+	action->floats[2] = width;
+	action->floats[3] = height;
+	action->num_of_floats = 4;
+}
+
 static void UITrigger_Execute(UI_Action *action){
 	UI_Trigger *trigger = action->triggers;
 	while(trigger!=NULL){
@@ -903,6 +959,8 @@ static void UIAction_Init(UI_Element *element, UI_Action *action){
 	action->strings = NULL;
 	action->num_of_strings = 0;
 	action->texture = NULL;
+	action->floats = NULL;
+	action->num_of_floats = 0;
 }
 
 static int UIElement_isVisible(UI_Element *element){
@@ -930,4 +988,8 @@ void UIRoot_Destroy(UIData *uiData){
     }
     UIElement_Free(queue_element);
   }
+}
+
+void UIRoot_Pack(UIData *uiData, GraphicsData *graphicsData){
+	UIRoot_Execute(uiData,WINDOW_RESIZE,graphicsData->window);
 }

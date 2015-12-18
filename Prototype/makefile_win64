@@ -16,10 +16,10 @@ PROG = $(BIN)/Prototype2
 CXX = gcc
 
 ifeq ($(PROCESSOR_ARCHITECTURE),AMD64)
-	DEPENDENCY_FOLDER = libraries_x64
+	DEPENDENCY_FOLDER = ./libraries_x64
 endif
 ifeq ($(PROCESSOR_ARCHITECTURE),x86)
-	DEPENDENCY_FOLDER = libraries_x86
+	DEPENDENCY_FOLDER = ./libraries_x86
 endif
 
 DLL_LOCATION = $(DEPENDENCY_FOLDER)/DLLs
@@ -49,7 +49,7 @@ $(PROG): $(BIN) | $(OBJS)
 	$(CXX) $(OBJS) -o $(PROG) $(LFLAGS)
 
 # makes bin/ directory and copies assets to bin/ so we don't have to drag them in manually.
-assets:
+$(BIN):
 	mkdir $@
 	$(DLL_COPY_COMMAND)
 	$(ASSET_COPY_COMMAND)
