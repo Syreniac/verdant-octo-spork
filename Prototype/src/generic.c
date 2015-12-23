@@ -142,7 +142,6 @@ SDL_Rect getRectFromInvRect(SDL_Window *window, int from_left, int from_top, int
 	int win_x = X_SIZE_OF_SCREEN, win_y = Y_SIZE_OF_SCREEN;
 	SDL_Rect rect;
 	SDL_GetWindowSize(window, &win_x, &win_y);
-	printf("window is now %d by %d\n",win_x, win_y);
 	if(from_left < 0){
 		from_left = win_x + from_left;
 		from_right -= from_left;
@@ -150,14 +149,11 @@ SDL_Rect getRectFromInvRect(SDL_Window *window, int from_left, int from_top, int
 	if(from_top < 0){
 		from_top = win_y + from_top;
 		from_bot -= from_top;
-		printf("$%d\n",from_top);
-		printf("win_y - from bot = %d\n",win_y-from_bot);
 	}
 	rect.x = from_left;
 	rect.y = from_top;
 	rect.w = (win_x - from_right) - rect.x;
 	rect.h = (win_y - from_bot) - rect.y;
-	printf("final rect is %d,%d %d,%d\n",rect.x,rect.y,rect.w,rect.h);
 	return rect;
 }
 
@@ -165,12 +161,10 @@ SDL_Rect getRectFromPercRect(SDL_Window *window, float from_left, float from_top
 	int win_x = X_SIZE_OF_SCREEN, win_y = Y_SIZE_OF_SCREEN;
 	SDL_Rect rect;
 	SDL_GetWindowSize(window, &win_x, &win_y);
-	printf("window is now %d by %d\n",win_x, win_y);
 	rect.x = (int)((float) win_x * from_left);
 	rect.y = (int)((float) win_y * from_top);
 	rect.w = (int)((float) win_x * from_right);
 	rect.h = (int)((float) win_y * from_bot);
-	printf("final rect is %d,%d %d,%d\n",rect.x,rect.y,rect.w,rect.h);
 	return rect;
 }
 

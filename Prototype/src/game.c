@@ -177,7 +177,7 @@ static void createGameUI(GameData *gameData){
     UITrigger_Bind(&element2->actions[1],&element2->actions[1],1,0);
 	UIConfigure_TwoRectOverride(element2,&element2->actions[2],0,win_y - 100, 100, 100,
                                                                50, 50, win_x - 100, win_y - 200,
-                                                               2000, 0, 0);
+                                                               200, 0, 0);
   UIElement_Reparent(element2,gameData->uiData.root);
 
   element = UIElement_Create(50 + win_x - 150, 50, 50, 50,4);
@@ -259,7 +259,6 @@ static void createGameUI(GameData *gameData){
       while(array[j] != gameData->aiData.blockFunctionRoots[0].blockFunctions[i].primary){
         j++;
       }
-	  printf("B");
       assert(array[j] != NULL);
       element = array2[i];
       element->actions[6].external = array2[j];

@@ -103,9 +103,6 @@ void playSoundEffect(int channel, AudioData *audioData, char* name) {
 		exit(1);
 	}
 
-	printf("name = \"%s\"\n", name);
-	printf("audioData.soundEffect->name = \"%s\"\n", active->name);
-
 	while (active != NULL) {
 		if(strcmp(active->name, name) == 0){
 			audioData->channel = Mix_PlayChannel(channel, active->sound, 0);
@@ -134,9 +131,6 @@ void fadeInChannel(int channel, AudioData *audioData, char* name) {
 		printf("No matching sound effect loaded\n");
 		exit(1);
 	}
-
-	printf("name = \"%s\"\n", name);
-	printf("audioData.soundEffect->name = \"%s\"\n", active->name);
 
 	while (active != NULL) {
 		if(strcmp(active->name, name) == 0){

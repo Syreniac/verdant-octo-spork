@@ -290,7 +290,6 @@ blockFunction_WrappedFunction getBlockFunctionByName(char *blockFunctionName){
 	  return &blockFunction_IfWorkerReturning;
   }
   printf("ERROR: Unrecognised function name: \"%s\".\n Substituting a print function.\n",blockFunctionName);
-  scanf("%d"); 
   return &blockFunction_Print;
 }
 
@@ -313,7 +312,6 @@ int getNumberOfTextStoredBlocks(FILE *file, int *maxDescLength){
   int testMaxDescLength = 0;
 
   fseek(file,0,SEEK_SET);
-  printf("attempting to get number of text stored blocks\n");
   while((read_char = fgetc(file)) != EOF){
     /* Because the current format of BlockFunction files says that all
        lines within a single block function must be indented by tabs or spaces,
@@ -362,8 +360,6 @@ BlockFunctionRoot makeBlockFunctionRootFromString(char *str, int numOfBlocks){
 	blockFunctionRoot.blockFunctions = calloc(numOfBlocks,sizeof(BlockFunction));
 	blockFunctionRoot.numOfBlockFunctions = 0;
 	
-	printf("given string:\n%s\n",str);
-	
 	tok = strtok(str,"\n");
 	while(tok != NULL){
 		i++;
@@ -384,12 +380,12 @@ BlockFunctionRoot makeBlockFunctionRootFromString(char *str, int numOfBlocks){
 		blockFunctionRoot.blockFunctions[blockFunctionRoot.numOfBlockFunctions-1] = createAIBlockFunctionFromTokens(&blockFunctionRoot,
 																													i,tokensToUse);
 	}
-	i = 0;
+	/*i = 0;
 	while(i < blockFunctionRoot.numOfBlockFunctions){
 		printf("%s\n",blockFunctionRoot.blockFunctions[i].name);
 		printf("%p\n",&blockFunctionRoot.blockFunctions[i]);
 		i++;
-	}
+	}*/
 	return blockFunctionRoot;
 }
 
@@ -412,10 +408,8 @@ BlockFunction createAIBlockFunctionFromTokens(BlockFunctionRoot *blockFunctionRo
 	blockFunction.arguments.numOfFloats = 0;
 	
 	while(i < numOfLinesToUse){
-		printf("given token: %s\n",tokensToUse[i]);
 		if(tokensToUse[i][0] != '\t'){
 			strcpy(blockFunction.name,tokensToUse[i]);
-			printf("attempting to make function %s\n",tokensToUse[i]);
 			blockFunction.wrapped_function = getBlockFunctionByName(tokensToUse[i]);
 		}
 		else if(strncmp(tokensToUse[i],"\tprimary = ",10) == 0){

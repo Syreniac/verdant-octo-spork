@@ -279,12 +279,12 @@ int UIAction_ReadAiBlocks(UI_Action *action, va_list copy_from){
 			childElement = childElement->sibling;
 		}
 		aiData->blockFunctionRoots[0] = makeBlockFunctionRootFromString(workingSpace,childCount);
-		int i = 0;
+		/*int i = 0;
 		while(i < aiData->blockFunctionRoots[0].numOfBlockFunctions){
 			printf("%s\n",aiData->blockFunctionRoots[0].blockFunctions[i].name);
 			printf("%p\n",&aiData->blockFunctionRoots[0].blockFunctions[i]);
 			i++;
-		}
+		}*/
 		free(workingSpace);
 		action->new_status = 0;
 	}
@@ -329,8 +329,6 @@ int UIAction_SetUpAiBlock(UI_Action *action, va_list copy_from){
 			sprintf(workingSpace,"\tsecondary = %d\n",action->companions[2]->external->sibling_position + 1);
 			strcat(action->element->exposed_data[0],workingSpace);
 		}
-		//action->new_status = 0;
-		//printf("exposed string: %s\n",action->element->exposed_data[0]);
 		return 1;
 	}
 	return 0;
