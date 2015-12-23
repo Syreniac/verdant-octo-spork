@@ -4,7 +4,6 @@ static ResourceNode *chooseNodeRandomly(ResourceNodeSpawner *resourceNodeSpawner
 
 void initAudio(GameObjectData *gameObjectData, AudioData audioData){
   gameObjectData->audioData = audioData;
-  printf("gameObjectData->audioData->name = \"%s\" ", gameObjectData->audioData.soundEffect->name);
 }
 
 static ResourceNode *chooseNodeRandomly(ResourceNodeSpawner *resourceNodeSpawner){
@@ -150,7 +149,7 @@ ProgrammableWorker *createProgrammableWorker(GameObjectData *gameObjectData){
   programmableWorker->type = 1;
   programmableWorker->cargo = 0;
   /* This is an enum detailed in game_objects.h */
-  programmableWorker->status = RETURNING;
+  programmableWorker->status = IDLE;
   programmableWorker->next = NULL;
   programmableWorker->brain.is_point_remembered = 0;
   programmableWorker->brain.followTarget = NULL;
@@ -180,7 +179,6 @@ Weather createWeatherLayer(void){
      values. Many of these are defined in generic.h */
   Weather weather;
   weather.tickCount = 0;
-  printf("Created weather layer.");
   weather.present_weather = Sun;
   return(weather);
 }
@@ -194,7 +192,6 @@ Hive createHive(void){
   hive.rect.h = 80;
   hive.rect.x = X_SIZE_OF_WORLD/2 - hive.rect.w/2;
   hive.rect.y = Y_SIZE_OF_WORLD/2 - hive.rect.h/2;
-  printf("created hive at %d,%d",hive.rect.x,hive.rect.y);
   hive.flowers_collected = 0;
   return(hive);
 }
@@ -217,6 +214,7 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
                                               determining collision
      float ticks                            = The number of ticks to update for.*/
   double newX,newY;
+  double pX,pY;
   ResourceNodeSpawner *resourceNodeSpawner = NULL;
   ResourceNode *resourceNode;
 
@@ -258,8 +256,19 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
   	if(programmableWorker->brain.foundNode != NULL && !programmableWorker->brain.foundNode->alive){
     	programmableWorker->brain.foundNode = NULL;
   	}
+	
+	if(programmableWorker->status == IDLE){
+		if(getDistance2BetweenPoints(programmableWorker->rect.x + programmableWorker->rect.w/2,
+							   	programmableWorker->rect.y + programmableWorker->rect.h/2,
+							   	gameObjectData->hive.rect.x + gameObjectData->hive.rect.w/2,
+							   	gameObjectData->hive.rect.y + gameObjectData->hive.rect.h/2) > 1000.0){
+			pX = (double)(gameObjectData->hive.rect.x + gameObjectData->hive.rect.w/2 - 500 + rand() % 1000);
+			pY = (double)(gameObjectData->hive.rect.y + gameObjectData->hive.rect.h/2 - 500 + rand() % 1000);
+			programmableWorker->heading = atan2(pX - programmableWorker->rawX,pY - programmableWorker->rawY);
+		}
+	}
 
-  	if(getDistance2BetweenPoints(programmableWorker->rect.x + programmableWorker->rect.w/2,
+  	else if(getDistance2BetweenPoints(programmableWorker->rect.x + programmableWorker->rect.w/2,
 							   	programmableWorker->rect.y + programmableWorker->rect.h/2,
 							   	gameObjectData->hive.rect.x + gameObjectData->hive.rect.w/2,
 							   	gameObjectData->hive.rect.y + gameObjectData->hive.rect.h/2) < 50.0 &&
@@ -268,8 +277,8 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
     	  programmableWorker->cargo = 0;
     	  gameObjectData->hive.flowers_collected++;
 		  if(gameObjectData->hive.flowers_collected % 50 == 0){playSoundEffect(2, &gameObjectData->audioData, "returnFlower");}
-    	  printf("We've now collected %d flowers!\n",gameObjectData->hive.flowers_collected);
     	}
+		programmableWorker->status = IDLE;
   	}
   	else if(programmableWorker->status == LEAVING){
     	/* status being 1 means that the bee heading away from the center */
@@ -502,17 +511,16 @@ void updateWeather(GameObjectData *gameObjectData, Weather *weather, int ticks){
     if(weather->tickCount > TICKSPERWEATHER){
     	weather->tickCount = 0;
 
-    printf("weather changed\n");
       switch (weather->present_weather)
       {
         /* Closing the Window will exit the program */
         case Sun:
           weather->present_weather = (rand() % CHANCE_OF_CLOUD == 0) ? Cloud : Sun;
           break;
-        case Cloud:
+        /*case Cloud:
           weather->present_weather = (rand() % CHANCE_OF_RAIN == 0) ? Rain : Sun;
 		  fadeInChannel(weatherChannel, &gameObjectData->audioData, "thunder");
-          break;
+          break;*/
         case Rain:
           weather->present_weather = (rand() % CHANCE_OF_CLOUD == 0) ? Cloud : Sun;
 		  fadeOutChannel(weatherChannel, &gameObjectData->audioData);

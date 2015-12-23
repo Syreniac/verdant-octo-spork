@@ -20,6 +20,30 @@ FILE *fopenAndVerify(char *file_name, char *permission){
   return file;
 }
 
+int blockFunction_Void(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
+	return(1);
+}
+
+int blockFunction_IfWorkerIdle(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
+	if(programmableWorker->status == IDLE){
+		return 1;
+	}
+	return 2;
+}
+
+int blockFunction_IfWorkerReturning(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
+	if(programmableWorker->status == RETURNING){
+		return 1;
+	}
+	return 2;
+}
+
+int blockFunction_IfWorkerHasCargo(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
+	if(programmableWorker->cargo > 0){
+		return 1;
+	}
+	return 2;
+}
 
 int blockFunction_Print(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
   int i = 0;
@@ -73,6 +97,15 @@ int blockFunction_IfWorkerWithinDistanceOfHive(BlockFunctionArgs *arguments, Pro
     return(1);
   }
   return(2);
+}
+
+int blockFunction_IfWorkerNearHive(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
+	double d2 = getDistance2BetweenRects(programmableWorker->rect,gameObjectData->hive.rect);
+  if(d2 <= 50.0){
+    return(1);
+  }
+  return(2);
+	
 }
 
 int blockFunction_SetWorkerHeadingRandomly(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
@@ -173,6 +206,9 @@ int blockFunction_HeadToFoundNode(BlockFunctionArgs *arguments, ProgrammableWork
 void runBlockFunctionRootOverWorker(BlockFunctionRoot *blockFunctionRoot, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
   int i;
   BlockFunction *blockFunction = &(blockFunctionRoot->blockFunctions[0]);
+  if(blockFunctionRoot->numOfBlockFunctions == 0){
+	  return;
+  }
   while(1){
     i = runBlockFunctionOverWorker(blockFunction, programmableWorker,gameObjectData);
     if(i == 1 && blockFunction->primary != NULL){
@@ -195,142 +231,66 @@ int runBlockFunctionOverWorker(BlockFunction *blockFunction, ProgrammableWorker 
   return(i);
 }
 
-BlockFunctionRoot generateGenericWorkerOrders(void){
-  BlockFunctionRoot blockFunctionRoot;
-  BlockFunction blockFunction1,
-                blockFunction2,
-                blockFunction3,
-                blockFunction4,
-                blockFunction5,
-                blockFunction6;
-
-  BlockFunctionArgs blockFunctionArgs1,
-                    blockFunctionArgs2,
-                    blockFunctionArgs3,
-                    blockFunctionArgs4,
-                    blockFunctionArgs5,
-                    blockFunctionArgs6;
-
-  /* This is the "if worker status = RETURNING" */
-  strcpy(blockFunction1.name,"blockFunction_IfWorkerStatusEqual");
-  blockFunction1.wrapped_function = &blockFunction_IfWorkerStatusEqual;
-  blockFunctionArgs1.integers = calloc(1, sizeof(int));
-  blockFunctionArgs1.integers[0] = 2;
-  blockFunctionArgs1.numOfInts = 1;
-  blockFunction1.arguments = blockFunctionArgs1;
-
-  /* This is the "within x distance of the hive part." */
-  strcpy(blockFunction2.name,"blockFunction_IfWorkerWithinDistanceOfHive");
-  blockFunction2.wrapped_function = &blockFunction_IfWorkerWithinDistanceOfHive;
-  blockFunctionArgs2.floats = calloc(1, sizeof(float));
-  blockFunctionArgs2.floats[0] = 1.0;
-  blockFunctionArgs2.numOfFloats = 1;
-  blockFunction2.arguments = blockFunctionArgs2;
-
-  /* This is the "then randomly move away from the hive" part */
-  strcpy(blockFunction3.name,"blockFunction_SetWorkerHeadingRandomly");
-  blockFunction3.wrapped_function = &blockFunction_SetWorkerHeadingRandomly;
-  blockFunction3.arguments = blockFunctionArgs3;
-  /* Putting the primary link to NULL will break the AI recursion
-     after this function */
-
-  /* This is the "check to see if the bee picked anything up part" */
-  strcpy(blockFunction4.name,"blockFunction_IfWorkerCargoGreaterThan");
-  blockFunction4.wrapped_function = &blockFunction_IfWorkerCargoGreaterThan;
-  blockFunctionArgs4.integers = calloc(1,sizeof(int));
-  blockFunctionArgs4.integers[0] = 0;
-  blockFunctionArgs4.numOfInts = 1;
-  blockFunction4.arguments = blockFunctionArgs4;
-
-  /* This is "return to the hive" */
-  strcpy(blockFunction5.name,"blockFunction_WorkerReturnToHive");
-  blockFunction5.wrapped_function = &blockFunction_WorkerReturnToHive;
-  blockFunction5.arguments = blockFunctionArgs5;
-  /* Set the primary to NULL to break the recursion */
-
-  /* This is "check whether the bee is in the bounds or not" */
-  strcpy(blockFunction6.name, "blockFunction_IfWorkerOutsideOfBounds");
-  blockFunction6.wrapped_function = &blockFunction_IfWorkerOutsideOfBounds;
-  blockFunction6.arguments = blockFunctionArgs6;
-  /* Just to be confusing, I'll save us a function by looping this back up to
-     the function above, which is an example of how you can do a sort of OR
-     statement, by having multiple IF FunctionBlocks pointing to a condition */
-
-  blockFunctionRoot.blockFunctions = calloc(6,sizeof(BlockFunction));
-  blockFunctionRoot.blockFunctions[0] = blockFunction1;
-  blockFunctionRoot.blockFunctions[1] = blockFunction2;
-  blockFunctionRoot.blockFunctions[2] = blockFunction3;
-  blockFunctionRoot.blockFunctions[3] = blockFunction4;
-  blockFunctionRoot.blockFunctions[4] = blockFunction5;
-  blockFunctionRoot.blockFunctions[5] = blockFunction6;
-  blockFunctionRoot.numOfBlockFunctions = 6;
-
-
-  blockFunctionRoot.blockFunctions[0].primary = &blockFunctionRoot.blockFunctions[1];
-  blockFunctionRoot.blockFunctions[0].secondary = &blockFunctionRoot.blockFunctions[3];
-
-  blockFunctionRoot.blockFunctions[1].primary = &blockFunctionRoot.blockFunctions[2];
-  blockFunctionRoot.blockFunctions[1].secondary = &blockFunctionRoot.blockFunctions[3];
-
-  blockFunctionRoot.blockFunctions[2].primary = NULL;
-  blockFunctionRoot.blockFunctions[2].secondary = NULL;
-
-  blockFunctionRoot.blockFunctions[3].primary = &blockFunctionRoot.blockFunctions[4];
-  blockFunctionRoot.blockFunctions[3].secondary = &blockFunctionRoot.blockFunctions[5];
-
-  blockFunctionRoot.blockFunctions[4].primary = NULL;
-  blockFunctionRoot.blockFunctions[4].secondary = NULL;
-
-  blockFunctionRoot.blockFunctions[5].primary = &blockFunctionRoot.blockFunctions[4];
-  blockFunctionRoot.blockFunctions[5].secondary = NULL;
-
-  return(blockFunctionRoot);
-}
-
 blockFunction_WrappedFunction getBlockFunctionByName(char *blockFunctionName){
-  if(strcmp(blockFunctionName,"BlockFunction_IfWorkerCargoGreaterThan") == 0){
+  if(strcmp(blockFunctionName,"IfWorkerCargoGreaterThan") == 0){
     return &blockFunction_IfWorkerCargoGreaterThan;
   }
-  if(strcmp(blockFunctionName,"BlockFunction_IfWorkerStatusEqual") == 0){
+  if(strcmp(blockFunctionName,"IfWorkerStatusEqual") == 0){
     return &blockFunction_IfWorkerStatusEqual;
   }
-  if(strcmp(blockFunctionName,"BlockFunction_IfWorkerOutsideOfBounds") == 0){
+  if(strcmp(blockFunctionName,"IfWorkerOutOfBounds") == 0){
     return &blockFunction_IfWorkerOutsideOfBounds;
   }
-  if(strcmp(blockFunctionName,"BlockFunction_IfWorkerWithinXOfHive") == 0){
+  if(strcmp(blockFunctionName,"IfWorkerWithinXOfHive") == 0){
     return &blockFunction_IfWorkerWithinDistanceOfHive;
   }
-  if(strcmp(blockFunctionName,"BlockFunction_SetWorkerHeadingRandomly") == 0){
+  if(strcmp(blockFunctionName,"SetWorkerHeadingRandomly") == 0){
     return &blockFunction_SetWorkerHeadingRandomly;
   }
-  if(strcmp(blockFunctionName,"BlockFunction_WorkerReturnToHive") == 0){
+  if(strcmp(blockFunctionName,"WorkerReturnToHive") == 0){
     return &blockFunction_WorkerReturnToHive;
   }
-  if(strcmp(blockFunctionName,"BlockFunction_IfNumOfFlowersInRadius") == 0){
+  if(strcmp(blockFunctionName,"IfNumOfFlowersInRadius") == 0){
     return &blockFunction_IfNumOfFlowersInRadius;
   }
-  if(strcmp(blockFunctionName,"BlockFunction_RememberCurrentLocation") == 0){
+  if(strcmp(blockFunctionName,"RememberCurrentLocation") == 0){
     return &blockFunction_RememberCurrentLocation;
   }
-  if(strcmp(blockFunctionName,"BlockFunction_ForgetRememberedLocation") == 0){
+  if(strcmp(blockFunctionName,"ForgetRememberedLocation") == 0){
     return &blockFunction_ForgetRememberedLocation;
   }
-  if(strcmp(blockFunctionName,"BlockFunction_GoToRememberedLocation") == 0){
+  if(strcmp(blockFunctionName,"GoToRememberedLocation") == 0){
     return &blockFunction_GoToRememberedLocation;
   }
-  if(strcmp(blockFunctionName,"BlockFunction_IfWorkerWithinDistanceOfRememberedLocation") == 0){
+  if(strcmp(blockFunctionName,"IfWorkerWithinDistanceOfRememberedLocation") == 0){
     return &blockFunction_IfWorkerWithinDistanceOfRememberedLocation;
   }
-  if(strcmp(blockFunctionName, "BlockFunction_RandomiseRememberedLocation") == 0){
+  if(strcmp(blockFunctionName, "RandomiseRememberedLocation") == 0){
     return &blockFunction_RandomShiftRememberedLocation;
   }
-  if(strcmp(blockFunctionName, "BlockFunction_IfNodeFound") == 0){
+  if(strcmp(blockFunctionName, "IfNodeFound") == 0){
     return &blockFunction_IfNodeFound;
   }
-  if(strcmp(blockFunctionName, "BlockFunction_HeadToFoundNode") == 0){
+  if(strcmp(blockFunctionName, "HeadToFoundNode") == 0){
     return &blockFunction_HeadToFoundNode;
   }
+  if(strcmp(blockFunctionName, "IfWorkerNearHive") == 0){
+	  return &blockFunction_IfWorkerNearHive;
+  }
+  if(strcmp(blockFunctionName, "START") == 0){
+	  return &blockFunction_Void;
+  }
+  if(strcmp(blockFunctionName,"IfWorkerIdle") == 0){
+	  return &blockFunction_IfWorkerIdle;
+  }
+  if(strcmp(blockFunctionName,"IfWorkerHasCargo") == 0){
+	  return &blockFunction_IfWorkerHasCargo;
+  }
+  if(strcmp(blockFunctionName,"IfWorkerReturning") == 0){
+	  return &blockFunction_IfWorkerReturning;
+  }
   printf("ERROR: Unrecognised function name: \"%s\".\n Substituting a print function.\n",blockFunctionName);
+  scanf("%d"); 
   return &blockFunction_Print;
 }
 
@@ -352,6 +312,8 @@ int getNumberOfTextStoredBlocks(FILE *file, int *maxDescLength){
   int functionBlockCount = 0;
   int testMaxDescLength = 0;
 
+  fseek(file,0,SEEK_SET);
+  printf("attempting to get number of text stored blocks\n");
   while((read_char = fgetc(file)) != EOF){
     /* Because the current format of BlockFunction files says that all
        lines within a single block function must be indented by tabs or spaces,
@@ -383,148 +345,137 @@ int getNumberOfTextStoredBlocks(FILE *file, int *maxDescLength){
   return(functionBlockCount);
 }
 
-void makeBlockFunctionRootFromFile(BlockFunctionRoot *blockFunctionRoot, FILE *file){
-  int blockFunctionIndex = 0;
-  int stringWhiteSpaceShift = 0;
-  char read_line[255];
-  char *read_line2;
-  int *integers = NULL;
-  int intReadOffset = 0;
-  int readInt;
-  int presumedNumOfInts;
-  int numOfInts = 0;
-  float *floats = NULL;
-  int floatReadOffset = 0;
-  float readFloat;
-  int presumedNumOfFloats;
-  int numOfFloats = 0;
-  int maxDescLength;
-  int primaryRef = -1;
-  int secondaryRef = -1;
-  int initialRun = 1;
-  int functionBlockCount = getNumberOfTextStoredBlocks(file,&maxDescLength);
-  char name[255];
-  blockFunction_WrappedFunction wrapped_function = NULL;
+BlockFunctionRoot makeBlockFunctionRootFromFile(FILE *file){
+	char *string = fileToString(file);
+	int i = 0;
+	BlockFunctionRoot blockFunctionRoot = makeBlockFunctionRootFromString(string,
+	                                                                      getNumberOfTextStoredBlocks(file,&i));
+	free(string);
+	return blockFunctionRoot;
+}
 
-  printf("number of function blocks in file = %d\n",functionBlockCount);
+BlockFunctionRoot makeBlockFunctionRootFromString(char *str, int numOfBlocks){
+	char *tok;
+	char *tokensToUse[7] = {NULL};
+	int i = -1;
+	BlockFunctionRoot blockFunctionRoot;
+	blockFunctionRoot.blockFunctions = calloc(numOfBlocks,sizeof(BlockFunction));
+	blockFunctionRoot.numOfBlockFunctions = 0;
+	
+	printf("given string:\n%s\n",str);
+	
+	tok = strtok(str,"\n");
+	while(tok != NULL){
+		i++;
+		if(tok[0] != '\t' && i > 0){
+			blockFunctionRoot.numOfBlockFunctions++;
+			blockFunctionRoot.blockFunctions[blockFunctionRoot.numOfBlockFunctions-1] = createAIBlockFunctionFromTokens(&blockFunctionRoot,
+																														i,tokensToUse);
+			i = 0;
+		}
+		tokensToUse[i] = tok;
+		tok = strtok(NULL,"\n");
+	}
+	if(i > 0 || blockFunctionRoot.numOfBlockFunctions == numOfBlocks - 1){
+		if(blockFunctionRoot.numOfBlockFunctions == numOfBlocks - 1){
+			i++;
+		}
+		blockFunctionRoot.numOfBlockFunctions++;
+		blockFunctionRoot.blockFunctions[blockFunctionRoot.numOfBlockFunctions-1] = createAIBlockFunctionFromTokens(&blockFunctionRoot,
+																													i,tokensToUse);
+	}
+	i = 0;
+	while(i < blockFunctionRoot.numOfBlockFunctions){
+		printf("%s\n",blockFunctionRoot.blockFunctions[i].name);
+		printf("%p\n",&blockFunctionRoot.blockFunctions[i]);
+		i++;
+	}
+	return blockFunctionRoot;
+}
 
-  fseek(file,0,SEEK_SET);
+BlockFunction createAIBlockFunctionFromTokens(BlockFunctionRoot *blockFunctionRoot, int numOfLinesToUse, char *tokensToUse[7]){
+	int i = 0;
+	BlockFunction blockFunction;
+	int read_int;
+	float read_float;
+	char read_char;
+	int read_position;
+	int read_add;
+	int read_count;
+	blockFunction.primary = NULL;
+	blockFunction.secondary = NULL;
+	blockFunction.arguments.numOfInts = 0;
+	blockFunction.arguments.integers = NULL;
+	blockFunction.arguments.characters = NULL;
+	blockFunction.arguments.numOfChars = 0;
+	blockFunction.arguments.floats = NULL;
+	blockFunction.arguments.numOfFloats = 0;
+	
+	while(i < numOfLinesToUse){
+		printf("given token: %s\n",tokensToUse[i]);
+		if(tokensToUse[i][0] != '\t'){
+			strcpy(blockFunction.name,tokensToUse[i]);
+			printf("attempting to make function %s\n",tokensToUse[i]);
+			blockFunction.wrapped_function = getBlockFunctionByName(tokensToUse[i]);
+		}
+		else if(strncmp(tokensToUse[i],"\tprimary = ",10) == 0){
+			blockFunction.primary = &blockFunctionRoot->blockFunctions[atoi(&tokensToUse[i][11]) - 1];
+		}
+		else if(strncmp(tokensToUse[i],"\tsecondary = ",12) == 0){
+			blockFunction.secondary = &blockFunctionRoot->blockFunctions[atoi(&tokensToUse[i][13]) - 1];
+		}
+		else if(strncmp(tokensToUse[i],"\tintegers = ",11) == 0){
+			read_position = 12;
+			blockFunction.arguments.numOfInts = 0;
+			blockFunction.arguments.integers = NULL;
+			while((sscanf(&tokensToUse[i][read_position],"%d%n",&read_int,&read_add)) != 0 && read_add != 0){
+				read_position += read_add+1;
+				blockFunction.arguments.numOfInts++;
+				blockFunction.arguments.integers = realloc(blockFunction.arguments.integers,
+				                                           blockFunction.arguments.numOfInts * sizeof(int));
+				blockFunction.arguments.integers[blockFunction.arguments.numOfInts-1] = read_int;
+			}
+		}
+		else if(strncmp(tokensToUse[i],"\tfloats = ",9) == 0){
+			read_position = 10;
+			blockFunction.arguments.numOfFloats = 0;
+			blockFunction.arguments.floats = NULL;
+			while((sscanf(&tokensToUse[i][read_position],"%f%n",&read_float,&read_add)) != 0 && read_add != 0){
+				read_position += read_add+1;
+				blockFunction.arguments.numOfFloats++;
+				blockFunction.arguments.floats = realloc(blockFunction.arguments.floats,
+				                                         blockFunction.arguments.numOfFloats * sizeof(float));
+				blockFunction.arguments.floats[blockFunction.arguments.numOfFloats-1] = read_float;
+			}
+		}
+		i++;
+	}
+	return blockFunction;
+}
 
-  blockFunctionRoot->blockFunctions = malloc(functionBlockCount * sizeof(BlockFunction));
-
-  while(fgets(read_line,255,file) != NULL){
-    /* Through magic, this removes the \n character from the read_line */
-    /* It does work, I've tested it */
-    /* Also, every thing coded after this comment was done whilst I was drunk */
-    read_line2 = strtok(read_line,"\n");
-    stringWhiteSpaceShift = 0;
-    /* Work out whether we need to move onto the next block */
-    if(read_line2[0] != '\t' && read_line2[0] != ' '){
-      if(initialRun == 0){
-        strcpy(blockFunctionRoot->blockFunctions[blockFunctionIndex].name, &name[14]);
-        blockFunctionRoot->blockFunctions[blockFunctionIndex].wrapped_function = wrapped_function;
-        if(primaryRef != -1){
-          blockFunctionRoot->blockFunctions[blockFunctionIndex].primary = &blockFunctionRoot->blockFunctions[primaryRef-1];
-        }
-        else{
-          blockFunctionRoot->blockFunctions[blockFunctionIndex].primary = NULL;
-        }
-        if(secondaryRef != -1){
-          blockFunctionRoot->blockFunctions[blockFunctionIndex].secondary = &blockFunctionRoot->blockFunctions[secondaryRef-1];
-        }
-        else{
-          blockFunctionRoot->blockFunctions[blockFunctionIndex].secondary = NULL;
-        }
-        blockFunctionRoot->blockFunctions[blockFunctionIndex].arguments.floats = &floats[0];
-        blockFunctionRoot->blockFunctions[blockFunctionIndex].arguments.numOfFloats = numOfFloats;
-        blockFunctionRoot->blockFunctions[blockFunctionIndex].arguments.integers = &integers[0];
-        blockFunctionRoot->blockFunctions[blockFunctionIndex].arguments.numOfInts = numOfInts;
-        blockFunctionIndex++;
-        primaryRef = -1;
-        secondaryRef = -1;
-        integers = NULL;
-        floats = NULL;
-      }
-      initialRun = 0;
-      /* If we do, then we need to work with the new name to get the wrapped
-         function */
-      wrapped_function = getBlockFunctionByName(read_line2);
-      strcpy(name,read_line2);
-
-
-    }
-    /* Else trim out whitespace */
-    else{
-      while(read_line[stringWhiteSpaceShift] == '\t' || read_line[stringWhiteSpaceShift] == ' '){
-        stringWhiteSpaceShift++;
-      }
-
-      /* Now work out whether what kind of secondary line we are looking at (integers,
-         floats, primary/secondary BlockFunctions) */
-      /* strncmp is a variation on strcmp which only compares a specific number
-         of characters from a string to another. Combining this with some pointer
-         magic and we can read only the bits which are relevant */
-      /* The pointer magic works by tricking the program into treating the string
-         referred to by the pointer as starting at the address of the index given */
-      /* DON'T ASK ME FOR A BETTER EXPLANATION, I'M DRUNK */
-      if(strncmp(&(read_line[stringWhiteSpaceShift]),"primary =",9) == 0){
-        sscanf(&(read_line[stringWhiteSpaceShift]),"primary = %d",&primaryRef);
-      }
-      else if(strncmp(&(read_line[stringWhiteSpaceShift]),"secondary =", 11) == 0){
-        sscanf(&(read_line[stringWhiteSpaceShift]),"secondary = %d",&secondaryRef);
-      }
-      else if(strncmp(&(read_line[stringWhiteSpaceShift]),"integers =", 10) == 0){
-        presumedNumOfInts = countCharsInString(&(read_line[stringWhiteSpaceShift]),',') + 1;
-        integers = calloc((size_t)presumedNumOfInts,sizeof(int));
-        intReadOffset = 0;
-        numOfInts = 0;
-        while(sscanf(&(read_line[stringWhiteSpaceShift+intReadOffset+11]),"%d",&readInt) > 0 && numOfInts < presumedNumOfInts){
-          /* Add some offset until we find the next comma */
-          integers[numOfInts] = readInt;
-          numOfInts++;
-          while(presumedNumOfInts > numOfInts && read_line[stringWhiteSpaceShift+intReadOffset+11] != ','){
-            intReadOffset++;
-          }
-          intReadOffset++;
-          /* increament the numofInts */
-        }
-      }
-      else if(strncmp(&(read_line[stringWhiteSpaceShift]),"floats =", 8) == 0){
-        presumedNumOfFloats = countCharsInString(&(read_line[stringWhiteSpaceShift]),',') + 1;
-        floats = calloc((size_t)presumedNumOfFloats,sizeof(float));
-        floatReadOffset = 0;
-        numOfFloats = 0;
-        while(sscanf(&(read_line[stringWhiteSpaceShift+floatReadOffset+9]),"%f",&readFloat) > 0 && numOfFloats < presumedNumOfFloats){
-          /* Add some offset until we find the next comma */
-          floats[numOfFloats] = readFloat;
-          numOfFloats++;
-          while(presumedNumOfFloats > numOfFloats && read_line[stringWhiteSpaceShift+floatReadOffset+9] != ','){
-            floatReadOffset++;
-          }
-          floatReadOffset++;
-        }
-      }
-    }
-  }
-    strcpy(blockFunctionRoot->blockFunctions[blockFunctionIndex].name, &name[14]);
-    blockFunctionRoot->blockFunctions[blockFunctionIndex].wrapped_function = wrapped_function;
-    if(primaryRef != -1){
-      blockFunctionRoot->blockFunctions[blockFunctionIndex].primary = &blockFunctionRoot->blockFunctions[primaryRef-1];
-    }
-    else{
-      blockFunctionRoot->blockFunctions[blockFunctionIndex].primary = NULL;
-    }
-    if(secondaryRef != -1){
-      blockFunctionRoot->blockFunctions[blockFunctionIndex].secondary = &blockFunctionRoot->blockFunctions[secondaryRef-1];
-    }
-    else{
-      blockFunctionRoot->blockFunctions[blockFunctionIndex].secondary = NULL;
-    }
-    blockFunctionRoot->blockFunctions[blockFunctionIndex].arguments.floats = floats;
-    blockFunctionRoot->blockFunctions[blockFunctionIndex].arguments.numOfFloats = numOfFloats;
-    blockFunctionRoot->blockFunctions[blockFunctionIndex].arguments.integers = integers;
-    blockFunctionRoot->blockFunctions[blockFunctionIndex].arguments.numOfInts = numOfInts;
-    blockFunctionRoot->numOfBlockFunctions = 1 + blockFunctionIndex;
+void nullifyBlockFunctionRoot(BlockFunctionRoot *root){
+	int i = 0;
+	while(i < root->numOfBlockFunctions){
+		if(root->blockFunctions[i].arguments.numOfInts != 0){
+			free(root->blockFunctions[i].arguments.integers);
+			root->blockFunctions[i].arguments.integers = NULL;
+			root->blockFunctions[i].arguments.numOfInts = 0;
+		}
+		if(root->blockFunctions[i].arguments.numOfFloats != 0){
+			free(root->blockFunctions[i].arguments.floats);
+			root->blockFunctions[i].arguments.floats = NULL;
+			root->blockFunctions[i].arguments.numOfFloats = 0;
+		}
+		if(root->blockFunctions[i].arguments.numOfInts != 0){
+			free(root->blockFunctions[i].arguments.characters);
+			root->blockFunctions[i].arguments.characters = NULL;
+			root->blockFunctions[i].arguments.numOfChars = 0;
+		}
+		i++;
+	}
+	free(root->blockFunctions);
+	root->blockFunctions = NULL;
+	root->numOfBlockFunctions = 0;
 }
 
 void runAI(AIData *aiData, GameObjectData *gameObjectData){
@@ -541,4 +492,14 @@ void runAI(AIData *aiData, GameObjectData *gameObjectData){
                                    programmableWorker,
                                    gameObjectData);
   }
+}
+
+AIData initAIData(void){
+	AIData aiData;
+	FILE *file;
+	file = fopenAndVerify("GenericWorkerAI.txt","r");
+	aiData.blockFunctionRoots = calloc(1,sizeof(BlockFunctionRoot));
+	aiData.blockFunctionRoots[0] = makeBlockFunctionRootFromFile(file);
+	fclose(file);
+	return aiData;
 }

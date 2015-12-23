@@ -17,11 +17,162 @@
 #define RENDERRECT_G integers[2]
 
 static void UIAction_Init(UI_Element *element, UI_Action *action);
-static void freeUIAction(UI_Action *action);
+static void UIAction_Free(UI_Action *action);
 static void UITrigger_Execute(UI_Action *action);
 static int isLinked(UI_Element *test, UI_Element *to);
 static int UIElement_isVisible(UI_Element *element);
 static int percWindowDimension(int dimension, float perc);
+static void UIElement_DeExternalise(UI_Element *root, UI_Element *external);
+static void UITrigger_Destroy(UI_Action *action, UI_Trigger *trigger);
+static void UIElement_RemoveExposedData(UI_Element *element);
+
+int UIAction_External(UI_Action *action, va_list copy_from);
+int UIAction_DisplayNumber(UI_Action *action, va_list copy_from);
+int UIAction_DisplayString(UI_Action *action, va_list copy_from);
+int UIAction_Counter(UI_Action *action, va_list copy_from);
+int UIAction_RenderSquare(UI_Action *action, va_list copy_from);
+int UIAction_FillRect(UI_Action *action, va_list copy_from);
+int UIAction_TwoRectOverride(UI_Action *action, va_list copy_from);
+int UIAction_ToggleActionStatus(UI_Action *action, va_list copy_from);
+int UIAction_DraggableRectOverride(UI_Action *action, va_list copy_from);
+int UIAction_RenderLine(UI_Action *action, va_list copy_from);
+int UIAction_CalculateSibling(UI_Action *action, va_list copy_from);
+int UIAction_ClickAnywhere(UI_Action *action, va_list copy_from);
+int UIAction_ClickRect(UI_Action *action, va_list copy_from);
+int UIAction_ResourceCounter(UI_Action *action, va_list copy_from);
+int UIAction_Auto(UI_Action *action, va_list copy_from);
+int UIAction_NullifyAI(UI_Action *action, va_list copy_from);
+
+UI_Element *makeStartBlock(int x_offset, int y_offset, UI_Element *parent){
+	UI_Element *element;
+	element = UIElement_Create(x_offset,y_offset,200,50,9);
+	UIConfigure_FillRect(element,&element->actions[0],321,123,321);
+	UIConfigure_ShrinkFitToParent(element, &element->actions[1]);
+	UIConfigure_DisplayString(element, &element->actions[2],"START",0);
+	UIConfigure_RenderLine(element, &element->actions[3],BR_CORNER,NULL);
+	
+	UIConfigure_LeftClickRect(element, &element->actions[4]);
+		UITrigger_Bind(&element->actions[4],&element->actions[3],-1,1);
+		UITrigger_Bind(&element->actions[4],&element->actions[4],1,0);
+		UITrigger_Bind(&element->actions[4],&element->actions[5],0,1);
+		UITrigger_Bind(&element->actions[4],&element->actions[6],0,1);
+		
+	UIConfigure_LeftReleaseAnywhere(element, &element->actions[5]);
+		element->actions[5].status = 0;
+		element->actions[5].new_status = 0;
+		UITrigger_Bind(&element->actions[5],&element->actions[3],1,2);
+		UITrigger_Bind(&element->actions[5],&element->actions[4],0,1);
+		UITrigger_Bind(&element->actions[5],&element->actions[7],0,1);
+		UITrigger_Bind(&element->actions[5],&element->actions[6],0,1);
+		UITrigger_Bind(&element->actions[5],&element->actions[5],1,0);
+		
+	UIConfigure_StoreMousePosition(element, &element->actions[6],2,&element->actions[3],&element->actions[7]);
+		element->actions[6].status = 0;
+		element->actions[6].new_status = 0;
+	UIConfigure_CalculateSibling(element, &element->actions[7],1,&element->actions[3]);
+		element->actions[7].status = 0;
+		element->actions[7].new_status = 0;
+	UIConfigure_SetUpAiBlock(element,&element->actions[8],2,&element->actions[2],&element->actions[3]);
+	UIElement_Reparent(element,parent);
+	return element;
+}
+
+UI_Element *makeAIResetButton(int x_offset, int y_offset, UI_Element *parent){
+	UI_Element *element;
+	element = UIElement_Create(x_offset,y_offset,200,50,5);
+	UIConfigure_FillRect(element,&element->actions[0],333,000,150);
+	UIConfigure_ShrinkFitToParent(element,&element->actions[1]);
+	UIConfigure_LeftClickRect(element,&element->actions[2]);
+		UITrigger_Bind(&element->actions[2],&element->actions[3],0,1);
+		UITrigger_Bind(&element->actions[2],&element->actions[4],0,1);
+	UIConfigure_NullifyAI(element,&element->actions[3]);
+	UIConfigure_RecallWorkers(element,&element->actions[4]);
+	UIElement_Reparent(element,parent);
+	return element;
+}
+
+UI_Element *makeAIBlock(int x_offset, int y_offset, char *aiString, UI_Element *parent){
+	UI_Element *element2;
+	element2 = UIElement_Create(x_offset,y_offset,200,50,19);
+	UIConfigure_FillRect(element2,&element2->actions[0],123,321,123);
+	UIConfigure_ShrinkFitToParent(element2,&element2->actions[1]);
+	UIConfigure_RightClickRect(element2, &element2->actions[2]);
+		UITrigger_Bind(&element2->actions[2],&element2->actions[3],0,1);
+		UITrigger_Bind(&element2->actions[2],&element2->actions[4],0,1);
+		UITrigger_Bind(&element2->actions[2],&element2->actions[2],1,0);
+	UIConfigure_RightReleaseAnywhere(element2, &element2->actions[3]);
+		UITrigger_Bind(&element2->actions[3],&element2->actions[3],1,0);
+		UITrigger_Bind(&element2->actions[3],&element2->actions[4],1,0);
+		UITrigger_Bind(&element2->actions[3],&element2->actions[2],0,1);
+	UIConfigure_DraggableRectOverride(element2, &element2->actions[4],1,&element2->actions[1]);
+	UIConfigure_DisplayString(element2, &element2->actions[5],aiString,1);
+	
+	/* Line 1 */
+	UIConfigure_RenderLine(element2, &element2->actions[6],BL_CORNER,NULL);
+	UIConfigure_LeftClickRect(element2, &element2->actions[7]);
+		element2->actions[7].status = 1;
+		element2->actions[7].new_status = 1;
+		UITrigger_Bind(&element2->actions[7],&element2->actions[6],-1,1);
+		UITrigger_Bind(&element2->actions[7],&element2->actions[7],1,0);
+		UITrigger_Bind(&element2->actions[7],&element2->actions[8],0,1);
+		UITrigger_Bind(&element2->actions[7],&element2->actions[10],0,1);
+	UIConfigure_StoreMousePosition(element2, &element2->actions[8],2,&element2->actions[6],&element2->actions[9]);
+		element2->actions[8].status = 0;
+		element2->actions[8].new_status = 0;
+	UIConfigure_CalculateSibling(element2, &element2->actions[9],1,&element2->actions[6]);
+		element2->actions[9].status = 0;
+		element2->actions[9].new_status = 0;
+	UIConfigure_LeftReleaseAnywhere(element2, &element2->actions[10]);
+		element2->actions[10].status = 0;
+		element2->actions[10].new_status = 0;
+		UITrigger_Bind(&element2->actions[10],&element2->actions[6],1,2);
+		UITrigger_Bind(&element2->actions[10],&element2->actions[12],0,1);
+		UITrigger_Bind(&element2->actions[10],&element2->actions[8],1,0);
+		UITrigger_Bind(&element2->actions[10],&element2->actions[9],0,1);
+		UITrigger_Bind(&element2->actions[10],&element2->actions[10],1,0);
+		UITrigger_Bind(&element2->actions[10],&element2->actions[18],0,1);
+
+	/* Line 2 */
+	UIConfigure_RenderLine(element2, &element2->actions[11],BR_CORNER,NULL);
+	UIConfigure_LeftClickRect(element2, &element2->actions[12]);
+		element2->actions[12].status = 0;
+		element2->actions[12].new_status = 0;
+		UITrigger_Bind(&element2->actions[12],&element2->actions[11],-1,1);
+		UITrigger_Bind(&element2->actions[12],&element2->actions[12],1,0);
+		UITrigger_Bind(&element2->actions[12],&element2->actions[13],0,1);
+		UITrigger_Bind(&element2->actions[12],&element2->actions[15],0,1);
+	UIConfigure_StoreMousePosition(element2, &element2->actions[13],2,&element2->actions[11],&element2->actions[14]);
+		element2->actions[13].status = 0;
+		element2->actions[13].new_status = 0;
+	UIConfigure_CalculateSibling(element2, &element2->actions[14],1,&element2->actions[11]);
+		element2->actions[14].status = 0;
+		element2->actions[14].new_status = 0;
+	UIConfigure_LeftReleaseAnywhere(element2, &element2->actions[15]);
+		element2->actions[15].status = 0;
+		element2->actions[15].new_status = 0;
+		UITrigger_Bind(&element2->actions[15],&element2->actions[11],1,2);
+		UITrigger_Bind(&element2->actions[15],&element2->actions[16],0,1);
+		UITrigger_Bind(&element2->actions[15],&element2->actions[13],1,0);
+		UITrigger_Bind(&element2->actions[15],&element2->actions[14],0,1);
+		UITrigger_Bind(&element2->actions[15],&element2->actions[15],1,0);
+		UITrigger_Bind(&element2->actions[15],&element2->actions[18],0,1);
+
+	/* Lines Clear */
+	UIConfigure_LeftClickRect(element2, &element2->actions[16]);
+		element2->actions[16].status = 0;
+		element2->actions[16].new_status = 0;
+		UITrigger_Bind(&element2->actions[16],&element2->actions[6],-1,4);
+		UITrigger_Bind(&element2->actions[16],&element2->actions[11],-1,4);
+		UITrigger_Bind(&element2->actions[16],&element2->actions[7],0,1);
+		UITrigger_Bind(&element2->actions[16],&element2->actions[16],1,0);
+		UITrigger_Bind(&element2->actions[16],&element2->actions[18],0,1);
+		
+	UIConfigure_DeleteKeyFlagDestroy(element2, &element2->actions[17]);
+	UIConfigure_SetUpAiBlock(element2,&element2->actions[18],3,&element2->actions[5],&element2->actions[6],&element2->actions[11]);
+		
+	UIElement_Reparent(element2,parent);
+	return element2;
+}
 
 UI_Element *UIElement_CreateByPercentage(float rx, float ry, float rw, float rh, int x, int y, int num_of_actions){
 	   UI_Element *element;
@@ -37,24 +188,184 @@ UI_Element *UIElement_CreateByPercentage(float rx, float ry, float rw, float rh,
 	   element->parent = NULL;
 	   element->child = NULL;
 	   element->sibling = NULL;
+	   element->exposed_data_types = NULL;
+	   element->exposed_data = NULL;
+	   element->exposed_data_count = 0;
 	return element;
 }
 
 UI_Element *UIElement_Create(int x, int y, int w, int h, int num_of_actions){
 	   UI_Element *element;
-		 element  = calloc(1,sizeof(UI_Element));
+	   element  = calloc(1,sizeof(UI_Element));
 
 
 	   element->rect.x = x;
 	   element->rect.y = y;
 	   element->rect.w = w;
 	   element->rect.h = h;
-	   element->actions = malloc(sizeof(UI_Action)*num_of_actions);
-	   element->num_of_actions = num_of_actions;
-	   element->parent = NULL;
+	   if(num_of_actions == 0){
+			element->actions = NULL;
+			element->num_of_actions = 0;
+	   }
+	   else{
+		   element->actions = malloc(sizeof(UI_Action)*num_of_actions);
+		   element->num_of_actions = num_of_actions;
+	   }
+	   element->parent = NULL; 
 	   element->child = NULL;
 	   element->sibling = NULL;
-		 return element;
+	   element->exposed_data_types = NULL;
+	   element->exposed_data = NULL;
+	   element->exposed_data_count = 0;
+	   return element;
+}
+
+int UIAction_NullifyAI(UI_Action *action, va_list copy_from){
+	va_list vargs;
+	AIData *aiData;
+	if(action->status == 1){
+		va_copy(vargs,copy_from);
+		aiData = va_arg(vargs,AIData*);
+		va_end(vargs);
+		nullifyBlockFunctionRoot(&aiData->blockFunctionRoots[0]);
+		action->new_status = 0;
+		return 1;
+	}
+	return 0;
+}
+
+int UIAction_RecallWorkers(UI_Action *action, va_list copy_from){
+	va_list vargs;
+	int i = 0;
+	GameObjectData *gameObjectData;
+	ProgrammableWorker *programmableWorker;
+	if(action->status == 1){
+		va_copy(vargs, copy_from);
+		gameObjectData = va_arg(vargs, GameObjectData*);
+		va_end(vargs);
+		programmableWorker = gameObjectData->first_programmable_worker;
+		while(programmableWorker != NULL){
+			programmableWorker->status = RETURNING;
+			programmableWorker->heading = getAngleBetweenRects(&gameObjectData->hive.rect,&programmableWorker->rect);
+			programmableWorker = programmableWorker->next;
+		}
+		action->new_status = 0;
+		return 1;
+	}
+	return 0;	
+}
+
+int UIAction_ReadAiBlocks(UI_Action *action, va_list copy_from){
+	char *workingSpace;
+	char *childElementExposedString;
+	va_list vargs;
+	AIData *aiData;
+	UI_Element *childElement;
+	int childCount;
+	if(action->status == 1){
+		childElement = action->element->child;
+		childCount = 0;
+		workingSpace = calloc(1,sizeof(char));
+		va_copy(vargs,copy_from);
+		aiData = va_arg(vargs,AIData*);
+		va_end(vargs);
+		while(childElement != NULL){
+			childCount++;
+			childElementExposedString = ((char**)childElement->exposed_data)[0];
+			assert(childElement->exposed_data_count > 0);
+			assert(childElement->exposed_data_types[0] == UI_STRING);
+			workingSpace = realloc(workingSpace,1+strlen(workingSpace)+strlen(childElementExposedString));
+			strcat(workingSpace,childElementExposedString);
+			childElement = childElement->sibling;
+		}
+		aiData->blockFunctionRoots[0] = makeBlockFunctionRootFromString(workingSpace,childCount);
+		int i = 0;
+		while(i < aiData->blockFunctionRoots[0].numOfBlockFunctions){
+			printf("%s\n",aiData->blockFunctionRoots[0].blockFunctions[i].name);
+			printf("%p\n",&aiData->blockFunctionRoots[0].blockFunctions[i]);
+			i++;
+		}
+		free(workingSpace);
+		action->new_status = 0;
+	}
+	return action->status;
+}
+
+int UIAction_SetUpAiBlock(UI_Action *action, va_list copy_from){
+	int i = 0;
+	int stringLength = 1;
+	char workingSpace[30] = {0};
+	char *exposedDataString;
+	if(action->status == 1){
+		UIElement_RemoveExposedData(action->element);
+		
+		action->element->exposed_data_types = malloc(sizeof(enum UIDataTypes));
+		action->element->exposed_data_types[0] = UI_STRING;
+		
+		action->element->exposed_data_count = 1;
+		
+		action->element->exposed_data = calloc(1,sizeof(char*));
+		action->element->exposed_data[0] = calloc(stringLength,sizeof(char));
+		
+		/* action->companions[0].strings[0] This should be the action holding the string */
+		stringLength = stringLength + 1 + strlen(action->companions[0]->strings[0]);
+		action->element->exposed_data[0] = realloc(action->element->exposed_data[0],
+		                                        stringLength);
+		strcat(action->element->exposed_data[0],action->companions[0]->strings[0]);
+		strcat(action->element->exposed_data[0],"\n");
+		/* This should be the action holding the primary link */
+		if(action->num_of_companions > 1 && action->companions[1] != NULL && action->companions[1]->external != NULL){
+			stringLength = stringLength + 16;
+			action->element->exposed_data[0] = realloc(action->element->exposed_data[0],
+													stringLength);
+			sprintf(workingSpace,"\tprimary = %d\n",action->companions[1]->external->sibling_position + 1);
+			strcat(action->element->exposed_data[0],workingSpace);
+		}
+		/* This should be the action holding the secondary link */
+		if(action->num_of_companions > 2 && action->companions[2] != NULL && action->companions[2]->external != NULL){
+			stringLength = stringLength + 18;
+			action->element->exposed_data[0] = realloc(action->element->exposed_data[0],
+													stringLength);
+			sprintf(workingSpace,"\tsecondary = %d\n",action->companions[2]->external->sibling_position + 1);
+			strcat(action->element->exposed_data[0],workingSpace);
+		}
+		//action->new_status = 0;
+		//printf("exposed string: %s\n",action->element->exposed_data[0]);
+		return 1;
+	}
+	return 0;
+}
+
+int UIAction_DeleteKeyFlagDestroy(UI_Action *action, va_list copy_from){
+	int x,y;
+	if(action->status == 1){
+		SDL_GetMouseState(&x,&y);
+		if(x < action->element->rect.x || x > action->element->rect.x + action->element->rect.w){
+		  return 0;
+		}
+		if(y < action->element->rect.y || y > action->element->rect.y + action->element->rect.h){
+		  return 0;
+		}
+		action->element->destroy = 1;
+		return 1;
+	}
+	return 0;
+}
+
+int UIAction_AddAiBlock(UI_Action *action, va_list copy_from){
+	va_list vargs;
+	UI_Element *element2;
+	char c = 0;
+	char aiString[30];
+	if(action->status == 1){
+		printf("Enter AI string\n");
+		scanf("%30[0-9a-zA-Z ]", aiString);
+		while(c != '\n' && c != EOF){c = getchar();}
+		makeAIBlock(action->external->rect.x,action->external->rect.y,aiString,action->external);
+		action->new_status = 0;
+		return 1;
+	}
+	return 0;
 }
 
 int UIAction_PercRect(UI_Action *action, va_list copy_from){
@@ -63,14 +374,15 @@ int UIAction_PercRect(UI_Action *action, va_list copy_from){
 	va_copy(vargs, copy_from);
 	event = va_arg(vargs,SDL_Event*);
 	va_end(vargs);
-	if(action->status != 0){
+	if(action->status == 1){
 		action->element->rect = getRectFromPercRect(SDL_GetWindowFromID(event->window.windowID),
 												   action->floats[0],
 												   action->floats[1],
 												   action->floats[2],
 												   action->floats[3]);
+		return 1;
 	}
-	return action->status;
+	return 0;
 }
 	
 int UIAction_InverseRect(UI_Action *action, va_list copy_from){
@@ -79,14 +391,15 @@ int UIAction_InverseRect(UI_Action *action, va_list copy_from){
 	va_copy(vargs, copy_from);
 	event = va_arg(vargs,SDL_Event*);
 	va_end(vargs);
-	if(action->status != 0){
+	if(action->status == 1){
 		action->element->rect = getRectFromInvRect(SDL_GetWindowFromID(event->window.windowID),
 												   action->integers[0],
 												   action->integers[1],
 												   action->integers[2],
 												   action->integers[3]);
+		return 1;
 	}
-	return action->status;
+	return 0;
 }
 
 int UIAction_DisplayImage(UI_Action *action, va_list copy_from){
@@ -96,23 +409,25 @@ int UIAction_DisplayImage(UI_Action *action, va_list copy_from){
 	graphicsData = va_arg(vargs,GraphicsData*);
 	va_end(vargs);
 
-	if(action->status){
+	if(action->status == 1){
 		SDL_RenderCopy(graphicsData->renderer,action->texture,NULL,&action->element->rect);
+		return 1;
 	}
-	return 1;
+	return 0;
 }
 
 int UIAction_Auto(UI_Action *action, va_list copy_from){
 	if(action->status == 1){
 		UITrigger_Execute(action);
+		return 1;
 	}
-	return action->status;
+	return 0;
 }
 
 int UIAction_External(UI_Action *action, va_list copy_from){
 	if(action->status == 1 && action->external != NULL){
 		UITrigger_Execute(action);
-		action->status = 0;
+		action->new_status = 0;
 		return 1;
 	}
 	return 0;
@@ -178,8 +493,9 @@ int UIAction_DisplayNumber(UI_Action *action, va_list copy_from){
 		temp_rect.y = action->element->rect.y;
 		TTF_SizeText(graphicsData->fonts[action->integers[2]], action->strings[0], &temp_rect.w, &temp_rect.h);
 		SDL_RenderCopy(graphicsData->renderer,action->texture,NULL,&temp_rect);
+		return 1;
 	}
-	return 1;
+	return 0;
 }
 
 int UIAction_DisplayString(UI_Action *action, va_list copy_from){
@@ -195,7 +511,7 @@ int UIAction_DisplayString(UI_Action *action, va_list copy_from){
 	graphicsData = va_arg(vargs,GraphicsData*);
 	va_end(vargs);
 	if(action->strings[0] != NULL && action->strings[1] != NULL && strcmp(action->strings[0],action->strings[1]) != 0){
-		action->strings[0] = realloc(action->strings[0], strlen(action->strings[1] + 1));
+		action->strings[0] = realloc(action->strings[0], strlen(action->strings[1])+1);
 		strcpy(action->strings[0],action->strings[1]);
 		SDL_DestroyTexture(action->texture);
 		temp = TTF_RenderText_Solid(graphicsData->fonts[action->integers[0]],action->strings[0],colour);
@@ -206,8 +522,9 @@ int UIAction_DisplayString(UI_Action *action, va_list copy_from){
 		temp_rect.y = action->element->rect.y;
 		TTF_SizeText(graphicsData->fonts[action->integers[0]], action->strings[0], &temp_rect.w, &temp_rect.h);
 		SDL_RenderCopy(graphicsData->renderer,action->texture,NULL,&temp_rect);
+		return 1;
 	}
-	return 1;
+	return 0;
 }
 
 int UIAction_ResourceCounter(UI_Action *action, va_list copy_from){
@@ -223,12 +540,13 @@ int UIAction_ResourceCounter(UI_Action *action, va_list copy_from){
 			action->companions[i]->integers[0] = action->integers[0];
 			i++;
 		}
+		return 1;
 	}
-	return 1;
+	return 0;
 }
 
 int UIAction_Counter(UI_Action *action, va_list copy_from){
-	action->status = 0;
+	action->new_status = 0;
 	return 1;
 }
 
@@ -239,19 +557,22 @@ int UIAction_RenderLine(UI_Action *action, va_list copy_from){
 	va_copy(vargs,copy_from);
 	graphicsData = va_arg(vargs, GraphicsData*);
 	va_end(vargs);
-	if(!UIElement_isVisible(action->element)){
+	if(!UIElement_isVisible(action->element) || (action->external != NULL && !UIElement_isVisible(action->external))){
 		return 0;
 	}
 	if(action->status == 3){
 		if(action->external == NULL || isLinked(action->external,action->element)){
+			action->new_status = 0;
 			action->external = NULL;
-			action->status = 0;
+			action->integers[0] = action->element->rect.x;
+			action->integers[1] = action->element->rect.y;
 		}
 		else{
-			action->status = 2;
+			action->new_status = 2;
 		}
+		return 1;
 	}
-	if(action->status == 1){
+	else if(action->status == 1){
 		SDL_SetRenderDrawColor(graphicsData->renderer,255,
 										255,
 										255,
@@ -262,7 +583,10 @@ int UIAction_RenderLine(UI_Action *action, va_list copy_from){
 	}
 	else if(action->status == 2){
 		if(action->external == NULL){
-			action->status = 0;
+			action->new_status = 0;
+			action->external = NULL;
+			action->integers[0] = action->element->rect.x;
+			action->integers[1] = action->element->rect.y;
 			return 0;
 		}
 		SDL_SetRenderDrawColor(graphicsData->renderer,255,
@@ -277,7 +601,7 @@ int UIAction_RenderLine(UI_Action *action, va_list copy_from){
 	}
 	else if(action->status == 4){
 		action->external = NULL;
-		action->status = 0;
+		action->new_status = 0;
 		action->integers[0] = action->element->rect.x;
 		action->integers[1] = action->element->rect.y;
 		return 0;
@@ -305,7 +629,8 @@ int UIAction_CalculateSibling(UI_Action *action, va_list copy_from){
 	UI_Element *element;
 	int i = 0;
 	if(action->status == 1){
-		element = action->element->parent->child;
+		/* Ignore the first sibling, because that's the start block */
+		element = action->element->parent->child->sibling;
 		while(element != NULL){
 			if(element != action->element){
 				if(!(action->integers[0] < element->rect.x || action->integers[0] > element->rect.x + element->rect.w) &&
@@ -319,7 +644,11 @@ int UIAction_CalculateSibling(UI_Action *action, va_list copy_from){
 			action->companions[i]->external = element;
 			i++;
 		}
-		action->status = 0;
+		action->new_status = 0;
+		/* Make sure that our integers are something that won't get confusing if we're not actually using this action.
+		   This is to prevent the links snapping back to where they were if we click too quickly */
+		action->integers[0] = action->element->rect.x;
+		action->integers[1] = action->element->rect.y;
 	}
 	return 1;
 }
@@ -339,8 +668,9 @@ int UIAction_StoreMousePosition(UI_Action *action, va_list copy_from){
 			action->companions[i]->integers[1] = action->integers[1];
 			i++;
 		}
+		return 1;
 	}
-	return 1;
+	return 0;
 }
 
 int UIAction_FillRect(UI_Action *action, va_list copy_from){
@@ -351,14 +681,15 @@ int UIAction_FillRect(UI_Action *action, va_list copy_from){
 	va_copy(vargs,copy_from);
 	graphicsData = va_arg(vargs,GraphicsData*);
 	va_end(vargs);
-	if(action->status != 0){
+	if(action->status == 1){
 		SDL_SetRenderDrawColor(graphicsData->renderer,action->RENDERRECT_R,
 		                                action->RENDERRECT_G,
 		                                action->RENDERRECT_B,
 		                                255);
 		SDL_RenderFillRect(graphicsData->renderer,&action->element->rect);
+		return 1;
 	}
-	return 1;
+	return 0;
 }
 
 int UIAction_ClickRect(UI_Action *action, va_list copy_from){
@@ -415,8 +746,9 @@ int UIAction_DraggableRectOverride(UI_Action *action, va_list copy_from){
 			action->companions[i]->integers[1] = y;
 			i++;
 		}
+		return 1;
 	}
-	return 1;
+	return 0;
 }
 
 int UIAction_TwoRectOverride(UI_Action *action, va_list copy_from){
@@ -433,7 +765,7 @@ int UIAction_TwoRectOverride(UI_Action *action, va_list copy_from){
 	  action->TWORECTOVERRIDE_COUNTER+=dt;
 	  if(action->TWORECTOVERRIDE_COUNTER > action->TWORECTOVERRIDE_TRANSITION){
 	    /* We've become big */
-	    action->status = 3;
+	    action->new_status = 3;
 	    action->TWORECTOVERRIDE_COUNTER = action->TWORECTOVERRIDE_TRANSITION;
 	  }
 	  transition_multiplier = ((float) action->TWORECTOVERRIDE_COUNTER)/((float) action->TWORECTOVERRIDE_TRANSITION);
@@ -441,13 +773,14 @@ int UIAction_TwoRectOverride(UI_Action *action, va_list copy_from){
 	  action->element->rect.y = action->TWORECTOVERRIDE_SY + (action->TWORECTOVERRIDE_BY - action->TWORECTOVERRIDE_SY) * transition_multiplier;
 	  action->element->rect.w = action->TWORECTOVERRIDE_SW + (action->TWORECTOVERRIDE_BW - action->TWORECTOVERRIDE_SW) * transition_multiplier;
 	  action->element->rect.h = action->TWORECTOVERRIDE_SH + (action->TWORECTOVERRIDE_BH - action->TWORECTOVERRIDE_SH) * transition_multiplier;
+	  return 1;
 	}
 	else if(action->status == 2){
 	  /* We're going small! */
 	  action->TWORECTOVERRIDE_COUNTER-=dt;
 	  if(action->TWORECTOVERRIDE_COUNTER < 0){
 	    /* We've become small */
-	    action->status = 0;
+	    action->new_status = 0;
 	    action->TWORECTOVERRIDE_COUNTER = 0;
 	  }
 	  transition_multiplier = ((float) action->TWORECTOVERRIDE_COUNTER)/((float) action->TWORECTOVERRIDE_TRANSITION);
@@ -455,71 +788,15 @@ int UIAction_TwoRectOverride(UI_Action *action, va_list copy_from){
 	  action->element->rect.y = action->TWORECTOVERRIDE_SY + (action->TWORECTOVERRIDE_BY - action->TWORECTOVERRIDE_SY) * transition_multiplier;
 	  action->element->rect.w = action->TWORECTOVERRIDE_SW + (action->TWORECTOVERRIDE_BW - action->TWORECTOVERRIDE_SW) * transition_multiplier;
 	  action->element->rect.h = action->TWORECTOVERRIDE_SH + (action->TWORECTOVERRIDE_BH - action->TWORECTOVERRIDE_SH) * transition_multiplier;
+	  return 1;
 	}
-	return 1;
-}
-
-int UIAction_GenerateAIString(UI_Action *action, va_list copy_from){
-	/* This is hacky and shouldn't be used outside of this specific project */
-	int primary_search = 0;
-	int primary = 0;
-	int secondary_search = 0;
-	int secondary = 0;
-	char working_space[300] = {'\0'};
-	UI_Element *worker = action->element->parent->child;
-	/* Copy in the default string */
-	action->strings[1] = realloc(action->strings[1],strlen(action->strings[0])+1);
-	strcpy(action->strings[1],action->strings[0]);
-	if(action->companions[0]->external != NULL){
-		memset(working_space, 0, 300);
-		while(worker != NULL){
-			primary_search++;
-			if(action->companions[0]->external == worker){
-				primary = primary_search;
-				break;
-			}
-			worker = worker->sibling;
-		}
-		if(primary != 0){
-			action->strings[1] = realloc(action->strings[1],strlen(action->strings[1]) + 1 + strlen(working_space)+1);
-			strcat(action->strings[1],working_space);
-		}
-	}
-	if(action->companions[1]->external != NULL){
-		memset(working_space, 0, 300);
-		worker = action->element->parent->child;
-		while(worker != NULL){
-			secondary_search++;
-			if(action->companions[1]->external == worker){
-				secondary = secondary_search;
-				break;
-			}
-			worker = worker->sibling;
-		}
-		if(secondary != 0){
-			action->strings[1] = realloc(action->strings[1],strlen(action->strings[1]) + 1 + strlen(working_space)+1);
-			strcat(action->strings[1],working_space);
-		}
-	}
-	return 1;
-}
-
-void UIConfigure_GenerateAIString(UI_Element *element, UI_Action *action, char *string, UI_Action *linkPrimary, UI_Action *linkSecondary){
-	UIAction_Init(element,action);
-	action->response = EXTERNAL;
-	action->function = UIAction_GenerateAIString;
-	action->companions = malloc(sizeof(UI_Action*));
-	action->companions[0] = linkPrimary;
-	action->companions[1] = linkSecondary;
-	action->num_of_companions = 2;
-	action->strings = malloc(sizeof(char*)*2);
-	action->strings[0] = malloc(strlen(string)+1 * sizeof(char));
-	action->strings[1] = malloc(strlen(string)+1 * sizeof(char));
-	strcpy(action->strings[0],string);
-	strcpy(action->strings[1],string);
+    return 0;
 }
 
 void UIConfigure_FillRect(UI_Element *element, UI_Action *action, int r, int g, int b){
+	#if DEBUGGING==1
+	printf("UIConfigure_FillRect\n");
+	#endif
 	UIAction_Init(element,action);
 	action->response = RENDER;
 	action->function = UIAction_FillRect;
@@ -532,23 +809,33 @@ void UIConfigure_FillRect(UI_Element *element, UI_Action *action, int r, int g, 
 }
 
 void UIConfigure_LeftClickRect(UI_Element *element, UI_Action *action){
+	#if DEBUGGING==1
+	printf("UIConfigure_LeftClickRect\n");
+	#endif
 	UIAction_Init(element,action);
 	action->response = LEFT_CLICK;
 	action->function = UIAction_ClickRect;
 }
 
 void UIConfigure_RightClickRect(UI_Element *element, UI_Action *action){
+	#if DEBUGGING==1
+	printf("UIConfigure_RightClickRect\n");
+	#endif
 	UIAction_Init(element,action);
 	action->response = RIGHT_CLICK;
 	action->function = UIAction_ClickRect;
 }
 
 void UIConfigure_TwoRectOverride(UI_Element *element, UI_Action *action, int sx, int sy, int sw, int sh, int bx, int by, int bw, int bh, int delay, int small_triggers, int big_triggers,...){
+	#if DEBUGGING==1
+	printf("UIConfigure_TwoRectOverride\n");
+	#endif
 	UIAction_Init(element,action);
 	action->response = UPDATE;
 	action->function = UIAction_TwoRectOverride;
 	action->element = element;
 	action->status = 0;
+	action->new_status = 0;
 	action->integers = malloc(sizeof(int) * 10);
 	action->num_of_integers = 10;
 	/* Small */
@@ -572,10 +859,14 @@ void UIConfigure_DraggableRectOverride(UI_Element *element, UI_Action *action, i
 	int i = 0;
 	va_list vargs;
 	va_start(vargs,num_of_companions);
+	#if DEBUGGING==1
+	printf("UIConfigure_DraggableRectOverride\n");
+	#endif
 	UIAction_Init(element,action);
 	action->response = MOTION;
 	action->function = UIAction_DraggableRectOverride;
 	action->status = 0;
+	action->new_status = 0;
 	action->num_of_companions = num_of_companions;
 	action->companions = calloc(num_of_companions, sizeof(UI_Action*));
 	while(i < num_of_companions){
@@ -586,11 +877,15 @@ void UIConfigure_DraggableRectOverride(UI_Element *element, UI_Action *action, i
 }
 
 void UIConfigure_RenderLine(UI_Element *element, UI_Action *action, enum LineOrigins origin, UI_Element *external){
+	#if DEBUGGING==1
+	printf("UIConfigure_RenderLine\n");
+	#endif
 	UIAction_Init(element,action);
 	action->response = RENDER;
 	action->function = UIAction_RenderLine;
 	action->external = external;
 	action->status = 2;
+	action->new_status = 2;
 	action->integers = calloc(4,sizeof(int));
 	action->num_of_integers = 4;
 
@@ -623,6 +918,9 @@ void UIConfigure_RenderLine(UI_Element *element, UI_Action *action, enum LineOri
 void UIConfigure_StoreMousePosition(UI_Element *element, UI_Action *action, int num_of_companions, ...){
 	va_list vargs;
 	int i = 0;
+	#if DEBUGGING==1
+	printf("UIConfigure_StoreMousePosition\n");
+	#endif
 	UIAction_Init(element,action);
 	va_start(vargs,num_of_companions);
 	action->response = MOTION;
@@ -636,6 +934,7 @@ void UIConfigure_StoreMousePosition(UI_Element *element, UI_Action *action, int 
 	action->num_of_companions = num_of_companions;
 
 	action->status = 0;
+	action->new_status = 0;
 	action->integers = malloc(sizeof(int) * 2);
 	action->num_of_integers = 2;
 	va_end(vargs);
@@ -644,6 +943,9 @@ void UIConfigure_StoreMousePosition(UI_Element *element, UI_Action *action, int 
 void UIConfigure_CalculateSibling(UI_Element *element, UI_Action *action, int num_of_companions, ...){
 	va_list vargs;
 	int i = 0;
+	#if DEBUGGING==1
+	printf("UIConfigure_CalculateSibling\n");
+	#endif
 	UIAction_Init(element,action);
 	va_start(vargs,num_of_companions);
 	action->response = UPDATE;
@@ -657,53 +959,77 @@ void UIConfigure_CalculateSibling(UI_Element *element, UI_Action *action, int nu
 	action->num_of_companions = num_of_companions;
 
 	action->status = 0;
+	action->new_status = 0;
 	action->integers = malloc(sizeof(int) * 2);
 	action->num_of_integers = 2;
 	va_end(vargs);
 }
 
 void UIConfigure_LeftClickAnywhere(UI_Element *element, UI_Action *action){
+	#if DEBUGGING==1
+	printf("UIConfigure_LeftClickAnywhere\n");
+	#endif
 	UIAction_Init(element,action);
 	action->response = LEFT_CLICK;
 	action->function = UIAction_ClickAnywhere;
 }
 
 void UIConfigure_RightClickAnywhere(UI_Element *element, UI_Action *action){
+	#if DEBUGGING==1
+	printf("UIConfigure_RightClickAnywhere\n");
+	#endif
 	UIAction_Init(element,action);
 	action->response = RIGHT_CLICK;
 	action->function = UIAction_ClickAnywhere;
 }
 
 void UIConfigure_LeftReleaseAnywhere(UI_Element *element, UI_Action *action){
+	#if DEBUGGING==1
+	printf("UIConfigure_LeftReleaseAnywhere\n");
+	#endif
 	UIAction_Init(element,action);
 	action->response = LEFT_RELEASE;
 	action->function = UIAction_ReleaseAnywhere;
 }
 
 void UIConfigure_RightReleaseAnywhere(UI_Element *element, UI_Action *action){
+	#if DEBUGGING==1
+	printf("UIConfigure_RightReleaseAnywhere\n");
+	#endif
 	UIAction_Init(element,action);
 	action->response = RIGHT_RELEASE;
 	action->function = UIAction_ReleaseAnywhere;
 }
 
 void UIConfigure_Counter(UI_Element *element, UI_Action *action){
+	#if DEBUGGING==1
+	printf("UIConfigure_Counter\n");
+	#endif
 	UIAction_Init(element,action);
 	action->response = UPDATE;
 	action->function = UIAction_Counter;
 	action->status = 0;
+	action->new_status = 0;
 }
 
 void UIConfigure_External(UI_Element *element, UI_Action *action, UI_Element *external){
+	#if DEBUGGING==1
+	printf("UIConfigure_External\n");
+	#endif
 	UIAction_Init(element,action);
 	action->response = EXTERNAL;
 	action->function = UIAction_External;
 	action->external = external;
 	action->status = 0;
+	action->new_status = 0;
 }
 
 void UIConfigure_ResourceCounter(UI_Element *element, UI_Action *action, int num_of_companions, ...){
 	va_list vargs;
 	int i = 0;
+	#if DEBUGGING==1
+	printf("UIConfigure_ResourceCounter\n");
+	#endif
 	UIAction_Init(element,action);
 	va_start(vargs,num_of_companions);
 	action->response = GAME_OBJECT_UPDATE;
@@ -720,6 +1046,9 @@ void UIConfigure_ResourceCounter(UI_Element *element, UI_Action *action, int num
 }
 
 void UIConfigure_DisplayString(UI_Element *element, UI_Action *action, char *string, int font){
+	#if DEBUGGING==1
+	printf("UIConfigure_DisplayString\n");
+	#endif
 	UIAction_Init(element,action);
 	action->response = RENDER;
 	action->function = UIAction_DisplayString;
@@ -733,15 +1062,21 @@ void UIConfigure_DisplayString(UI_Element *element, UI_Action *action, char *str
 		action->strings[0] = NULL;
 		action->strings[1] = NULL;
 	}
+	action->new_status = 1;
+	action->status = 1;
 	action->num_of_strings = 2;
 	action->integers = calloc(1,sizeof(int));
 	action->integers[0] = font;
 }
 
 void UIConfigure_DisplayNumber(UI_Element *element, UI_Action *action, int number, int font){
+	#if DEBUGGING==1
+	printf("UIConfigure_DisplayNumber\n");
+	#endif
 	UIAction_Init(element,action);
 	action->response = RENDER;
 	action->status = 1;
+	action->new_status = 1;
 	action->function = UIAction_DisplayNumber;
 	action->integers = calloc(3, sizeof(int));
 	action->integers[0] = number;
@@ -753,6 +1088,9 @@ void UIConfigure_DisplayNumber(UI_Element *element, UI_Action *action, int numbe
 }
 
 void UIConfigure_ShrinkFitToParent(UI_Element *element, UI_Action *action){
+	#if DEBUGGING==1
+	printf("UIConfigure_ShrinkFitToParent\n");
+	#endif
 	UIAction_Init(element,action);
 	action->response = UPDATE;
 	action->function = UIAction_ShrinkFitToParent;
@@ -764,12 +1102,18 @@ void UIConfigure_ShrinkFitToParent(UI_Element *element, UI_Action *action){
 }
 
 void UIConfigure_Auto(UI_Element *element, UI_Action *action, enum Response response){
+	#if DEBUGGING==1
+	printf("UIConfigure_Auto\n");
+	#endif
 	UIAction_Init(element,action);
 	action->response = response;
 	action->function = UIAction_Auto;
 }
 
 void UIConfigure_DisplayImage(UI_Element *element, UI_Action *action, SDL_Texture *image){
+	#if DEBUGGING==1
+	printf("UIConfigure_DisplayImage\n");
+	#endif
 	UIAction_Init(element,action);
 	action->response = RENDER;
 	action->function = UIAction_DisplayImage;
@@ -777,6 +1121,9 @@ void UIConfigure_DisplayImage(UI_Element *element, UI_Action *action, SDL_Textur
 }
 
 void UIConfigure_InverseRect(UI_Element *element, UI_Action *action, int from_left, int from_top, int from_right, int from_bot){
+	#if DEBUGGING==1
+	printf("UIConfigure_InverseRect\n");
+	#endif
 	UIAction_Init(element, action);
 	action->response = WINDOW_RESIZE;
 	action->function = UIAction_InverseRect;
@@ -789,6 +1136,9 @@ void UIConfigure_InverseRect(UI_Element *element, UI_Action *action, int from_le
 }
 
 void UIConfigure_PercRect(UI_Element *element, UI_Action *action, float from_left, float from_top, float width, float height){
+	#if DEBUGGING==1
+	printf("UIConfigure_PercRect\n");
+	#endif
 	UIAction_Init(element,action);
 	action->response = WINDOW_RESIZE;
 	action->function = UIAction_PercRect;
@@ -800,16 +1150,89 @@ void UIConfigure_PercRect(UI_Element *element, UI_Action *action, float from_lef
 	action->num_of_floats = 4;
 }
 
+void UIConfigure_AddAiBlock(UI_Element *element, UI_Action *action, UI_Element *target){
+	#if DEBUGGING==1
+	printf("UIConfigure_AddAiBlock\n");
+	#endif
+	UIAction_Init(element,action);
+	action->response = EXTERNAL;
+	action->function = UIAction_AddAiBlock;
+	action->external = target;
+	action->status = 0;
+	action->new_status = 0;
+}
+
+void UIConfigure_ReadAiBlocks(UI_Element *element, UI_Action *action){
+	#if DEBUGGING==1
+	printf("UIConfigure_ReadAiBlocks\n");
+	#endif
+	UIAction_Init(element,action);
+	action->response = AI_RESPONSE;
+	action->function = UIAction_ReadAiBlocks;
+	action->status = 0;
+	action->new_status = 0;
+}
+
+void UIConfigure_SetUpAiBlock(UI_Element *element, UI_Action *action, int num_of_companions, ...){
+	va_list vargs;
+	int i = 0;
+	#if DEBUGGING==1
+	printf("UIConfigure_SetUpAiBlock\n");
+	#endif
+	UIAction_Init(element,action);
+	va_start(vargs,num_of_companions);
+	action->response = AI_RESPONSE;
+	action->function = UIAction_SetUpAiBlock;
+	action->num_of_companions = num_of_companions;
+	action->companions = calloc(num_of_companions, sizeof(UI_Action*));
+	while(i < num_of_companions){
+		action->companions[i] = va_arg(vargs,UI_Action*);
+		i++;
+	}
+	va_end(vargs);
+}
+
+void UIConfigure_DeleteKeyFlagDestroy(UI_Element *element, UI_Action *action){
+	#if DEBUGGING==1
+	printf("UIConfigure_DeleteKeyFlagDestroy\n");
+	#endif
+	UIAction_Init(element,action);
+	action->response = RESPONSE_DELETE;
+	action->function = UIAction_DeleteKeyFlagDestroy;
+}
+
+void UIConfigure_RecallWorkers(UI_Element *element, UI_Action *action){
+	#if DEBUGGING==1
+	printf("UIConfigure_RecallWorkers\n");
+	#endif
+	UIAction_Init(element,action);
+	action->response = GAME_OBJECT_UPDATE;
+	action->function = UIAction_RecallWorkers;
+	action->status = 0;
+	action->new_status = 0;
+}
+
+void UIConfigure_NullifyAI(UI_Element *element, UI_Action *action){
+	#if DEBUGGING==1
+	printf("UIConfigure_NullifyAI\n");
+	#endif
+	UIAction_Init(element,action);
+	action->response = AI_RESPONSE;
+	action->function = UIAction_NullifyAI;
+	action->status = 0;
+	action->new_status = 0;
+}
+
 static void UITrigger_Execute(UI_Action *action){
 	UI_Trigger *trigger = action->triggers;
 	while(trigger!=NULL){
 		if(trigger->action != NULL){
 			if(trigger->status_from == -1 || trigger->action->status == trigger->status_from){
 				if(trigger->status_to == UITRIGGER_PLUSONE){
-					trigger->action->status++;
+					trigger->action->new_status = trigger->action->status+1;
 				}
 				else{
-					trigger->action->status = trigger->status_to;
+					trigger->action->new_status = trigger->status_to;
 				}
 			}
 		}
@@ -819,26 +1242,46 @@ static void UITrigger_Execute(UI_Action *action){
 
 void UIElement_Free(UI_Element *element){
 	int i = 0;
+	UI_Element *root = element;
+	UI_Element *sibling = element->parent;
+	while(root->parent != NULL){
+		root = root->parent;
+	}
+	UIElement_Deparent(element);
+	/* Clean out all references to this element */
+	UIElement_DeExternalise(root,element);
 	while(i < element->num_of_actions){
-	  freeUIAction(&element->actions[i]);
+	  UIAction_Free(&element->actions[i]);
 	  i++;
 	}
 	free(element->actions);
 	free(element);
 }
 
-static void freeUIAction(UI_Action *action){
-	free(action->triggers);
-	if(action->num_of_integers){
-	  action->num_of_integers = 0;
-	  free(action->integers);
+static void UIAction_Free(UI_Action *action){
+	UI_Trigger *movingPointer2;
+	UI_Trigger *movingPointer = action->triggers;
+	int i = 0;
+	
+	while(action->triggers!=NULL){
+		UITrigger_Destroy(action,action->triggers);
 	}
+	
+	while(i < action->num_of_strings){
+		free(action->strings[i]);
+		i++;
+	}
+	free(action->strings);
+	free(action->companions);
+	free(action->integers);
+	free(action->floats);
+	
 	return;
 }
 
 void UIElement_Reparent(UI_Element *element, UI_Element *parent){
 	UI_Element *child = parent->child;
-	int testing = 0;
+	element->sibling_position = 0;
 	if(element->parent != NULL){
 		UIElement_Deparent(element);
 	}
@@ -846,9 +1289,10 @@ void UIElement_Reparent(UI_Element *element, UI_Element *parent){
 		parent->child = element;
 	}
 	else{
+		element->sibling_position++;
 		while(child->sibling != NULL){
+			element->sibling_position++;
 			child = child->sibling;
-			testing++;
 		}
 		child->sibling = element;
 	}
@@ -857,7 +1301,13 @@ void UIElement_Reparent(UI_Element *element, UI_Element *parent){
 
 void UIElement_Deparent(UI_Element *element){
 	UI_Element *parent = element->parent;
-	UI_Element *child = parent->child;
+	UI_Element *child;
+	UI_Element *sibling;
+	int i;
+	if(parent==NULL){
+		return;
+	}
+	child = parent->child;
 	if(child == element){
 		parent->child = element->sibling;
 	}
@@ -870,23 +1320,79 @@ void UIElement_Deparent(UI_Element *element){
 		child = child->sibling;
 		}
 	}
+	sibling = element->parent->child;
+	i = 0;
+	while(sibling != NULL){
+		sibling->sibling_position = i;
+		sibling = sibling->sibling;
+		i++;
+	}
 	element->parent = NULL;
 }
 
-void UIElement_DeExternalise(UI_Element *element){
+static void UIElement_DeExternalise(UI_Element *root, UI_Element *external){
 	/* Cleans all external references in actions to a given element,
 		 preventing segfaults */
-	return;
-}
-
-void UIElement_Execute(UI_Element *element, enum Response response, va_list vargs){
 	int i = 0;
-	while(i < element->num_of_actions){
-		if(element->actions[i].response == response){
-			element->actions[i].function(&element->actions[i],vargs);
+	UI_Trigger *trigger;
+	UI_Trigger *trigger2;
+	while(i < root->num_of_actions){
+		if(root->actions[i].external == external){
+			root->actions[i].external = NULL;
+			trigger = root->actions[i].triggers;
+			while(trigger != NULL){
+				trigger2 = trigger->next;
+				if(trigger->action->element == external){
+					UITrigger_Destroy(&root->actions[i],trigger);
+				}
+				trigger = trigger2;
+			}
 		}
 		i++;
 	}
+	root = root->child;
+	/* Suddenly, recursion */
+	while(root != NULL){
+		UIElement_DeExternalise(root,external);
+		root = root->sibling;
+	}
+}
+
+static void UITrigger_Destroy(UI_Action *action, UI_Trigger *trigger){
+	UI_Trigger *next = trigger->next;
+	UI_Trigger *prev = action->triggers;
+	
+	assert(prev != NULL);
+	
+	if(prev != trigger){
+		while(prev->next != trigger){
+			prev = prev->next;
+		}
+		prev->next = next;
+	}
+	else{
+		action->triggers = next;
+	}
+	free(trigger);
+}
+
+int UIElement_Execute(UI_Element *element, enum Response response, va_list vargs){
+	int i = 0;
+	int ret = 0;
+	int result = 0;
+	while(i < element->num_of_actions){
+		if(element->actions[i].response == response){
+			result = element->actions[i].function(&element->actions[i],vargs);
+			ret = result || ret;
+		}
+		i++;
+	}
+	i = 0;
+	while(i < element->num_of_actions){
+		element->actions[i].status = element->actions[i].new_status;
+		i++;
+	}
+	return ret;
 }
 
 static int isLinked(UI_Element *test, UI_Element *to){
@@ -923,27 +1429,78 @@ void UITrigger_Bind(UI_Action *action, UI_Action *target, int status_from, int s
 	}
 }
 
-void UIRoot_Execute(UIData *uiData, enum Response response, ...){
+void UIRoot_Execute(UIData *uiData, enum Response response, int stopAtFirst, ...){
 	va_list vargs;
-  UI_Element *queue[255] = {NULL};
-  UI_Element *queue_element;
-  UI_Element *queue_element_child;
-  int front = 0, back = 1;
-	va_start(vargs, response);
-  queue[0] = uiData->root;
-  while(front != back){
-    queue_element = queue[front];
-    front = (front + 1) % 255;
-    UIElement_Execute(queue_element,response,vargs);
-    queue_element_child = queue_element->child;
-    while(queue_element_child != NULL){
-      queue[back] = queue_element_child;
-      back = (back + 1) % 255;
-      queue_element_child = queue_element_child->sibling;
-    }
-  }
+	UI_Element *queue[255] = {NULL};
+	UI_Element *queue_element;
+	UI_Element *queue_element_child;
+	int front = 0, back = 1;
+	va_start(vargs, stopAtFirst);
+	queue[0] = uiData->root;
+	int shouldStop;
+	while(front != back){
+		queue_element = queue[front];
+		front = (front + 1) % 255;
+		shouldStop = UIElement_Execute(queue_element,response,vargs);
+		if(shouldStop && stopAtFirst){
+			break;
+		}
+		queue_element_child = queue_element->child;
+		while(queue_element_child != NULL){
+		  queue[back] = queue_element_child;
+		  back = (back + 1) % 255;
+		  queue_element_child = queue_element_child->sibling;
+		}
+	}
 	va_end(vargs);
 }
+
+/* Does a depth based traversal of the tree backwards (i.e. going from the deepest layer to
+   the top layer) */
+void UIRoot_ExecuteUpwards(UIData *uiData, enum Response response, int stopAtFirst, ...){
+	static int guesstimated_queue_length = 2;
+	va_list vargs;
+	UI_Element **queue = calloc(guesstimated_queue_length,sizeof(UI_Element*)); 
+	UI_Element *queue_element;
+	UI_Element *queue_element_child;
+	int front = 0,back = 1;
+	va_start(vargs, stopAtFirst);
+	queue[0] = uiData->root;
+	assert(queue!=NULL);
+	while(queue[front] != NULL && front != back){
+		queue_element = queue[front];
+		front = (front + 1);
+		queue_element_child = queue_element->child;
+		while(queue_element_child != NULL){
+			if(back == guesstimated_queue_length){
+				guesstimated_queue_length = back+1;
+				queue = realloc(queue,guesstimated_queue_length * sizeof(UI_Element*));
+			}
+			queue[back] = queue_element_child;
+			back = (back + 1);
+			queue_element_child = queue_element_child->sibling;
+		}
+	}
+	if(back < guesstimated_queue_length){
+		guesstimated_queue_length = back + 1;
+	}
+	while(back > 0){
+		back--;
+		queue_element = queue[back];
+		/* We have to do our disposal here because doing it in a top down traversal
+		   of the tree would break things */
+		if(response == DISPOSAL && queue_element->destroy){
+			UIElement_Free(queue_element);
+		}
+		else{
+			if(UIElement_Execute(queue_element,response,vargs) && stopAtFirst){
+				break;
+			}
+		}
+	}
+	va_end(vargs);
+	free(queue);
+ }
 
 static void UIAction_Init(UI_Element *element, UI_Action *action){
 	action->response = NONE;
@@ -951,6 +1508,7 @@ static void UIAction_Init(UI_Element *element, UI_Action *action){
 	action->element = element;
 	action->external = NULL;
 	action->status = 1;
+	action->new_status = 1;
 	action->companions = NULL;
 	action->num_of_companions = 0;
 	action->integers = NULL;
@@ -972,24 +1530,52 @@ static int percWindowDimension(int dimension, float perc){
 }
 
 void UIRoot_Destroy(UIData *uiData){
-  UI_Element *queue[255] = {NULL};
-  UI_Element *queue_element;
-  UI_Element *queue_element_child;
-  int front = 0, back = 1;
-  queue[0] = uiData->root;
-  while(front != back){
-    queue_element = queue[front];
-    front = (front + 1) % 255;
-    queue_element_child = queue_element->child;
-    while(queue_element_child != NULL){
-      queue[back] = queue_element_child;
-      back = (back + 1) % 255;
-      queue_element_child = queue_element_child->sibling;
-    }
-    UIElement_Free(queue_element);
-  }
+	static int guesstimated_queue_length = 2;
+	UI_Element **queue = calloc(guesstimated_queue_length,sizeof(UI_Element*)); 
+	UI_Element *queue_element;
+	UI_Element *queue_element_child;
+	int front = 0,back = 1;
+	queue[0] = uiData->root;
+	assert(queue!=NULL);
+	while(queue[front] != NULL && front != back){
+		queue_element = queue[front];
+		front = (front + 1);
+		queue_element_child = queue_element->child;
+		while(queue_element_child != NULL){
+			if(back == guesstimated_queue_length){
+				guesstimated_queue_length = back+1;
+				queue = realloc(queue,guesstimated_queue_length * sizeof(UI_Element*));
+			}
+			queue[back] = queue_element_child;
+			back = (back + 1);
+			queue_element_child = queue_element_child->sibling;
+		}
+	}
+	if(back < guesstimated_queue_length){
+		guesstimated_queue_length = back + 1;
+	}
+	while(back > 0){
+		back--;
+		queue_element = queue[back];
+		UIElement_Free(queue_element);
+	}
+	free(queue);
 }
 
 void UIRoot_Pack(UIData *uiData, GraphicsData *graphicsData){
-	UIRoot_Execute(uiData,WINDOW_RESIZE,graphicsData->window);
+	UIRoot_Execute(uiData,WINDOW_RESIZE,0,graphicsData->window);
+}
+
+static void UIElement_RemoveExposedData(UI_Element *element){
+	/* I'm going to do some hax with void pointers here */
+	int i = 0;
+	free(element->exposed_data_types);
+	while(i < element->exposed_data_count){
+		free(element->exposed_data[i]);
+		i++;
+	}
+	free(element->exposed_data);
+	element->exposed_data_types = NULL;
+	element->exposed_data = NULL;
+	element->exposed_data_count = 0;
 }

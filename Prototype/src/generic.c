@@ -174,6 +174,24 @@ SDL_Rect getRectFromPercRect(SDL_Window *window, float from_left, float from_top
 	return rect;
 }
 
+char *fileToString(FILE *file){
+	/* This string is malloc'd, and needs to be freed */
+	char *s = NULL;
+	int i = 0;
+	int i2 = 0;
+	char c;
+	while((c = fgetc(file)) != EOF){
+		i2++;
+		if(i2 > i){
+			i += FILE_TO_STRING_STEP_SIZE;
+			s = realloc(s,i);
+		}
+		s[i2 - 1] = c;
+	}
+	s[i2] = '\0';
+	return s;
+}
+
 #if DEBUGGING==1
 #undef calloc
 #undef malloc
@@ -181,33 +199,51 @@ SDL_Rect getRectFromPercRect(SDL_Window *window, float from_left, float from_top
 #undef free
 
 void *debug_calloc(int line, char *filename, int itemCount, int itemSize){
-  void *p;
+  char *p;
+  size_t vp;
   printf("callocing @ %s:%d ",filename,line);
-  p = calloc(itemCount, itemSize);
-  printf("getting block %p of size %d\n",p,itemCount*itemSize);
+  fprintf(DEBUGGING_FILE_ALLOC,"callocing @ %s:%d ",filename,line);
+  p = calloc(itemCount,itemSize);
+  vp = p;
+  printf("getting block %p of size %d (%p)\n",vp,itemCount*itemSize,p+itemCount*itemSize*8);
+  fprintf(DEBUGGING_FILE_ALLOC,"getting block %p of size %d (%p)\n",vp,itemCount*itemSize,p+itemCount*itemSize*8);
+  fflush(DEBUGGING_FILE_ALLOC);
   return p;
 }
 
 void *debug_malloc(int line, char *filename, int totalSize){
-  void *p;
-  printf("mallocing @ %s:%d ",filename,line);
+  char *p;
+  size_t vp;
+  printf("mAlLoCiNg @ %s:%d ",filename,line);
+  fprintf(DEBUGGING_FILE_ALLOC,"callocing @ %s:%d ",filename,line);
   p = malloc(totalSize);
-  printf("getting block %p of size %d\n",p,totalSize);
+  vp = p;
+  printf("getting block %p of size %d (%p)\n",p,totalSize,vp+totalSize*8);
+  fprintf(DEBUGGING_FILE_ALLOC,"getting block %p of size %d (%p)\n",p,totalSize,vp+totalSize*8);
+  fflush(DEBUGGING_FILE_ALLOC);
   return p;
 }
 
 
 void *debug_realloc(int line, char *filename, void* oldPointer, int newSize){
-  void *p;
+  char *p;
+  size_t vp;
   printf("reallocing @ %s:%d from %p to ",filename,line,oldPointer);
+  fprintf(DEBUGGING_FILE_ALLOC,"reallocing @ %s:%d from %p to ",filename,line,oldPointer);
   p = realloc(oldPointer,newSize);
-  printf("getting block %p of size %d\n",p,newSize);
+  vp = p;
+  printf("getting block %p of size %d (%p)\n",vp,newSize,p+newSize);
+  fprintf(DEBUGGING_FILE_ALLOC,"getting block %p of size %d (%p)\n",vp,newSize,vp+newSize*8);
+  fflush(DEBUGGING_FILE_ALLOC);
   return p;
 }
 
 void debug_free(int line, char *filename, void* pointer){
-  printf("freeing @ %s:%d pointer %p\n",filename,line,pointer);
+  fprintf(DEBUGGING_FILE_FREE,"freeing @ %s:%d pointer %p\n",filename,line,pointer);
+  fflush(DEBUGGING_FILE_FREE);
+  printf("freeing @ %s:%d pointer %p",filename,line,pointer);
   free(pointer);
+  printf("\n");
 }
 #define calloc(x,y) debug_calloc(__LINE__,__FILE__,x,y)
 #define malloc(x) debug_malloc(__LINE__,__FILE__,x)

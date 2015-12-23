@@ -101,14 +101,18 @@ void runBlockFunctionRootOverWorker(BlockFunctionRoot *blockFunctionRoot,
 int runBlockFunctionOverWorker(BlockFunction *blockFunction,
                                ProgrammableWorker *programmableWorker,
                                GameObjectData *gameObjectData);
-
-
-BlockFunctionRoot generateGenericWorkerOrders(void);
-
-void makeBlockFunctionRootFromFile(BlockFunctionRoot *blockFunctionRoot, FILE *file);
-
+							   
 int getNumberOfTextStoredBlocks(FILE *file, int *maxDescLength);
 
 int countCharsInString(char *string, char countChar);
 
 void runAI(AIData *aiData, GameObjectData *gameObjectData);
+
+AIData initAIData(void);
+
+BlockFunction createAIBlockFunctionFromTokens(BlockFunctionRoot *blockFunctionRoot, int numOfLinesToUse, char *tokensToUse[7]);
+
+BlockFunctionRoot makeBlockFunctionRootFromString(char *str, int numOfBlocks);
+
+blockFunction_WrappedFunction getBlockFunctionByName(char *blockFunctionName);
+void nullifyBlockFunctionRoot(BlockFunctionRoot *root); 

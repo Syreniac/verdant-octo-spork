@@ -6,7 +6,7 @@
 
 
 # These are system independent
-CFLAGS = -pedantic -Wall -Wextra -Wno-unused-variable -Wno-unused-parameter
+CFLAGS = -g -pedantic -Wall -Wextra -Wno-unused-variable -Wno-unused-parameter -std=c99
 
 # File structure variables
 ASSETS_CONTENTS = assets
@@ -28,7 +28,7 @@ IMAGE_FLAGS = -I$(DEPENDENCY_FOLDER)/SDL_image/include -L$(DEPENDENCY_FOLDER)/SD
 TTF_FLAGS = -I$(DEPENDENCY_FOLDER)/SDL_ttf/include -L$(DEPENDENCY_FOLDER)/SDL_ttf/lib
 MIXER_FLAGS = -I$(DEPENDENCY_FOLDER)/SDL_mixer/include -L$(DEPENDENCY_FOLDER)/SDL_mixer/lib
 
-LFLAGS =  $(SDL_FLAGS) $(IMAGE_FLAGS) $(TTF_FLAGS) $(MIXER_FLAGS) -O3 -Wall -Wextra -pedantic -std=c99 -lmingw32 -lSDL2main -lSDL2 -lSDL_image -lSDL_mixer -lSDL_ttf -lm
+LFLAGS =  $(SDL_FLAGS) $(IMAGE_FLAGS) $(TTF_FLAGS) $(MIXER_FLAGS) -lmingw32 -lSDL2main -lSDL2 -lSDL_image -lSDL_mixer -lSDL_ttf -lm
 DELETE = del
 DELETE_RECURSIVE = del /s
 DLL_COPY_COMMAND = cp $(DLL_LOCATION) $(BIN)

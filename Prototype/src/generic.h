@@ -18,6 +18,9 @@
 #define malloc(x) debug_malloc(__LINE__,__FILE__,x)
 #define realloc(x,y) debug_realloc(__LINE__,__FILE__,x,y)
 #define free(x) debug_free(__LINE__,__FILE__,x)
+
+FILE *DEBUGGING_FILE_ALLOC;
+FILE *DEBUGGING_FILE_FREE;
 #endif
 #define VERBOSE 1
 
@@ -78,7 +81,7 @@ each call to updateProgrammableWorker*/
 #define DEFAULT_SPAWNDELAY 100*10
 #define DEFAULT_SPAWNRADIUS 200.0
 #define DEFAULT_MAXNODECOUNT 10
-#define TICKSPERWEATHER 7500
+#define TICKSPERWEATHER 7500000
 #define FRAME_TIME 20
 
 #define NUM_OF_KEYS 30
@@ -89,6 +92,8 @@ each call to updateProgrammableWorker*/
 #define RADIANSTODEGREES 57.2958
 
 #define SDL_InvRect SDL_Rect
+
+#define FILE_TO_STRING_STEP_SIZE 10
 
 typedef enum personGraphic {WITH_ICE_CREAM_STRIDE1, WITH_ICE_CREAM_STRIDE2} personGraphic;
 
@@ -114,3 +119,4 @@ double getAngleBetweenRects(SDL_Rect *rectA, SDL_Rect *rectB);
 SDL_Point getCenterOfRect(SDL_Rect rect);
 SDL_Rect getRectFromInvRect(SDL_Window *window, int from_left, int from_top, int from_right, int from_bot);
 SDL_Rect getRectFromPercRect(SDL_Window *window, float from_left, float from_right, float from_top, float from_bot);
+char *fileToString(FILE *file);

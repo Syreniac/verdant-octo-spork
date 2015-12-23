@@ -12,13 +12,14 @@ enum Keybindings {ARROW_DOWN,
 				  ARROW_LEFT,
 				  ARROW_RIGHT,
 				  SPACE,
+				  DELETE,
 				  MAX_KEYS};
 
 typedef enum Keybindings Keybindings;
 
 struct ControlsData{
 	int keys[MAX_KEYS];
-  int mouseButtons[NUM_OF_MOUSE_BUTTONS];
+	int mouseButtons[NUM_OF_MOUSE_BUTTONS];
 };
 typedef struct ControlsData ControlsData;
 
