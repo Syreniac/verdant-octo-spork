@@ -1,0 +1,10 @@
+IfWorkerIdle
+	primary = 2
+	secondary = 3
+SetWorkerHeadingRandomly
+IfWorkerOutOfBounds
+	primary = 4
+	secondary = 5
+WorkerReturnToHive
+IfWorkerHasCargo
+	primary = 4
