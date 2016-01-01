@@ -105,7 +105,7 @@ int blockFunction_IfWorkerNearHive(BlockFunctionArgs *arguments, ProgrammableWor
     return(1);
   }
   return(2);
-	
+
 }
 
 int blockFunction_SetWorkerHeadingRandomly(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
@@ -199,8 +199,16 @@ int blockFunction_IfNodeFound(BlockFunctionArgs *arguments, ProgrammableWorker *
 int blockFunction_HeadToFoundNode(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
   if(programmableWorker->brain.foundNode != NULL){
     programmableWorker->heading = getAngleBetweenRects(&programmableWorker->brain.foundNode->rect,&programmableWorker->rect);
+    programmableWorker->status = LEAVING;
   }
   return 1;
+}
+
+int blockFunction_HasRememberedLocation(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
+  if(programmableWorker->brain.is_point_remembered){
+    return 1;
+  }
+  return 2;
 }
 
 void runBlockFunctionRootOverWorker(BlockFunctionRoot *blockFunctionRoot, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
@@ -238,7 +246,7 @@ blockFunction_WrappedFunction getBlockFunctionByName(char *blockFunctionName){
   if(strcmp(blockFunctionName,"IfWorkerStatusEqual") == 0){
     return &blockFunction_IfWorkerStatusEqual;
   }
-  if(strcmp(blockFunctionName,"IfWorkerOutOfBounds") == 0){
+  if(strcmp(blockFunctionName,"IfWorkerOutsideBounds") == 0){
     return &blockFunction_IfWorkerOutsideOfBounds;
   }
   if(strcmp(blockFunctionName,"IfWorkerWithinXOfHive") == 0){
@@ -258,6 +266,9 @@ blockFunction_WrappedFunction getBlockFunctionByName(char *blockFunctionName){
   }
   if(strcmp(blockFunctionName,"ForgetRememberedLocation") == 0){
     return &blockFunction_ForgetRememberedLocation;
+  }
+  if(strcmp(blockFunctionName,"HasRememberedLocation") == 0){
+    return &blockFunction_HasRememberedLocation;
   }
   if(strcmp(blockFunctionName,"GoToRememberedLocation") == 0){
     return &blockFunction_GoToRememberedLocation;
@@ -359,7 +370,7 @@ BlockFunctionRoot makeBlockFunctionRootFromString(char *str, int numOfBlocks){
 	BlockFunctionRoot blockFunctionRoot;
 	blockFunctionRoot.blockFunctions = calloc(numOfBlocks,sizeof(BlockFunction));
 	blockFunctionRoot.numOfBlockFunctions = 0;
-	
+
 	tok = strtok(str,"\n");
 	while(tok != NULL){
 		i++;
@@ -406,7 +417,7 @@ BlockFunction createAIBlockFunctionFromTokens(BlockFunctionRoot *blockFunctionRo
 	blockFunction.arguments.numOfChars = 0;
 	blockFunction.arguments.floats = NULL;
 	blockFunction.arguments.numOfFloats = 0;
-	
+
 	while(i < numOfLinesToUse){
 		if(tokensToUse[i][0] != '\t'){
 			strcpy(blockFunction.name,tokensToUse[i]);
@@ -488,12 +499,59 @@ void runAI(AIData *aiData, GameObjectData *gameObjectData){
   }
 }
 
+static void makeAIBlockTemplate(AIData *aiData, char name[50], int numOfArguments, BlockFunctionArgumentType *arguments){
+  BlockFunctionTemplate *template = malloc(sizeof(BlockFunctionTemplate));
+  BlockFunctionTemplate *previous = aiData->templates;
+  int i = 0;
+  strcpy(template->name,name);
+  if(numOfArguments != 0){
+    template->arguments = malloc(sizeof(BlockFunctionArgumentType) * numOfArguments);
+    template->numOfArguments = numOfArguments;
+    while(i < numOfArguments){
+      template->arguments[i] = arguments[i];
+      i++;
+    }
+  }
+  else{
+    template->arguments = NULL;
+    template->numOfArguments = 0;
+  }
+  template->next = NULL;
+  printf("prepared block template\n");
+  if(previous == NULL){
+    aiData->templates = template;
+  }
+  else{
+    while(previous->next != NULL){
+      previous = previous->next;
+    }
+    previous->next = template;
+  }
+}
+
 AIData initAIData(void){
 	AIData aiData;
 	FILE *file;
+  BlockFunctionArgumentType arguments[2] = {BF_PRIMARY,BF_SECONDARY};
 	file = fopenAndVerify("GenericWorkerAI.txt","r");
 	aiData.blockFunctionRoots = calloc(1,sizeof(BlockFunctionRoot));
 	aiData.blockFunctionRoots[0] = makeBlockFunctionRootFromFile(file);
+  aiData.templates = NULL;
 	fclose(file);
+  makeAIBlockTemplate(&aiData,"Void",1,arguments);
+  makeAIBlockTemplate(&aiData,"IfWorkerIdle",2,arguments);
+  makeAIBlockTemplate(&aiData,"IfWorkerReturning",2,arguments);
+  makeAIBlockTemplate(&aiData,"IfWorkerHasCargo",2,arguments);
+  makeAIBlockTemplate(&aiData,"IfWorkerOutsideBounds",2,arguments);
+  makeAIBlockTemplate(&aiData,"IfWorkerNearHive",2,arguments);
+  makeAIBlockTemplate(&aiData,"SetWorkerHeadingRandomly",1,arguments);
+  makeAIBlockTemplate(&aiData,"WorkerReturnToHive",1,arguments);
+  makeAIBlockTemplate(&aiData,"RememberCurrentLocation",1,arguments);
+  makeAIBlockTemplate(&aiData,"GoToRememberedLocation",2,arguments);
+  makeAIBlockTemplate(&aiData,"ForgetRememberedLocation",1,arguments);
+  makeAIBlockTemplate(&aiData,"IfNodeFound",2,arguments);
+  makeAIBlockTemplate(&aiData,"HeadToFoundNode",1,arguments);
+  makeAIBlockTemplate(&aiData,"HasRememberedLocation",2,arguments);
+
 	return aiData;
 }

@@ -1,9 +1,21 @@
 #include "world_generation.h"
 
+
+enum BlockFunctionArgumentType{
+  BF_WORKER_STATUS,
+  BF_DISTANCE,
+  BF_CARGO_QUANTITY,
+  BF_PRIMARY,
+  BF_SECONDARY,
+};
+
 typedef struct BlockFunctionArgs BlockFunctionArgs;
 typedef struct BlockFunction BlockFunction;
 typedef struct BlockFunctionRoot BlockFunctionRoot;
 typedef struct AIData AIData;
+typedef struct BlockFunctionTemplate BlockFunctionTemplate;
+typedef enum BlockFunctionArgumentType BlockFunctionArgumentType;
+
 
 typedef int(*blockFunction_WrappedFunction)(BlockFunctionArgs *arguments,
                                             ProgrammableWorker *programmableWorker,
@@ -32,15 +44,39 @@ struct BlockFunctionRoot{
   int numOfBlockFunctions;
 };
 
+struct BlockFunctionTemplate{
+  BlockFunctionTemplate *next;
+  char name[50];
+  int numOfArguments;
+  BlockFunctionArgumentType *arguments;
+};
+
 struct AIData{
   BlockFunctionRoot *blockFunctionRoots;
+  BlockFunctionTemplate *templates;
 };
 
 FILE *fopenAndVerify(char *file_name, char *permission);
 
+int blockFunction_Void(BlockFunctionArgs *arguments,
+                       ProgrammableWorker *programmableWorker,
+                       GameObjectData *gameObjectData);
+
+int blockFunction_IfWorkerIdle(BlockFunctionArgs *arguments,
+                               ProgrammableWorker *programmableWorker,
+                               GameObjectData *gameObjectData);
+
+int blockFunction_IfWorkerReturning(BlockFunctionArgs *arguments,
+                                    ProgrammableWorker *programmableWorker,
+                                    GameObjectData *gameObjectData);
+
+int blockFunction_IfWorkerHasCargo(BlockFunctionArgs *arguments,
+                                   ProgrammableWorker *programmableWorker,
+                                   GameObjectData *gameObjectData);
+
 int blockFunction_Print(BlockFunctionArgs *arguments,
-                                            ProgrammableWorker *programmableWorker,
-                                            GameObjectData *gameObjectData);
+                        ProgrammableWorker *programmableWorker,
+                        GameObjectData *gameObjectData);
 
 int blockFunction_IfWorkerCargoGreaterThan(BlockFunctionArgs *arguments,
                                            ProgrammableWorker *programmableWorker,
@@ -54,9 +90,9 @@ int blockFunction_IfWorkerOutsideOfBounds(BlockFunctionArgs *arguments,
                                           ProgrammableWorker *programmableWorker,
                                           GameObjectData *gameObjectData);
 
-int blockFunction_IfWorkerWithinDistanceOfHive(BlockFunctionArgs *arguments,
-                                               ProgrammableWorker *programmableWorker,
-                                               GameObjectData *gameObjectData);
+int blockFunction_IfWorkerNearHive(BlockFunctionArgs *arguments,
+                                   ProgrammableWorker *programmableWorker,
+                                   GameObjectData *gameObjectData);
 
 int blockFunction_SetWorkerHeadingRandomly(BlockFunctionArgs *arguments,
                                            ProgrammableWorker *programmableWorker,
@@ -94,6 +130,10 @@ int blockFunction_HeadToFoundNode(BlockFunctionArgs *arguments,
                                   ProgrammableWorker *programmableWorker,
                                   GameObjectData *gameObjectData);
 
+int blockFunction_HasRememberedLocation(BlockFunctionArgs *arguments,
+                                        ProgrammableWorker *programmableWorker,
+                                        GameObjectData *gameObjectData);
+
 void runBlockFunctionRootOverWorker(BlockFunctionRoot *blockFunctionRoot,
                                    ProgrammableWorker *programmableWorker,
                                    GameObjectData *gameObjectData);
@@ -101,7 +141,7 @@ void runBlockFunctionRootOverWorker(BlockFunctionRoot *blockFunctionRoot,
 int runBlockFunctionOverWorker(BlockFunction *blockFunction,
                                ProgrammableWorker *programmableWorker,
                                GameObjectData *gameObjectData);
-							   
+
 int getNumberOfTextStoredBlocks(FILE *file, int *maxDescLength);
 
 int countCharsInString(char *string, char countChar);
@@ -115,4 +155,4 @@ BlockFunction createAIBlockFunctionFromTokens(BlockFunctionRoot *blockFunctionRo
 BlockFunctionRoot makeBlockFunctionRootFromString(char *str, int numOfBlocks);
 
 blockFunction_WrappedFunction getBlockFunctionByName(char *blockFunctionName);
-void nullifyBlockFunctionRoot(BlockFunctionRoot *root); 
+void nullifyBlockFunctionRoot(BlockFunctionRoot *root);

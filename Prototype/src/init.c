@@ -45,7 +45,7 @@ InitData initialise(void){
   TTF_Init();
   initData.graphicsData.fonts[0] = TTF_OpenFont("font/Aclonica.ttf",16);
   initData.graphicsData.fonts[1] = TTF_OpenFont("font/Aclonica.ttf",12);
-	
+
 	loadMusic("sound/music01.wav" , 0, &initData.audioData);
 	loadMusic("sound/music02.wav" , 1, &initData.audioData);
 	loadMusic("sound/music03.wav" , 1, &initData.audioData);
@@ -61,7 +61,7 @@ void uninitialise(void){
 }
 
 void audioSystem(AudioData *AudioSettings){
-	
+
 	AudioSettings->audio_rate = 44100;
 	AudioSettings->audio_format = AUDIO_S16SYS;
 	AudioSettings->audio_channels = 2;
@@ -107,7 +107,7 @@ int game_welcome_page(GraphicsData graphicsData, AudioData audioData){
 
    initData.uiData.root = UIElement_Create(0,0,win_x,win_y,2);
    UIConfigure_DisplayImage(initData.uiData.root,&initData.uiData.root->actions[0],graphicsData.mainMenuImage);
-   UIConfigure_InverseRect(initData.uiData.root,&initData.uiData.root->actions[1],0,0,0,0);
+   UIConfigure_InverseRect(initData.uiData.root,&initData.uiData.root->actions[1],0,0,0,0,0);
 
    element = UIElement_CreateByPercentage(0.56f,0.7f,0.35f,0.1f,win_x,win_y,4);
    UIConfigure_Counter(element,&element->actions[0]);
@@ -115,7 +115,7 @@ int game_welcome_page(GraphicsData graphicsData, AudioData audioData){
        UITrigger_Bind(&element->actions[1],&element->actions[0],-1,UITRIGGER_PLUSONE);
    UIConfigure_FillRect(element,&element->actions[2],255,255,255);
    UIConfigure_PercRect(element,&element->actions[3],0.56f,0.7f,0.35f,0.1f);
-   
+
    UIElement_Reparent(element,initData.uiData.root);
 
     /*element = UIElement_Create((win_x *3)/4 - 100, (win_y * 3)/4, 150, 50, 1);
@@ -124,12 +124,12 @@ int game_welcome_page(GraphicsData graphicsData, AudioData audioData){
 
     element2 = UIElement_Create((win_x - 30), win_y - 30, 30, 30, 2);
     UIConfigure_FillRect(element2, &element2->actions[0],228,240,3);
-	UIConfigure_InverseRect(element2, &element2->actions[1],-30,-30,30,30);
+	UIConfigure_InverseRect(element2, &element2->actions[1],-30,-30,30,30,0);
     UIElement_Reparent(element2,initData.uiData.root);
 	UIRoot_Pack(&initData.uiData,&initData.graphicsData);
 
-   playMusic(&initData.audioData,0);   
-   
+   playMusic(&initData.audioData,0);
+
    while(menuRunning){
 
       //UIRoot_Execute(&initData.uiData,UPDATE,0);
@@ -162,7 +162,7 @@ int game_welcome_page(GraphicsData graphicsData, AudioData audioData){
 		}
       menuRunning = (!initData.uiData.root->child->actions[0].status);
    }
-   
+
    UIRoot_Destroy(&initData.uiData);
 
    fadeOutMusic(&initData.audioData);

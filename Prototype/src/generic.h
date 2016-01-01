@@ -69,8 +69,8 @@ each call to updateProgrammableWorker*/
 #define STRIDE_FREQUENCY 0.75
 
 #define SIZE_OF_TREE 200
-#define NUMBER_OF_TREES 50
-#define NUMBER_OF_FLOWER_PATCHES 50
+#define NUMBER_OF_TREES 25
+#define NUMBER_OF_FLOWER_PATCHES 5
 
 
 #define X_SIZE_OF_WORKER 40
@@ -78,8 +78,8 @@ each call to updateProgrammableWorker*/
 #define WORKER_SPEED 0.3
 
 #define DEFAULT_RESOURCEUNITS 100
-#define DEFAULT_SPAWNDELAY 100*10
-#define DEFAULT_SPAWNRADIUS 200.0
+#define DEFAULT_SPAWNDELAY 1000*10
+#define DEFAULT_SPAWNRADIUS 100.0
 #define DEFAULT_MAXNODECOUNT 10
 #define TICKSPERWEATHER 7500000
 #define FRAME_TIME 20
@@ -90,8 +90,6 @@ each call to updateProgrammableWorker*/
 #define PI 3.14159
 #define DEGREESINCIRCLE 360.0
 #define RADIANSTODEGREES 57.2958
-
-#define SDL_InvRect SDL_Rect
 
 #define FILE_TO_STRING_STEP_SIZE 10
 
@@ -120,3 +118,5 @@ SDL_Point getCenterOfRect(SDL_Rect rect);
 SDL_Rect getRectFromInvRect(SDL_Window *window, int from_left, int from_top, int from_right, int from_bot);
 SDL_Rect getRectFromPercRect(SDL_Window *window, float from_left, float from_right, float from_top, float from_bot);
 char *fileToString(FILE *file);
+SDL_Point getPointFromInvPoint(SDL_Window *window, int x, int y);
+SDL_Point getPointFromPerc(SDL_Window *window, float x, float y);

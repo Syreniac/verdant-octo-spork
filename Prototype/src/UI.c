@@ -50,13 +50,13 @@ UI_Element *makeStartBlock(int x_offset, int y_offset, UI_Element *parent){
 	UIConfigure_ShrinkFitToParent(element, &element->actions[1]);
 	UIConfigure_DisplayString(element, &element->actions[2],"START",0);
 	UIConfigure_RenderLine(element, &element->actions[3],BR_CORNER,NULL);
-	
+
 	UIConfigure_LeftClickRect(element, &element->actions[4]);
 		UITrigger_Bind(&element->actions[4],&element->actions[3],-1,1);
 		UITrigger_Bind(&element->actions[4],&element->actions[4],1,0);
 		UITrigger_Bind(&element->actions[4],&element->actions[5],0,1);
 		UITrigger_Bind(&element->actions[4],&element->actions[6],0,1);
-		
+
 	UIConfigure_LeftReleaseAnywhere(element, &element->actions[5]);
 		element->actions[5].status = 0;
 		element->actions[5].new_status = 0;
@@ -65,7 +65,7 @@ UI_Element *makeStartBlock(int x_offset, int y_offset, UI_Element *parent){
 		UITrigger_Bind(&element->actions[5],&element->actions[7],0,1);
 		UITrigger_Bind(&element->actions[5],&element->actions[6],0,1);
 		UITrigger_Bind(&element->actions[5],&element->actions[5],1,0);
-		
+
 	UIConfigure_StoreMousePosition(element, &element->actions[6],2,&element->actions[3],&element->actions[7]);
 		element->actions[6].status = 0;
 		element->actions[6].new_status = 0;
@@ -79,7 +79,7 @@ UI_Element *makeStartBlock(int x_offset, int y_offset, UI_Element *parent){
 
 UI_Element *makeAIResetButton(int x_offset, int y_offset, UI_Element *parent){
 	UI_Element *element;
-	element = UIElement_Create(x_offset,y_offset,200,50,5);
+	element = UIElement_Create(x_offset,y_offset,200,50,6);
 	UIConfigure_FillRect(element,&element->actions[0],333,000,150);
 	UIConfigure_ShrinkFitToParent(element,&element->actions[1]);
 	UIConfigure_LeftClickRect(element,&element->actions[2]);
@@ -87,6 +87,51 @@ UI_Element *makeAIResetButton(int x_offset, int y_offset, UI_Element *parent){
 		UITrigger_Bind(&element->actions[2],&element->actions[4],0,1);
 	UIConfigure_NullifyAI(element,&element->actions[3]);
 	UIConfigure_RecallWorkers(element,&element->actions[4]);
+	UIConfigure_PercPosition(element,&element->actions[5],1.0,0.0,x_offset,y_offset,1,&element->actions[1]);
+	UIElement_Reparent(element,parent);
+	return element;
+}
+
+UI_Element *makeAITemplateScrollList(int x_offset, int y_offset, AIData *aiData, UI_Element *parent, UI_Element *blockHolder){
+	UI_Element *element;
+	UI_Element *element2;
+	BlockFunctionTemplate *template = aiData->templates;
+	int y_offset2 = 0;
+	/* Set up the main panel */
+	element = UIElement_Create(x_offset, y_offset, 220, 360,5);
+	UIConfigure_FillRect(element,&element->actions[0],222,222,222);
+	UIConfigure_ShrinkFitToParent(element,&element->actions[1]);
+	/* Set up the slider bar */
+		element2 = UIElement_Create(x_offset+200,y_offset,20,20,6);
+		UIConfigure_FillRect(element2,&element2->actions[0],77,77,77);
+		UIConfigure_ShrinkFitToParent(element2,&element2->actions[1]);
+		UIConfigure_DraggableVerticalOverride(element2,&element2->actions[2],1,&element2->actions[1]);
+		UIConfigure_LeftClickRect(element2,&element2->actions[3]);
+			UITrigger_Bind(&element2->actions[3],&element2->actions[2],0,1);
+			UITrigger_Bind(&element2->actions[3],&element2->actions[4],0,1);
+		UIConfigure_LeftReleaseAnywhere(element2,&element2->actions[4]);
+			UITrigger_Bind(&element2->actions[4],&element2->actions[2],1,0);
+			UITrigger_Bind(&element2->actions[4],&element2->actions[4],1,0);
+			UIElement_Reparent(element2,element);
+		UIConfigure_PercPositionV(element2,&element2->actions[5],1.0,0.0,-x_offset+200,y_offset,1,&element2->actions[1]);
+		/* Set up the main panel again */
+	UIConfigure_GetDifferenceInChildYOffset(element,&element->actions[2],0.0,y_offset,element2,1,&element->actions[3]);
+	/* Set up the options */
+	while(template!=NULL){
+		element2 = UIElement_Create(x_offset, y_offset + y_offset2, 200,50,6);
+		UIConfigure_FillRect(element2,&element2->actions[0],111,111,111);
+		UIConfigure_ShrinkFitToParentWithYShift(element2,&element2->actions[1],&element->actions[3]);
+		UIConfigure_DisplayString(element2,&element2->actions[2],template->name,1);
+		UIConfigure_LeftClickRect(element2,&element2->actions[3]);
+			UITrigger_Bind(&element2->actions[3],&element2->actions[4],-1,1);
+		UIConfigure_AddAiBlock(element2,&element2->actions[4],template,blockHolder);
+		UIConfigure_PercPosition(element2,&element2->actions[5],1.0,0.0,-x_offset,y_offset+y_offset2,1,&element2->actions[1]);
+		UIElement_Reparent(element2,element);
+		template = template->next;
+		y_offset2 += 60;
+	}
+	UIConfigure_CalculateScrollListOffset(element,&element->actions[3],y_offset2+60);
+	UIConfigure_PercOffsetRect(element,&element->actions[4],1.0,0.0,1.0,1.0,-x_offset,y_offset,-50,-50,1,&element->actions[1]);
 	UIElement_Reparent(element,parent);
 	return element;
 }
@@ -106,7 +151,7 @@ UI_Element *makeAIBlock(int x_offset, int y_offset, char *aiString, UI_Element *
 		UITrigger_Bind(&element2->actions[3],&element2->actions[2],0,1);
 	UIConfigure_DraggableRectOverride(element2, &element2->actions[4],1,&element2->actions[1]);
 	UIConfigure_DisplayString(element2, &element2->actions[5],aiString,1);
-	
+
 	/* Line 1 */
 	UIConfigure_RenderLine(element2, &element2->actions[6],BL_CORNER,NULL);
 	UIConfigure_LeftClickRect(element2, &element2->actions[7]);
@@ -166,10 +211,10 @@ UI_Element *makeAIBlock(int x_offset, int y_offset, char *aiString, UI_Element *
 		UITrigger_Bind(&element2->actions[16],&element2->actions[7],0,1);
 		UITrigger_Bind(&element2->actions[16],&element2->actions[16],1,0);
 		UITrigger_Bind(&element2->actions[16],&element2->actions[18],0,1);
-		
+
 	UIConfigure_DeleteKeyFlagDestroy(element2, &element2->actions[17]);
 	UIConfigure_SetUpAiBlock(element2,&element2->actions[18],3,&element2->actions[5],&element2->actions[6],&element2->actions[11]);
-		
+
 	UIElement_Reparent(element2,parent);
 	return element2;
 }
@@ -211,13 +256,214 @@ UI_Element *UIElement_Create(int x, int y, int w, int h, int num_of_actions){
 		   element->actions = malloc(sizeof(UI_Action)*num_of_actions);
 		   element->num_of_actions = num_of_actions;
 	   }
-	   element->parent = NULL; 
+	   element->parent = NULL;
 	   element->child = NULL;
 	   element->sibling = NULL;
 	   element->exposed_data_types = NULL;
 	   element->exposed_data = NULL;
 	   element->exposed_data_count = 0;
 	   return element;
+}
+
+int UIAction_PercOffsetRect(UI_Action *action, va_list copy_from){
+		va_list vargs;
+		SDL_Event *event;
+		SDL_Point point;
+		SDL_Point point2;
+		int i = 0;
+		va_copy(vargs, copy_from);
+		event = va_arg(vargs,SDL_Event*);
+		va_end(vargs);
+		if(action->status == 1){
+			point = getPointFromPerc(SDL_GetWindowFromID(event->window.windowID),
+													                             action->floats[0],
+													                             action->floats[1]);
+			point2 = getPointFromPerc(SDL_GetWindowFromID(event->window.windowID),
+		                            action->floats[2],
+															  action->floats[3]);
+			action->element->rect.x = point.x + action->integers[0];
+			action->element->rect.y = point.y + action->integers[1];
+			action->element->rect.w = point2.x + action->integers[2] - point.x - action->integers[0];
+			action->element->rect.h = point2.y + action->integers[3] - point.y - action->integers[1];
+			while(i < action->num_of_companions){
+				action->companions[i]->integers[0] = point.x + action->integers[0];
+				action->companions[i]->integers[1] = point.y + action->integers[1];
+				action->companions[i]->integers[2] = point2.x + action->integers[2] - point.x - action->integers[0];
+				action->companions[i]->integers[3] = point2.y + action->integers[3] - point.y - action->integers[1];
+				i++;
+			}
+			return 1;
+		}
+		return 0;
+
+}
+
+int UIAction_PercPositionV(UI_Action *action, va_list copy_from){
+		va_list vargs;
+		SDL_Event *event;
+		SDL_Point point;
+		int i = 0;
+		va_copy(vargs, copy_from);
+		event = va_arg(vargs,SDL_Event*);
+		va_end(vargs);
+		if(action->status == 1){
+			point = getPointFromPerc(SDL_GetWindowFromID(event->window.windowID),
+													                             action->floats[0],
+													                             action->floats[1]);
+			action->element->rect.x = point.x + action->integers[0];
+			action->element->rect.y = point.y + action->integers[1];
+			while(i < action->num_of_companions){
+				action->companions[i]->integers[0] = point.x + action->integers[0];
+				action->companions[i]->integers[1] = point.y + action->integers[1];
+				i++;
+			}
+			return 1;
+		}
+		return 0;
+}
+
+int UIAction_PercPosition(UI_Action *action, va_list copy_from){
+		va_list vargs;
+		SDL_Event *event;
+		SDL_Point point;
+		int i = 0;
+		va_copy(vargs, copy_from);
+		event = va_arg(vargs,SDL_Event*);
+		va_end(vargs);
+		if(action->status == 1){
+			point = getPointFromPerc(SDL_GetWindowFromID(event->window.windowID),
+													                             action->floats[0],
+													                             action->floats[1]);
+			action->element->rect.x = point.x + action->integers[0];
+			action->element->rect.y = point.y + action->integers[1];
+			while(i < action->num_of_companions){
+				action->companions[i]->integers[0] = point.x + action->integers[0];
+				action->companions[i]->integers[1] = point.y + action->integers[1];
+				i++;
+			}
+			return 1;
+		}
+		return 0;
+}
+
+int UIAction_InversePosition(UI_Action *action, va_list copy_from){
+	va_list vargs;
+	SDL_Event *event;
+	SDL_Point point;
+	va_copy(vargs, copy_from);
+	event = va_arg(vargs,SDL_Event*);
+	va_end(vargs);
+	if(action->status == 1){
+		point = getPointFromInvPoint(SDL_GetWindowFromID(event->window.windowID),
+												                             action->integers[0],
+												                             action->integers[1]);
+		action->element->rect.x = point.x;
+		action->element->rect.y = point.y;
+		return 1;
+	}
+	return 0;
+}
+
+int UIAction_CalculateScrollListOffset(UI_Action *action, va_list copy_from){
+	if(action->status == 1){
+		if(action->integers[1] <= action->element->rect.h){
+			action->integers[0] = 0;
+			return 1;
+		}
+		action->integers[0] = -(float)((float)action->integers[0]/(float)action->element->rect.h) * (action->integers[1] - action->element->rect.h);
+		return 1;
+	}
+	return 0;
+}
+
+int UIAction_ShrinkFitToParentWithYShift(UI_Action *action, va_list copy_from){
+	SDL_Rect temp_rect;
+	SDL_Rect *parent_rect = &action->element->parent->rect;
+	if(action->status == 1){
+			temp_rect.x = action->integers[0];
+			temp_rect.y = action->integers[1] + action->companions[0]->integers[0];
+			temp_rect.w = action->integers[2];
+			temp_rect.h = action->integers[3];
+			/* returns 1 if the rectangle is visible otherwise returns 0 */
+			if(!testRectIntersection(temp_rect,*parent_rect)){
+				/* It's outside of the limit, make it 0 */
+				temp_rect.w = 0;
+				temp_rect.h = 0;
+			}
+			else{
+				if(temp_rect.x < parent_rect->x){
+					temp_rect.x = parent_rect->x;
+				}
+				if(temp_rect.x + temp_rect.w > parent_rect->x + parent_rect->w){
+					temp_rect.w = (parent_rect->x + parent_rect->w) - temp_rect.x;
+				}
+
+				if(temp_rect.y < parent_rect->y){
+					temp_rect.h -= parent_rect->y - temp_rect.y;
+					temp_rect.y = parent_rect->y;
+				}
+				else if(temp_rect.y + temp_rect.h > parent_rect->y + parent_rect->h){
+					temp_rect.h -= temp_rect.y + temp_rect.h - parent_rect->y - parent_rect->h;
+				}
+			}
+			action->element->rect = temp_rect;
+			return 1;
+	}
+	return 0;
+}
+
+int UIAction_GetDifferenceInChildYOffset(UI_Action *action, va_list copy_from){
+	va_list vargs;
+	GraphicsData *graphicsData;
+	int y,i=0,win_x,win_y,base_offset;
+	if(action->status == 1 && action->external != NULL){
+		va_copy(vargs,copy_from);
+		graphicsData = va_arg(vargs,GraphicsData*);
+		SDL_GetWindowSize(graphicsData->window,&win_x,&win_y);
+
+		base_offset = (int)(win_y * action->floats[0]) + action->integers[0];
+
+
+		y = action->external->rect.y - base_offset;
+		action->integers[1] = -y;
+		while(i < action->num_of_companions){
+			action->companions[i]->integers[0] = y;
+			i++;
+		}
+		va_end(vargs);
+		return 1;
+	}
+	return 0;
+}
+
+int UIAction_DraggableVerticalOverride(UI_Action *action, va_list copy_from){
+	SDL_Event *event;
+	int x,y,i=0;
+	va_list vargs;
+	va_copy(vargs,copy_from);
+	event = va_arg(vargs,SDL_Event*);
+	va_end(vargs);
+
+	/* UIACTION_INTS is the status, 0 = rooted, 1 = grabbed */
+
+	if(action->status == 1){
+		y = event->motion.y;
+
+		if(y < action->element->parent->rect.y){
+			y = action->element->parent->rect.y;
+		}
+		else if(y + action->element->rect.h > action->element->parent->rect.y + action->element->parent->rect.h){
+			y = action->element->parent->rect.y + action->element->parent->rect.h - action->element->rect.h;
+		}
+
+	  action->element->rect.y = y;
+		while(i < action->num_of_companions){
+			action->companions[i]->integers[1] = y;
+			i++;
+		}
+		return 1;
+	}
+	return 0;
 }
 
 int UIAction_NullifyAI(UI_Action *action, va_list copy_from){
@@ -252,7 +498,7 @@ int UIAction_RecallWorkers(UI_Action *action, va_list copy_from){
 		action->new_status = 0;
 		return 1;
 	}
-	return 0;	
+	return 0;
 }
 
 int UIAction_ReadAiBlocks(UI_Action *action, va_list copy_from){
@@ -279,12 +525,6 @@ int UIAction_ReadAiBlocks(UI_Action *action, va_list copy_from){
 			childElement = childElement->sibling;
 		}
 		aiData->blockFunctionRoots[0] = makeBlockFunctionRootFromString(workingSpace,childCount);
-		/*int i = 0;
-		while(i < aiData->blockFunctionRoots[0].numOfBlockFunctions){
-			printf("%s\n",aiData->blockFunctionRoots[0].blockFunctions[i].name);
-			printf("%p\n",&aiData->blockFunctionRoots[0].blockFunctions[i]);
-			i++;
-		}*/
 		free(workingSpace);
 		action->new_status = 0;
 	}
@@ -298,15 +538,15 @@ int UIAction_SetUpAiBlock(UI_Action *action, va_list copy_from){
 	char *exposedDataString;
 	if(action->status == 1){
 		UIElement_RemoveExposedData(action->element);
-		
+
 		action->element->exposed_data_types = malloc(sizeof(enum UIDataTypes));
 		action->element->exposed_data_types[0] = UI_STRING;
-		
+
 		action->element->exposed_data_count = 1;
-		
+
 		action->element->exposed_data = calloc(1,sizeof(char*));
 		action->element->exposed_data[0] = calloc(stringLength,sizeof(char));
-		
+
 		/* action->companions[0].strings[0] This should be the action holding the string */
 		stringLength = stringLength + 1 + strlen(action->companions[0]->strings[0]);
 		action->element->exposed_data[0] = realloc(action->element->exposed_data[0],
@@ -353,13 +593,12 @@ int UIAction_DeleteKeyFlagDestroy(UI_Action *action, va_list copy_from){
 int UIAction_AddAiBlock(UI_Action *action, va_list copy_from){
 	va_list vargs;
 	UI_Element *element2;
+	BlockFunctionTemplate *template;
 	char c = 0;
 	char aiString[30];
 	if(action->status == 1){
-		printf("Enter AI string\n");
-		scanf("%30[0-9a-zA-Z ]", aiString);
-		while(c != '\n' && c != EOF){c = getchar();}
-		makeAIBlock(action->external->rect.x,action->external->rect.y,aiString,action->external);
+		template = action->extra;
+		makeAIBlock(action->external->rect.x,action->external->rect.y,template->name,action->external);
 		action->new_status = 0;
 		return 1;
 	}
@@ -382,19 +621,27 @@ int UIAction_PercRect(UI_Action *action, va_list copy_from){
 	}
 	return 0;
 }
-	
+
 int UIAction_InverseRect(UI_Action *action, va_list copy_from){
 	va_list vargs;
+	int i = 0;
 	SDL_Event *event;
 	va_copy(vargs, copy_from);
 	event = va_arg(vargs,SDL_Event*);
 	va_end(vargs);
 	if(action->status == 1){
 		action->element->rect = getRectFromInvRect(SDL_GetWindowFromID(event->window.windowID),
-												   action->integers[0],
-												   action->integers[1],
-												   action->integers[2],
-												   action->integers[3]);
+												                       action->integers[0],
+												                       action->integers[1],
+												                       action->integers[2],
+												                       action->integers[3]);
+ 		while(i < action->num_of_companions){
+ 			action->companions[i]->integers[0] = action->element->rect.x;
+ 			action->companions[i]->integers[1] = action->element->rect.y;
+			action->companions[i]->integers[2] = action->element->rect.w;
+			action->companions[i]->integers[3] = action->element->rect.h;
+ 			i++;
+ 		}
 		return 1;
 	}
 	return 0;
@@ -486,7 +733,7 @@ int UIAction_DisplayNumber(UI_Action *action, va_list copy_from){
 		temp = TTF_RenderText_Solid(graphicsData->fonts[action->integers[2]],action->strings[0],colour);
 		action->texture = SDL_CreateTextureFromSurface(graphicsData->renderer,temp);
 	}
-	if(UIElement_isVisible(action->element) && action->status != 0 && action->texture != NULL){
+	if(UIElement_isVisible(action->element) && action->element->rect.h > TTF_FontHeight(graphicsData->fonts[action->integers[2]]) && action->status != 0 && action->texture != NULL){
 		temp_rect.x = action->element->rect.x;
 		temp_rect.y = action->element->rect.y;
 		TTF_SizeText(graphicsData->fonts[action->integers[2]], action->strings[0], &temp_rect.w, &temp_rect.h);
@@ -515,7 +762,7 @@ int UIAction_DisplayString(UI_Action *action, va_list copy_from){
 		temp = TTF_RenderText_Solid(graphicsData->fonts[action->integers[0]],action->strings[0],colour);
 		action->texture = SDL_CreateTextureFromSurface(graphicsData->renderer,temp);
 	}
-	if(UIElement_isVisible(action->element) && action->strings[0] != NULL && action->status != 0 && action->texture != NULL){
+	if(UIElement_isVisible(action->element) && action->element->rect.h > TTF_FontHeight(graphicsData->fonts[action->integers[0]]) && action->strings[0] != NULL && action->status != 0 && action->texture != NULL){
 		temp_rect.x = action->element->rect.x;
 		temp_rect.y = action->element->rect.y;
 		TTF_SizeText(graphicsData->fonts[action->integers[0]], action->strings[0], &temp_rect.w, &temp_rect.h);
@@ -699,7 +946,6 @@ int UIAction_ClickRect(UI_Action *action, va_list copy_from){
 	va_end(vargs);
 
 	if(action->status == 0){return 0;}
-
 	if(event->button.x < action->element->rect.x || event->button.x > action->element->rect.x + action->element->rect.w){
 	  return 0;
 	}
@@ -757,8 +1003,14 @@ int UIAction_TwoRectOverride(UI_Action *action, va_list copy_from){
 	dt = va_arg(vargs,int);
 	va_end(vargs);
 
-
-	if(action->status == 1){
+	if(action->status == 0){
+		action->element->rect.x = action->TWORECTOVERRIDE_SX;
+		action->element->rect.y = action->TWORECTOVERRIDE_SY;
+		action->element->rect.w = action->TWORECTOVERRIDE_SW;
+		action->element->rect.h = action->TWORECTOVERRIDE_SH;
+		return 1;
+	}
+	else if(action->status == 1){
 	  /* We're going big! */
 	  action->TWORECTOVERRIDE_COUNTER+=dt;
 	  if(action->TWORECTOVERRIDE_COUNTER > action->TWORECTOVERRIDE_TRANSITION){
@@ -788,7 +1040,84 @@ int UIAction_TwoRectOverride(UI_Action *action, va_list copy_from){
 	  action->element->rect.h = action->TWORECTOVERRIDE_SH + (action->TWORECTOVERRIDE_BH - action->TWORECTOVERRIDE_SH) * transition_multiplier;
 	  return 1;
 	}
-    return 0;
+	else if(action->status == 3){
+		action->element->rect.x = action->TWORECTOVERRIDE_BX;
+		action->element->rect.y = action->TWORECTOVERRIDE_BY;
+		action->element->rect.w = action->TWORECTOVERRIDE_BW;
+		action->element->rect.h = action->TWORECTOVERRIDE_BH;
+		return 1;
+	}
+  return 0;
+}
+
+int UIAction_UpdateTwoRectOverrideOnWindowResize(UI_Action *action, va_list copy_from){
+		va_list vargs;
+		SDL_Event *event;
+		SDL_Point point;
+		va_copy(vargs, copy_from);
+		event = va_arg(vargs,SDL_Event*);
+		va_end(vargs);
+		if(action->status == 1){
+			point = getPointFromPerc(SDL_GetWindowFromID(event->window.windowID),
+													                             action->floats[0],
+													                             action->floats[1]);
+			action->companions[0]->TWORECTOVERRIDE_BX = point.x + action->integers[0];
+			action->companions[0]->TWORECTOVERRIDE_BY = point.y + action->integers[1];
+
+			point = getPointFromPerc(SDL_GetWindowFromID(event->window.windowID),
+		                           action->floats[2],
+														   action->floats[3]);
+			action->companions[0]->TWORECTOVERRIDE_BW = point.x + action->integers[2];
+			action->companions[0]->TWORECTOVERRIDE_BH = point.y + action->integers[3];
+
+			point = getPointFromPerc(SDL_GetWindowFromID(event->window.windowID),
+													                             action->floats[4],
+													                             action->floats[5]);
+			action->companions[0]->TWORECTOVERRIDE_SX = point.x + action->integers[4];
+			action->companions[0]->TWORECTOVERRIDE_SY = point.y + action->integers[5];
+
+			point = getPointFromPerc(SDL_GetWindowFromID(event->window.windowID),
+		                           action->floats[6],
+														   action->floats[7]);
+			action->companions[0]->TWORECTOVERRIDE_SW = point.x + action->integers[6];
+			action->companions[0]->TWORECTOVERRIDE_SH = point.y + action->integers[7];
+
+			return 1;
+	}
+	return 0;
+}
+/* These argument names are horrible, but they stand for Big/Small X/Y Int/Float Point/Dimension */
+void UIConfigure_UpdateTwoRectOverrideOnWindowResize(UI_Element *element, UI_Action *action, UI_Action *twoRectOverride, int bxip, int byip, float bxfp, float byfp,
+	                                                                                                                      int bxid, int byid, float bxfd, float byfd,
+                                                                                                                        int sxip, int syip, float sxfp, float syfp,
+																																																											  int sxid, int syid, float sxfd, float syfd){
+	UIAction_Init(element,action);
+	action->response = WINDOW_RESIZE;
+	action->function = UIAction_UpdateTwoRectOverrideOnWindowResize;
+	action->integers = malloc(sizeof(int) * 8);
+	action->num_of_integers = 8;
+	action->integers[0] = bxip;
+	action->integers[1] = byip;
+	action->integers[2] = bxid;
+	action->integers[3] = byid;
+	action->integers[4] = sxip;
+	action->integers[5] = syip;
+	action->integers[6] = sxid;
+	action->integers[7] = syid;
+
+	action->floats = malloc(sizeof(float) * 8);
+	action->num_of_floats = 8;
+	action->floats[0] = bxfp;
+	action->floats[1] = byfp;
+	action->floats[2] = bxfd;
+	action->floats[3] = byfd;
+	action->floats[4] = sxfp;
+	action->floats[5] = syfp;
+	action->floats[6] = sxfd;
+	action->floats[7] = syfd;
+	action->companions = malloc(sizeof(void*));
+	action->companions[0] = twoRectOverride;
+	action->num_of_companions = 1;
 }
 
 void UIConfigure_FillRect(UI_Element *element, UI_Action *action, int r, int g, int b){
@@ -1118,10 +1447,13 @@ void UIConfigure_DisplayImage(UI_Element *element, UI_Action *action, SDL_Textur
 	action->texture = image;
 }
 
-void UIConfigure_InverseRect(UI_Element *element, UI_Action *action, int from_left, int from_top, int from_right, int from_bot){
+void UIConfigure_InverseRect(UI_Element *element, UI_Action *action, int from_left, int from_top, int from_right, int from_bot, int num_of_companions, ...){
+	va_list vargs;
+	int i = 0;
 	#if DEBUGGING==1
 	printf("UIConfigure_InverseRect\n");
 	#endif
+	va_start(vargs, num_of_companions);
 	UIAction_Init(element, action);
 	action->response = WINDOW_RESIZE;
 	action->function = UIAction_InverseRect;
@@ -1131,6 +1463,13 @@ void UIConfigure_InverseRect(UI_Element *element, UI_Action *action, int from_le
 	action->integers[2] = from_right;
 	action->integers[3] = from_bot;
 	action->num_of_integers = 4;
+	action->num_of_companions = num_of_companions;
+	action->companions = malloc(sizeof(void*) * num_of_companions);
+	while(i < num_of_companions){
+		action->companions[i] = va_arg(vargs,UI_Action*);
+		i++;
+	}
+	va_end(vargs);
 }
 
 void UIConfigure_PercRect(UI_Element *element, UI_Action *action, float from_left, float from_top, float width, float height){
@@ -1148,7 +1487,7 @@ void UIConfigure_PercRect(UI_Element *element, UI_Action *action, float from_lef
 	action->num_of_floats = 4;
 }
 
-void UIConfigure_AddAiBlock(UI_Element *element, UI_Action *action, UI_Element *target){
+void UIConfigure_AddAiBlock(UI_Element *element, UI_Action *action, BlockFunctionTemplate *template, UI_Element *target){
 	#if DEBUGGING==1
 	printf("UIConfigure_AddAiBlock\n");
 	#endif
@@ -1158,6 +1497,7 @@ void UIConfigure_AddAiBlock(UI_Element *element, UI_Action *action, UI_Element *
 	action->external = target;
 	action->status = 0;
 	action->new_status = 0;
+	action->extra = template;
 }
 
 void UIConfigure_ReadAiBlocks(UI_Element *element, UI_Action *action){
@@ -1221,6 +1561,167 @@ void UIConfigure_NullifyAI(UI_Element *element, UI_Action *action){
 	action->new_status = 0;
 }
 
+void UIConfigure_DraggableVerticalOverride(UI_Element *element, UI_Action *action, int num_of_companions, ...){
+	int i = 0;
+	va_list vargs;
+	va_start(vargs,num_of_companions);
+	#if DEBUGGING==1
+	printf("UIConfigure_DraggableVerticalOverride\n");
+	#endif
+	UIAction_Init(element,action);
+	action->response = MOTION;
+	action->function = UIAction_DraggableVerticalOverride;
+	action->status = 0;
+	action->new_status = 0;
+	action->num_of_companions = num_of_companions;
+	action->companions = calloc(num_of_companions, sizeof(UI_Action*));
+	while(i < num_of_companions){
+		action->companions[i] = va_arg(vargs,UI_Action*);
+		i++;
+	}
+	va_end(vargs);
+}
+
+void UIConfigure_GetDifferenceInChildYOffset(UI_Element *element, UI_Action *action, float initial_perc, int initial_offset, UI_Element *child, int num_of_companions, ...){
+		int i = 0;
+		va_list vargs;
+		va_start(vargs,num_of_companions);
+		#if DEBUGGING==1
+		printf("UIConfigure_GetDifferenceInChildYOffset\n");
+		#endif
+		UIAction_Init(element,action);
+		action->response = RENDER;
+		action->function = UIAction_GetDifferenceInChildYOffset;
+		action->num_of_companions = num_of_companions;
+		action->integers = malloc(2*sizeof(int));
+		action->integers[0] = initial_offset;
+		action->integers[1] = 0;
+		action->num_of_integers = 2;
+		action->floats = malloc(sizeof(float));
+		action->floats[0] = initial_perc;
+		action->num_of_floats = 1;
+		action->companions = calloc(num_of_companions, sizeof(UI_Action*));
+		while(i < num_of_companions){
+			action->companions[i] = va_arg(vargs,UI_Action*);
+			i++;
+		}
+		action->external = child;
+		va_end(vargs);
+}
+
+void UIConfigure_ShrinkFitToParentWithYShift(UI_Element *element, UI_Action *action, UI_Action *shiftSource){
+	#if DEBUGGING==1
+	printf("UIConfigure_ShrinkFitToParent\n");
+	#endif
+	UIAction_Init(element,action);
+	action->response = UPDATE;
+	action->function = UIAction_ShrinkFitToParentWithYShift;
+	action->integers = calloc(4,(sizeof(int)));
+	action->integers[0] = element->rect.x;
+	action->integers[1] = element->rect.y;
+	action->integers[2] = element->rect.w;
+	action->integers[3] = element->rect.h;
+	action->companions = malloc(sizeof(UI_Action*));
+	action->companions[0] = shiftSource;
+	action->num_of_companions = 1;
+}
+
+void UIConfigure_CalculateScrollListOffset(UI_Element *element, UI_Action *action, int total_possible_offset){
+	UIAction_Init(element,action);
+	action->response = UPDATE;
+	action->function = UIAction_CalculateScrollListOffset;
+	action->integers = calloc(3, sizeof(int));
+	action->integers[0] = 0;
+	action->integers[1] = total_possible_offset;
+	action->num_of_integers = 2;
+}
+
+void UIConfigure_InversePosition(UI_Element *element, UI_Action *action, int x_offset, int y_offset){
+	UIAction_Init(element,action);
+	action->response = WINDOW_RESIZE;
+	action->function = UIAction_InversePosition;
+	action->integers = calloc(2,sizeof(int));
+	action->integers[0] = x_offset;
+	action->integers[1] = y_offset;
+	action->num_of_integers = 2;
+}
+
+void UIConfigure_PercPosition(UI_Element *element, UI_Action *action, float x_offset, float y_offset, int xi_offset, int yi_offset, int num_of_companions, ...){
+	va_list vargs;
+	int i = 0;
+	va_start(vargs,num_of_companions);
+	UIAction_Init(element,action);
+	action->response = WINDOW_RESIZE;
+	action->function = UIAction_PercPosition;
+	action->floats = calloc(2,sizeof(float));
+	action->floats[0] = x_offset;
+	action->floats[1] = y_offset;
+	action->num_of_floats = 2;
+	action->integers = calloc(2,sizeof(int));
+	action->integers[0] = xi_offset;
+	action->integers[1] = yi_offset;
+	action->num_of_integers = 2;
+	action->companions = calloc(num_of_companions, sizeof(UI_Action*));
+	while(i < num_of_companions){
+		action->companions[i] = va_arg(vargs,UI_Action*);
+		i++;
+	}
+	action->num_of_companions = num_of_companions;
+	va_end(vargs);
+}
+
+void UIConfigure_PercPositionV(UI_Element *element, UI_Action *action, float x_offset, float y_offset, int xi_offset, int yi_offset, int num_of_companions, ...){
+	va_list vargs;
+	int i = 0;
+	va_start(vargs,num_of_companions);
+	UIAction_Init(element,action);
+	action->response = WINDOW_RESIZE;
+	action->function = UIAction_PercPositionV;
+	action->floats = calloc(2,sizeof(float));
+	action->floats[0] = x_offset;
+	action->floats[1] = y_offset;
+	action->num_of_floats = 2;
+	action->integers = calloc(2,sizeof(int));
+	action->integers[0] = xi_offset;
+	action->integers[1] = yi_offset;
+	action->num_of_integers = 2;
+	action->companions = calloc(num_of_companions, sizeof(UI_Action*));
+	while(i < num_of_companions){
+		action->companions[i] = va_arg(vargs,UI_Action*);
+		i++;
+	}
+	action->num_of_companions = num_of_companions;
+	va_end(vargs);
+}
+
+void UIConfigure_PercOffsetRect(UI_Element *element, UI_Action *action, float xfp, float yfp, float xfd, float yfd,
+                                                                        int xip, int yip, int xid, int yid,
+																																			  int num_of_companions, ...){
+		va_list vargs;
+		int i = 0;
+		va_start(vargs,num_of_companions);
+		UIAction_Init(element,action);
+		action->response = WINDOW_RESIZE;
+		action->function = UIAction_PercOffsetRect;
+		action->floats = calloc(4,sizeof(float));
+		action->floats[0] = xfp;
+		action->floats[1] = yfp;
+		action->floats[2] = xfd;
+		action->floats[3] = yfd;
+		action->integers = calloc(4,sizeof(int));
+		action->integers[0] = xip;
+		action->integers[1] = yip;
+		action->integers[2] = xid;
+		action->integers[3] = yid;
+		action->companions = malloc(sizeof(void*) * num_of_companions);
+		while(i < num_of_companions){
+			action->companions[i] = va_arg(vargs,UI_Action*);
+			i++;
+		}
+		action->num_of_companions = num_of_companions;
+		va_end(vargs);
+}
+
 static void UITrigger_Execute(UI_Action *action){
 	UI_Trigger *trigger = action->triggers;
 	while(trigger!=NULL){
@@ -1260,11 +1761,11 @@ static void UIAction_Free(UI_Action *action){
 	UI_Trigger *movingPointer2;
 	UI_Trigger *movingPointer = action->triggers;
 	int i = 0;
-	
+
 	while(action->triggers!=NULL){
 		UITrigger_Destroy(action,action->triggers);
 	}
-	
+
 	while(i < action->num_of_strings){
 		free(action->strings[i]);
 		i++;
@@ -1273,7 +1774,7 @@ static void UIAction_Free(UI_Action *action){
 	free(action->companions);
 	free(action->integers);
 	free(action->floats);
-	
+
 	return;
 }
 
@@ -1359,9 +1860,9 @@ static void UIElement_DeExternalise(UI_Element *root, UI_Element *external){
 static void UITrigger_Destroy(UI_Action *action, UI_Trigger *trigger){
 	UI_Trigger *next = trigger->next;
 	UI_Trigger *prev = action->triggers;
-	
+
 	assert(prev != NULL);
-	
+
 	if(prev != trigger){
 		while(prev->next != trigger){
 			prev = prev->next;
@@ -1458,7 +1959,7 @@ void UIRoot_Execute(UIData *uiData, enum Response response, int stopAtFirst, ...
 void UIRoot_ExecuteUpwards(UIData *uiData, enum Response response, int stopAtFirst, ...){
 	static int guesstimated_queue_length = 2;
 	va_list vargs;
-	UI_Element **queue = calloc(guesstimated_queue_length,sizeof(UI_Element*)); 
+	UI_Element **queue = calloc(guesstimated_queue_length,sizeof(UI_Element*));
 	UI_Element *queue_element;
 	UI_Element *queue_element_child;
 	int front = 0,back = 1;
@@ -1517,6 +2018,7 @@ static void UIAction_Init(UI_Element *element, UI_Action *action){
 	action->texture = NULL;
 	action->floats = NULL;
 	action->num_of_floats = 0;
+	action->extra = NULL;
 }
 
 static int UIElement_isVisible(UI_Element *element){
@@ -1529,7 +2031,7 @@ static int percWindowDimension(int dimension, float perc){
 
 void UIRoot_Destroy(UIData *uiData){
 	static int guesstimated_queue_length = 2;
-	UI_Element **queue = calloc(guesstimated_queue_length,sizeof(UI_Element*)); 
+	UI_Element **queue = calloc(guesstimated_queue_length,sizeof(UI_Element*));
 	UI_Element *queue_element;
 	UI_Element *queue_element_child;
 	int front = 0,back = 1;

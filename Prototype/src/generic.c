@@ -186,6 +186,43 @@ char *fileToString(FILE *file){
 	return s;
 }
 
+SDL_Point getPointFromInvPoint(SDL_Window *window, int x, int y){
+  /* This function is tricksy and will give you a point defined through some cleverness
+     if x (or y, they are both similarly treated) is negative, then you will get a point
+     relative to the bottom of the screen.
+
+     e.g. x = -10 then you get the result 10 pixels from the bottom of the screen
+
+     If they are positive, then you get the amount relative to the top of the screen.
+
+     e.g. x = 10  then you get 10 */
+     SDL_Point point;
+     int win_x, win_y;
+     SDL_GetWindowSize(window,&win_x, &win_y);
+     if(x < 0){
+       point.x = win_x + x;
+     }
+     else{
+       point.x = x;
+     }
+     if(y < 0){
+       point.y = win_y + y;
+     }
+     else{
+       point.y = y;
+     }
+     return point;
+}
+
+SDL_Point getPointFromPerc(SDL_Window *window, float x, float y){
+  SDL_Point point;
+  int win_x, win_y;
+  SDL_GetWindowSize(window,&win_x, &win_y);
+  point.x = (win_x * x);
+  point.y = (win_y * y);
+  return point;
+}
+
 #if DEBUGGING==1
 #undef calloc
 #undef malloc

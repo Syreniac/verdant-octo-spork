@@ -23,6 +23,7 @@ int handleEvent(SDL_Event *event, GameObjectData *gameObjectData, UIData *uiData
 						UIRoot_Execute(uiData,WINDOW_RESIZE,0,event);
 						break;
 				}
+				break;
 			case SDL_MOUSEMOTION:
 				UIRoot_Execute(uiData,MOTION,0,event);
 				break;

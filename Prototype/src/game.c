@@ -137,13 +137,15 @@ static void createGameUI(GameData *gameData){
 
   SDL_GetWindowSize(gameData->graphicsData.window,&win_x, &win_y);
 
-  element = UIElement_Create(win_x-150,0,150,50,3);
+  /* Score counter */
+  element = UIElement_Create(0,0,150,50,4);
   UIConfigure_FillRect(element,&element->actions[0],255,255,255);
   UIConfigure_DisplayNumber(element, &element->actions[1], 0,0);
   UIConfigure_ResourceCounter(element, &element->actions[2],1,&element->actions[1]);
+  UIConfigure_PercPosition(element, &element->actions[3],1.0,0.0,-150,0,0);
   UIElement_Reparent(element,gameData->uiData.root);
 
-  element = UIElement_Create(win_x/2,win_y - 50,200,50,5);
+  element = UIElement_Create(win_x/2,win_y - 50,200,50,6);
   UIConfigure_Auto(element, &element->actions[0], RESPONSE_PAUSE);
     UITrigger_Bind(&element->actions[0],&element->actions[0],-1,0);
     UITrigger_Bind(&element->actions[0],&element->actions[1],0,2);
@@ -167,10 +169,11 @@ static void createGameUI(GameData *gameData){
   UIConfigure_Auto(element,&element->actions[4],UPDATE);
 	UITrigger_Bind(&element->actions[4],&element->actions[0],2,1);
 	UITrigger_Bind(&element->actions[4],&element->actions[1],2,1);
+  UIConfigure_PercPosition(element, &element->actions[5], 0.5, 1.0, -100, -50,0);
   UIElement_Reparent(element,gameData->uiData.root);
 
 
-  element2 = UIElement_Create(0, win_y - 100, 100,100,3);
+  element2 = UIElement_Create(0, win_y - 100, 100,100,4);
 	UIConfigure_FillRect(element2,&element2->actions[0],0,100,100);
 	UIConfigure_LeftClickRect(element2,&element2->actions[1]);
 		UITrigger_Bind(&element2->actions[1],&element2->actions[2],0,1);
@@ -178,9 +181,15 @@ static void createGameUI(GameData *gameData){
 	UIConfigure_TwoRectOverride(element2,&element2->actions[2],0,win_y - 100, 100, 100,
                                                                50, 50, win_x - 100, win_y - 200,
                                                                200, 0, 0);
+  UIConfigure_UpdateTwoRectOverrideOnWindowResize(element2, &element2->actions[3],&element2->actions[2],
+                                                                                  50,50,0.0,0.0,
+                                                                                  -100,-150,1.0,1.0,
+                                                                                  0,-100,0.0,1.0,
+                                                                                  100,100,0.0,0.0);
   UIElement_Reparent(element2,gameData->uiData.root);
 
-  element = UIElement_Create(50 + win_x - 150, 50, 50, 50,4);
+  /* Minimize button */
+  element = UIElement_Create(50 + win_x - 150, 50, 50, 50,5);
   UIConfigure_FillRect(element, &element->actions[0],222,0,0);
   UIConfigure_ShrinkFitToParent(element, &element->actions[1]);
   UIConfigure_LeftClickRect(element, &element->actions[2]);
@@ -188,40 +197,43 @@ static void createGameUI(GameData *gameData){
   UIConfigure_External(element, &element->actions[3],element2);
     UITrigger_Bind(&element->actions[3], &element2->actions[2], 3,2);
     UITrigger_Bind(&element->actions[3], &element2->actions[1], 0,1);
+  UIConfigure_PercPosition(element, &element->actions[4],1.0,0.0,-100,50,1,&element->actions[1]);
   UIElement_Reparent(element,element2);
 
   /* The big panel holding all the AI blocks */
-  element3 = UIElement_Create(50,50,win_x - 150,win_y - 200,3);
+  element3 = UIElement_Create(50,50,win_x - 320,win_y - 200,4);
   UIConfigure_FillRect(element3, &element3->actions[0],0,222,0);
   UIConfigure_ShrinkFitToParent(element3, &element3->actions[1]);
   UIConfigure_ReadAiBlocks(element3,&element3->actions[2]);
+  UIConfigure_InverseRect(element3,&element3->actions[3],50,50,320,100,1,&element3->actions[1]);
   UIElement_Reparent(element3,element2);
-  
-  /* add block button */
+
+  /* add block button - DEPRECATED
   element = UIElement_Create(50 + win_x - 150, 150,50,50,4);
   UIConfigure_FillRect(element, &element->actions[0],255,255,0);
   UIConfigure_ShrinkFitToParent(element, &element->actions[1]);
   UIConfigure_LeftClickRect(element, &element->actions[2]);
 	UITrigger_Bind(&element->actions[2],&element->actions[3],0,1);
   UIConfigure_AddAiBlock(element,&element->actions[3],element3);
-  UIElement_Reparent(element,element2);
-  
+  UIElement_Reparent(element,element2);*/
+
   /* Calculate AI button */
-  element = UIElement_Create(50 + win_x - 150, 250, 50, 50, 4);
+  element = UIElement_Create(0, 0, 50, 50, 5);
   UIConfigure_FillRect(element, &element->actions[0],255,255,0);
   UIConfigure_ShrinkFitToParent(element, &element->actions[1]);
   UIConfigure_LeftClickRect(element, &element->actions[2]);
 	UITrigger_Bind(&element->actions[2],&element->actions[3],0,1);
   UIConfigure_External(element, &element->actions[3],element2);
     UITrigger_Bind(&element->actions[3], &element3->actions[2], 0,1);
+  UIConfigure_PercPosition(element,&element->actions[4],1.0,0.0,-100,110,1,&element->actions[1]);
   UIElement_Reparent(element,element2);
-  
+
   /* Nullify AI button */
-  
-  makeAIResetButton(50+win_x-150,350,element2);
-  
-  
-  
+
+  makeAIResetButton(-100,170,element2);
+
+  makeAITemplateScrollList(320,230,&gameData->aiData,element2,element3);
+
   element4 = makeStartBlock(topX,topY,element3);
   topX+=210;
 
@@ -305,6 +317,7 @@ static void createGameUI(GameData *gameData){
     i++;
   }
   gameData->element = array2[0];
+  UIRoot_Pack(&gameData->uiData,&gameData->graphicsData);
 }
 
 int gameLoop(GameData *gameData){
@@ -327,7 +340,7 @@ int gameLoop(GameData *gameData){
   after the function SDL_RenderPresent*/
   UIRoot_Execute(&gameData->uiData,AI_RESPONSE,0,&gameData->aiData);
   UIRoot_Execute(&gameData->uiData,UPDATE,0,delta_t);
-  
+
   panScreen(&gameData->graphicsData, &gameData->controlsData, delta_t);
   if(SDL_RenderClear(gameData->graphicsData.renderer) == -1){
 	   printf("Error clearing renderer: %s\n", SDL_GetError());

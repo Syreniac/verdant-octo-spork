@@ -20,7 +20,7 @@ enum Response {NONE,
 			   DISPOSAL,
 			   AI_RESPONSE,
                FREED};												/* 13 */
-			   
+
 enum UIDataTypes{UI_NULL,
 				 UI_INT,
 				 UI_ACTION_POINTER,
@@ -45,11 +45,10 @@ struct UI_Element{
   UI_Action *actions;
   int num_of_actions;
   SDL_Rect rect;
-  
   UIDataTypes *exposed_data_types;
   int exposed_data_count;
   void **exposed_data;
-  
+
   UI_Element *parent;
   UI_Element *child;
   UI_Element *sibling;
@@ -74,6 +73,7 @@ struct UI_Action{
   float *floats;
   char **strings;
   UI_Action **companions;
+	void *extra;
 };
 /* These are stored as a linked list! */
 struct UI_Trigger{
@@ -106,14 +106,29 @@ void UIConfigure_ShrinkFitToParent(UI_Element *element, UI_Action *action);
 void UIConfigure_External(UI_Element *element, UI_Action *action, UI_Element *external);
 void UIConfigure_Auto(UI_Element *element, UI_Action *action, enum Response response);
 void UIConfigure_DisplayImage(UI_Element *element, UI_Action *action, SDL_Texture *image);
-void UIConfigure_InverseRect(UI_Element *element, UI_Action *action, int from_left, int from_top, int from_right, int from_bot);
+void UIConfigure_InverseRect(UI_Element *element, UI_Action *action, int from_left, int from_top, int from_right, int from_bot, int num_of_companions, ...);
 void UIConfigure_PercRect(UI_Element *element, UI_Action *action, float from_left, float from_right, float width, float height);
-void UIConfigure_AddAiBlock(UI_Element *element, UI_Action *action, UI_Element *target);
+void UIConfigure_AddAiBlock(UI_Element *element, UI_Action *action, BlockFunctionTemplate *template, UI_Element *target);
 void UIConfigure_DeleteKeyFlagDestroy(UI_Element *element, UI_Action *action);
 void UIConfigure_ReadAiBlocks(UI_Element *element, UI_Action *action);
 void UIConfigure_SetUpAiBlock(UI_Element *element, UI_Action *action, int num_of_companions, ...);
 void UIConfigure_NullifyAI(UI_Element *element, UI_Action *action);
 void UIConfigure_RecallWorkers(UI_Element *element, UI_Action *action);
+void UIConfigure_DraggableVerticalOverride(UI_Element *element, UI_Action *action, int num_of_companions, ...);
+void UIConfigure_GetDifferenceInChildYOffset(UI_Element *element, UI_Action *action, float initial_perc, int initial_offset, UI_Element *child, int num_of_companions, ...);
+void UIConfigure_ShiftChildren(UI_Element *element, UI_Action *action);
+void UIConfigure_ShrinkFitToParentWithYShift(UI_Element *element, UI_Action *action, UI_Action *shiftSource);
+void UIConfigure_CalculateScrollListOffset(UI_Element *element, UI_Action *action, int total_possible_offset);
+void UIConfigure_InversePosition(UI_Element *element, UI_Action *action, int x_offset, int y_offset);
+void UIConfigure_PercPosition(UI_Element *element, UI_Action *action, float x_offset, float y_offset, int xi_offset, int yi_offset, int num_of_companions, ...);
+void UIConfigure_PercPositionV(UI_Element *element, UI_Action *action, float x_offset, float y_offset, int xi_offset, int yi_offset, int num_of_companions, ...);
+void UIConfigure_UpdateTwoRectOverrideOnWindowResize(UI_Element *element, UI_Action *action, UI_Action *twoRectOverride, int bxip, int byip, float bxfp, float byfp,
+	                                                                                                                      int bxid, int byid, float bxfd, float byfd,
+                                                                                                                        int sxip, int syip, float sxfp, float syfp,
+																																																											  int sxid, int syid, float sxfd, float syfd);
+
+void UIConfigure_PercOffsetRect(UI_Element *element, UI_Action *action, float xfp, float yfp, float xfd, float yfd, int xip, int yip, int xid, int yid, int num_of_companions,...);
+
 
 void UITrigger_Bind(UI_Action *action, UI_Action *target, int state_from, int state_to);
 
@@ -132,3 +147,4 @@ void UIRoot_ExecuteUpwards(UIData *uiData, enum Response response, int stopAtFir
 UI_Element *makeAIBlock(int x_offset, int y_offset, char *aiString, UI_Element *parent);
 UI_Element *makeStartBlock(int x_offset, int y_offset, UI_Element *parent);
 UI_Element *makeAIResetButton(int x_offset, int y_offset, UI_Element *parent);
+UI_Element *makeAITemplateScrollList(int x_offset, int y_offset, AIData *aiData, UI_Element *parent, UI_Element *blockHolder);

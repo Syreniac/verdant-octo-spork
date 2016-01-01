@@ -2,7 +2,7 @@ IfWorkerIdle
 	primary = 2
 	secondary = 3
 SetWorkerHeadingRandomly
-IfWorkerOutOfBounds
+IfWorkerOutsideBounds
 	primary = 4
 	secondary = 5
 WorkerReturnToHive
