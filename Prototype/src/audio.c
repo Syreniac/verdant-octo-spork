@@ -66,10 +66,22 @@ void fadeOutMusic(AudioData *audioData) {
 }
 
 void loadSoundEffect(char *sound, char *name, AudioData *audioData) {
+	printf("here\n");
+	if(audioData == NULL){
+		fprintf(stderr, "audioData is NULL\n");
+		exit(1);
+	}
 	SoundEffect *pointer = audioData->soundEffect;
-	SoundEffect *newSoundEffect = calloc(1,sizeof(SoundEffect));
+	SoundEffect *newSoundEffect = (SoundEffect*) calloc(1, sizeof(SoundEffect));
+	printf("here2\n");
+	if(newSoundEffect == NULL) {
+		fprintf(stderr, "Calloc failed allocate space for SoundEffect newSoundEffect\n");
+		exit(1);
+	}
 
-	newSoundEffect->name = (char* )malloc(sizeof(char) * strlen(name));
+	/*previously the +1 for the null terminator had been forgotten, this was causing occational seg faults*/
+	/*TOOK ME AGES TO FIND! :D (i hope this was actually the seg fault cause, it seems to have worked*/
+	newSoundEffect->name = (char* )malloc(sizeof(char) * (strlen(name) + 1));
 
 	newSoundEffect->sound = Mix_LoadWAV(sound);
 	strcpy(newSoundEffect->name, name);
