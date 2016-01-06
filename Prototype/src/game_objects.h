@@ -16,6 +16,7 @@ typedef struct Tree Tree;
 typedef struct IceCreamPerson IceCreamPerson;
 typedef struct Weather Weather;
 typedef struct GameObjectData GameObjectData;
+typedef struct DroppedIceCream DroppedIceCream;
 
 /* I'm calling them resource nodes rather than flowers because it makes the
    game more easily adaptable to other themes if we want. Otherwise they are
@@ -95,6 +96,15 @@ struct Tree{
   int bees_taking_shelter;
 };
 
+struct DroppedIceCream{
+	float xPosition;
+	float yPosition;
+	SDL_Rect rect;
+	int dropped;
+	int collected;
+	int sizeOscillator;
+};
+
 struct IceCreamPerson{
   float xPosition;
   float yPosition;
@@ -125,6 +135,7 @@ struct GameObjectData{
   Tree tree[NUMBER_OF_TREES];
   ResourceNodeSpawner resourceNodeSpawners[NUMBER_OF_FLOWER_PATCHES];
   IceCreamPerson *iceCreamPerson;
+  DroppedIceCream *droppedIceCream;
   int resourceNodeSpawnerCount;
   ProgrammableWorker *first_programmable_worker;
   int programmableWorkerCount;
@@ -155,6 +166,7 @@ void updateWeather(GameObjectData *gameObjectData, Weather *weather, int ticks);
 void initResourceNode(ResourceNode *resourceNode);
 ResourceNode createResourceNode(ResourceNodeSpawner *parentSpawner, int resourceUnits);
 IceCreamPerson *createIceCreamPerson(void);
+DroppedIceCream *createDroppedIceCream(void);
 void reInitialiseIceCreamPerson(IceCreamPerson *iceCreamPerson);
 void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsData, int ticks);
 int countProgrammableWorkersInRange(GameObjectData *gameObjectData, SDL_Point center, double radius);

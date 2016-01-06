@@ -31,6 +31,7 @@ struct GraphicsData{
   SDL_Texture *treeTexture;
   SDL_Texture *grassTexture;
   TTF_Font *fonts[2];
+  SDL_Texture *droppedIceCreamTexture;
   struct Bee *bee;
   struct Rainy *rainy;
   struct Person *person;

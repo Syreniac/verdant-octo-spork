@@ -33,6 +33,11 @@ void generateIceCreamPerson(GameObjectData *gameObjectData){
   gameObjectData->iceCreamPerson = createIceCreamPerson();
 }
 
+void generateDroppedIceCream(GameObjectData *gameObjectData){
+/*create iceCreamPerson at initial location outside of world boundaries*/
+  gameObjectData->droppedIceCream = createDroppedIceCream();
+}
+
 void generateHive(GameObjectData *gameObjectData){
   /* Create a Hive */
   gameObjectData->hive = createHive();

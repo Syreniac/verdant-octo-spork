@@ -175,6 +175,19 @@ IceCreamPerson *createIceCreamPerson(void){
 
 }
 
+DroppedIceCream *createDroppedIceCream(void){
+	DroppedIceCream *droppedIceCream = (DroppedIceCream*) malloc(sizeof(DroppedIceCream));
+	droppedIceCream->rect.w = DROPPED_ICECREAM_HEIGHT;
+	droppedIceCream->rect.h = DROPPED_ICECREAM_WIDTH;
+	/*set initial location to ensure no interaction or existence inside world*/
+	/* (when the time is right for the person to appear, x y co-ordinates*/
+	/*can be reassigned values that exist inside the world boundaries)*/
+	droppedIceCream->dropped = 0;
+	droppedIceCream->collected = 0;
+	droppedIceCream->sizeOscillator = 1;
+	return droppedIceCream;
+}
+
 Weather createWeatherLayer(void){
 	/* This function creates a Weather struct and fills in the default
 	 values. Many of these are defined in generic.h */
@@ -365,10 +378,17 @@ void updateIceCreamPerson(GameObjectData *gameObjectData, int ticks){
 	
   	if(countProgrammableWorkersInRange(gameObjectData, getCenterOfRect(gameObjectData->iceCreamPerson->rect), STING_HIT_RADIUS) != 0){
   		gameObjectData->iceCreamPerson->stung_count++;
-  		/*if sting threshold has been achieved*/
-  		if(gameObjectData->iceCreamPerson->stung_count >= gameObjectData->iceCreamPerson->stings_until_ice_cream_drop){
+  		/*if iceCream not yet dropped but sting threshold has been achieved*/
+  		if(!gameObjectData->droppedIceCream->dropped &&
+  		gameObjectData->iceCreamPerson->stung_count >= gameObjectData->iceCreamPerson->stings_until_ice_cream_drop){
   			/*drop iceCream!*/
   			gameObjectData->iceCreamPerson->has_ice_cream = 0;
+  			
+  			gameObjectData->droppedIceCream->xPosition = gameObjectData->iceCreamPerson->xPosition;
+  			gameObjectData->droppedIceCream->yPosition = gameObjectData->iceCreamPerson->yPosition;
+  			
+  			gameObjectData->droppedIceCream->dropped = 1;
+  			gameObjectData->droppedIceCream->collected = 0;
   			/*run for your life!*/
   			gameObjectData->iceCreamPerson->speed = 0.1;
   		}
@@ -666,6 +686,27 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 		i++;
 	}
 	}
+	
+	if(gameObjectData->droppedIceCream->dropped && !gameObjectData->droppedIceCream->collected){
+		if(gameObjectData->droppedIceCream->rect.w >= MAX_DROPPED_ICECREAM_WIDTH){
+			gameObjectData->droppedIceCream->sizeOscillator = -1;
+		}else if(gameObjectData->droppedIceCream->rect.w <= DROPPED_ICECREAM_WIDTH){
+			gameObjectData->droppedIceCream->sizeOscillator = 1;
+		}
+		gameObjectData->droppedIceCream->rect.w += gameObjectData->droppedIceCream->sizeOscillator;
+		gameObjectData->droppedIceCream->xPosition -= ((float)gameObjectData->droppedIceCream->sizeOscillator)/2.0;
+		gameObjectData->droppedIceCream->rect.x = gameObjectData->droppedIceCream->xPosition;
+		
+		gameObjectData->droppedIceCream->rect.h += gameObjectData->droppedIceCream->sizeOscillator;
+		gameObjectData->droppedIceCream->yPosition -= ((float)gameObjectData->droppedIceCream->sizeOscillator)/2.0;
+		gameObjectData->droppedIceCream->rect.y = gameObjectData->droppedIceCream->yPosition;
+  	 	blitGameObject(gameObjectData->droppedIceCream->rect,
+                  	graphicsData,
+                   	graphicsData->droppedIceCreamTexture,
+                   	0,
+                   	NULL,
+                   	SDL_FLIP_NONE);	
+	}
 
 	 /*determine if iceCreamPerson is on screen and needs animating*/
 	if(gameObjectData->iceCreamPerson->currently_on_screen){
@@ -684,12 +725,12 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 
 	}else{ /*small probability of re-initialising iceCreamPerson and setting location to on-screen*/
 	 	if((gameObjectData->weather.present_weather == Sun) &&
- 		(rand() % ICE_CREAM_PERSON_PROB == 0)){
+ 		(rand() % ICE_CREAM_PERSON_PROB == 0) && !gameObjectData->droppedIceCream->dropped){
 
 	 		reInitialiseIceCreamPerson(gameObjectData->iceCreamPerson);
 
-	 }
- }
+		}
+ 	}
 
 
 

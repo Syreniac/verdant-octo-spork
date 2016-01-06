@@ -70,6 +70,7 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
   generateWeatherLayer(&gameData.gameObjectData);
 
   generateIceCreamPerson(&gameData.gameObjectData);
+  generateDroppedIceCream(&gameData.gameObjectData);
 
 
   gameData.graphicsData.grassTexture = loadTextureFromFile("images/grass/grass4.bmp",&gameData.graphicsData, 0);
@@ -94,6 +95,8 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
   gameData.graphicsData.person->graphic[WITH_ICE_CREAM_STRIDE2 + NO_ICECREAM_INDEX_OFFSET] =
   loadTextureFromFile("images/person/withoutIceCream2.bmp",
 					  &gameData.graphicsData, 1);
+					  
+  gameData.graphicsData.droppedIceCreamTexture = loadTextureFromFile("images/person/droppedIceCream.bmp", &gameData.graphicsData, 1);
 
   gameData.graphicsData.rainy = (Rainy*) malloc(sizeof(Rainy));
 

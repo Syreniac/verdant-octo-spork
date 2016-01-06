@@ -60,6 +60,10 @@ each call to updateProgrammableWorker*/
 /*higher values result in lower levels of parallax*/
 #define PARALLAX_INTENSITY 10
 
+#define DROPPED_ICECREAM_HEIGHT 50
+#define DROPPED_ICECREAM_WIDTH 50
+#define MAX_DROPPED_ICECREAM_WIDTH 60
+
 #define PERSON_HEIGHT 54
 #define PERSON_WIDTH 50
 /*probability that the iceCreamPerson will appear each time that*/
