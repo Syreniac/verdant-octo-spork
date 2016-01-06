@@ -171,7 +171,7 @@ IceCreamPerson *createIceCreamPerson(void){
   iceCreamPerson->has_ice_cream = 0;
   iceCreamPerson->speed = 0;
   iceCreamPerson->stung_count = 0;
-  iceCreamPerson->strings_until_ice_cream_drop = 0;
+  iceCreamPerson->stings_until_ice_cream_drop = 0;
   return iceCreamPerson;
 }
 
@@ -310,15 +310,18 @@ void updateIceCreamPerson(GameObjectData *gameObjectData, int ticks){
   int distanceFromXBorder;
 
   /*set iceCreamPerson to going home if sun has gone, or he has lost his ice cream*/
-  if(!(gameObjectData->weather.present_weather == Sun &&
-  gameObjectData->iceCreamPerson->has_ice_cream)){
+  if(gameObjectData->weather.present_weather != Sun ||
+  !gameObjectData->iceCreamPerson->has_ice_cream){
   	gameObjectData->iceCreamPerson->going_home = 1;
   }
   /*set iceCreamPerson to running if it is raining*/
   if(gameObjectData->weather.present_weather == Rain){
     gameObjectData->iceCreamPerson->speed = 0.1;
   }else{
-    gameObjectData->iceCreamPerson->speed = 0.05;
+  	/*if he doesn't have his icecream (he's been stung) he'll keep running even when rain stops*/
+  	if(gameObjectData->iceCreamPerson->has_ice_cream){
+    	gameObjectData->iceCreamPerson->speed = 0.05;
+    }
   }
 
   /*set iceCreamPerson->currently_on_screen to false if he has walked off screen*/
@@ -359,6 +362,18 @@ void updateIceCreamPerson(GameObjectData *gameObjectData, int ticks){
   gameObjectData->iceCreamPerson->yPosition += newY;
   gameObjectData->iceCreamPerson->rect.x = (int)floor(gameObjectData->iceCreamPerson->xPosition);
   gameObjectData->iceCreamPerson->rect.y = (int)floor(gameObjectData->iceCreamPerson->yPosition);
+  
+  if(countProgrammableWorkersInRange(gameObjectData, getCenterOfRect(gameObjectData->iceCreamPerson->rect), STING_HIT_RADIUS) != 0)
+  {
+  	gameObjectData->iceCreamPerson->stung_count++;
+  	/*if sting threshold has been achieved*/
+  	if(gameObjectData->iceCreamPerson->stung_count >= gameObjectData->iceCreamPerson->stings_until_ice_cream_drop){
+  		/*drop iceCream!*/
+  		gameObjectData->iceCreamPerson->has_ice_cream = 0;
+  		/*run for your life!*/
+  		gameObjectData->iceCreamPerson->speed = 0.1;
+  	}
+  }
 
   if(countProgrammableWorkersInRange(gameObjectData, getCenterOfRect(gameObjectData->iceCreamPerson->rect), 250.0) == 0 && !gameObjectData->iceCreamPerson->going_home){
 
@@ -549,7 +564,7 @@ void reInitialiseIceCreamPerson(IceCreamPerson *iceCreamPerson){
   iceCreamPerson->currentGraphicIndex = 0;
 
 
-  iceCreamPerson->strings_until_ice_cream_drop = (rand() % 5) + 1;
+  iceCreamPerson->stings_until_ice_cream_drop = (rand() % 5) + 1;
 }
 
 
@@ -660,7 +675,8 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 
    	blitGameObject(gameObjectData->iceCreamPerson->rect,
                   	graphicsData,
-                   	graphicsData->person->graphic[gameObjectData->iceCreamPerson->currentGraphicIndex],
+                   	graphicsData->person->graphic[gameObjectData->iceCreamPerson->currentGraphicIndex +
+                   	((gameObjectData->iceCreamPerson->has_ice_cream) ? 0 : NO_ICECREAM_INDEX_OFFSET)],
                    	DEGREESINCIRCLE-(gameObjectData->iceCreamPerson->heading * RADIANSTODEGREES),
                    	NULL,
                    	SDL_FLIP_NONE);

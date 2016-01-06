@@ -66,14 +66,10 @@ void fadeOutMusic(AudioData *audioData) {
 }
 
 void loadSoundEffect(char *sound, char *name, AudioData *audioData) {
-	printf("here\n");
-	if(audioData == NULL){
-		fprintf(stderr, "audioData is NULL\n");
-		exit(1);
-	}
+
 	SoundEffect *pointer = audioData->soundEffect;
 	SoundEffect *newSoundEffect = (SoundEffect*) calloc(1, sizeof(SoundEffect));
-	printf("here2\n");
+
 	if(newSoundEffect == NULL) {
 		fprintf(stderr, "Calloc failed allocate space for SoundEffect newSoundEffect\n");
 		exit(1);

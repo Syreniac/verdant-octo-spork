@@ -86,6 +86,14 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
   gameData.graphicsData.person->graphic[WITH_ICE_CREAM_STRIDE2] =
   loadTextureFromFile("images/person/withIceCream2.bmp",
 					  &gameData.graphicsData, 1);
+					  
+  gameData.graphicsData.person->graphic[WITH_ICE_CREAM_STRIDE1 + NO_ICECREAM_INDEX_OFFSET] =
+  loadTextureFromFile("images/person/withoutIceCream1.bmp",
+					  &gameData.graphicsData, 1);
+
+  gameData.graphicsData.person->graphic[WITH_ICE_CREAM_STRIDE2 + NO_ICECREAM_INDEX_OFFSET] =
+  loadTextureFromFile("images/person/withoutIceCream2.bmp",
+					  &gameData.graphicsData, 1);
 
   gameData.graphicsData.rainy = (Rainy*) malloc(sizeof(Rainy));
 

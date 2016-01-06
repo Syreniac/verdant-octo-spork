@@ -65,6 +65,8 @@ each call to updateProgrammableWorker*/
 #define ICE_CREAM_PERSON_PROB 100
 #define STRIDE_FREQUENCY 0.75
 
+#define STING_HIT_RADIUS PERSON_HEIGHT
+
 #define SIZE_OF_TREE 200
 #define NUMBER_OF_TREES 50
 #define NUMBER_OF_FLOWER_PATCHES 50
@@ -91,6 +93,7 @@ each call to updateProgrammableWorker*/
 #define SDL_InvRect SDL_Rect
 
 typedef enum personGraphic {WITH_ICE_CREAM_STRIDE1, WITH_ICE_CREAM_STRIDE2} personGraphic;
+#define NO_ICECREAM_INDEX_OFFSET 2
 
 
 #if DEBUGGING==1

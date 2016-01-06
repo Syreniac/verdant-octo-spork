@@ -110,7 +110,7 @@ struct IceCreamPerson{
   int has_ice_cream;
   int currently_on_screen;
   int stung_count;
-  int strings_until_ice_cream_drop;
+  int stings_until_ice_cream_drop;
 };
 
 struct Weather{

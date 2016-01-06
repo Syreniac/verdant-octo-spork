@@ -42,7 +42,7 @@ struct Bee{
 };
 
 struct Person{
-	SDL_Texture *graphic[2];
+	SDL_Texture *graphic[4];
 };
 
 struct Rainy{
