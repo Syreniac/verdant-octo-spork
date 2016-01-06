@@ -748,7 +748,8 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 
 		blitGameObject(programmableWorker->rect,
 					 	graphicsData,
-					 	graphicsData->bee->graphic[programmableWorker->currentGraphicIndex],
+					 	graphicsData->bee->graphic[programmableWorker->currentGraphicIndex +
+                   		((!programmableWorker->cargo) ? 0 : CARRYING_FLOWER_INDEX_OFFSET)],
 					 	DEGREESINCIRCLE-(programmableWorker->heading * RADIANSTODEGREES),
 					 	NULL,
 					 	SDL_FLIP_NONE);

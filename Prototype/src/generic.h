@@ -78,6 +78,8 @@ each call to updateProgrammableWorker*/
 #define NUMBER_OF_TREES 25
 #define NUMBER_OF_FLOWER_PATCHES 5
 
+#define CARRYING_FLOWER_INDEX_OFFSET 2
+
 
 #define X_SIZE_OF_WORKER 40
 #define Y_SIZE_OF_WORKER 40
