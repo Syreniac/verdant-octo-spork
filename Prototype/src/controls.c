@@ -20,34 +20,35 @@ int handleEvent(SDL_Event *event, GameObjectData *gameObjectData, UIData *uiData
 				switch (event->window.event){
 					case SDL_WINDOWEVENT_RESIZED:
 						printf("window resized\n");
-						UIRoot_Execute(uiData,WINDOW_RESIZE,event);
+						UIRoot_Execute(uiData,WINDOW_RESIZE,0,event);
 						break;
 				}
+				break;
 			case SDL_MOUSEMOTION:
-				UIRoot_Execute(uiData,MOTION,event);
+				UIRoot_Execute(uiData,MOTION,0,event);
 				break;
 			case SDL_MOUSEBUTTONDOWN:
 				if(isMouseFree(controlsData)){
 					/* We only want to catch new mouse clicks if the mouse is not having
 					   a button held down */
 					/* trust me */
-	        if(event->button.button == SDL_BUTTON_LEFT){
-	          UIRoot_Execute(uiData,LEFT_CLICK,event);
-						controlsData->mouseButtons[LEFT_CLICK_BUTTON] = 1;
-	        }
-	        else if(event->button.button == SDL_BUTTON_RIGHT){
-	          UIRoot_Execute(uiData,RIGHT_CLICK,event);
-						controlsData->mouseButtons[RIGHT_CLICK_BUTTON] = 1;
-	        }
+					if(event->button.button == SDL_BUTTON_LEFT){
+					  UIRoot_ExecuteUpwards(uiData,LEFT_CLICK,1,event);
+								controlsData->mouseButtons[LEFT_CLICK_BUTTON] = 1;
+					}
+					else if(event->button.button == SDL_BUTTON_RIGHT){
+					  UIRoot_ExecuteUpwards(uiData,RIGHT_CLICK,1,event);
+								controlsData->mouseButtons[RIGHT_CLICK_BUTTON] = 1;
+					}
 				}
 				break;
 			case SDL_MOUSEBUTTONUP:
 				if(event->button.button == SDL_BUTTON_LEFT){
-				  UIRoot_Execute(uiData,LEFT_RELEASE,event);
+				  UIRoot_Execute(uiData,LEFT_RELEASE,0,event);
 							controlsData->mouseButtons[LEFT_CLICK_BUTTON] = 0;
 				}
 				else if(event->button.button == SDL_BUTTON_RIGHT){
-				  UIRoot_Execute(uiData,RIGHT_RELEASE,event);
+				  UIRoot_Execute(uiData,RIGHT_RELEASE,0,event);
 							controlsData->mouseButtons[RIGHT_CLICK_BUTTON] = 0;
 				}
 				break;
@@ -81,8 +82,13 @@ void keydown(ControlsData *controlsData, GameObjectData *gameObjectData, UIData 
             break;
 		case (SDL_SCANCODE_P):
             gameObjectData->pause_status = 1 - gameObjectData->pause_status; /* 1 for pause, 0 for go on */
-						UIRoot_Execute(uiData,RESPONSE_PAUSE);
+			UIRoot_Execute(uiData,RESPONSE_PAUSE,0);
             break;
+		case (SDL_SCANCODE_Q):
+			printf("DELETE key pressed\n");
+			controlsData->keys[DELETE] = 1;
+			UIRoot_ExecuteUpwards(uiData,RESPONSE_DELETE,1);
+			break;
         default:
 			return;
     }
@@ -102,6 +108,9 @@ void keyup(ControlsData *controlsData, GameObjectData *gameObjectData, UIData *u
         case (SDL_SCANCODE_LEFT):
 			controlsData->keys[ARROW_LEFT] = 0;
             break;
+		case (SDL_SCANCODE_DELETE):
+			controlsData->keys[DELETE] = 0;
+			break;
         default:
             return;
     }

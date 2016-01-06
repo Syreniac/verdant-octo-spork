@@ -45,15 +45,12 @@ InitData initialise(void){
   TTF_Init();
   initData.graphicsData.fonts[0] = TTF_OpenFont("font/Aclonica.ttf",16);
   initData.graphicsData.fonts[1] = TTF_OpenFont("font/Aclonica.ttf",12);
-	
+
 	loadMusic("sound/music01.wav" , 0, &initData.audioData);
 	loadMusic("sound/music02.wav" , 1, &initData.audioData);
 	loadMusic("sound/music03.wav" , 1, &initData.audioData);
-	printf("ALL MUSIC LOADED\n");
 	loadSoundEffect("sound/returnFlower.wav", "returnFlower", &initData.audioData);
-	printf("FIRST SOUND EFFECT LOADED\n");
 	loadSoundEffect("sound/thunder.wav", "thunder", &initData.audioData);
-	printf("ALL SOUND EFFECTS LOADED\n");
 
   return initData;
 }
@@ -64,7 +61,7 @@ void uninitialise(void){
 }
 
 void audioSystem(AudioData *AudioSettings){
-	
+
 	AudioSettings->audio_rate = 44100;
 	AudioSettings->audio_format = AUDIO_S16SYS;
 	AudioSettings->audio_channels = 2;
@@ -110,9 +107,7 @@ int game_welcome_page(GraphicsData graphicsData, AudioData audioData){
 
    initData.uiData.root = UIElement_Create(0,0,win_x,win_y,2);
    UIConfigure_DisplayImage(initData.uiData.root,&initData.uiData.root->actions[0],graphicsData.mainMenuImage);
-   UIConfigure_InverseRect(initData.uiData.root,&initData.uiData.root->actions[1],0,0,0,0);
-
-   printf("made the background image\n");
+   UIConfigure_InverseRect(initData.uiData.root,&initData.uiData.root->actions[1],0,0,0,0,0);
 
    element = UIElement_CreateByPercentage(0.56f,0.7f,0.35f,0.1f,win_x,win_y,4);
    UIConfigure_Counter(element,&element->actions[0]);
@@ -129,20 +124,18 @@ int game_welcome_page(GraphicsData graphicsData, AudioData audioData){
 
     element2 = UIElement_Create((win_x - 30), win_y - 30, 30, 30, 2);
     UIConfigure_FillRect(element2, &element2->actions[0],228,240,3);
-	UIConfigure_InverseRect(element2, &element2->actions[1],-30,-30,30,30);
+	UIConfigure_InverseRect(element2, &element2->actions[1],-30,-30,30,30,0);
     UIElement_Reparent(element2,initData.uiData.root);
-
 	UIRoot_Pack(&initData.uiData,&initData.graphicsData);
-    printf("made ui\n");
 
-   playMusic(&initData.audioData,0);   
-   
+   playMusic(&initData.audioData,0);
+
    while(menuRunning){
 
-      UIRoot_Execute(&initData.uiData,UPDATE);
+      /*UIRoot_Execute(&initData.uiData,UPDATE,0);*/
 
       paintBackground(&initData.graphicsData,0,200,100);
-      UIRoot_Execute(&initData.uiData,RENDER,&initData.graphicsData);
+      UIRoot_Execute(&initData.uiData,RENDER,0,&initData.graphicsData);
 
       SDL_RenderPresent(initData.graphicsData.renderer);
     	while (SDL_PollEvent(&event))
@@ -152,14 +145,12 @@ int game_welcome_page(GraphicsData graphicsData, AudioData audioData){
 				case SDL_WINDOWEVENT:
 					switch (event.window.event){
 						case SDL_WINDOWEVENT_RESIZED:
-							printf("window resized\n");
-							UIRoot_Execute(&initData.uiData,WINDOW_RESIZE,&event);
+							UIRoot_Execute(&initData.uiData,WINDOW_RESIZE,0,&event);
 							break;
 					}
     			/* Closing the Window will exit the program */
     			case SDL_MOUSEBUTTONDOWN:
-   				   UIRoot_Execute(&initData.uiData,LEFT_CLICK,&event);
-             printf("execute\n");
+   				   UIRoot_ExecuteUpwards(&initData.uiData,LEFT_CLICK,1,&event);
    				   break;
     			case SDL_QUIT:
     				exit(0);
@@ -171,6 +162,8 @@ int game_welcome_page(GraphicsData graphicsData, AudioData audioData){
 		}
       menuRunning = (!initData.uiData.root->child->actions[0].status);
    }
+
+   UIRoot_Destroy(&initData.uiData);
 
    fadeOutMusic(&initData.audioData);
    /*stopMusic(&initData.audioData, 0);*/

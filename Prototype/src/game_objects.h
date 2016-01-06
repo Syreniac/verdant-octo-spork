@@ -4,6 +4,7 @@ enum ProgrammableWorkerStatus {LEAVING = 1,
                                RETURNING = 2,
                                WANTING_TO_RETURN = 3,
                                NODE_FOUND = 4,
+							   IDLE = 5,
                                BLANK = -1};
 
 typedef struct ProgrammableWorker ProgrammableWorker;

@@ -9,10 +9,12 @@ int main(int argc, char *argv[]){
      functions from other modules */
 
   InitData initData;
-	 
-  printf("main\n");
+
+  #if DEBUGGING==1
+  DEBUGGING_FILE_ALLOC= fopen("debug_output_alloc.txt","w");
+  DEBUGGING_FILE_FREE= fopen("debug_output_free.txt","w");
+  #endif
   initData  = initialise();
-  printf("initialised\n");
   game_welcome_page(initData.graphicsData,initData.audioData);
   uninitialise();
   exit(0);
