@@ -88,6 +88,16 @@ int countProgrammableWorkersInRange(GameObjectData *gameObjectData, SDL_Point ce
 	return i;
 }
 
+int isProgrammableWorkerInRangeOf(ProgrammableWorker *worker, SDL_Point center, double radius){
+	SDL_Point point;
+	radius = radius * radius;
+	point = getCenterOfRect(worker->rect);
+	if(getDistance2BetweenPoints(center.x,center.y,point.x,point.y) <= radius){
+		return 1;
+	}
+	return 0;
+}
+
 int getFirstDeadResourceNode(ResourceNodeSpawner *resourceNodeSpawner){
 	/* ResourceNodeSpawner *resourceNodeSpawner = the pointer to the
 												ResourceNodeSpawner we're
@@ -169,8 +179,8 @@ IceCreamPerson *createIceCreamPerson(void){
 	iceCreamPerson->currently_on_screen = 0;
 	iceCreamPerson->has_ice_cream = 0;
 	iceCreamPerson->speed = 0;
-	iceCreamPerson->stung_count = 0;
-  	iceCreamPerson->stings_until_ice_cream_drop = 0;
+	iceCreamPerson->stung = 0;
+
 	return iceCreamPerson;
 
 }
@@ -183,7 +193,7 @@ DroppedIceCream *createDroppedIceCream(void){
 	/* (when the time is right for the person to appear, x y co-ordinates*/
 	/*can be reassigned values that exist inside the world boundaries)*/
 	droppedIceCream->dropped = 0;
-	droppedIceCream->collected = 0;
+	droppedIceCream->droppedTimer = 0;
 	droppedIceCream->sizeOscillator = 1;
 	return droppedIceCream;
 }
@@ -259,8 +269,11 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
 		programmableWorker->rawY += newY;
 		programmableWorker->rect.x = (int)floor(programmableWorker->rawX);
 		programmableWorker->rect.y = (int)floor(programmableWorker->rawY);
+		
 
 		resourceNode = checkResourceNodeCollision(&resourceNodeSpawner,gameObjectData,programmableWorker);
+	
+
 
 		if(programmableWorker->status == IDLE){
 			if(getDistance2BetweenRects(programmableWorker->rect,gameObjectData->hive.rect) > 100 * 100){
@@ -270,29 +283,49 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
 			}
 		}
 		else if(getDistance2BetweenRects(programmableWorker->rect,gameObjectData->hive.rect) < 50.0 && programmableWorker->status == RETURNING){
-			if(programmableWorker->cargo != 0){
+			if(programmableWorker->cargo == SUGAR_VALUE_OF_FLOWER){
 				programmableWorker->cargo = 0;
-				gameObjectData->hive.flowers_collected++;
+				gameObjectData->hive.flowers_collected += SUGAR_VALUE_OF_FLOWER;
 				if(gameObjectData->hive.flowers_collected % 50 == 0){
 					playSoundEffect(2, &gameObjectData->audioData, "returnFlower");
 				}
+			}else if(programmableWorker->cargo == SUGAR_VALUE_OF_ICECREAM){
+				programmableWorker->cargo = 0;
+				gameObjectData->hive.flowers_collected += SUGAR_VALUE_OF_ICECREAM;
+				if(gameObjectData->hive.flowers_collected % 50 < SUGAR_VALUE_OF_ICECREAM){
+					playSoundEffect(2, &gameObjectData->audioData, "returnFlower");
+				}			
 			}
+			
 			programmableWorker->status = IDLE;
 		}
 		else if(programmableWorker->status == LEAVING){
   		/* status being 1 means that the bee heading away from the center */
+  		
+  			/*if programmable worker is clsoe enough to dropped icecream, it is not the very same second that the person dropped it*/
+  			/* then the worker picks up the iceCream*/
+			if(isProgrammableWorkerInRangeOf(programmableWorker, getCenterOfRect(gameObjectData->droppedIceCream->rect),
+			(double)ICECREAM_PICKUP_RADIUS) && gameObjectData->droppedIceCream->dropped){
+			
+				programmableWorker->cargo += SUGAR_VALUE_OF_ICECREAM;
+				gameObjectData->droppedIceCream->dropped = 0;
+				gameObjectData->droppedIceCream->droppedTimer = 0;
 
-  		/* We want to get back the ResourceNode and ResourceNodeSpawner (if any)
-  		that we are colliding with */
-  		/* resourceNode will be NULL if there are no collisions, so test that */
-  		if(resourceNode != NULL){
-    		/* Kill the ResourceNode */
-    		resourceNode->alive = 0;
-    		/* Make sure the ResourceNodeSpawner knows that it's lost a ResourceNode */
-    		resourceNodeSpawner->currentNodeCount--;
-    		programmableWorker->cargo++;
-    		programmableWorker->brain.foundNode = NULL;
-  		}
+				
+			}else{
+  				/* We want to get back the ResourceNode and ResourceNodeSpawner (if any)
+  				that we are colliding with */
+  				/* resourceNode will be NULL if there are no collisions, so test that */
+  				if(resourceNode != NULL){
+    				/* Kill the ResourceNode */
+    				resourceNode->alive = 0;
+    				/* Make sure the ResourceNodeSpawner knows that it's lost a ResourceNode */
+    				resourceNodeSpawner->currentNodeCount--;
+    				programmableWorker->cargo++;/*assumes sugar value of flower to be 1*/
+    				programmableWorker->brain.foundNode = NULL;
+  				}
+  			}
+  			
 		}
 	}
 	else{ /*programmable worker has been caught in rain and hasn't regained ability to fly yet*/
@@ -376,22 +409,22 @@ void updateIceCreamPerson(GameObjectData *gameObjectData, int ticks){
 	gameObjectData->iceCreamPerson->rect.x = (int)floor(gameObjectData->iceCreamPerson->xPosition);
 	gameObjectData->iceCreamPerson->rect.y = (int)floor(gameObjectData->iceCreamPerson->yPosition);
 	
-  	if(countProgrammableWorkersInRange(gameObjectData, getCenterOfRect(gameObjectData->iceCreamPerson->rect), STING_HIT_RADIUS) != 0){
-  		gameObjectData->iceCreamPerson->stung_count++;
-  		/*if iceCream not yet dropped but sting threshold has been achieved*/
-  		if(!gameObjectData->droppedIceCream->dropped &&
-  		gameObjectData->iceCreamPerson->stung_count >= gameObjectData->iceCreamPerson->stings_until_ice_cream_drop){
-  			/*drop iceCream!*/
-  			gameObjectData->iceCreamPerson->has_ice_cream = 0;
+	/*if iceCreamPerson not yet stung, and bee is close enough to sting*/
+  	if(!gameObjectData->iceCreamPerson->stung && countProgrammableWorkersInRange(gameObjectData,
+  	getCenterOfRect(gameObjectData->iceCreamPerson->rect), STING_HIT_RADIUS) != 0){
+  	
+  		gameObjectData->iceCreamPerson->stung = 1;
+  		/*drop iceCream!*/
+  		gameObjectData->iceCreamPerson->has_ice_cream = 0;
   			
-  			gameObjectData->droppedIceCream->xPosition = gameObjectData->iceCreamPerson->xPosition;
-  			gameObjectData->droppedIceCream->yPosition = gameObjectData->iceCreamPerson->yPosition;
+  		gameObjectData->droppedIceCream->xPosition = gameObjectData->iceCreamPerson->xPosition;
+  		gameObjectData->droppedIceCream->yPosition = gameObjectData->iceCreamPerson->yPosition;
   			
-  			gameObjectData->droppedIceCream->dropped = 1;
-  			gameObjectData->droppedIceCream->collected = 0;
-  			/*run for your life!*/
-  			gameObjectData->iceCreamPerson->speed = 0.1;
-  		}
+  		gameObjectData->droppedIceCream->dropped = 1;
+
+  		/*run for your life!*/
+  		gameObjectData->iceCreamPerson->speed = 0.1;
+  		
   	}
 
 	if(countProgrammableWorkersInRange(gameObjectData, getCenterOfRect(gameObjectData->iceCreamPerson->rect), 250.0) == 0 && !gameObjectData->iceCreamPerson->going_home){
@@ -576,7 +609,7 @@ void reInitialiseIceCreamPerson(IceCreamPerson *iceCreamPerson){
 	iceCreamPerson->has_ice_cream = 1;
 	iceCreamPerson->going_home = 0;
 	iceCreamPerson->speed = 0.05; /*pixels per millisecond*/
-	iceCreamPerson->stung_count = 0;
+	iceCreamPerson->stung = 0;
 
 	iceCreamPerson->countDownToStride = (double)STRIDE_FREQUENCY / iceCreamPerson->speed;
 
@@ -584,7 +617,7 @@ void reInitialiseIceCreamPerson(IceCreamPerson *iceCreamPerson){
 
 
 
-  iceCreamPerson->stings_until_ice_cream_drop = (rand() % 5) + 1;
+
 
 }
 
@@ -687,25 +720,44 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 	}
 	}
 	
-	if(gameObjectData->droppedIceCream->dropped && !gameObjectData->droppedIceCream->collected){
-		if(gameObjectData->droppedIceCream->rect.w >= MAX_DROPPED_ICECREAM_WIDTH){
-			gameObjectData->droppedIceCream->sizeOscillator = -1;
-		}else if(gameObjectData->droppedIceCream->rect.w <= DROPPED_ICECREAM_WIDTH){
-			gameObjectData->droppedIceCream->sizeOscillator = 1;
-		}
-		gameObjectData->droppedIceCream->rect.w += gameObjectData->droppedIceCream->sizeOscillator;
-		gameObjectData->droppedIceCream->xPosition -= ((float)gameObjectData->droppedIceCream->sizeOscillator)/2.0;
-		gameObjectData->droppedIceCream->rect.x = gameObjectData->droppedIceCream->xPosition;
+	/*if icecream is on the ground*/
+	if(gameObjectData->droppedIceCream->dropped){
+		/*but not yet melted*/
+		if(gameObjectData->droppedIceCream->droppedTimer < MELT_TIME_THRESHOLD){
+			gameObjectData->droppedIceCream->droppedTimer++;
+			if(gameObjectData->droppedIceCream->rect.w >= MAX_DROPPED_ICECREAM_WIDTH){
+				gameObjectData->droppedIceCream->sizeOscillator = -1;
+			}else if(gameObjectData->droppedIceCream->rect.w <= DROPPED_ICECREAM_WIDTH){
+				gameObjectData->droppedIceCream->sizeOscillator = 1;
+			}
+			gameObjectData->droppedIceCream->rect.w += gameObjectData->droppedIceCream->sizeOscillator;
+			gameObjectData->droppedIceCream->xPosition -= ((float)gameObjectData->droppedIceCream->sizeOscillator)/2.0;
+			gameObjectData->droppedIceCream->rect.x = gameObjectData->droppedIceCream->xPosition;
 		
-		gameObjectData->droppedIceCream->rect.h += gameObjectData->droppedIceCream->sizeOscillator;
-		gameObjectData->droppedIceCream->yPosition -= ((float)gameObjectData->droppedIceCream->sizeOscillator)/2.0;
-		gameObjectData->droppedIceCream->rect.y = gameObjectData->droppedIceCream->yPosition;
-  	 	blitGameObject(gameObjectData->droppedIceCream->rect,
-                  	graphicsData,
-                   	graphicsData->droppedIceCreamTexture,
-                   	0,
-                   	NULL,
-                   	SDL_FLIP_NONE);	
+			gameObjectData->droppedIceCream->rect.h += gameObjectData->droppedIceCream->sizeOscillator;
+			gameObjectData->droppedIceCream->yPosition -= ((float)gameObjectData->droppedIceCream->sizeOscillator)/2.0;
+			gameObjectData->droppedIceCream->rect.y = gameObjectData->droppedIceCream->yPosition;
+  	 		blitGameObject(gameObjectData->droppedIceCream->rect,
+            	      	graphicsData,
+                	   	graphicsData->droppedIceCreamTexture,
+                	   	0,
+                	   	NULL,
+                	   	SDL_FLIP_NONE);	
+        }else{
+        	gameObjectData->droppedIceCream->droppedTimer++;
+        	if(gameObjectData->droppedIceCream->droppedTimer < MELT_TIME_THRESHOLD + 40){
+        		/*allow a bit of time to display the melted icecream (hence +40)*/
+        		blitGameObject(gameObjectData->droppedIceCream->rect,
+            	      	graphicsData,
+                	   	graphicsData->meltedIceCreamTexture,
+                	   	0,
+                	   	NULL,
+                	   	SDL_FLIP_NONE);	
+        	}else{/*now get rid of icecream*/
+        		gameObjectData->droppedIceCream->dropped = 0;
+        		gameObjectData->droppedIceCream->droppedTimer = 0;
+        	}
+        }
 	}
 
 	 /*determine if iceCreamPerson is on screen and needs animating*/
@@ -749,7 +801,8 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 		blitGameObject(programmableWorker->rect,
 					 	graphicsData,
 					 	graphicsData->bee->graphic[programmableWorker->currentGraphicIndex +
-                   		((!programmableWorker->cargo) ? 0 : CARRYING_FLOWER_INDEX_OFFSET)],
+                   		((programmableWorker->cargo == SUGAR_VALUE_OF_FLOWER) ? CARRYING_FLOWER_INDEX_OFFSET :
+                   		((programmableWorker->cargo == SUGAR_VALUE_OF_ICECREAM) ? CARRYING_ICECREAM_INDEX_OFFSET : 0))],
 					 	DEGREESINCIRCLE-(programmableWorker->heading * RADIANSTODEGREES),
 					 	NULL,
 					 	SDL_FLIP_NONE);

@@ -101,7 +101,7 @@ struct DroppedIceCream{
 	float yPosition;
 	SDL_Rect rect;
 	int dropped;
-	int collected;
+	int droppedTimer;
 	int sizeOscillator;
 };
 
@@ -120,8 +120,7 @@ struct IceCreamPerson{
 
   int has_ice_cream;
   int currently_on_screen;
-  int stung_count;
-  int stings_until_ice_cream_drop;
+  int stung;
 };
 
 struct Weather{
@@ -170,5 +169,6 @@ DroppedIceCream *createDroppedIceCream(void);
 void reInitialiseIceCreamPerson(IceCreamPerson *iceCreamPerson);
 void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsData, int ticks);
 int countProgrammableWorkersInRange(GameObjectData *gameObjectData, SDL_Point center, double radius);
+int isProgrammableWorkerInRangeOf(ProgrammableWorker *work, SDL_Point center, double radius);
 
 void initAudio(GameObjectData *gameObjectData, AudioData audioData);

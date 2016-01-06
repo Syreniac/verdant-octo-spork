@@ -97,7 +97,8 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
 					  &gameData.graphicsData, 1);
 					  
   gameData.graphicsData.droppedIceCreamTexture = loadTextureFromFile("images/person/droppedIceCream.bmp", &gameData.graphicsData, 1);
-
+  gameData.graphicsData.meltedIceCreamTexture = loadTextureFromFile("images/person/meltedIceCream.bmp", &gameData.graphicsData, 1);
+  
   gameData.graphicsData.rainy = (Rainy*) malloc(sizeof(Rainy));
 
   gameData.graphicsData.rainy->graphic[0] = loadTextureFromFile("images/rain/rain1.bmp", &gameData.graphicsData, 1);
@@ -119,6 +120,11 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
 														  &gameData.graphicsData, 1);
   gameData.graphicsData.bee->graphic[BEE_FLAP_GRAPHIC_2 + CARRYING_FLOWER_INDEX_OFFSET] = loadTextureFromFile("images/beeWithFlower2.bmp",
 														  &gameData.graphicsData, 1);
+
+  gameData.graphicsData.bee->graphic[BEE_FLAP_GRAPHIC_1 + CARRYING_ICECREAM_INDEX_OFFSET] =
+  loadTextureFromFile("images/beeWithIcecream.bmp", &gameData.graphicsData, 1);
+  gameData.graphicsData.bee->graphic[BEE_FLAP_GRAPHIC_2 + CARRYING_ICECREAM_INDEX_OFFSET] =
+  loadTextureFromFile("images/beeWithIcecream2.bmp",&gameData.graphicsData, 1);
 
   gameData.graphicsData.hiveTexture = loadTextureFromFile("images/beehive.bmp",
 														  &gameData.graphicsData, 1);
