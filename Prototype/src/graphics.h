@@ -29,6 +29,7 @@ struct GraphicsData{
   SDL_Texture *nodeTexture;
   SDL_Texture *hiveTexture;
   SDL_Texture *treeTexture;
+  SDL_Texture *treeStumpTexture;
   SDL_Texture *grassTexture;
   TTF_Font *fonts[2];
   SDL_Texture *droppedIceCreamTexture;

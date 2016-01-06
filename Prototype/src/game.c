@@ -75,6 +75,7 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
 
   gameData.graphicsData.grassTexture = loadTextureFromFile("images/grass/grass4.bmp",&gameData.graphicsData, 0);
   gameData.graphicsData.treeTexture = loadTextureFromFile("images/tree.bmp",&gameData.graphicsData, 1);
+  gameData.graphicsData.treeStumpTexture = loadTextureFromFile("images/stump.bmp",&gameData.graphicsData, 1);
   gameData.graphicsData.nodeTexture = loadTextureFromFile("images/blueFlower.bmp",
 														  &gameData.graphicsData, 1);
 

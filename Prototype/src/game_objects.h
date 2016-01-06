@@ -93,6 +93,7 @@ struct Tree{
   float xPosition;
   float yPosition;
   SDL_Rect rect;
+  SDL_Rect stumpRect;
   int bees_taking_shelter;
 };
 

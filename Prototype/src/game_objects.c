@@ -224,8 +224,12 @@ Tree createTree(void){
 	Tree tree;
 	tree.rect.w = SIZE_OF_TREE;
 	tree.rect.h = SIZE_OF_TREE;
+	tree.stumpRect.w = SIZE_OF_TREESTUMP;
+	tree.stumpRect.h = SIZE_OF_TREESTUMP;
 	tree.rect.x = rand() % X_SIZE_OF_WORLD - SIZE_OF_TREE/2;
 	tree.rect.y = rand() % Y_SIZE_OF_WORLD - SIZE_OF_TREE/2;
+	tree.stumpRect.x = tree.rect.x + (SIZE_OF_TREE / 2) - (SIZE_OF_TREESTUMP / 2);
+	tree.stumpRect.y = tree.rect.y + (SIZE_OF_TREE / 2) - (SIZE_OF_TREESTUMP / 2);
 	tree.bees_taking_shelter = 0;
 	return tree;
 }
@@ -817,10 +821,16 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 
 	/* render tree tops last, so that they appear above everything else*/
 	for(i = 0; i < NUMBER_OF_TREES; i++){
+		blitGameObject(gameObjectData->tree[i].stumpRect,
+					 	graphicsData,
+					 	graphicsData->treeStumpTexture,
+					 	0,
+					 	NULL,
+					 	SDL_FLIP_NONE);
 
-	 blitParallaxTreeTops(gameObjectData->tree[i].rect,
-					graphicsData,
-					graphicsData->treeTexture);
+	 	blitParallaxTreeTops(gameObjectData->tree[i].rect,
+						graphicsData,
+						graphicsData->treeTexture);
 	}
 
 	/*finally render a layer or rain splatter if its raining*/

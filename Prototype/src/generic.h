@@ -58,7 +58,7 @@ each call to updateProgrammableWorker*/
 #define BEE_SHRINK_FACTOR_ON_GROUND 1.2
 
 /*higher values result in lower levels of parallax*/
-#define PARALLAX_INTENSITY 10
+#define PARALLAX_INTENSITY 20
 
 #define DROPPED_ICECREAM_HEIGHT 50
 #define DROPPED_ICECREAM_WIDTH 50
@@ -81,6 +81,7 @@ each call to updateProgrammableWorker*/
 #define STING_HIT_RADIUS PERSON_HEIGHT
 
 #define SIZE_OF_TREE 200
+#define SIZE_OF_TREESTUMP 70
 #define NUMBER_OF_TREES 25
 #define NUMBER_OF_FLOWER_PATCHES 5
 
