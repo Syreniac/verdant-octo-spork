@@ -877,9 +877,25 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 		}
 		
 		if(programmableWorker->displayInfo){
+		  	int window_x,window_y, tempXOffset, tempYOffset;
 			SDL_Point point = getCenterOfRect(programmableWorker->rect);
+			
 			renderRadius(graphicsData, &point, WORKER_PERCEPTION_RADIUS, 255,255,255, 180);
+ 			SDL_GetWindowSize(graphicsData->window,&window_x,&window_y);
+			
+			tempXOffset = -programmableWorker->rawX + (programmableWorker->xRenderPosWhenSelected);
+			tempYOffset = -programmableWorker->rawY  + (programmableWorker->yRenderPosWhenSelected);
+			
+			if(tempXOffset > -X_SIZE_OF_WORLD + window_x && tempXOffset < 0){
+				graphicsData->navigationOffset.x = tempXOffset;
+			}
+			
+			if(tempYOffset > -Y_SIZE_OF_WORLD + window_y && tempYOffset < 0){
+				graphicsData->navigationOffset.y = tempYOffset;
+			}
 		}
+		
+		
 		
 		blitGameObject(programmableWorker->rect,
 					 	graphicsData,
@@ -937,7 +953,7 @@ void objectInfoDisplay(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 	point.x = mbEvent->x - graphicsData->navigationOffset.x;
 	point.y = mbEvent->y - graphicsData->navigationOffset.y;
 	
-	
+	graphicsData->trackingMode = 0;
 	
 	for(i = 0; i < NUMBER_OF_TREES; i++){
 		if(isPointInRangeOf(getCenterOfRect(gameObjectData->tree[i].rect), point, SIZE_OF_TREE/2)){
@@ -957,7 +973,10 @@ void objectInfoDisplay(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 		if(isPointInRangeOf(getCenterOfRect(worker->rect), point, worker->rect.w/2)){
 			if(!displayInfoAlreadySet){	
 				worker->displayInfo = 1;
+				worker->xRenderPosWhenSelected = worker->rect.x + graphicsData->navigationOffset.x;
+				worker->yRenderPosWhenSelected = worker->rect.y + graphicsData->navigationOffset.y;
 				displayInfoAlreadySet = 1;
+				graphicsData->trackingMode = 1;
 			}else{
 				worker->displayInfo = 0;
 			}

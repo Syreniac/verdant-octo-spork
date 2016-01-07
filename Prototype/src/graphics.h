@@ -25,6 +25,7 @@ enum WeatherStatus {/*Should belong in game_objects.h, but graphics.c needs to a
 struct GraphicsData{
   SDL_Window *window;
   SDL_Rect navigationOffset;
+  int trackingMode;
   SDL_Renderer *renderer;
   SDL_Texture *nodeTexture;
   SDL_Texture *hiveTexture;

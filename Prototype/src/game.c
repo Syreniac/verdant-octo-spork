@@ -48,6 +48,8 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
   gameData.graphicsData.navigationOffset.y = Y_INITIAL_SCREEN_OFFSET; /*setting initial y offset ot center of world*/
   gameData.graphicsData.navigationOffset.w = X_SIZE_OF_WORLD;
   gameData.graphicsData.navigationOffset.h = Y_SIZE_OF_WORLD;
+  
+  gameData.graphicsData.trackingMode = 0;
 
 
 
@@ -377,7 +379,9 @@ int gameLoop(GameData *gameData){
   UIRoot_Execute(&gameData->uiData,AI_RESPONSE,0,&gameData->aiData);
   UIRoot_Execute(&gameData->uiData,UPDATE,0,delta_t);
 
-  panScreen(&gameData->graphicsData, &gameData->controlsData, delta_t);
+  if(!gameData->graphicsData.trackingMode){
+  	panScreen(&gameData->graphicsData, &gameData->controlsData, delta_t);
+  }
   
   if(SDL_RenderClear(gameData->graphicsData.renderer) == -1){
 	   printf("Error clearing renderer: %s\n", SDL_GetError());
