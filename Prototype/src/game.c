@@ -157,16 +157,29 @@ static void createGameUI(GameData *gameData){
   int j = 0;
   int topX = 60;
   int topY = 60;
+  
+  SDL_DisplayMode dm;
 
   SDL_GetWindowSize(gameData->graphicsData.window,&win_x, &win_y);
+  
+  /*get dimensions of the display monitor*/
+  SDL_GetCurrentDisplayMode(0, &dm);
+  
+  /* top information bar */
+  element = UIElement_Create(0,0,dm.w,30,2);
+  UIConfigure_FillRect(element,&element->actions[0],0,0,0);
+  UIConfigure_PercPosition(element, &element->actions[1],1.0,0.0,-dm.w,0,0);
+  UIElement_Reparent(element,gameData->uiData.root);
 
   /* Score counter */
-  element = UIElement_Create(0,0,150,50,4);
+  element = UIElement_Create(0,0,150,30,4);
   UIConfigure_FillRect(element,&element->actions[0],255,255,255);
   UIConfigure_DisplayNumber(element, &element->actions[1], 0,0);
   UIConfigure_ResourceCounter(element, &element->actions[2],1,&element->actions[1]);
   UIConfigure_PercPosition(element, &element->actions[3],1.0,0.0,-150,0,0);
   UIElement_Reparent(element,gameData->uiData.root);
+  
+  
 
   element = UIElement_Create(win_x/2,win_y - 50,200,50,6);
   UIConfigure_Auto(element, &element->actions[0], RESPONSE_PAUSE);
@@ -365,6 +378,7 @@ int gameLoop(GameData *gameData){
   UIRoot_Execute(&gameData->uiData,UPDATE,0,delta_t);
 
   panScreen(&gameData->graphicsData, &gameData->controlsData, delta_t);
+  
   if(SDL_RenderClear(gameData->graphicsData.renderer) == -1){
 	   printf("Error clearing renderer: %s\n", SDL_GetError());
   }
@@ -389,7 +403,7 @@ int gameLoop(GameData *gameData){
   /* Don't worry too much about this for now */
 	while (SDL_PollEvent(&event))
 	{
-		handleEvent(&event,&gameData->gameObjectData,&gameData->uiData,&gameData->controlsData);
+		handleEvent(&event,&gameData->gameObjectData,&gameData->uiData,&gameData->controlsData, &gameData->graphicsData);
 	}
   if (Mix_Playing(1) == 0) {
 	 playMusic(&gameData->audioData,1);

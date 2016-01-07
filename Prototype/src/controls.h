@@ -27,4 +27,4 @@ void keydown(ControlsData *controlsData, GameObjectData *gameObjectData, UIData 
 void keyup(ControlsData *controlsData, GameObjectData *gameObjectData, UIData *uiData, SDL_Event *event);
 void panScreen(GraphicsData *graphicsData, ControlsData *controlsData, int delta_t);
 void initControlData(ControlsData *controlsData);
-int handleEvent(SDL_Event *event, GameObjectData *gameObjectData, UIData *uiData, ControlsData *controlsData);
+int handleEvent(SDL_Event *event, GameObjectData *gameObjectData, UIData *uiData, ControlsData *controlsData, GraphicsData *graphicsData);

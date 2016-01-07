@@ -28,6 +28,7 @@ struct ResourceNode{
   /* How many resources (e.g. Honey) are in a node*/
   int resourceUnits;
   /* standard positioning data - x,y coords */
+  int displayInfo;
   SDL_Rect rect;
 };
 
@@ -75,6 +76,8 @@ struct ProgrammableWorker{
 
 
   int cargo;
+  
+  int displayInfo;
 
   int type;
   enum ProgrammableWorkerStatus status;
@@ -86,6 +89,7 @@ struct Hive{
   float xPosition;
   float yPosition;
   SDL_Rect rect;
+  int displayInfo;
   int flowers_collected;
 };
 
@@ -95,6 +99,7 @@ struct Tree{
   SDL_Rect rect;
   SDL_Rect stumpRect;
   int bees_taking_shelter;
+  int displayInfo;
 };
 
 struct DroppedIceCream{
@@ -104,6 +109,7 @@ struct DroppedIceCream{
 	int dropped;
 	int droppedTimer;
 	int sizeOscillator;
+	int displayInfo;
 };
 
 struct IceCreamPerson{
@@ -122,6 +128,7 @@ struct IceCreamPerson{
   int has_ice_cream;
   int currently_on_screen;
   int stung;
+  int displayInfo;
 };
 
 struct Weather{
@@ -170,6 +177,7 @@ DroppedIceCream *createDroppedIceCream(void);
 void reInitialiseIceCreamPerson(IceCreamPerson *iceCreamPerson);
 void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsData, int ticks);
 int countProgrammableWorkersInRange(GameObjectData *gameObjectData, SDL_Point center, double radius);
-int isProgrammableWorkerInRangeOf(ProgrammableWorker *work, SDL_Point center, double radius);
+int isPointInRangeOf(SDL_Point point, SDL_Point center, double radius);
 
 void initAudio(GameObjectData *gameObjectData, AudioData audioData);
+void objectInfoDisplay(GameObjectData *gameObjectData, GraphicsData *graphicsData, SDL_MouseButtonEvent *mbEvent);

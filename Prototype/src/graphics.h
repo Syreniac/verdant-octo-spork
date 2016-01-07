@@ -69,3 +69,5 @@ void blitRainRandomly(GraphicsData *graphicsData);
 void blitTiledBackground(GraphicsData *graphicsData, SDL_Texture *texture);
 SDL_Texture *loadTextureFromFile(char *file_name, GraphicsData *graphicsData, char toggleAlpha);
 void paintBackground(GraphicsData *graphicsData, int r, int g, int b);
+void renderRadius(GraphicsData *graphicsData, SDL_Point *point, double radius, Uint8 r, Uint8 g, Uint8 b, Uint8 a);
+void renderFillRadius(GraphicsData *graphicsData, SDL_Point *point, double radius, Uint8 r, Uint8 g, Uint8 b, Uint8 a);

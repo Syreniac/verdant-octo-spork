@@ -180,4 +180,49 @@ void paintBackground(GraphicsData *graphicsData, int r, int g, int b){
     	SDL_SetRenderDrawColor(graphicsData->renderer,o_r,o_g,o_b,o_a);
 }
 
+void renderRadius(GraphicsData *graphicsData, SDL_Point *point, double radius, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
+{
+	double currOffsetX, currOffsetY;
+	point->x += graphicsData->navigationOffset.x;
+	point->y += graphicsData->navigationOffset.y;
+
+	SDL_SetRenderDrawColor(graphicsData->renderer, r,g,b, a);
+			   
+    for (currOffsetY = 1; currOffsetY <= radius; currOffsetY ++) {
+         currOffsetX = floor(sqrt((2.0 * radius * currOffsetY) - (pow(currOffsetY, 2))));
+         SDL_RenderDrawPoint(graphicsData->renderer, point->x - currOffsetX, point->y + radius - currOffsetY);
+         SDL_RenderDrawPoint(graphicsData->renderer, point->x - currOffsetX, point->y - radius + currOffsetY);
+         SDL_RenderDrawPoint(graphicsData->renderer, point->x + currOffsetX, point->y + radius - currOffsetY);
+         SDL_RenderDrawPoint(graphicsData->renderer, point->x + currOffsetX, point->y - radius + currOffsetY);
+    }
+
+}
+
+void renderFillRadius(GraphicsData *graphicsData, SDL_Point *point, double radius, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
+{
+	double currOffsetX, currOffsetY;
+	point->x += graphicsData->navigationOffset.x;
+	point->y += graphicsData->navigationOffset.y;
+
+	SDL_SetRenderDrawColor(graphicsData->renderer, r,g,b, a);
+			   
+    for (currOffsetY = 1; currOffsetY <= radius; currOffsetY ++) {
+         currOffsetX = floor(sqrt((2.0 * radius * currOffsetY) - (pow(currOffsetY, 2))));
+         SDL_RenderDrawLine(graphicsData->renderer,
+         					point->x - currOffsetX,
+         					point->y + radius - currOffsetY,
+         					point->x + currOffsetX,
+         					point->y + radius - currOffsetY);
+         if(currOffsetY + 1 <= radius){
+        	 SDL_RenderDrawLine(graphicsData->renderer,
+         						point->x - currOffsetX,
+         						point->y - radius + currOffsetY,
+         						point->x + currOffsetX,
+         						point->y - radius + currOffsetY);
+         }
+
+    }
+
+}
+
 
