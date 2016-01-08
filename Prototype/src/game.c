@@ -48,7 +48,7 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
   gameData.graphicsData.navigationOffset.y = Y_INITIAL_SCREEN_OFFSET; /*setting initial y offset ot center of world*/
   gameData.graphicsData.navigationOffset.w = X_SIZE_OF_WORLD;
   gameData.graphicsData.navigationOffset.h = Y_SIZE_OF_WORLD;
-  
+
   gameData.graphicsData.trackingMode = 0;
 
 
@@ -90,7 +90,7 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
   gameData.graphicsData.person->graphic[WITH_ICE_CREAM_STRIDE2] =
   loadTextureFromFile("images/person/withIceCream2.bmp",
 					  &gameData.graphicsData, 1);
-					  
+
   gameData.graphicsData.person->graphic[WITH_ICE_CREAM_STRIDE1 + NO_ICECREAM_INDEX_OFFSET] =
   loadTextureFromFile("images/person/withoutIceCream1.bmp",
 					  &gameData.graphicsData, 1);
@@ -98,10 +98,10 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
   gameData.graphicsData.person->graphic[WITH_ICE_CREAM_STRIDE2 + NO_ICECREAM_INDEX_OFFSET] =
   loadTextureFromFile("images/person/withoutIceCream2.bmp",
 					  &gameData.graphicsData, 1);
-					  
+
   gameData.graphicsData.droppedIceCreamTexture = loadTextureFromFile("images/person/droppedIceCream.bmp", &gameData.graphicsData, 1);
   gameData.graphicsData.meltedIceCreamTexture = loadTextureFromFile("images/person/meltedIceCream.bmp", &gameData.graphicsData, 1);
-  
+
   gameData.graphicsData.rainy = (Rainy*) malloc(sizeof(Rainy));
 
   gameData.graphicsData.rainy->graphic[0] = loadTextureFromFile("images/rain/rain1.bmp", &gameData.graphicsData, 1);
@@ -118,7 +118,7 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
 														  &gameData.graphicsData, 1);
   gameData.graphicsData.bee->graphic[BEE_FLAP_GRAPHIC_2] = loadTextureFromFile("images/bee2.bmp",
 														  &gameData.graphicsData, 1);
-														  
+
   gameData.graphicsData.bee->graphic[BEE_FLAP_GRAPHIC_1 + CARRYING_FLOWER_INDEX_OFFSET] = loadTextureFromFile("images/beeWithFlower.bmp",
 														  &gameData.graphicsData, 1);
   gameData.graphicsData.bee->graphic[BEE_FLAP_GRAPHIC_2 + CARRYING_FLOWER_INDEX_OFFSET] = loadTextureFromFile("images/beeWithFlower2.bmp",
@@ -159,14 +159,14 @@ static void createGameUI(GameData *gameData){
   int j = 0;
   int topX = 60;
   int topY = 60;
-  
+
   SDL_DisplayMode dm;
 
   SDL_GetWindowSize(gameData->graphicsData.window,&win_x, &win_y);
-  
+
   /*get dimensions of the display monitor*/
   SDL_GetCurrentDisplayMode(0, &dm);
-  
+
   /* top information bar */
   element = UIElement_Create(0,0,dm.w,30,2);
   UIConfigure_FillRect(element,&element->actions[0],0,0,0);
@@ -176,12 +176,12 @@ static void createGameUI(GameData *gameData){
   /* Score counter */
   element = UIElement_Create(0,0,150,30,4);
   UIConfigure_FillRect(element,&element->actions[0],255,255,255);
-  UIConfigure_DisplayNumber(element, &element->actions[1], 0,0);
+  UIConfigure_DisplayNumber(element, &element->actions[1], 0,0,UISTRING_ALIGN_CENTER);
   UIConfigure_ResourceCounter(element, &element->actions[2],1,&element->actions[1]);
   UIConfigure_PercPosition(element, &element->actions[3],1.0,0.0,-150,0,0);
   UIElement_Reparent(element,gameData->uiData.root);
-  
-  
+
+
 
   element = UIElement_Create(win_x/2,win_y - 50,200,50,6);
   UIConfigure_Auto(element, &element->actions[0], RESPONSE_PAUSE);
@@ -201,7 +201,7 @@ static void createGameUI(GameData *gameData){
   UIConfigure_FillRect(element, &element->actions[2],255,0,0);
 	  element->actions[2].status = 0;
 	  element->actions[2].new_status = 0;
-  UIConfigure_DisplayString(element, &element->actions[3],"PAUSED",0);
+  UIConfigure_DisplayString(element, &element->actions[3],"PAUSED",0, UISTRING_ALIGN_CENTER);
 	  element->actions[3].status = 0;
 	  element->actions[3].new_status = 0;
   UIConfigure_Auto(element,&element->actions[4],UPDATE);
@@ -211,11 +211,12 @@ static void createGameUI(GameData *gameData){
   UIElement_Reparent(element,gameData->uiData.root);
 
 
-  element2 = UIElement_Create(0, win_y - 100, 100,100,4);
+  element2 = UIElement_Create(0, win_y - 100, 100,100,5);
 	UIConfigure_FillRect(element2,&element2->actions[0],0,100,100);
 	UIConfigure_LeftClickRect(element2,&element2->actions[1]);
 		UITrigger_Bind(&element2->actions[1],&element2->actions[2],0,1);
     UITrigger_Bind(&element2->actions[1],&element2->actions[1],1,0);
+    UITrigger_Bind(&element2->actions[1],&element2->actions[4],0,1);
 	UIConfigure_TwoRectOverride(element2,&element2->actions[2],0,win_y - 100, 100, 100,
                                                                50, 50, win_x - 100, win_y - 200,
                                                                200, 0, 0);
@@ -224,18 +225,21 @@ static void createGameUI(GameData *gameData){
                                                                                   -100,-150,1.0,1.0,
                                                                                   0,-100,0.0,1.0,
                                                                                   100,100,0.0,0.0);
+  UIConfigure_ToggleObjectSelection(element2,&element->actions[4]);
   UIElement_Reparent(element2,gameData->uiData.root);
 
   /* Minimize button */
-  element = UIElement_Create(50 + win_x - 150, 50, 50, 50,5);
+  element = UIElement_Create(50 + win_x - 150, 50, 50, 50,6);
   UIConfigure_FillRect(element, &element->actions[0],222,0,0);
   UIConfigure_ShrinkFitToParent(element, &element->actions[1]);
   UIConfigure_LeftClickRect(element, &element->actions[2]);
     UITrigger_Bind(&element->actions[2],&element->actions[3],0,1);
+    UITrigger_Bind(&element->actions[2],&element->actions[5],0,1);
   UIConfigure_External(element, &element->actions[3],element2);
     UITrigger_Bind(&element->actions[3], &element2->actions[2], 3,2);
     UITrigger_Bind(&element->actions[3], &element2->actions[1], 0,1);
   UIConfigure_PercPosition(element, &element->actions[4],1.0,0.0,-100,50,1,&element->actions[1]);
+  UIConfigure_ToggleObjectSelection(element,&element->actions[5]);
   UIElement_Reparent(element,element2);
 
   /* The big panel holding all the AI blocks */
@@ -382,7 +386,7 @@ int gameLoop(GameData *gameData){
   if(!gameData->graphicsData.trackingMode){
   	panScreen(&gameData->graphicsData, &gameData->controlsData, delta_t);
   }
-  
+
   if(SDL_RenderClear(gameData->graphicsData.renderer) == -1){
 	   printf("Error clearing renderer: %s\n", SDL_GetError());
   }
@@ -398,6 +402,7 @@ int gameLoop(GameData *gameData){
   SDL_RenderPresent(gameData->graphicsData.renderer);
   UIRoot_Execute(&gameData->uiData,GAME_OBJECT_UPDATE,0,&gameData->gameObjectData);
   UIRoot_Execute(&gameData->uiData,EXTERNAL,0);
+  UIRoot_Execute(&gameData->uiData,CONTROLS,0,&gameData->controlsData);
 
   /* At the end of the loop we need to update the main application window to
      reflect the changes we've made to the graphics */

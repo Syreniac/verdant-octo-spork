@@ -19,6 +19,7 @@ enum Response {NONE,
 			   RESPONSE_DELETE,
 			   DISPOSAL,
 			   AI_RESPONSE,
+				 CONTROLS,
                FREED};												/* 13 */
 
 enum UIDataTypes{UI_NULL,
@@ -83,6 +84,12 @@ struct UI_Trigger{
   int status_to;
 };
 
+enum UIString_Align{
+	UISTRING_ALIGN_LEFT,
+	UISTRING_ALIGN_CENTER,
+	UISTRING_ALIGN_RIGHT
+};
+
 void UIConfigure_FillRect(UI_Element *element, UI_Action *action, int r, int g, int b);
 void UIConfigure_LeftClickRect(UI_Element *element, UI_Action *action);
 void UIConfigure_RightClickRect(UI_Element *element, UI_Action *action);
@@ -100,8 +107,8 @@ void UIConfigure_LeftReleaseAnywhere(UI_Element *element, UI_Action *action);
 void UIConfigure_RightReleaseAnywhere(UI_Element *element, UI_Action *action);
 void UIConfigure_Counter(UI_Element *element, UI_Action *action);
 void UIConfigure_ResourceCounter(UI_Element *element, UI_Action *action, int num_of_companions, ...);
-void UIConfigure_DisplayString(UI_Element *element, UI_Action *action, char *string, int font);
-void UIConfigure_DisplayNumber(UI_Element *element, UI_Action *action, int number, int font);
+void UIConfigure_DisplayString(UI_Element *element, UI_Action *action, char *string, int font, enum UIString_Align align);
+void UIConfigure_DisplayNumber(UI_Element *element, UI_Action *action, int number, int font, enum UIString_Align align);
 void UIConfigure_ShrinkFitToParent(UI_Element *element, UI_Action *action);
 void UIConfigure_External(UI_Element *element, UI_Action *action, UI_Element *external);
 void UIConfigure_Auto(UI_Element *element, UI_Action *action, enum Response response);

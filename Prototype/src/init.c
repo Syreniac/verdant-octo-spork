@@ -43,8 +43,8 @@ InitData initialise(void){
 	audioSystem(&initData.audioData);
 
   TTF_Init();
-  initData.graphicsData.fonts[0] = TTF_OpenFont("font/Aclonica.ttf",16);
-  initData.graphicsData.fonts[1] = TTF_OpenFont("font/Aclonica.ttf",12);
+  initData.graphicsData.fonts[0] = TTF_OpenFont("font/Oxygen-Regular.ttf",16);
+  initData.graphicsData.fonts[1] = TTF_OpenFont("font/Oxygen-Regular.ttf",12);
 
 	loadMusic("sound/music01.wav" , 0, &initData.audioData);
 	loadMusic("sound/music02.wav" , 1, &initData.audioData);
