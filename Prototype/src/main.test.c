@@ -4,12 +4,12 @@
 #define VALID_HEXFILE "assets/test.m7"
 
 
-/* NOTE: Uncharacterised behaviour if i exceeds 9 digits. */
+/* Test passes! */
 START_TEST(test_isPointInRect){
     SDL_Rect rect;
 
     rect.x = rect.y = 20;
-    rect.w = 40;
+    rect.h = rect.w = 40;
 
     fail_unless(isPointInRect(10,10,rect) == 0, "isPointInRect function borked");
     fail_unless(isPointInRect(21,21,rect) == 1, "isPointInRect function borked");
