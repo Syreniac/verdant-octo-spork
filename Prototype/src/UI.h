@@ -135,7 +135,7 @@ void UIConfigure_UpdateTwoRectOverrideOnWindowResize(UI_Element *element, UI_Act
 																																																											  int sxid, int syid, float sxfd, float syfd);
 
 void UIConfigure_PercOffsetRect(UI_Element *element, UI_Action *action, float xfp, float yfp, float xfd, float yfd, int xip, int yip, int xid, int yid, int num_of_companions,...);
-
+void UIConfigure_ToggleObjectSelection(UI_Element *element, UI_Action *action);
 
 void UITrigger_Bind(UI_Action *action, UI_Action *target, int state_from, int state_to);
 
