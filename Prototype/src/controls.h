@@ -19,11 +19,12 @@ typedef enum Keybindings Keybindings;
 
 struct ControlsData{
 	int keys[MAX_KEYS];
+	int objectSelectionOff;
 	int mouseButtons[NUM_OF_MOUSE_BUTTONS];
 };
 typedef struct ControlsData ControlsData;
 
-void keydown(ControlsData *controlsData, GameObjectData *gameObjectData, UIData *uiData, SDL_Event *event);
+void keydown(ControlsData *controlsData, GameObjectData *gameObjectData, GraphicsData *graphicsData, UIData *uiData, SDL_Event *event);
 void keyup(ControlsData *controlsData, GameObjectData *gameObjectData, UIData *uiData, SDL_Event *event);
 void panScreen(GraphicsData *graphicsData, ControlsData *controlsData, int delta_t);
 void initControlData(ControlsData *controlsData);

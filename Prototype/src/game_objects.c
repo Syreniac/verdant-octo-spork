@@ -876,7 +876,7 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 			updateProgrammableWorker(programmableWorker,gameObjectData,ticks);
 		}
 		
-		if(programmableWorker->displayInfo){
+		if(programmableWorker->displayInfo && graphicsData->trackingMode){
 		  	int window_x,window_y, tempXOffset, tempYOffset;
 			SDL_Point point = getCenterOfRect(programmableWorker->rect);
 			
