@@ -118,7 +118,6 @@
 /* Try to find out if we're compiling for WinRT or non-WinRT */
 /* If _USING_V110_SDK71_ is defined it means we are using the v110_xp or v120_xp toolset. */
 #if (defined(_MSC_VER) && (_MSC_VER >= 1700) && !_USING_V110_SDK71_)	/* _MSC_VER==1700 for MSVC 2012 */
-#include <winapifamily.h>
 #if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
 #undef __WINDOWS__
 #define __WINDOWS__   1

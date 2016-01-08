@@ -15,6 +15,7 @@ struct GameData{
   UIData uiData;
   ControlsData controlsData;
   AudioData audioData;
+  AnnouncementsData announcementsData;
 };
 
 int gameStart(GraphicsData graphicsData, AudioData audioData);
