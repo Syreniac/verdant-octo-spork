@@ -24,21 +24,21 @@ int blockFunction_Void(BlockFunctionArgs *arguments, ProgrammableWorker *program
 	return(1);
 }
 
-int blockFunction_IfWorkerIdle(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
+int blockFunction_IfIdle(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
 	if(programmableWorker->status == IDLE){
 		return 1;
 	}
 	return 2;
 }
 
-int blockFunction_IfWorkerReturning(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
+int blockFunction_IfReturning(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
 	if(programmableWorker->status == RETURNING){
 		return 1;
 	}
 	return 2;
 }
 
-int blockFunction_IfWorkerHasCargo(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
+int blockFunction_IfHasCargo(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
 	if(programmableWorker->cargo > 0){
 		return 1;
 	}
@@ -68,21 +68,21 @@ int blockFunction_Print(BlockFunctionArgs *arguments, ProgrammableWorker *progra
   return(1);
 }
 
-int blockFunction_IfWorkerCargoGreaterThan(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
+int blockFunction_IfCargoGreaterThan(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
   if(programmableWorker->cargo > arguments->integers[0]){
     return(1);
   }
   return(2);
 }
 
-int blockFunction_IfWorkerStatusEqual(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
+int blockFunction_IfStatusEqual(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
   if(programmableWorker->status == arguments->integers[0]){
     return(1);
   }
   return(2);
 }
 
-int blockFunction_IfWorkerOutsideOfBounds(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
+int blockFunction_IfOutsideOfBounds(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
 
   if(programmableWorker->rect.x >= (X_SIZE_OF_WORLD - programmableWorker->rect.w) || programmableWorker->rect.x <= 0 ||
      programmableWorker->rect.y >= (Y_SIZE_OF_WORLD - programmableWorker->rect.h) || programmableWorker->rect.y <= 0){
@@ -91,7 +91,7 @@ int blockFunction_IfWorkerOutsideOfBounds(BlockFunctionArgs *arguments, Programm
     return(2);
 }
 
-int blockFunction_IfWorkerWithinDistanceOfHive(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
+int blockFunction_IfWithinDistanceOfHive(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
 	double d2 = getDistance2BetweenRects(programmableWorker->rect,gameObjectData->hive.rect);
   if(d2 <= (double)(arguments->floats[0])){
     return(1);
@@ -99,7 +99,7 @@ int blockFunction_IfWorkerWithinDistanceOfHive(BlockFunctionArgs *arguments, Pro
   return(2);
 }
 
-int blockFunction_IfWorkerNearHive(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
+int blockFunction_IfNearHive(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
 	double d2 = getDistance2BetweenRects(programmableWorker->rect,gameObjectData->hive.rect);
   if(d2 <= 50.0){
     return(1);
@@ -108,7 +108,7 @@ int blockFunction_IfWorkerNearHive(BlockFunctionArgs *arguments, ProgrammableWor
 
 }
 
-int blockFunction_SetWorkerHeadingRandomly(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
+int blockFunction_SetHeadingRandomly(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
   programmableWorker->heading = (double)(randPi() * 2);
   programmableWorker->status = LEAVING;
   return(1);
@@ -150,7 +150,7 @@ int blockFunction_RememberCurrentLocation(BlockFunctionArgs *arguments, Programm
   return 1;
 }
 
-int blockFunction_GoToRememberedLocation(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
+int blockFunction_GoToStoredLocation(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
     if(!programmableWorker->brain.is_point_remembered){
       return 2;
     }
@@ -160,7 +160,7 @@ int blockFunction_GoToRememberedLocation(BlockFunctionArgs *arguments, Programma
     return 1;
 }
 
-int blockFunction_IfWorkerWithinDistanceOfRememberedLocation(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
+int blockFunction_IfWithinDistanceOfStoredLocation(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
   double d2;
   if(!programmableWorker->brain.is_point_remembered){
     return 2;
@@ -173,12 +173,12 @@ int blockFunction_IfWorkerWithinDistanceOfRememberedLocation(BlockFunctionArgs *
   return 2;
 }
 
-int blockFunction_ForgetRememberedLocation(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
+int blockFunction_ForgetStoredLocation(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
   programmableWorker->brain.is_point_remembered = 0;
   return 1;
 }
 
-int blockFunction_RandomShiftRememberedLocation(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
+int blockFunction_RandomShiftStoredLocation(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
   int x_shift = rand() % arguments->integers[0];
   int y_shift = rand() % arguments->integers[0];
 
@@ -204,7 +204,7 @@ int blockFunction_HeadToFoundNode(BlockFunctionArgs *arguments, ProgrammableWork
   return 1;
 }
 
-int blockFunction_HasRememberedLocation(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
+int blockFunction_HasStoredLocation(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
   if(programmableWorker->brain.is_point_remembered){
     return 1;
   }
@@ -240,20 +240,20 @@ int runBlockFunctionOverWorker(BlockFunction *blockFunction, ProgrammableWorker 
 }
 
 blockFunction_WrappedFunction getBlockFunctionByName(char *blockFunctionName){
-  if(strcmp(blockFunctionName,"IfWorkerCargoGreaterThan") == 0){
-    return &blockFunction_IfWorkerCargoGreaterThan;
+  if(strcmp(blockFunctionName,"IfCargoGreaterThan") == 0){
+    return &blockFunction_IfCargoGreaterThan;
   }
-  if(strcmp(blockFunctionName,"IfWorkerStatusEqual") == 0){
-    return &blockFunction_IfWorkerStatusEqual;
+  if(strcmp(blockFunctionName,"IfStatusEqual") == 0){
+    return &blockFunction_IfStatusEqual;
   }
-  if(strcmp(blockFunctionName,"IfWorkerOutsideBounds") == 0){
-    return &blockFunction_IfWorkerOutsideOfBounds;
+  if(strcmp(blockFunctionName,"IfOutsideBounds") == 0){
+    return &blockFunction_IfOutsideOfBounds;
   }
-  if(strcmp(blockFunctionName,"IfWorkerWithinXOfHive") == 0){
-    return &blockFunction_IfWorkerWithinDistanceOfHive;
+  if(strcmp(blockFunctionName,"IfWithinXOfHive") == 0){
+    return &blockFunction_IfWithinDistanceOfHive;
   }
-  if(strcmp(blockFunctionName,"SetWorkerHeadingRandomly") == 0){
-    return &blockFunction_SetWorkerHeadingRandomly;
+  if(strcmp(blockFunctionName,"SetHeadingRandomly") == 0){
+    return &blockFunction_SetHeadingRandomly;
   }
   if(strcmp(blockFunctionName,"WorkerReturnToHive") == 0){
     return &blockFunction_WorkerReturnToHive;
@@ -264,20 +264,20 @@ blockFunction_WrappedFunction getBlockFunctionByName(char *blockFunctionName){
   if(strcmp(blockFunctionName,"RememberCurrentLocation") == 0){
     return &blockFunction_RememberCurrentLocation;
   }
-  if(strcmp(blockFunctionName,"ForgetRememberedLocation") == 0){
-    return &blockFunction_ForgetRememberedLocation;
+  if(strcmp(blockFunctionName,"ForgetStoredLocation") == 0){
+    return &blockFunction_ForgetStoredLocation;
   }
-  if(strcmp(blockFunctionName,"HasRememberedLocation") == 0){
-    return &blockFunction_HasRememberedLocation;
+  if(strcmp(blockFunctionName,"HasStoredLocation") == 0){
+    return &blockFunction_HasStoredLocation;
   }
-  if(strcmp(blockFunctionName,"GoToRememberedLocation") == 0){
-    return &blockFunction_GoToRememberedLocation;
+  if(strcmp(blockFunctionName,"GoToStoredLocation") == 0){
+    return &blockFunction_GoToStoredLocation;
   }
-  if(strcmp(blockFunctionName,"IfWorkerWithinDistanceOfRememberedLocation") == 0){
-    return &blockFunction_IfWorkerWithinDistanceOfRememberedLocation;
+  if(strcmp(blockFunctionName,"IfWithinDistanceOfStoredLocation") == 0){
+    return &blockFunction_IfWithinDistanceOfStoredLocation;
   }
-  if(strcmp(blockFunctionName, "RandomiseRememberedLocation") == 0){
-    return &blockFunction_RandomShiftRememberedLocation;
+  if(strcmp(blockFunctionName, "RandomiseStoredLocation") == 0){
+    return &blockFunction_RandomShiftStoredLocation;
   }
   if(strcmp(blockFunctionName, "IfNodeFound") == 0){
     return &blockFunction_IfNodeFound;
@@ -285,20 +285,20 @@ blockFunction_WrappedFunction getBlockFunctionByName(char *blockFunctionName){
   if(strcmp(blockFunctionName, "HeadToFoundNode") == 0){
     return &blockFunction_HeadToFoundNode;
   }
-  if(strcmp(blockFunctionName, "IfWorkerNearHive") == 0){
-	  return &blockFunction_IfWorkerNearHive;
+  if(strcmp(blockFunctionName, "IfNearHive") == 0){
+	  return &blockFunction_IfNearHive;
   }
   if(strcmp(blockFunctionName, "START") == 0){
 	  return &blockFunction_Void;
   }
-  if(strcmp(blockFunctionName,"IfWorkerIdle") == 0){
-	  return &blockFunction_IfWorkerIdle;
+  if(strcmp(blockFunctionName,"IfIdle") == 0){
+	  return &blockFunction_IfIdle;
   }
-  if(strcmp(blockFunctionName,"IfWorkerHasCargo") == 0){
-	  return &blockFunction_IfWorkerHasCargo;
+  if(strcmp(blockFunctionName,"IfHasCargo") == 0){
+	  return &blockFunction_IfHasCargo;
   }
-  if(strcmp(blockFunctionName,"IfWorkerReturning") == 0){
-	  return &blockFunction_IfWorkerReturning;
+  if(strcmp(blockFunctionName,"IfReturning") == 0){
+	  return &blockFunction_IfReturning;
   }
   printf("ERROR: Unrecognised function name: \"%s\".\n Substituting a print function.\n",blockFunctionName);
   return &blockFunction_Print;
@@ -539,19 +539,19 @@ AIData initAIData(void){
   aiData.templates = NULL;
 	fclose(file);
   makeAIBlockTemplate(&aiData,"Void",1,arguments);
-  makeAIBlockTemplate(&aiData,"IfWorkerIdle",2,arguments);
-  makeAIBlockTemplate(&aiData,"IfWorkerReturning",2,arguments);
-  makeAIBlockTemplate(&aiData,"IfWorkerHasCargo",2,arguments);
-  makeAIBlockTemplate(&aiData,"IfWorkerOutsideBounds",2,arguments);
-  makeAIBlockTemplate(&aiData,"IfWorkerNearHive",2,arguments);
-  makeAIBlockTemplate(&aiData,"SetWorkerHeadingRandomly",1,arguments);
+  makeAIBlockTemplate(&aiData,"IfIdle",2,arguments);
+  makeAIBlockTemplate(&aiData,"IfReturning",2,arguments);
+  makeAIBlockTemplate(&aiData,"IfHasCargo",2,arguments);
+  makeAIBlockTemplate(&aiData,"IfOutsideBounds",2,arguments);
+  makeAIBlockTemplate(&aiData,"IfNearHive",2,arguments);
+  makeAIBlockTemplate(&aiData,"SetHeadingRandomly",1,arguments);
   makeAIBlockTemplate(&aiData,"WorkerReturnToHive",1,arguments);
   makeAIBlockTemplate(&aiData,"RememberCurrentLocation",1,arguments);
-  makeAIBlockTemplate(&aiData,"GoToRememberedLocation",2,arguments);
-  makeAIBlockTemplate(&aiData,"ForgetRememberedLocation",1,arguments);
+  makeAIBlockTemplate(&aiData,"GoToStoredLocation",2,arguments);
+  makeAIBlockTemplate(&aiData,"ForgetStoredLocation",1,arguments);
   makeAIBlockTemplate(&aiData,"IfNodeFound",2,arguments);
   makeAIBlockTemplate(&aiData,"HeadToFoundNode",1,arguments);
-  makeAIBlockTemplate(&aiData,"HasRememberedLocation",2,arguments);
+  makeAIBlockTemplate(&aiData,"HasStoredLocation",2,arguments);
 
 	return aiData;
 }

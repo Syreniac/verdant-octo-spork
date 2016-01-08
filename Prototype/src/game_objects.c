@@ -590,10 +590,19 @@ void updateResourceNodeSpawner(ResourceNodeSpawner *spawner, int ticks){
 void updateWeather(GameObjectData *gameObjectData, Weather *weather, int ticks){
 	/* Advance weather every TICKSPERWEATHER ticks; this may be semi-random due to tick-skipping. */
 	int weatherChannel = 3;
+	int ticksPerWeather;
+	
+	if(weather->present_weather != Sun){
+		ticksPerWeather = TICKSPERWEATHER / SUN_LASTS_LONGER_FACTOR;
+	}else{
+		ticksPerWeather = TICKSPERWEATHER;
+	}
 
-	weather->tickCount += ticks;
+	if(!gameObjectData->pause_status){
+		weather->tickCount += ticks;
+	}
 
-	if(weather->tickCount > TICKSPERWEATHER && !gameObjectData->pause_status){
+	if(weather->tickCount > ticksPerWeather && !gameObjectData->pause_status){
 		weather->tickCount = 0;
 
 		switch (weather->present_weather)

@@ -1,15 +1,14 @@
 #include <check.h>
 #include "../src/main.h"
 
-#define VALID_HEXFILE "assets/test.m7"
 
-
-/* NOTE: Uncharacterised behaviour if i exceeds 9 digits. */
+/* Test passes! */
+/* From generic.h */
 START_TEST(test_isPointInRect){
     SDL_Rect rect;
 
     rect.x = rect.y = 20;
-    rect.w = 40;
+    rect.h = rect.w = 40;
 
     fail_unless(isPointInRect(10,10,rect) == 0, "isPointInRect function borked");
     fail_unless(isPointInRect(21,21,rect) == 1, "isPointInRect function borked");
@@ -22,7 +21,7 @@ START_TEST(test_isPointInRect){
   }
 END_TEST
 
-
+/* From generic.h */
 START_TEST(test_testRectIntersection){
     SDL_Rect rectA;
     SDL_Rect rectB;
@@ -47,7 +46,7 @@ START_TEST(test_testRectIntersection){
 END_TEST
 
 
-
+/* From generic.h */
 START_TEST(test_isRectEnclosedInRect){
     SDL_Rect rectA;
     SDL_Rect rectB;
@@ -71,7 +70,7 @@ START_TEST(test_isRectEnclosedInRect){
 }
 END_TEST
 
-
+/* From generic.h */
 /*ensureRectEnclosed: assumption: size of ensure is always smaller than size of limit*/
 START_TEST(test_ensureRectEnclosed){
     SDL_Rect rectA;
@@ -98,6 +97,7 @@ START_TEST(test_ensureRectEnclosed){
 END_TEST
 
 
+/* From generic.h */
 /* the function generates a random number. the testing is to ensure the number is within range */
 START_TEST(test_randPi){
     fail_unless(randPi() <= PI, "randPi function borked, random number greater than PI");
@@ -106,7 +106,7 @@ START_TEST(test_randPi){
 END_TEST
 
 
-/* */
+/* From generic.h */
 START_TEST(test_square){
     fail_unless(square(1.5) == 2.25, "square function borked, for a non-integer case");
     fail_unless(square(2) == 4, "square function borked, for an integer case");
@@ -114,31 +114,14 @@ START_TEST(test_square){
 END_TEST
 
 
-
+/* From generic.h */
 START_TEST(test_getDistance2BetweenPoints){
     fail_unless(getDistance2BetweenPoints(1.5, 1.5, 2.5, 1.5) == 1, "getDistance2BetweenPoints function borked, for a one dimension case");
     fail_unless(getDistance2BetweenPoints(1, 1, 4, 5) == 25, "getDistance2BetweenPoints function borked, for a two dimensions case");
   }
 END_TEST
 
-START_TEST(test_fitRectToWorld){
-    /* not quite understand logic of this fit, to discuss */
-    /* not understand when whole rectangle should be present when below lower bound, only 1 pixel is present when above upper bound */
-    /* fail_unless(fitRectToWorld()); */
-    }
-END_TEST
-
-  /* */
-START_TEST(test_generateRandomCoordOffset){
-    /* the offset is only half of radius, please double check */
-    /* the function generates a random number. the testing is to ensure the number is within range*/
-    fail_unless(generateRandomCoordOffset(5) <= 5.0/2, "randPi function borked, random number greater than PI");
-    fail_unless(generateRandomCoordOffset(5) >= -5.0/2, "randPi function borked, random number less than 0");
-  }
-END_TEST
-
-
-/* */
+/* From generic.h */
 START_TEST(test_getDistance2BetweenRects){
     SDL_Rect rectA;
     SDL_Rect rectB;
@@ -154,7 +137,25 @@ START_TEST(test_getDistance2BetweenRects){
   }
 END_TEST
 
+/* From generic.h */
+START_TEST(test_fitRectToWorld){
+    /* not quite understand logic of this fit, to discuss */
+    /* not understand when whole rectangle should be present when below lower bound, only 1 pixel is present when above upper bound */
+    /* fail_unless(fitRectToWorld()); */
+    }
+END_TEST
 
+/* From generic.h */
+START_TEST(test_generateRandomCoordOffset){
+    /* the offset is only half of radius, please double check */
+    /* the function generates a random number. the testing is to ensure the number is within range*/
+    fail_unless(generateRandomCoordOffset(5) <= 5.0/2, "randPi function borked, random number greater than PI");
+    fail_unless(generateRandomCoordOffset(5) >= -5.0/2, "randPi function borked, random number less than 0");
+  }
+END_TEST
+
+
+/* From generic.h */
 /* the function should return angle between the centre of 2 rectangles */
 START_TEST(test_getAngleBetweenRects){
     SDL_Rect rectA;
@@ -171,6 +172,7 @@ START_TEST(test_getAngleBetweenRects){
 END_TEST
 
 
+/* From generic.h */
 /* TODO: fix this test. "SDL_Point" is a variable type, not a function.
 START_TEST(test_getCenterOfRect){
     SDL_Rect rect;
@@ -187,10 +189,10 @@ END_TEST
 
 Suite *main_suite(void)
 {
-  Suite *s;
+  Suite *generic;
   TCase *tc_core;
 
-  s = suite_create("main");
+  generic = suite_create("generic");
 
   /* Core test case */
   tc_core = tcase_create("core");
@@ -202,27 +204,27 @@ Suite *main_suite(void)
   tcase_add_test(tc_core, test_randPi);
   tcase_add_test(tc_core, test_square);
   tcase_add_test(tc_core, test_getDistance2BetweenPoints);
+  tcase_add_test(tc_core, test_getDistance2BetweenRects);
   tcase_add_test(tc_core, test_fitRectToWorld);
   tcase_add_test(tc_core, test_generateRandomCoordOffset);
-  tcase_add_test(tc_core, test_getDistance2BetweenRects);
   tcase_add_test(tc_core, test_getAngleBetweenRects);
 //  tcase_add_test(tc_core, test_getCenterOfRect);
-  suite_add_tcase(s, tc_core);
+  suite_add_tcase(generic, tc_core);
 
-  return s;
+  return generic;
 }
 
 int main(void)
 {
   int number_failed;
-  Suite *s;
-  SRunner *sr;
+  Suite *generic;
+  SRunner *genericr;
 
-  s = main_suite();
-  sr = srunner_create(s);
+  generic = main_suite();
+  genericr = srunner_create(generic);
 
-  srunner_run_all(sr, CK_NORMAL);
-  number_failed = srunner_ntests_failed(sr);
-  srunner_free(sr);
+  srunner_run_all(genericr, CK_NORMAL);
+  number_failed = srunner_ntests_failed(genericr);
+  srunner_free(genericr);
   return (number_failed == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
 }

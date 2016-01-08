@@ -48,7 +48,7 @@ UI_Element *makeStartBlock(int x_offset, int y_offset, UI_Element *parent){
 	element = UIElement_Create(x_offset,y_offset,200,50,9);
 	UIConfigure_FillRect(element,&element->actions[0],248,221,35);
 	UIConfigure_ShrinkFitToParent(element, &element->actions[1]);
-	UIConfigure_DisplayString(element, &element->actions[2],"START",0);
+	UIConfigure_DisplayString(element, &element->actions[2],"START",0,UISTRING_ALIGN_CENTER);
 	UIConfigure_RenderLine(element, &element->actions[3],BR_CORNER,NULL);
 
 	UIConfigure_LeftClickRect(element, &element->actions[4]);
@@ -121,7 +121,7 @@ UI_Element *makeAITemplateScrollList(int x_offset, int y_offset, AIData *aiData,
 		element2 = UIElement_Create(x_offset, y_offset + y_offset2, 200,50,6);
 		UIConfigure_FillRect(element2,&element2->actions[0],248,221,35);
 		UIConfigure_ShrinkFitToParentWithYShift(element2,&element2->actions[1],&element->actions[3]);
-		UIConfigure_DisplayString(element2,&element2->actions[2],template->name,1);
+		UIConfigure_DisplayString(element2,&element2->actions[2],template->name,0,UISTRING_ALIGN_CENTER);
 		UIConfigure_LeftClickRect(element2,&element2->actions[3]);
 			UITrigger_Bind(&element2->actions[3],&element2->actions[4],-1,1);
 		UIConfigure_AddAiBlock(element2,&element2->actions[4],template,blockHolder);
@@ -150,7 +150,8 @@ UI_Element *makeAIBlock(int x_offset, int y_offset, char *aiString, UI_Element *
 		UITrigger_Bind(&element2->actions[3],&element2->actions[4],1,0);
 		UITrigger_Bind(&element2->actions[3],&element2->actions[2],0,1);
 	UIConfigure_DraggableRectOverride(element2, &element2->actions[4],1,&element2->actions[1]);
-	UIConfigure_DisplayString(element2, &element2->actions[5],aiString,1);
+	printf("|%s|\n",aiString);
+	UIConfigure_DisplayString(element2, &element2->actions[5],aiString,0,UISTRING_ALIGN_CENTER);
 
 	/* Line 1 */
 	UIConfigure_RenderLine(element2, &element2->actions[6],BL_CORNER,NULL);
@@ -265,6 +266,7 @@ UI_Element *UIElement_Create(int x, int y, int w, int h, int num_of_actions){
 	   return element;
 }
 
+<<<<<<< HEAD
 int UIAction_GetAnnouncement(UI_Action *action, va_list copy_from){
 		AnnouncementsData* announcementsData;
 		va_list vargs;
@@ -285,6 +287,27 @@ void UIConfigure_GetAnnouncement(UI_Element *element, UI_Action *action, UI_Acti
 	action->function = UIAction_GetAnnouncement;
 	action->companions = calloc(1,sizeof(void*));
 	action->companions[0] = placeToPut;
+=======
+int UIAction_ToggleObjectSelection(UI_Action *action, va_list copy_from){
+	va_list vargs;
+	int *integer;
+	va_copy(vargs,copy_from);
+	integer = va_arg(vargs,int*);
+	va_end(vargs);
+	if(action->status == 1){
+		*integer = !(*integer);
+		action->new_status = 0;
+	}
+	return 0;
+}
+
+void UIConfigure_ToggleObjectSelection(UI_Element *element, UI_Action *action){
+	UIAction_Init(element,action);
+	action->response = CONTROLS;
+	action->function = UIAction_ToggleObjectSelection;
+	action->status = 0;
+	action->new_status = 0;
+>>>>>>> 300528ba4094fa668c30d0c7b6471caa57cbbe0a
 }
 
 int UIAction_PercOffsetRect(UI_Action *action, va_list copy_from){
@@ -742,6 +765,7 @@ int UIAction_DisplayNumber(UI_Action *action, va_list copy_from){
 	SDL_Color colour;
 	SDL_Surface *temp;
 	SDL_Rect temp_rect;
+	int w,h;
 	colour.r = 0;
 	colour.g = 0;
 	colour.b = 0;
@@ -752,11 +776,22 @@ int UIAction_DisplayNumber(UI_Action *action, va_list copy_from){
 		action->integers[1] = action->integers[0];
 		sprintf(action->strings[0],"%d",action->integers[1]);
 		SDL_DestroyTexture(action->texture);
-		temp = TTF_RenderText_Solid(graphicsData->fonts[action->integers[2]],action->strings[0],colour);
+		temp = TTF_RenderText_Blended(graphicsData->fonts[action->integers[2]],action->strings[0],colour);
 		action->texture = SDL_CreateTextureFromSurface(graphicsData->renderer,temp);
+		TTF_SizeText(graphicsData->fonts[action->integers[2]],action->strings[0],&w,&h);
+		action->integers[4] = w;
+
 	}
-	if(UIElement_isVisible(action->element) && action->element->rect.h > TTF_FontHeight(graphicsData->fonts[action->integers[2]]) && action->status != 0 && action->texture != NULL){
-		temp_rect.x = action->element->rect.x;
+	if(UIElement_isVisible(action->element) && action->element->rect.h > TTF_FontHeight(graphicsData->fonts[0]) && action->status != 0 && action->texture != NULL){
+		if(action->integers[3] == UISTRING_ALIGN_CENTER){
+			temp_rect.x = action->element->rect.x + action->element->rect.w/2 - action->integers[4]/2;
+		}
+		else if(action->integers[3] == UISTRING_ALIGN_RIGHT){
+			temp_rect.x = action->element->rect.x + action->element->rect.w - action->integers[4];
+		}
+		else{
+			temp_rect.x = action->element->rect.x;
+		}
 		temp_rect.y = action->element->rect.y;
 		TTF_SizeText(graphicsData->fonts[action->integers[2]], action->strings[0], &temp_rect.w, &temp_rect.h);
 		SDL_RenderCopy(graphicsData->renderer,action->texture,NULL,&temp_rect);
@@ -771,6 +806,7 @@ int UIAction_DisplayString(UI_Action *action, va_list copy_from){
 	SDL_Color colour;
 	SDL_Surface *temp;
 	SDL_Rect temp_rect;
+	int w,h;
 	colour.r = 0;
 	colour.g = 0;
 	colour.b = 0;
@@ -781,11 +817,21 @@ int UIAction_DisplayString(UI_Action *action, va_list copy_from){
 		action->strings[0] = realloc(action->strings[0], strlen(action->strings[1])+1);
 		strcpy(action->strings[0],action->strings[1]);
 		SDL_DestroyTexture(action->texture);
-		temp = TTF_RenderText_Solid(graphicsData->fonts[action->integers[0]],action->strings[0],colour);
+		temp = TTF_RenderText_Blended(graphicsData->fonts[action->integers[0]],action->strings[0],colour);
 		action->texture = SDL_CreateTextureFromSurface(graphicsData->renderer,temp);
+		TTF_SizeText(graphicsData->fonts[action->integers[0]],action->strings[0],&w,&h);
+		action->integers[3] = w;
 	}
 	if(UIElement_isVisible(action->element) && action->element->rect.h > TTF_FontHeight(graphicsData->fonts[action->integers[0]]) && action->strings[0] != NULL && action->status != 0 && action->texture != NULL){
-		temp_rect.x = action->element->rect.x;
+		if(action->integers[1] == UISTRING_ALIGN_CENTER){
+			temp_rect.x = action->element->rect.x + action->element->rect.w/2 - action->integers[3]/2;
+		}
+		else if(action->integers[1] == UISTRING_ALIGN_RIGHT){
+			temp_rect.x = action->element->rect.x + action->element->rect.w - action->integers[3];
+		}
+		else{
+			temp_rect.x = action->element->rect.x;
+		}
 		temp_rect.y = action->element->rect.y;
 		TTF_SizeText(graphicsData->fonts[action->integers[0]], action->strings[0], &temp_rect.w, &temp_rect.h);
 		SDL_RenderCopy(graphicsData->renderer,action->texture,NULL,&temp_rect);
@@ -1394,7 +1440,7 @@ void UIConfigure_ResourceCounter(UI_Element *element, UI_Action *action, int num
 	va_end(vargs);
 }
 
-void UIConfigure_DisplayString(UI_Element *element, UI_Action *action, char *string, int font){
+void UIConfigure_DisplayString(UI_Element *element, UI_Action *action, char *string, int font, enum UIString_Align align){
 	#if DEBUGGING==1
 	printf("UIConfigure_DisplayString\n");
 	#endif
@@ -1414,11 +1460,12 @@ void UIConfigure_DisplayString(UI_Element *element, UI_Action *action, char *str
 	action->new_status = 1;
 	action->status = 1;
 	action->num_of_strings = 2;
-	action->integers = calloc(1,sizeof(int));
+	action->integers = calloc(4,sizeof(int));
 	action->integers[0] = font;
+	action->integers[1] = align;
 }
 
-void UIConfigure_DisplayNumber(UI_Element *element, UI_Action *action, int number, int font){
+void UIConfigure_DisplayNumber(UI_Element *element, UI_Action *action, int number, int font, enum UIString_Align align){
 	#if DEBUGGING==1
 	printf("UIConfigure_DisplayNumber\n");
 	#endif
@@ -1427,10 +1474,11 @@ void UIConfigure_DisplayNumber(UI_Element *element, UI_Action *action, int numbe
 	action->status = 1;
 	action->new_status = 1;
 	action->function = UIAction_DisplayNumber;
-	action->integers = calloc(3, sizeof(int));
+	action->integers = calloc(6, sizeof(int));
 	action->integers[0] = number;
 	action->integers[2] = font;
-	action->num_of_integers = 3;
+	action->integers[3] = align;
+	action->num_of_integers = 4;
 	action->strings = malloc(sizeof(char*) * 1);
 	action->strings[0] = calloc(30,sizeof(char));
 	action->num_of_strings = 1;
