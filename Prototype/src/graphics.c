@@ -118,10 +118,12 @@ void blitParallaxTreeTops(SDL_Rect objectRect, GraphicsData *graphicsData, SDL_T
 
 void blitTiledBackground(GraphicsData *graphicsData, SDL_Texture *texture){
 	int i, j, xbgShifter, ybgShifter;
+	SDL_Rect rect;
 
 	int window_x, window_y;
 
 	SDL_GetWindowSize(graphicsData->window,&window_x,&window_y);
+
 
 	xbgShifter = (graphicsData->navigationOffset.x - X_INITIAL_SCREEN_OFFSET) % GRASS_TILE_WIDTH;
 	ybgShifter = (graphicsData->navigationOffset.y - Y_INITIAL_SCREEN_OFFSET) % GRASS_TILE_HEIGHT;
@@ -141,6 +143,28 @@ void blitTiledBackground(GraphicsData *graphicsData, SDL_Texture *texture){
 			SDL_RenderCopy(graphicsData->renderer, texture, NULL, &dstRect);
 
 		}
+	}
+	
+	rect.x = window_x;
+	
+	if((window_x - graphicsData->navigationOffset.x) > X_SIZE_OF_WORLD){
+		rect.y = 0;
+		rect.w = (window_x - graphicsData->navigationOffset.x) - X_SIZE_OF_WORLD;
+		rect.x = window_x - rect.w;
+		rect.h = window_y;
+		SDL_SetRenderDrawColor(graphicsData->renderer, 0, 0, 0, 100);
+		SDL_RenderFillRect(graphicsData->renderer, &rect);
+		graphicsData->navigationOffset.x+= ceil((float)rect.w/10.0);
+	}
+	
+	if((window_y - graphicsData->navigationOffset.y) > Y_SIZE_OF_WORLD){
+		rect.w = rect.x;
+		rect.x = 0;
+		rect.h = (window_y - graphicsData->navigationOffset.y) - Y_SIZE_OF_WORLD;
+		rect.y = window_y - rect.h;
+		SDL_SetRenderDrawColor(graphicsData->renderer, 0, 0, 0, 100);
+		SDL_RenderFillRect(graphicsData->renderer, &rect);
+		graphicsData->navigationOffset.y+= ceil((float)rect.h/10.0);
 	}
 }
 

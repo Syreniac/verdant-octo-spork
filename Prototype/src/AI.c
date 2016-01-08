@@ -47,24 +47,24 @@ int blockFunction_IfHasCargo(BlockFunctionArgs *arguments, ProgrammableWorker *p
 
 int blockFunction_Print(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
   int i = 0;
-  printf("PRINTING OUT BLOCK FUNCTION DATA\n");
+ /* printf("PRINTING OUT BLOCK FUNCTION DATA\n");*/
   while(i < arguments->numOfChars){
       printf("%c",arguments->characters[i]);
       i++;
   }
-  printf("\nINTEGERS\n");
+ /* printf("\nINTEGERS\n");*/
   i = 0;
   while(i < arguments->numOfInts){
     printf("%d ",arguments->integers[i]);
     i++;
   }
-  printf("\nFLOATS\n");
+  /*printf("\nFLOATS\n");*/
   i=0;
   while(i<arguments->numOfFloats){
     printf("%f ",arguments->floats[i]);
     i++;
   }
-  printf("------------------");
+ /* printf("------------------");*/
   return(1);
 }
 
