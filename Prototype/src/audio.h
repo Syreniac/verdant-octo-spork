@@ -10,9 +10,11 @@ struct AudioData{
 	int audio_channels;
 	int audio_buffers;
 	BackgroundMusic *music;
+	int music_mute;
 	int music_timer;
 	int seasonal_music_count[5];
 	SoundEffect *soundEffect;
+	int soundEffect_mute;
 	int channel;
 };
 
@@ -36,3 +38,5 @@ void loadSoundEffect(char *sound, char *name, AudioData *audioData);
 void playSoundEffect(int channel, AudioData *audioData, char* name);
 void fadeOutChannel(int channel, AudioData *audioData);
 void fadeInChannel(int channel, AudioData *audioData, char* name);
+void muteMusic(AudioData *audioData);
+void muteSoundEffects(AudioData *audioData);

@@ -181,7 +181,18 @@ static void createGameUI(GameData *gameData){
   UIConfigure_PercPosition(element, &element->actions[3],1.0,0.0,-150,0,0);
   UIElement_Reparent(element,gameData->uiData.root);
   
-  
+  /* Mute button */
+      element = UIElement_Create((win_x - 30), win_y - 30, 30, 30, 6);
+    UIConfigure_FillRect(element, &element->actions[0],228,240,3);
+	UIConfigure_InverseRect(element, &element->actions[1],-30,-30,30,30,0);
+	UIConfigure_LeftClickRect(element, &element->actions[2]);
+		UITrigger_Bind(&element->actions[2],&element->actions[3],0,1);
+	UIConfigure_MuteSound(element,&element->actions[3]);
+	UIConfigure_RightClickRect(element, &element->actions[4]);
+		UITrigger_Bind(&element->actions[4],&element->actions[5],0,1);
+	UIConfigure_MuteSoundFX(element,&element->actions[5]);
+    UIElement_Reparent(element,gameData->uiData.root);
+	UIRoot_Pack(&gameData->uiData,&gameData->graphicsData);
 
   element = UIElement_Create(win_x/2,win_y - 50,200,50,6);
   UIConfigure_Auto(element, &element->actions[0], RESPONSE_PAUSE);
@@ -398,6 +409,7 @@ int gameLoop(GameData *gameData){
   SDL_RenderPresent(gameData->graphicsData.renderer);
   UIRoot_Execute(&gameData->uiData,GAME_OBJECT_UPDATE,0,&gameData->gameObjectData);
   UIRoot_Execute(&gameData->uiData,EXTERNAL,0);
+  UIRoot_Execute(&gameData->uiData,SOUND,0,&gameData->audioData);
 
   /* At the end of the loop we need to update the main application window to
      reflect the changes we've made to the graphics */

@@ -265,6 +265,48 @@ UI_Element *UIElement_Create(int x, int y, int w, int h, int num_of_actions){
 	   return element;
 }
 
+int UIAction_MuteSound(UI_Action *action, va_list copy_from){
+	va_list vargs;
+	AudioData *audioData;
+	va_copy(vargs,copy_from);
+	audioData = va_arg(vargs,AudioData*);
+	va_end(vargs);
+	if(action->status != 0){
+		muteMusic(audioData);
+		action->new_status = 0;
+	}
+	return 0;
+}
+
+void UIConfigure_MuteSound(UI_Element *element, UI_Action *action){
+	UIAction_Init(element,action);
+	action->response = SOUND;
+	action->function = UIAction_MuteSound;
+	action->new_status = 0;
+	action->status = 0;
+}
+
+int UIAction_MuteSoundFX(UI_Action *action, va_list copy_from){
+	va_list vargs;
+	AudioData *audioData;
+	va_copy(vargs,copy_from);
+	audioData = va_arg(vargs,AudioData*);
+	va_end(vargs);
+	if(action->status != 0){
+		muteSoundEffects(audioData);
+		action->new_status = 0;
+	}
+	return 0;
+}
+
+void UIConfigure_MuteSoundFX(UI_Element *element, UI_Action *action){
+	UIAction_Init(element,action);
+	action->response = SOUND;
+	action->function = UIAction_MuteSoundFX;
+	action->new_status = 0;
+	action->status = 0;
+}
+
 int UIAction_PercOffsetRect(UI_Action *action, va_list copy_from){
 		va_list vargs;
 		SDL_Event *event;

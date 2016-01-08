@@ -19,6 +19,7 @@ enum Response {NONE,
 			   RESPONSE_DELETE,
 			   DISPOSAL,
 			   AI_RESPONSE,
+			   SOUND,
                FREED};												/* 13 */
 
 enum UIDataTypes{UI_NULL,
@@ -129,6 +130,8 @@ void UIConfigure_UpdateTwoRectOverrideOnWindowResize(UI_Element *element, UI_Act
 
 void UIConfigure_PercOffsetRect(UI_Element *element, UI_Action *action, float xfp, float yfp, float xfd, float yfd, int xip, int yip, int xid, int yid, int num_of_companions,...);
 
+void UIConfigure_MuteSound(UI_Element *element, UI_Action *action);
+void UIConfigure_MuteSoundFX(UI_Element *element, UI_Action *action);
 
 void UITrigger_Bind(UI_Action *action, UI_Action *target, int state_from, int state_to);
 
