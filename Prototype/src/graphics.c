@@ -5,7 +5,7 @@ void paintWeatherLayer(GraphicsData *graphicsData, enum WeatherStatus present_we
 	/* This function creates a Weather struct and fills in the default
      values. Many of these are defined in generic.h */
 	Uint8 o_r = 0,o_g = 0,o_b = 0;
-	Uint8 o_a = 155;
+	Uint8 o_a = 80;
 
 
 
@@ -42,7 +42,9 @@ void paintWeatherLayer(GraphicsData *graphicsData, enum WeatherStatus present_we
 
 	/* SDL_GetRenderDrawColor(graphicsData->renderer,&o_r,&o_g,&o_b,&o_a); */
 	SDL_SetRenderDrawColor(graphicsData->renderer,o_r,o_g,o_b,o_a);
+
 	SDL_SetRenderDrawBlendMode(graphicsData->renderer, SDL_BLENDMODE_BLEND);
+
 	SDL_RenderFillRect(graphicsData->renderer, NULL);
 	/* SDL_SetRenderDrawColor(graphicsData->renderer,o_r,o_g,o_b,o_a); */
 }
@@ -59,27 +61,32 @@ void blitGameObject(SDL_Rect objectRect, GraphicsData *graphicsData, SDL_Texture
 
 void blitRainRandomly(GraphicsData *graphicsData){
 
-	SDL_Rect dstRect;
+	SDL_Rect srcRect;
+	SDL_Rect winRect = {0,0,0,0};
 	int i;
 
-	dstRect.w = RAIN_TILE_WIDTH;
-	dstRect.h = RAIN_TILE_HEIGHT;
+  	SDL_GetWindowSize(graphicsData->window,&winRect.w, &winRect.h);
 
-	for(i = 0; i < 20; i++){
+	printf("winRect.w = %d  winRect.h = %d\n", winRect.w, winRect.h);
 
-	   dstRect.x = (rand()% X_SIZE_OF_SCREEN);
-	   dstRect.y = (rand()% Y_SIZE_OF_SCREEN);
+	srcRect.w = RAIN_TILE_WIDTH;
+	srcRect.h = RAIN_TILE_HEIGHT;
+
+	for(i = 0; i < 50; i++){
+
+	   srcRect.x = (rand()% winRect.w);
+	   srcRect.y = (rand()% winRect.h);
 
 	   if(rand()%30){
 	      SDL_RenderCopy(graphicsData->renderer,
 						 graphicsData->rainy->graphic[rand()%4],
 						 NULL,
-						 &dstRect);
+						 &srcRect);
 	   }else{
 	      SDL_RenderCopy(graphicsData->renderer,
 						 graphicsData->rainy->graphic[(rand()%2)+3],
-						 NULL,
-						 &dstRect);
+					         NULL,
+						 &srcRect);
 	   }
 	}
 
