@@ -137,7 +137,7 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
   createGameUI(&gameData);
 
   /* Then run the gameLoop until it returns 0 or exits */
-
+  announce_init(&gameData.announcementsData);
   playMusic(&gameData.audioData,1);
   printf("gameStarted %d\n",gameLoopReturn);
   while(gameLoopReturn){
@@ -162,15 +162,18 @@ static void createGameUI(GameData *gameData){
 
   SDL_DisplayMode dm;
 
+
   SDL_GetWindowSize(gameData->graphicsData.window,&win_x, &win_y);
 
   /*get dimensions of the display monitor*/
   SDL_GetCurrentDisplayMode(0, &dm);
 
   /* top information bar */
-  element = UIElement_Create(0,0,dm.w,30,2);
-  UIConfigure_FillRect(element,&element->actions[0],0,0,0);
+  element = UIElement_Create(0,0,dm.w,30,4);
+  UIConfigure_FillRect(element,&element->actions[0],248,221,35);
   UIConfigure_PercPosition(element, &element->actions[1],1.0,0.0,-dm.w,0,0);
+  UIConfigure_DisplayString(element, &element->actions[2], "Hello",0,UISTRING_ALIGN_LEFT);
+  UIConfigure_GetAnnouncement(element, &element->actions[3], &element->actions[2]);
   UIElement_Reparent(element,gameData->uiData.root);
 
   /*item selected box*/
@@ -183,7 +186,7 @@ static void createGameUI(GameData *gameData){
 
   /* Score counter */
   element = UIElement_Create(0,0,SCORE_COUNTER_WIDTH,TOP_BAR_HEIGHT,4);
-  UIConfigure_FillRect(element,&element->actions[0],255,255,255);
+  UIConfigure_FillRect(element,&element->actions[0],249,252,124);
   UIConfigure_DisplayNumber(element, &element->actions[1], 0,0,UISTRING_ALIGN_CENTER);
   UIConfigure_ResourceCounter(element, &element->actions[2],1,&element->actions[1]);
   UIConfigure_PercPosition(element, &element->actions[3],1.0,0.0,-SCORE_COUNTER_WIDTH,0,0);
@@ -219,8 +222,9 @@ static void createGameUI(GameData *gameData){
   UIElement_Reparent(element,gameData->uiData.root);
 
 
+
   element2 = UIElement_Create(0, win_y - 100, 100,100,5);
-	UIConfigure_FillRect(element2,&element2->actions[0],0,100,100);
+	UIConfigure_FillRect(element2,&element2->actions[0],248,221,35);
 	UIConfigure_LeftClickRect(element2,&element2->actions[1]);
 		UITrigger_Bind(&element2->actions[1],&element2->actions[2],0,1);
     UITrigger_Bind(&element2->actions[1],&element2->actions[1],1,0);
@@ -238,7 +242,7 @@ static void createGameUI(GameData *gameData){
 
   /* Minimize button */
   element = UIElement_Create(50 + win_x - 150, 50, 50, 50,6);
-  UIConfigure_FillRect(element, &element->actions[0],222,0,0);
+  UIConfigure_FillRect(element, &element->actions[0],185,122,87);
   UIConfigure_ShrinkFitToParent(element, &element->actions[1]);
   UIConfigure_LeftClickRect(element, &element->actions[2]);
     UITrigger_Bind(&element->actions[2],&element->actions[3],0,1);
@@ -252,7 +256,7 @@ static void createGameUI(GameData *gameData){
 
   /* The big panel holding all the AI blocks */
   element3 = UIElement_Create(50,50,win_x - 320,win_y - 200,4);
-  UIConfigure_FillRect(element3, &element3->actions[0],0,222,0);
+  UIConfigure_FillRect(element3, &element3->actions[0],249,252,124);
   UIConfigure_ShrinkFitToParent(element3, &element3->actions[1]);
   UIConfigure_ReadAiBlocks(element3,&element3->actions[2]);
   UIConfigure_InverseRect(element3,&element3->actions[3],50,50,320,100,1,&element3->actions[1]);
@@ -269,7 +273,7 @@ static void createGameUI(GameData *gameData){
 
   /* Calculate AI button */
   element = UIElement_Create(0, 0, 50, 50, 5);
-  UIConfigure_FillRect(element, &element->actions[0],255,255,0);
+  UIConfigure_FillRect(element, &element->actions[0],249,252,124);
   UIConfigure_ShrinkFitToParent(element, &element->actions[1]);
   UIConfigure_LeftClickRect(element, &element->actions[2]);
 	UITrigger_Bind(&element->actions[2],&element->actions[3],0,1);
@@ -399,7 +403,7 @@ int gameLoop(GameData *gameData){
 	   printf("Error clearing renderer: %s\n", SDL_GetError());
   }
   paintBackground(&gameData->graphicsData,0,200,100);
-  updateGameObjects(&gameData->gameObjectData, &gameData->graphicsData, delta_t);
+  updateGameObjects(&gameData->gameObjectData, &gameData->graphicsData, &gameData->announcementsData, delta_t);
   UIRoot_Execute(&gameData->uiData,RENDER,0,&gameData->graphicsData);
   runAI(&gameData->aiData,&gameData->gameObjectData);
   /*This function is like the blit function, putting pixels to the screen.
@@ -410,8 +414,9 @@ int gameLoop(GameData *gameData){
   SDL_RenderPresent(gameData->graphicsData.renderer);
   UIRoot_Execute(&gameData->uiData,GAME_OBJECT_UPDATE,0,&gameData->gameObjectData);
   UIRoot_Execute(&gameData->uiData,EXTERNAL,0);
+  UIRoot_Execute(&gameData->uiData,ANNOUNCEMENTS,0,&gameData->announcementsData);
+  announce_update(&gameData->announcementsData, delta_t);
   UIRoot_Execute(&gameData->uiData,CONTROLS,0,&gameData->controlsData);
-
   /* At the end of the loop we need to update the main application window to
      reflect the changes we've made to the graphics */
   /*SDL_UpdateWindowSurface(gameData->graphicsData.window);*/

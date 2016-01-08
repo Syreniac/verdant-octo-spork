@@ -19,6 +19,7 @@ enum Response {NONE,
 			   RESPONSE_DELETE,
 			   DISPOSAL,
 			   AI_RESPONSE,
+				 ANNOUNCEMENTS,
 				 CONTROLS,
                FREED};												/* 13 */
 
@@ -136,6 +137,7 @@ void UIConfigure_UpdateTwoRectOverrideOnWindowResize(UI_Element *element, UI_Act
 
 void UIConfigure_PercOffsetRect(UI_Element *element, UI_Action *action, float xfp, float yfp, float xfd, float yfd, int xip, int yip, int xid, int yid, int num_of_companions,...);
 void UIConfigure_ToggleObjectSelection(UI_Element *element, UI_Action *action);
+void UIConfigure_GetAnnouncement(UI_Element *element, UI_Action *action, UI_Action *placeToPut);
 
 void UITrigger_Bind(UI_Action *action, UI_Action *target, int state_from, int state_to);
 

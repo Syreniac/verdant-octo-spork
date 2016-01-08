@@ -1,4 +1,4 @@
-#include "audio.h"
+#include "announcements.h"
 
 enum ProgrammableWorkerStatus {LEAVING = 1,
                                RETURNING = 2,
@@ -69,14 +69,14 @@ struct ProgrammableWorker{
 
   double heading;
   float speed;
-  
+
   int currentGraphicIndex;
-  
+
   int wet_and_cant_fly;
 
 
   int cargo;
-  
+
   int displayInfo;
   int xRenderPosWhenSelected;
   int yRenderPosWhenSelected;
@@ -149,12 +149,13 @@ struct GameObjectData{
   ProgrammableWorker *first_programmable_worker;
   int programmableWorkerCount;
   int pause_status;
-  
+  char announcement[256];
+
   AudioData audioData;
 };
 
 ProgrammableWorker *createProgrammableWorker(GameObjectData *gameObjectData);
-void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks);
+void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, AnnouncementsData *announcementsData ,int ticks);
 void updateIceCreamPerson(GameObjectData *gameObjectData, int ticks);
 
 Hive createHive(void);
@@ -177,7 +178,7 @@ ResourceNode createResourceNode(ResourceNodeSpawner *parentSpawner, int resource
 IceCreamPerson *createIceCreamPerson(void);
 DroppedIceCream *createDroppedIceCream(void);
 void reInitialiseIceCreamPerson(IceCreamPerson *iceCreamPerson);
-void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsData, int ticks);
+void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsData, AnnouncementsData *announcementsData, int ticks);
 int countProgrammableWorkersInRange(GameObjectData *gameObjectData, SDL_Point center, double radius);
 int isPointInRangeOf(SDL_Point point, SDL_Point center, double radius);
 

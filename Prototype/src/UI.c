@@ -46,7 +46,7 @@ int UIAction_NullifyAI(UI_Action *action, va_list copy_from);
 UI_Element *makeStartBlock(int x_offset, int y_offset, UI_Element *parent){
 	UI_Element *element;
 	element = UIElement_Create(x_offset,y_offset,200,50,9);
-	UIConfigure_FillRect(element,&element->actions[0],321,123,321);
+	UIConfigure_FillRect(element,&element->actions[0],248,221,35);
 	UIConfigure_ShrinkFitToParent(element, &element->actions[1]);
 	UIConfigure_DisplayString(element, &element->actions[2],"START",0,UISTRING_ALIGN_CENTER);
 	UIConfigure_RenderLine(element, &element->actions[3],BR_CORNER,NULL);
@@ -80,7 +80,7 @@ UI_Element *makeStartBlock(int x_offset, int y_offset, UI_Element *parent){
 UI_Element *makeAIResetButton(int x_offset, int y_offset, UI_Element *parent){
 	UI_Element *element;
 	element = UIElement_Create(x_offset,y_offset,200,50,6);
-	UIConfigure_FillRect(element,&element->actions[0],333,000,150);
+	UIConfigure_FillRect(element,&element->actions[0],74,74,74);
 	UIConfigure_ShrinkFitToParent(element,&element->actions[1]);
 	UIConfigure_LeftClickRect(element,&element->actions[2]);
 		UITrigger_Bind(&element->actions[2],&element->actions[3],0,1);
@@ -99,11 +99,11 @@ UI_Element *makeAITemplateScrollList(int x_offset, int y_offset, AIData *aiData,
 	int y_offset2 = 0;
 	/* Set up the main panel */
 	element = UIElement_Create(x_offset, y_offset, 220, 360,5);
-	UIConfigure_FillRect(element,&element->actions[0],222,222,222);
+	UIConfigure_FillRect(element,&element->actions[0],185,122,87);
 	UIConfigure_ShrinkFitToParent(element,&element->actions[1]);
 	/* Set up the slider bar */
 		element2 = UIElement_Create(x_offset+200,y_offset,20,20,6);
-		UIConfigure_FillRect(element2,&element2->actions[0],77,77,77);
+		UIConfigure_FillRect(element2,&element2->actions[0],249,252,124);
 		UIConfigure_ShrinkFitToParent(element2,&element2->actions[1]);
 		UIConfigure_DraggableVerticalOverride(element2,&element2->actions[2],1,&element2->actions[1]);
 		UIConfigure_LeftClickRect(element2,&element2->actions[3]);
@@ -119,7 +119,7 @@ UI_Element *makeAITemplateScrollList(int x_offset, int y_offset, AIData *aiData,
 	/* Set up the options */
 	while(template!=NULL){
 		element2 = UIElement_Create(x_offset, y_offset + y_offset2, 200,50,6);
-		UIConfigure_FillRect(element2,&element2->actions[0],111,111,111);
+		UIConfigure_FillRect(element2,&element2->actions[0],248,221,35);
 		UIConfigure_ShrinkFitToParentWithYShift(element2,&element2->actions[1],&element->actions[3]);
 		UIConfigure_DisplayString(element2,&element2->actions[2],template->name,0,UISTRING_ALIGN_CENTER);
 		UIConfigure_LeftClickRect(element2,&element2->actions[3]);
@@ -139,7 +139,7 @@ UI_Element *makeAITemplateScrollList(int x_offset, int y_offset, AIData *aiData,
 UI_Element *makeAIBlock(int x_offset, int y_offset, char *aiString, UI_Element *parent){
 	UI_Element *element2;
 	element2 = UIElement_Create(x_offset,y_offset,200,50,19);
-	UIConfigure_FillRect(element2,&element2->actions[0],123,321,123);
+	UIConfigure_FillRect(element2,&element2->actions[0],248,221,35);
 	UIConfigure_ShrinkFitToParent(element2,&element2->actions[1]);
 	UIConfigure_RightClickRect(element2, &element2->actions[2]);
 		UITrigger_Bind(&element2->actions[2],&element2->actions[3],0,1);
@@ -264,6 +264,28 @@ UI_Element *UIElement_Create(int x, int y, int w, int h, int num_of_actions){
 	   element->exposed_data = NULL;
 	   element->exposed_data_count = 0;
 	   return element;
+}
+
+int UIAction_GetAnnouncement(UI_Action *action, va_list copy_from){
+		AnnouncementsData* announcementsData;
+		va_list vargs;
+		va_copy(vargs,copy_from);
+		announcementsData = va_arg(vargs,AnnouncementsData*);
+		va_end(vargs);
+		if(action->status != 0){
+			printf("RUNNING\n");
+			action->companions[0]->strings[1] = realloc(action->companions[0]->strings[1], strlen(announcementsData->announcement)+1);
+			strcpy(action->companions[0]->strings[1], announcementsData->announcement);
+		}
+		return 0;
+}
+
+void UIConfigure_GetAnnouncement(UI_Element *element, UI_Action *action, UI_Action *placeToPut){
+	UIAction_Init(element,action);
+	action->response = ANNOUNCEMENTS;
+	action->function = UIAction_GetAnnouncement;
+	action->companions = calloc(1,sizeof(void*));
+	action->companions[0] = placeToPut;
 }
 
 int UIAction_ToggleObjectSelection(UI_Action *action, va_list copy_from){

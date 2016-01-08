@@ -10,7 +10,7 @@ CFLAGS = -g -pedantic -Wall -Wextra -Wno-unused-variable -Wno-unused-parameter -
 
 # File structure variables
 ASSETS_CONTENTS = assets
-OBJS = main.o init.o game.o world_generation.o game_objects.o AI.o UI.o generic.o controls.o graphics.o audio.o
+OBJS = main.o init.o game.o world_generation.o game_objects.o AI.o UI.o generic.o controls.o graphics.o audio.o announcements.o
 BIN = bin
 PROG = $(BIN)/Prototype2
 CXX = gcc
@@ -23,7 +23,7 @@ ifeq ($(PROCESSOR_ARCHITECTURE),x86)
 endif
 
 DLL_LOCATION = $(DEPENDENCY_FOLDER)/DLLs
-SDL_FLAGS = -I$(DEPENDENCY_FOLDER)/SDL2/include/SDL2 -L$(DEPENDENCY_FOLDER)/SDL2/lib
+SDL_FLAGS = -I$(DEPENDENCY_FOLDER)/SDL2/include/SDL2 -I$(DEPENDENCY_FOLDER)/SDL2/include -L$(DEPENDENCY_FOLDER)/SDL2/lib
 IMAGE_FLAGS = -I$(DEPENDENCY_FOLDER)/SDL_image/include -L$(DEPENDENCY_FOLDER)/SDL_image/lib
 TTF_FLAGS = -I$(DEPENDENCY_FOLDER)/SDL_ttf/include -L$(DEPENDENCY_FOLDER)/SDL_ttf/lib
 MIXER_FLAGS = -I$(DEPENDENCY_FOLDER)/SDL_mixer/include -L$(DEPENDENCY_FOLDER)/SDL_mixer/lib

@@ -233,13 +233,13 @@ Tree createTree(void){
 	/*if tree is too close to hive, rellocate*/
 	while(abs(tree.rect.x - (X_SIZE_OF_WORLD/2 - X_SIZE_OF_HIVE/2)) < SIZE_OF_TREE &&
 	abs(tree.rect.y - (Y_SIZE_OF_WORLD/2 - Y_SIZE_OF_HIVE/2)) < SIZE_OF_TREE){
-	
+
 		if(rand()%2){
 			tree.rect.x += SIZE_OF_TREE;
 		}else{
 			tree.rect.x -= SIZE_OF_TREE;
 		}
-		
+
 		if(rand()%2){
 			tree.rect.y += SIZE_OF_TREE;
 		}else{
@@ -253,7 +253,7 @@ Tree createTree(void){
 	return tree;
 }
 
-void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
+void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, AnnouncementsData *announcementsData, int ticks){
 	/* ProgrammableWorker *programmableWorker = the ProgrammableWorker we're going
 												to be updating
 	 GameObjectData *gameObjectData		 = the pointer to the GameObjectData
@@ -264,6 +264,7 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
 	double pX,pY;
 	ResourceNodeSpawner *resourceNodeSpawner = NULL;
 	ResourceNode *resourceNode;
+	char announcement[256];
 
 	if(!programmableWorker->wet_and_cant_fly){ /*programmable worker has not been caught in rain recently*/
 		programmableWorker->currentGraphicIndex = (programmableWorker->currentGraphicIndex + 1) % 2;
@@ -292,10 +293,10 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
 		programmableWorker->rawY += newY;
 		programmableWorker->rect.x = (int)floor(programmableWorker->rawX);
 		programmableWorker->rect.y = (int)floor(programmableWorker->rawY);
-		
+
 
 		resourceNode = checkResourceNodeCollision(&resourceNodeSpawner,gameObjectData,programmableWorker);
-	
+
 
 
 		if(programmableWorker->status == IDLE){
@@ -309,33 +310,35 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
 			if(programmableWorker->cargo == SUGAR_VALUE_OF_FLOWER){
 				programmableWorker->cargo = 0;
 				gameObjectData->hive.flowers_collected += SUGAR_VALUE_OF_FLOWER;
-				if(gameObjectData->hive.flowers_collected % 50 == 0){
+				if(gameObjectData->hive.flowers_collected % 2 == 0){
 					playSoundEffect(2, &gameObjectData->audioData, "returnFlower");
+					sprintf(announcement,"Congratulations you have collected %d flowers!",gameObjectData->hive.flowers_collected);
+					announce(announcementsData, announcement);
 				}
 			}else if(programmableWorker->cargo == SUGAR_VALUE_OF_ICECREAM){
 				programmableWorker->cargo = 0;
 				gameObjectData->hive.flowers_collected += SUGAR_VALUE_OF_ICECREAM;
 				if(gameObjectData->hive.flowers_collected % 50 < SUGAR_VALUE_OF_ICECREAM){
 					playSoundEffect(2, &gameObjectData->audioData, "returnFlower");
-				}			
+				}
 			}
-			
+
 			programmableWorker->status = IDLE;
 		}
 		else if(programmableWorker->status == LEAVING){
   		/* status being 1 means that the bee heading away from the center */
-  		
+
   			/*if programmable worker is clsoe enough to dropped icecream, it is not the very same second that the person dropped it*/
   			/* then the worker picks up the iceCream*/
 			if(isPointInRangeOf(getCenterOfRect(programmableWorker->rect),
 			getCenterOfRect(gameObjectData->droppedIceCream->rect),
 			(double)ICECREAM_PICKUP_RADIUS) && gameObjectData->droppedIceCream->dropped){
-			
+
 				programmableWorker->cargo += SUGAR_VALUE_OF_ICECREAM;
 				gameObjectData->droppedIceCream->dropped = 0;
 				gameObjectData->droppedIceCream->droppedTimer = 0;
 
-				
+
 			}else{
   				/* We want to get back the ResourceNode and ResourceNodeSpawner (if any)
   				that we are colliding with */
@@ -349,7 +352,7 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
     				programmableWorker->brain.foundNode = NULL;
   				}
   			}
-  			
+
 		}
 	}
 	else{ /*programmable worker has been caught in rain and hasn't regained ability to fly yet*/
@@ -432,25 +435,25 @@ void updateIceCreamPerson(GameObjectData *gameObjectData, int ticks){
 	gameObjectData->iceCreamPerson->yPosition += newY;
 	gameObjectData->iceCreamPerson->rect.x = (int)floor(gameObjectData->iceCreamPerson->xPosition);
 	gameObjectData->iceCreamPerson->rect.y = (int)floor(gameObjectData->iceCreamPerson->yPosition);
-	
+
 	/*if iceCreamPerson not yet stung, and bee is close enough to sting*/
 	/*STING_HIT_RADIUS can be made so small that this would never actually happen unless it's behaviour*/
 	/*that is explicitly programmed into the bees, or (as it currently is) bit enough to happy on an occatinal collision*/
   	if(!gameObjectData->iceCreamPerson->stung && countProgrammableWorkersInRange(gameObjectData,
   	getCenterOfRect(gameObjectData->iceCreamPerson->rect), STING_HIT_RADIUS) != 0){
-  	
+
   		gameObjectData->iceCreamPerson->stung = 1;
   		/*drop iceCream!*/
   		gameObjectData->iceCreamPerson->has_ice_cream = 0;
-  			
+
   		gameObjectData->droppedIceCream->xPosition = gameObjectData->iceCreamPerson->xPosition;
   		gameObjectData->droppedIceCream->yPosition = gameObjectData->iceCreamPerson->yPosition;
-  			
+
   		gameObjectData->droppedIceCream->dropped = 1;
 
   		/*run for your life!*/
   		gameObjectData->iceCreamPerson->speed = 0.1;
-  		
+
   	}
 
 	if(countProgrammableWorkersInRange(gameObjectData, getCenterOfRect(gameObjectData->iceCreamPerson->rect), 250.0) == 0 && !gameObjectData->iceCreamPerson->going_home){
@@ -465,7 +468,7 @@ void updateIceCreamPerson(GameObjectData *gameObjectData, int ticks){
 
 		}else if(gameObjectData->iceCreamPerson->yPosition >= Y_SIZE_OF_WORLD - PERSON_HEIGHT/2){
 			/*world border has been reached and sun is still out, change direction*/
-		gameObjectData->iceCreamPerson->heading = 3.142; 
+		gameObjectData->iceCreamPerson->heading = 3.142;
 
 		}else if(gameObjectData->iceCreamPerson->yPosition <= -PERSON_HEIGHT/2){
 			/*world border has been reached and sun is still out, change direction*/
@@ -475,7 +478,7 @@ void updateIceCreamPerson(GameObjectData *gameObjectData, int ticks){
 			/*randomly change direction, just for the hell of it*/
 	 		gameObjectData->iceCreamPerson->heading += ((double)(rand() % 30) / (double)10) - 1.5;
 	 	}
-	 
+
 	}else{
 		distanceFromYBorder = gameObjectData->iceCreamPerson->yPosition - Y_SIZE_OF_WORLD/2;
 		distanceFromXBorder = gameObjectData->iceCreamPerson->xPosition - X_SIZE_OF_WORLD/2;
@@ -642,7 +645,7 @@ void reInitialiseIceCreamPerson(IceCreamPerson *iceCreamPerson){
 			iceCreamPerson->heading = 4.713;
 		}
 		iceCreamPerson->yPosition = rand() % Y_SIZE_OF_WORLD;
-		
+
 	}else{
 		if(rand()%2){
 			iceCreamPerson->yPosition = Y_SIZE_OF_WORLD - PERSON_HEIGHT;
@@ -653,7 +656,7 @@ void reInitialiseIceCreamPerson(IceCreamPerson *iceCreamPerson){
 		}
 		iceCreamPerson->xPosition = rand() % X_SIZE_OF_WORLD;
 	}
-	
+
 	iceCreamPerson->rect.x = iceCreamPerson->xPosition;
 	iceCreamPerson->rect.y = iceCreamPerson->yPosition;
 
@@ -697,7 +700,7 @@ ResourceNode createResourceNode(ResourceNodeSpawner *parentSpawner, int resource
 
 
 
-void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsData, int ticks){
+void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsData, AnnouncementsData *announcementsData, int ticks){
 	/* GameObjectData *gameObjectData = the pointer to the GameObjectData struct
 										that holds all the information about our
 										GameObjects.
@@ -713,7 +716,7 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 	int i, j;
 	ProgrammableWorker *programmableWorker;
 	blitTiledBackground(graphicsData, graphicsData->grassTexture);
-	
+
 	if(gameObjectData->hive.displayInfo){
 		SDL_Point point = getCenterOfRect(gameObjectData->hive.rect);
 		renderFillRadius(graphicsData, &point, 40, 255,255,255, 80);
@@ -741,12 +744,12 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 	/* Then we need to loop through the attached ResourceNodes and draw them */
 	 while(j < gameObjectData->resourceNodeSpawners[i].maximumNodeCount){
 		if(gameObjectData->resourceNodeSpawners[i].resourceNodes[j].alive){
-		
+
 			if(gameObjectData->resourceNodeSpawners[i].resourceNodes[j].displayInfo){
 				SDL_Point point = getCenterOfRect(gameObjectData->resourceNodeSpawners[i].resourceNodes[j].rect);
 				renderFillRadius(graphicsData, &point, SIZE_OF_FLOWER, 255,255,255, 80);
 			}
-			
+
 		blitGameObject(gameObjectData->resourceNodeSpawners[i].resourceNodes[j].rect,
 						 graphicsData,
 						 graphicsData->nodeTexture,
@@ -764,21 +767,21 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 		SDL_Rect smallerBeeRect;
 		smallerBeeRect.w = (int)((float)programmableWorker->rect.w/BEE_SHRINK_FACTOR_ON_GROUND);
 		smallerBeeRect.h = (int)((float)programmableWorker->rect.h/BEE_SHRINK_FACTOR_ON_GROUND);
-		smallerBeeRect.x = programmableWorker->rect.x;
 		smallerBeeRect.y = programmableWorker->rect.y;
+		smallerBeeRect.x = programmableWorker->rect.x;
 
 		if(programmableWorker->wet_and_cant_fly){
 			if(!gameObjectData->pause_status){
-				updateProgrammableWorker(programmableWorker,gameObjectData,ticks);
+				updateProgrammableWorker(programmableWorker,gameObjectData,announcementsData,ticks);
 			}
-			
+
 			if(programmableWorker->displayInfo){
 				SDL_Point point = getCenterOfRect(programmableWorker->rect);
 				point.x -= 5;
 				point.y -= 5;
 				renderRadius(graphicsData, &point, programmableWorker->rect.w/2, 255,255,255, 180);
 			}
-		
+
 			blitGameObject(smallerBeeRect,
 					 	graphicsData,
 					 	graphicsData->bee->graphic[programmableWorker->currentGraphicIndex],
@@ -787,16 +790,16 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 					 	SDL_FLIP_NONE);
 		}
 	}
-	
+
 	/*if icecream is on the ground*/
 	if(gameObjectData->droppedIceCream->dropped){
 		/*but not yet melted*/
 		if(gameObjectData->droppedIceCream->droppedTimer < MELT_TIME_THRESHOLD){
-		
+
 			if(!gameObjectData->pause_status){
 				gameObjectData->droppedIceCream->droppedTimer++;
 	 		}
-	 		
+
 			if(gameObjectData->droppedIceCream->rect.w >= MAX_DROPPED_ICECREAM_WIDTH){
 				gameObjectData->droppedIceCream->sizeOscillator = -1;
 			}else if(gameObjectData->droppedIceCream->rect.w <= DROPPED_ICECREAM_WIDTH){
@@ -805,22 +808,22 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 			gameObjectData->droppedIceCream->rect.w += gameObjectData->droppedIceCream->sizeOscillator;
 			gameObjectData->droppedIceCream->xPosition -= ((float)gameObjectData->droppedIceCream->sizeOscillator)/2.0;
 			gameObjectData->droppedIceCream->rect.x = gameObjectData->droppedIceCream->xPosition;
-		
+
 			gameObjectData->droppedIceCream->rect.h += gameObjectData->droppedIceCream->sizeOscillator;
 			gameObjectData->droppedIceCream->yPosition -= ((float)gameObjectData->droppedIceCream->sizeOscillator)/2.0;
 			gameObjectData->droppedIceCream->rect.y = gameObjectData->droppedIceCream->yPosition;
-			
+
 			if(gameObjectData->droppedIceCream->displayInfo){
 				SDL_Point point = getCenterOfRect(gameObjectData->droppedIceCream->rect);
 				renderFillRadius(graphicsData, &point, gameObjectData->droppedIceCream->rect.w/2, 255,255,255, 80);
 			}
-			
+
   	 		blitGameObject(gameObjectData->droppedIceCream->rect,
             	      	graphicsData,
                 	   	graphicsData->droppedIceCreamTexture,
                 	   	0,
                 	   	NULL,
-                	   	SDL_FLIP_NONE);	
+                	   	SDL_FLIP_NONE);
         }else{
         	gameObjectData->droppedIceCream->droppedTimer++;
         	if(gameObjectData->droppedIceCream->droppedTimer < MELT_TIME_THRESHOLD + 40){
@@ -834,7 +837,7 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
                 	   	graphicsData->meltedIceCreamTexture,
                 	   	0,
                 	   	NULL,
-                	   	SDL_FLIP_NONE);	
+                	   	SDL_FLIP_NONE);
         	}else{/*now get rid of icecream*/
         		gameObjectData->droppedIceCream->dropped = 0;
         		gameObjectData->droppedIceCream->droppedTimer = 0;
@@ -848,7 +851,7 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 	 	if(!gameObjectData->pause_status){
 		 	updateIceCreamPerson(gameObjectData, ticks);
 	 	}
-	 	
+
 	 	if(gameObjectData->iceCreamPerson->displayInfo){
 			SDL_Point point = getCenterOfRect(gameObjectData->iceCreamPerson->rect);
 			renderFillRadius(graphicsData, &point, PERSON_WIDTH/2, 255,255,255, 80);
@@ -882,30 +885,30 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 	for(programmableWorker = gameObjectData->first_programmable_worker; programmableWorker != NULL ; programmableWorker = programmableWorker->next){
 		if(!programmableWorker->wet_and_cant_fly){
 		if(!gameObjectData->pause_status){
-			updateProgrammableWorker(programmableWorker,gameObjectData,ticks);
+			updateProgrammableWorker(programmableWorker,gameObjectData,announcementsData,ticks);
 		}
-		
+
 		if(programmableWorker->displayInfo && graphicsData->trackingMode){
 		  	int window_x,window_y, tempXOffset, tempYOffset;
 			SDL_Point point = getCenterOfRect(programmableWorker->rect);
-			
+
 			renderRadius(graphicsData, &point, WORKER_PERCEPTION_RADIUS, 255,255,255, 180);
  			SDL_GetWindowSize(graphicsData->window,&window_x,&window_y);
-			
+
 			tempXOffset = -programmableWorker->rawX + (programmableWorker->xRenderPosWhenSelected);
 			tempYOffset = -programmableWorker->rawY  + (programmableWorker->yRenderPosWhenSelected);
-			
+
 			if(tempXOffset > -X_SIZE_OF_WORLD + window_x && tempXOffset < 0){
 				graphicsData->navigationOffset.x = tempXOffset;
 			}
-			
+
 			if(tempYOffset > -Y_SIZE_OF_WORLD + window_y && tempYOffset < 0){
 				graphicsData->navigationOffset.y = tempYOffset;
 			}
 		}
-		
-		
-		
+
+
+
 		blitGameObject(programmableWorker->rect,
 					 	graphicsData,
 					 	graphicsData->bee->graphic[programmableWorker->currentGraphicIndex +
@@ -925,12 +928,12 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 
 	/* render tree tops last, so that they appear above everything else*/
 	for(i = 0; i < NUMBER_OF_TREES; i++){
-	
+
 		if(gameObjectData->tree[i].displayInfo){
 			SDL_Point point = getCenterOfRect(gameObjectData->tree[i].rect);
 			renderFillRadius(graphicsData, &point, TREE_SHELTER_RADIUS, 0,0,0, 40);
 		}
-		
+
 		blitGameObject(gameObjectData->tree[i].stumpRect,
 					 	graphicsData,
 					 	graphicsData->treeStumpTexture,
@@ -961,9 +964,9 @@ void objectInfoDisplay(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 	int displayInfoAlreadySet = 0, i;
 	point.x = mbEvent->x - graphicsData->navigationOffset.x;
 	point.y = mbEvent->y - graphicsData->navigationOffset.y;
-	
+
 	graphicsData->trackingMode = 0;
-	
+
 	for(i = 0; i < NUMBER_OF_TREES; i++){
 		if(isPointInRangeOf(getCenterOfRect(gameObjectData->tree[i].rect), point, SIZE_OF_TREE/2)){
 			if(!displayInfoAlreadySet){
@@ -974,13 +977,13 @@ void objectInfoDisplay(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 			}
 		}else{
 			gameObjectData->tree[i].displayInfo = 0;
-		}	
+		}
 	}
 
 	for(worker = gameObjectData->first_programmable_worker; worker != NULL ;
 		worker = worker->next){
 		if(isPointInRangeOf(getCenterOfRect(worker->rect), point, worker->rect.w/2)){
-			if(!displayInfoAlreadySet){	
+			if(!displayInfoAlreadySet){
 				worker->displayInfo = 1;
 				worker->xRenderPosWhenSelected = worker->rect.x + graphicsData->navigationOffset.x;
 				worker->yRenderPosWhenSelected = worker->rect.y + graphicsData->navigationOffset.y;
@@ -993,29 +996,29 @@ void objectInfoDisplay(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 		    worker->displayInfo = 0;
 		}
 	}
-	
+
 	if(isPointInRangeOf(getCenterOfRect(gameObjectData->iceCreamPerson->rect), point, PERSON_WIDTH/2)){
-		if(!displayInfoAlreadySet){	
+		if(!displayInfoAlreadySet){
 			gameObjectData->iceCreamPerson->displayInfo = 1;
 			displayInfoAlreadySet = 1;
 		}else{
 			gameObjectData->iceCreamPerson->displayInfo = 0;
-		}	
+		}
 	}else{
 		gameObjectData->iceCreamPerson->displayInfo = 0;
 	}
-	
+
 	if(isPointInRangeOf(getCenterOfRect(gameObjectData->droppedIceCream->rect), point, DROPPED_ICECREAM_WIDTH/2)){
-		if(!displayInfoAlreadySet){	
+		if(!displayInfoAlreadySet){
 			gameObjectData->droppedIceCream->displayInfo = 1;
 			displayInfoAlreadySet = 1;
 		}else{
 			gameObjectData->droppedIceCream->displayInfo = 0;
-		}	
+		}
 	}else{
 		gameObjectData->droppedIceCream->displayInfo = 0;
 	}
-	
+
 	i = 0;
 	while(i < gameObjectData->resourceNodeSpawnerCount){
 		int j = 0;
@@ -1023,12 +1026,12 @@ void objectInfoDisplay(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 	 	while(j < gameObjectData->resourceNodeSpawners[i].maximumNodeCount){
 			if(gameObjectData->resourceNodeSpawners[i].resourceNodes[j].alive &&
 			isPointInRangeOf(getCenterOfRect(gameObjectData->resourceNodeSpawners[i].resourceNodes[j].rect), point, SIZE_OF_FLOWER/2)){
-				if(!displayInfoAlreadySet){	
+				if(!displayInfoAlreadySet){
 					gameObjectData->resourceNodeSpawners[i].resourceNodes[j].displayInfo = 1;
 					displayInfoAlreadySet = 1;
 				}else{
 					gameObjectData->resourceNodeSpawners[i].resourceNodes[j].displayInfo = 0;
-				}	
+				}
 			}else{
 				gameObjectData->resourceNodeSpawners[i].resourceNodes[j].displayInfo = 0;
 			}
@@ -1036,21 +1039,19 @@ void objectInfoDisplay(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 		}
 		i++;
 	}
-	
+
 	if(isPointInRangeOf(getCenterOfRect(gameObjectData->hive.rect), point, 40)){
-	
-		if(!displayInfoAlreadySet){	
+
+		if(!displayInfoAlreadySet){
 			gameObjectData->hive.displayInfo = 1;
 			displayInfoAlreadySet = 1;
 		}else{
 			gameObjectData->hive.displayInfo = 0;
-		}	
+		}
 	}else{
 		gameObjectData->hive.displayInfo = 0;
 	}
-	
-	
-	
+
+
+
 }
-
-

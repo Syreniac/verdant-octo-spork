@@ -1,28 +1,38 @@
 #include <check.h>
 #include "../src/main.h"
 
-
 /* Test passes! */
 /* From generic.h */
-START_TEST(test_isPointInRect){
+START_TEST(core_isPointInRect){
     SDL_Rect rect;
 
     rect.x = rect.y = 20;
     rect.h = rect.w = 40;
-
+/* Returns '1' if the point is inside the rectangle. */
     fail_unless(isPointInRect(10,10,rect) == 0, "isPointInRect function borked");
-    fail_unless(isPointInRect(21,21,rect) == 1, "isPointInRect function borked");
     fail_unless(isPointInRect(10,21,rect) == 0, "isPointInRect function borked");
     fail_unless(isPointInRect(21,10,rect) == 0, "isPointInRect function borked");
-    fail_unless(isPointInRect(21,59,rect) == 1, "isPointInRect function borked");
-    fail_unless(isPointInRect(59,21,rect) == 1, "isPointInRect function borked");
     fail_unless(isPointInRect(21,61,rect) == 0, "isPointInRect function borked");
     fail_unless(isPointInRect(61,21,rect) == 0, "isPointInRect function borked");
   }
 END_TEST
 
+/* Test passes! */
 /* From generic.h */
-START_TEST(test_testRectIntersection){
+START_TEST(limits_isPointInRect){
+    SDL_Rect rect;
+
+    rect.x = rect.y = 20;
+    rect.h = rect.w = 40;
+/* Returns '0' if the point isn't inside the rectangle. */
+    fail_unless(isPointInRect(21,21,rect) == 1, "isPointInRect function borked");
+    fail_unless(isPointInRect(21,59,rect) == 1, "isPointInRect function borked");
+    fail_unless(isPointInRect(59,21,rect) == 1, "isPointInRect function borked");
+  }
+END_TEST
+
+/* From generic.h */
+START_TEST(core_testRectIntersection){
     SDL_Rect rectA;
     SDL_Rect rectB;
 
@@ -47,7 +57,7 @@ END_TEST
 
 
 /* From generic.h */
-START_TEST(test_isRectEnclosedInRect){
+START_TEST(core_isRectEnclosedInRect){
     SDL_Rect rectA;
     SDL_Rect rectB;
 
@@ -72,7 +82,7 @@ END_TEST
 
 /* From generic.h */
 /*ensureRectEnclosed: assumption: size of ensure is always smaller than size of limit*/
-START_TEST(test_ensureRectEnclosed){
+START_TEST(core_ensureRectEnclosed){
     SDL_Rect rectA;
     SDL_Rect rectB;
 
@@ -99,7 +109,7 @@ END_TEST
 
 /* From generic.h */
 /* the function generates a random number. the testing is to ensure the number is within range */
-START_TEST(test_randPi){
+START_TEST(core_randPi){
     fail_unless(randPi() <= PI, "randPi function borked, random number greater than PI");
     fail_unless(randPi() >= 0, "randPi function borked, random number less than 0");
   }
@@ -107,7 +117,7 @@ END_TEST
 
 
 /* From generic.h */
-START_TEST(test_square){
+START_TEST(core_square){
     fail_unless(square(1.5) == 2.25, "square function borked, for a non-integer case");
     fail_unless(square(2) == 4, "square function borked, for an integer case");
   }
@@ -115,14 +125,14 @@ END_TEST
 
 
 /* From generic.h */
-START_TEST(test_getDistance2BetweenPoints){
+START_TEST(core_getDistance2BetweenPoints){
     fail_unless(getDistance2BetweenPoints(1.5, 1.5, 2.5, 1.5) == 1, "getDistance2BetweenPoints function borked, for a one dimension case");
     fail_unless(getDistance2BetweenPoints(1, 1, 4, 5) == 25, "getDistance2BetweenPoints function borked, for a two dimensions case");
   }
 END_TEST
 
 /* From generic.h */
-START_TEST(test_getDistance2BetweenRects){
+START_TEST(core_getDistance2BetweenRects){
     SDL_Rect rectA;
     SDL_Rect rectB;
 
@@ -138,7 +148,7 @@ START_TEST(test_getDistance2BetweenRects){
 END_TEST
 
 /* From generic.h */
-START_TEST(test_fitRectToWorld){
+START_TEST(core_fitRectToWorld){
     /* not quite understand logic of this fit, to discuss */
     /* not understand when whole rectangle should be present when below lower bound, only 1 pixel is present when above upper bound */
     /* fail_unless(fitRectToWorld()); */
@@ -146,7 +156,7 @@ START_TEST(test_fitRectToWorld){
 END_TEST
 
 /* From generic.h */
-START_TEST(test_generateRandomCoordOffset){
+START_TEST(core_generateRandomCoordOffset){
     /* the offset is only half of radius, please double check */
     /* the function generates a random number. the testing is to ensure the number is within range*/
     fail_unless(generateRandomCoordOffset(5) <= 5.0/2, "randPi function borked, random number greater than PI");
@@ -157,7 +167,7 @@ END_TEST
 
 /* From generic.h */
 /* the function should return angle between the centre of 2 rectangles */
-START_TEST(test_getAngleBetweenRects){
+START_TEST(core_getAngleBetweenRects){
     SDL_Rect rectA;
     SDL_Rect rectB;
 
@@ -174,7 +184,7 @@ END_TEST
 
 /* From generic.h */
 /* TODO: fix this test. "SDL_Point" is a variable type, not a function.
-START_TEST(test_getCenterOfRect){
+START_TEST(core_getCenterOfRect){
     SDL_Rect rect;
     SDL_Point point;
 
@@ -191,25 +201,29 @@ Suite *main_suite(void)
 {
   Suite *generic;
   TCase *tc_core;
+  TCase *tc_limits;
 
   generic = suite_create("generic");
 
   /* Core test case */
   tc_core = tcase_create("core");
+  tc_limits = tcase_create("limits");
 
-  tcase_add_test(tc_core, test_isPointInRect);
-  tcase_add_test(tc_core, test_testRectIntersection);
-  tcase_add_test(tc_core, test_isRectEnclosedInRect);
-  tcase_add_test(tc_core, test_ensureRectEnclosed);
-  tcase_add_test(tc_core, test_randPi);
-  tcase_add_test(tc_core, test_square);
-  tcase_add_test(tc_core, test_getDistance2BetweenPoints);
-  tcase_add_test(tc_core, test_getDistance2BetweenRects);
-  tcase_add_test(tc_core, test_fitRectToWorld);
-  tcase_add_test(tc_core, test_generateRandomCoordOffset);
-  tcase_add_test(tc_core, test_getAngleBetweenRects);
-//  tcase_add_test(tc_core, test_getCenterOfRect);
+  tcase_add_test(tc_core, core_isPointInRect);
+  tcase_add_test(tc_limits, limits_isPointInRect);
+  tcase_add_test(tc_core, core_testRectIntersection);
+  tcase_add_test(tc_core, core_isRectEnclosedInRect);
+  tcase_add_test(tc_core, core_ensureRectEnclosed);
+  tcase_add_test(tc_core, core_randPi);
+  tcase_add_test(tc_core, core_square);
+  tcase_add_test(tc_core, core_getDistance2BetweenPoints);
+  tcase_add_test(tc_core, core_getDistance2BetweenRects);
+  tcase_add_test(tc_core, core_fitRectToWorld);
+  tcase_add_test(tc_core, core_generateRandomCoordOffset);
+  tcase_add_test(tc_core, core_getAngleBetweenRects);
+//  tcase_add_test(tc_core, core_getCenterOfRect);
   suite_add_tcase(generic, tc_core);
+  suite_add_tcase(generic, tc_limits);
 
   return generic;
 }
