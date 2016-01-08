@@ -173,21 +173,20 @@ static void createGameUI(GameData *gameData){
   UIConfigure_PercPosition(element, &element->actions[1],1.0,0.0,-dm.w,0,0);
   UIElement_Reparent(element,gameData->uiData.root);
 
-  /* item selected box
-  element = UIElement_Create(0,0,SCORE_COUNTER_WIDTH,TOP_BAR_HEIGHT,4);
-  UIConfigure_FillRect(element,&element->actions[0],255,255,255);
-  UIConfigure_DisplayNumber(element, &element->actions[1], 0,0);
-  UIConfigure_ResourceCounter(element, &element->actions[2],1,&element->actions[1]);
-  UIConfigure_PercPosition(element, &element->actions[3],1.0,0.0,-150,0,0);
-  UIElement_Reparent(element,gameData->uiData.root);*/
+  /*item selected box*/
+  element = UIElement_Create(0,0,SCORE_LABEL_WIDTH,TOP_BAR_HEIGHT,3);
+  UIConfigure_FillRect(element,&element->actions[0],127,127, 150);
+  UIConfigure_DisplayString(element, &element->actions[1],"   SCORE: ",0);
+  UIConfigure_PercPosition(element, &element->actions[2],1.0,0.0,-(SCORE_COUNTER_WIDTH + SCORE_LABEL_WIDTH),0,0);
+  UIElement_Reparent(element,gameData->uiData.root);
 
 
   /* Score counter */
-  element = UIElement_Create(0,0,150,30,4);
-  UIConfigure_FillRect(element,&element->actions[0],255,255,255);
+  element = UIElement_Create(0,0,SCORE_COUNTER_WIDTH, TOP_BAR_HEIGHT,4);
+  UIConfigure_FillRect(element,&element->actions[0],127,127,150);
   UIConfigure_DisplayNumber(element, &element->actions[1], 0,0);
   UIConfigure_ResourceCounter(element, &element->actions[2],1,&element->actions[1]);
-  UIConfigure_PercPosition(element, &element->actions[3],1.0,0.0,-150,0,0);
+  UIConfigure_PercPosition(element, &element->actions[3],1.0,0.0,-SCORE_COUNTER_WIDTH,0,0);
   UIElement_Reparent(element,gameData->uiData.root);
   
   

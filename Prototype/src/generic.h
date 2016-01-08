@@ -112,7 +112,8 @@ each call to updateProgrammableWorker*/
 #define FRAME_TIME 20
 
 #define TOP_BAR_HEIGHT 30
-#define SCORE_COUNTER_WIDTH 150
+#define SCORE_COUNTER_WIDTH 40
+#define SCORE_LABEL_WIDTH 90
 
 #define NUM_OF_KEYS 30
 #define PANSPEEDMULTI 0.5
