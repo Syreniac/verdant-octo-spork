@@ -499,6 +499,46 @@ void runAI(AIData *aiData, GameObjectData *gameObjectData){
   }
 }
 
+BlockFunction *testBlockFunctionRootForLoops(BlockFunction *toTest, BlockFunction **testAgainst, int countToTestAgainst){
+  int i = 0;
+  BlockFunction *returnValue = NULL;
+  BlockFunction **testAgainstCopy = calloc(countToTestAgainst+2,sizeof(BlockFunction*));
+  /* Make a copy of the testAgainst array that we can work with */
+  if(testAgainst!=NULL){
+    memcpy(testAgainstCopy,testAgainst,sizeof(BlockFunction*) * countToTestAgainst);
+  }
+  printf("testing block function %s\n",toTest->name);
+  /* If the block function we're testing against is in this list, we've found something that loops on itself */
+  while(i < countToTestAgainst){
+    if(testAgainst[i] == toTest){
+      printf("uh, we found a copy\n");
+      return toTest;
+    }
+    i++;
+  }
+  /* Add the block function we're testing against to the test array and then test the next block functions */
+  testAgainstCopy[countToTestAgainst] = toTest;
+  if(toTest->primary != NULL){
+    returnValue = testBlockFunctionRootForLoops(toTest->primary,testAgainstCopy,countToTestAgainst+1);
+  }
+  if(returnValue == NULL && toTest->secondary != NULL){
+    returnValue = testBlockFunctionRootForLoops(toTest->secondary,testAgainstCopy,countToTestAgainst+1);
+  }
+  /* Clean up */
+  if(testAgainstCopy!=NULL){
+    free(testAgainstCopy);
+  }
+  /* return the recursion */
+  return returnValue;
+}
+
+int testBlockFunctionRootForStart(BlockFunctionRoot *root){
+	if(root->blockFunctions[0].primary != NULL || root->blockFunctions[0].secondary != NULL){
+		return 1;
+	}
+	return 0;
+}
+
 static void makeAIBlockTemplate(AIData *aiData, char name[50], int numOfArguments, BlockFunctionArgumentType *arguments){
   BlockFunctionTemplate *template = malloc(sizeof(BlockFunctionTemplate));
   BlockFunctionTemplate *previous = aiData->templates;
@@ -532,26 +572,36 @@ static void makeAIBlockTemplate(AIData *aiData, char name[50], int numOfArgument
 AIData initAIData(void){
 	AIData aiData;
 	FILE *file;
-  BlockFunctionArgumentType arguments[2] = {BF_PRIMARY,BF_SECONDARY};
+	int i = 0;
+	BlockFunction *erroneousBlockFunction = NULL;
+    BlockFunctionArgumentType arguments[2] = {BF_PRIMARY,BF_SECONDARY};
 	file = fopenAndVerify("GenericWorkerAI.txt","r");
 	aiData.blockFunctionRoots = calloc(1,sizeof(BlockFunctionRoot));
 	aiData.blockFunctionRoots[0] = makeBlockFunctionRootFromFile(file);
-  aiData.templates = NULL;
+    aiData.templates = NULL;
 	fclose(file);
-  makeAIBlockTemplate(&aiData,"Void",1,arguments);
-  makeAIBlockTemplate(&aiData,"IfIdle",2,arguments);
-  makeAIBlockTemplate(&aiData,"IfReturning",2,arguments);
-  makeAIBlockTemplate(&aiData,"IfHasCargo",2,arguments);
-  makeAIBlockTemplate(&aiData,"IfOutsideBounds",2,arguments);
-  makeAIBlockTemplate(&aiData,"IfNearHive",2,arguments);
-  makeAIBlockTemplate(&aiData,"SetHeadingRandomly",1,arguments);
-  makeAIBlockTemplate(&aiData,"ReturnToHive",1,arguments);
-  makeAIBlockTemplate(&aiData,"RememberCurrentLocation",1,arguments);
-  makeAIBlockTemplate(&aiData,"GoToStoredLocation",2,arguments);
-  makeAIBlockTemplate(&aiData,"ForgetStoredLocation",1,arguments);
-  makeAIBlockTemplate(&aiData,"IfNodeFound",2,arguments);
-  makeAIBlockTemplate(&aiData,"HeadToFoundNode",1,arguments);
-  makeAIBlockTemplate(&aiData,"HasStoredLocation",2,arguments);
+	erroneousBlockFunction = testBlockFunctionRootForLoops(&aiData.blockFunctionRoots[0].blockFunctions[0],NULL,0);
+	if(erroneousBlockFunction != NULL){
+		while(erroneousBlockFunction != &aiData.blockFunctionRoots[0].blockFunctions[i]){
+		  i++;
+		}
+		printf("dumping loaded AI File: Loop detected in function %d: \'%s\'",i,erroneousBlockFunction->name);
+		nullifyBlockFunctionRoot(&aiData.blockFunctionRoots[0]);
+	}
+	makeAIBlockTemplate(&aiData,"Void",1,arguments);
+	makeAIBlockTemplate(&aiData,"IfIdle",2,arguments);
+	makeAIBlockTemplate(&aiData,"IfReturning",2,arguments);
+	makeAIBlockTemplate(&aiData,"IfHasCargo",2,arguments);
+	makeAIBlockTemplate(&aiData,"IfOutsideBounds",2,arguments);
+	makeAIBlockTemplate(&aiData,"IfNearHive",2,arguments);
+	makeAIBlockTemplate(&aiData,"SetHeadingRandomly",1,arguments);
+	makeAIBlockTemplate(&aiData,"ReturnToHive",1,arguments);
+	makeAIBlockTemplate(&aiData,"RememberCurrentLocation",1,arguments);
+	makeAIBlockTemplate(&aiData,"GoToStoredLocation",2,arguments);
+	makeAIBlockTemplate(&aiData,"ForgetStoredLocation",1,arguments);
+	makeAIBlockTemplate(&aiData,"IfNodeFound",2,arguments);
+	makeAIBlockTemplate(&aiData,"HeadToFoundNode",1,arguments);
+	makeAIBlockTemplate(&aiData,"HasStoredLocation",2,arguments);
 
 	return aiData;
 }

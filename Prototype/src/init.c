@@ -109,12 +109,12 @@ int game_welcome_page(GraphicsData graphicsData, AudioData audioData){
    UIConfigure_DisplayImage(initData.uiData.root,&initData.uiData.root->actions[0],graphicsData.mainMenuImage);
    UIConfigure_InverseRect(initData.uiData.root,&initData.uiData.root->actions[1],0,0,0,0,0);
 
-   element = UIElement_CreateByPercentage(0.56f,0.7f,0.35f,0.1f,win_x,win_y,4);
+   element = UIElement_CreateByPercentage(0.56f,0.7f,0.35f,0.1f,win_x,win_y,3);
    UIConfigure_Counter(element,&element->actions[0]);
    UIConfigure_LeftClickRect(element,&element->actions[1]);
        UITrigger_Bind(&element->actions[1],&element->actions[0],-1,UITRIGGER_PLUSONE);
-   UIConfigure_FillRect(element,&element->actions[2],255,255,255);
-   UIConfigure_PercRect(element,&element->actions[3],0.56f,0.7f,0.35f,0.1f);
+   UIConfigure_PercRect(element,&element->actions[2],0.56f,0.7f,0.35f,0.1f);
+   //UIConfigure_FillRect(element,&element->actions[3],255,255,255);
 
    UIElement_Reparent(element,initData.uiData.root);
 

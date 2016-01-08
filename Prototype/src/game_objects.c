@@ -894,7 +894,7 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 
 			renderRadius(graphicsData, &point, WORKER_PERCEPTION_RADIUS, 255,255,255, 180);
  			SDL_GetWindowSize(graphicsData->window,&window_x,&window_y);
-
+			/* I'm internally debating whether to center the screen or not here */
 			tempXOffset = -programmableWorker->rawX + (programmableWorker->xRenderPosWhenSelected);
 			tempYOffset = -programmableWorker->rawY  + (programmableWorker->yRenderPosWhenSelected);
 

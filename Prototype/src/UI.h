@@ -2,7 +2,7 @@
 
 #define UITRIGGER_PLUSONE -2
 
-enum Response {NONE,
+enum Response {NONE = 0,
 			   RENDER_BASE,										/* 1 */
                RENDER,												/* 2 */
                LEFT_CLICK,										/* 3 */
@@ -21,6 +21,7 @@ enum Response {NONE,
 			   AI_RESPONSE,
 				 ANNOUNCEMENTS,
 				 CONTROLS,
+				 MOUSEWHEEL,
                FREED};												/* 13 */
 
 enum UIDataTypes{UI_NULL,
@@ -118,7 +119,7 @@ void UIConfigure_InverseRect(UI_Element *element, UI_Action *action, int from_le
 void UIConfigure_PercRect(UI_Element *element, UI_Action *action, float from_left, float from_right, float width, float height);
 void UIConfigure_AddAiBlock(UI_Element *element, UI_Action *action, BlockFunctionTemplate *template, UI_Element *target);
 void UIConfigure_DeleteKeyFlagDestroy(UI_Element *element, UI_Action *action);
-void UIConfigure_ReadAiBlocks(UI_Element *element, UI_Action *action);
+void UIConfigure_ReadAiBlocks(UI_Element *element, UI_Action *action, UI_Action *infoOutput);
 void UIConfigure_SetUpAiBlock(UI_Element *element, UI_Action *action, int num_of_companions, ...);
 void UIConfigure_NullifyAI(UI_Element *element, UI_Action *action);
 void UIConfigure_RecallWorkers(UI_Element *element, UI_Action *action);
@@ -138,6 +139,10 @@ void UIConfigure_UpdateTwoRectOverrideOnWindowResize(UI_Element *element, UI_Act
 void UIConfigure_PercOffsetRect(UI_Element *element, UI_Action *action, float xfp, float yfp, float xfd, float yfd, int xip, int yip, int xid, int yid, int num_of_companions,...);
 void UIConfigure_ToggleObjectSelection(UI_Element *element, UI_Action *action);
 void UIConfigure_GetAnnouncement(UI_Element *element, UI_Action *action, UI_Action *placeToPut);
+void UIConfigure_FillAndBorderRect(UI_Element *element, UI_Action *action, int fr, int fg, int fb, int br, int bg, int bb);
+void UIConfigure_PassThrough(UI_Element *element, UI_Action *action, enum Response response, int num_of_companions, ...);
+void UIConfigure_SlideWithMouseWheel(UI_Element *element, UI_Action *action, int x, int y, int num_of_companions,...);
+
 
 void UITrigger_Bind(UI_Action *action, UI_Action *target, int state_from, int state_to);
 

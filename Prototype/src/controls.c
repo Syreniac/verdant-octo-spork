@@ -12,7 +12,6 @@ static int isMouseFree(ControlsData *controlsData){
 }
 
 int handleEvent(SDL_Event *event, GameObjectData *gameObjectData, UIData *uiData, ControlsData *controlsData, GraphicsData *graphicsData){
-
 		switch (event->type)
 		{
 			/* Closing the Window will exit the program */
@@ -28,6 +27,7 @@ int handleEvent(SDL_Event *event, GameObjectData *gameObjectData, UIData *uiData
 				UIRoot_Execute(uiData,MOTION,0,event);
 				break;
 			case SDL_MOUSEBUTTONDOWN:
+				printf("controlsData->objectSelection = %d\n",controlsData->objectSelection);
 				if(isMouseFree(controlsData)){
 					/* We only want to catch new mouse clicks if the mouse is not having
 					   a button held down */
@@ -68,6 +68,9 @@ int handleEvent(SDL_Event *event, GameObjectData *gameObjectData, UIData *uiData
 			case SDL_QUIT:
 				printf("exiting\n");
 				exit(0);
+				break;
+			case SDL_MOUSEWHEEL:
+				UIRoot_Execute(uiData,MOUSEWHEEL,0,event);
 				break;
 		}
 		return 1;

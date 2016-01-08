@@ -156,3 +156,5 @@ BlockFunctionRoot makeBlockFunctionRootFromString(char *str, int numOfBlocks);
 
 blockFunction_WrappedFunction getBlockFunctionByName(char *blockFunctionName);
 void nullifyBlockFunctionRoot(BlockFunctionRoot *root);
+BlockFunction *testBlockFunctionRootForLoops(BlockFunction *toTest, BlockFunction **testAgainst, int countToTestAgainst);
+int testBlockFunctionRootForStart(BlockFunctionRoot *root);
