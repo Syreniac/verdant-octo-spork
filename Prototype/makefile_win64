@@ -6,33 +6,34 @@
 
 
 # These are system independent
-CFLAGS = -g -pedantic -Wall -Wextra -Wno-unused-variable -Wno-unused-parameter -std=c99 -O3
+CFLAGS = -g -pedantic -Wall -Wextra -Wno-unused-variable -Wno-unused-parameter -std=c99
 
 # File structure variables
-ASSETS_CONTENTS = assets
+ASSETS_CONTENTS = .\assets
 OBJS = main.o init.o game.o world_generation.o game_objects.o AI.o UI.o generic.o controls.o graphics.o audio.o announcements.o
 BIN = bin
-PROG = $(BIN)/Prototype2
+PROG = $(BIN)\Prototype2
 CXX = gcc
 
 ifeq ($(PROCESSOR_ARCHITECTURE),AMD64)
-	DEPENDENCY_FOLDER = ./libraries_x64
+	DEPENDENCY_FOLDER = .\libraries_x64
 endif
 ifeq ($(PROCESSOR_ARCHITECTURE),x86)
-	DEPENDENCY_FOLDER = ./libraries_x86
+	DEPENDENCY_FOLDER = .\libraries_x86
 endif
 
-DLL_LOCATION = $(DEPENDENCY_FOLDER)/DLLs
-SDL_FLAGS = -I$(DEPENDENCY_FOLDER)/SDL2/include/SDL2 -I$(DEPENDENCY_FOLDER)/SDL2/include -L$(DEPENDENCY_FOLDER)/SDL2/lib
-IMAGE_FLAGS = -I$(DEPENDENCY_FOLDER)/SDL_image/include -L$(DEPENDENCY_FOLDER)/SDL_image/lib
-TTF_FLAGS = -I$(DEPENDENCY_FOLDER)/SDL_ttf/include -L$(DEPENDENCY_FOLDER)/SDL_ttf/lib
-MIXER_FLAGS = -I$(DEPENDENCY_FOLDER)/SDL_mixer/include -L$(DEPENDENCY_FOLDER)/SDL_mixer/lib
+DLL_LOCATION = $(DEPENDENCY_FOLDER)\DLLs
+SDL_FLAGS = -I$(DEPENDENCY_FOLDER)\SDL2\include\SDL2 -I$(DEPENDENCY_FOLDER)\SDL2\include -L$(DEPENDENCY_FOLDER)\SDL2\lib
+IMAGE_FLAGS = -I$(DEPENDENCY_FOLDER)\SDL_image\include -L$(DEPENDENCY_FOLDER)\SDL_image\lib
+TTF_FLAGS = -I$(DEPENDENCY_FOLDER)\SDL_ttf\include -L$(DEPENDENCY_FOLDER)\SDL_ttf\lib
+MIXER_FLAGS = -I$(DEPENDENCY_FOLDER)\SDL_mixer\include -L$(DEPENDENCY_FOLDER)\SDL_mixer\lib
 
 LFLAGS =  $(SDL_FLAGS) $(IMAGE_FLAGS) $(TTF_FLAGS) $(MIXER_FLAGS) -lmingw32 -lSDL2main -lSDL2 -lSDL_image -lSDL_mixer -lSDL_ttf -lm
 DELETE = del
-DELETE_RECURSIVE = del /s
-DLL_COPY_COMMAND = cp $(DLL_LOCATION) $(BIN)
-ASSET_COPY_COMMAND = cp $(ASSETS_CONTENTS) $(BIN)
+DELETE_RECURSIVE = del \s
+#DLL_COPY_COMMAND = Xcopy /f /s ".\libraries_x64\DLLs" ".\$(BIN)"
+DLL_COPY_COMMAND = Xcopy /f /s  "$(DLL_LOCATION)" ".\$(BIN)" 
+ASSET_COPY_COMMAND = Xcopy /s /f  "$(ASSETS_CONTENTS)" ".\$(BIN)"
 
 # List all the files here
 
@@ -41,21 +42,21 @@ all: $(PROG)
 
 
 # compiling other source files.
-%.o: src/%.c src/%.h
+%.o: src\%.c src\%.h
 	$(CXX) $(CFLAGS) $(LFLAGS) -c -s $<
 
-# linking the program. | $(BIN) makes the bin/ directory if it does not yet exist.
+# linking the program. | $(BIN) makes the bin\ directory if it does not yet exist.
 $(PROG): $(BIN) | $(OBJS)
 	$(CXX) $(OBJS) -o $(PROG) $(LFLAGS)
 
-# makes bin/ directory and copies assets to bin/ so we don't have to drag them in manually.
+# makes bin\ directory and copies assets to bin\ so we don't have to drag them in manually.
 $(BIN):
 	mkdir $@
 	$(DLL_COPY_COMMAND)
 	$(ASSET_COPY_COMMAND)
 
 # cleans everything that can be automatically recreated with "make".
-# To do this, run the following command in verdant-octo-spork/Prototype: make -f makefile_win64 clean
+# To do this, run the following command in verdant-octo-spork\Prototype: make -f makefile_win64 clean
 clean:
 	$(DELETE) *.o
 	$(DELETE_RECURSIVE) $(BIN)

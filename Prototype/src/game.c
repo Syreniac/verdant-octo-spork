@@ -169,32 +169,32 @@ static void createGameUI(GameData *gameData){
   SDL_GetCurrentDisplayMode(0, &dm);
 
   /* top information bar */
-  element = UIElement_Create(0,0,dm.w,30,4);
-  UIConfigure_FillRect(element,&element->actions[0],248,221,35);
+  element = UIElement_Create(0,0,dm.w,31,4);
+  UIConfigure_FillAndBorderRect(element,&element->actions[0],248,221,35,0,0,0);
   UIConfigure_PercPosition(element, &element->actions[1],1.0,0.0,-dm.w,0,0);
   UIConfigure_DisplayString(element, &element->actions[2], "Hello",0,UISTRING_ALIGN_LEFT);
   UIConfigure_GetAnnouncement(element, &element->actions[3], &element->actions[2]);
   UIElement_Reparent(element,gameData->uiData.root);
 
   /*item selected box*/
-  element = UIElement_Create(0,0,SCORE_LABEL_WIDTH,TOP_BAR_HEIGHT,3);
-  UIConfigure_FillRect(element,&element->actions[0],127,127, 150);
-  UIConfigure_DisplayString(element, &element->actions[1],"   SCORE: ",0,UISTRING_ALIGN_LEFT);
-  UIConfigure_PercPosition(element, &element->actions[2],1.0,0.0,-(SCORE_COUNTER_WIDTH + SCORE_LABEL_WIDTH),0,0);
-  UIElement_Reparent(element,gameData->uiData.root);
+  element2 = UIElement_Create(0,0,SCORE_LABEL_WIDTH,TOP_BAR_HEIGHT,3);
+  UIConfigure_FillRect(element2,&element2->actions[0],127,127, 150);
+  UIConfigure_DisplayString(element2, &element2->actions[1],"   SCORE: ",0,UISTRING_ALIGN_LEFT);
+  UIConfigure_PercPosition(element2, &element2->actions[2],1.0,0.0,-(SCORE_COUNTER_WIDTH + SCORE_LABEL_WIDTH),0,0);
+  UIElement_Reparent(element2,element);
 
 
   /* Score counter */
-  element = UIElement_Create(0,0,SCORE_COUNTER_WIDTH,TOP_BAR_HEIGHT,4);
-  UIConfigure_FillRect(element,&element->actions[0],249,252,124);
-  UIConfigure_DisplayNumber(element, &element->actions[1], 0,0,UISTRING_ALIGN_CENTER);
-  UIConfigure_ResourceCounter(element, &element->actions[2],1,&element->actions[1]);
-  UIConfigure_PercPosition(element, &element->actions[3],1.0,0.0,-SCORE_COUNTER_WIDTH,0,0);
-  UIElement_Reparent(element,gameData->uiData.root);
+  element2 = UIElement_Create(0,0,SCORE_COUNTER_WIDTH,TOP_BAR_HEIGHT,4);
+  UIConfigure_FillRect(element2,&element2->actions[0],249,252,124);
+  UIConfigure_DisplayNumber(element2, &element2->actions[1], 0,0,UISTRING_ALIGN_CENTER);
+  UIConfigure_ResourceCounter(element2, &element2->actions[2],1,&element2->actions[1]);
+  UIConfigure_PercPosition(element2, &element2->actions[3],1.0,0.0,-SCORE_COUNTER_WIDTH,0,0);
+  UIElement_Reparent(element2,element);
 
 
 
-  element = UIElement_Create(win_x/2,win_y - 50,200,50,6);
+  element = UIElement_Create(win_x/2,win_y - 50,200,25,6);
   UIConfigure_Auto(element, &element->actions[0], RESPONSE_PAUSE);
     UITrigger_Bind(&element->actions[0],&element->actions[0],-1,0);
     UITrigger_Bind(&element->actions[0],&element->actions[1],0,2);
@@ -209,7 +209,7 @@ static void createGameUI(GameData *gameData){
     UITrigger_Bind(&element->actions[1],&element->actions[3],0,1);
 	  element->actions[1].status = 1;
 	  element->actions[1].new_status = 1;
-  UIConfigure_FillRect(element, &element->actions[2],255,0,0);
+  UIConfigure_FillAndBorderRect(element, &element->actions[2],255,0,0,0,0,0);
 	  element->actions[2].status = 0;
 	  element->actions[2].new_status = 0;
   UIConfigure_DisplayString(element, &element->actions[3],"PAUSED",0, UISTRING_ALIGN_CENTER);
@@ -218,14 +218,15 @@ static void createGameUI(GameData *gameData){
   UIConfigure_Auto(element,&element->actions[4],UPDATE);
 	UITrigger_Bind(&element->actions[4],&element->actions[0],2,1);
 	UITrigger_Bind(&element->actions[4],&element->actions[1],2,1);
-  UIConfigure_PercPosition(element, &element->actions[5], 0.5, 1.0, -100, -50,0);
+  UIConfigure_PercPosition(element, &element->actions[5], 0.5, 1.0, -100, -25,0);
   UIElement_Reparent(element,gameData->uiData.root);
 
 
 
   element2 = UIElement_Create(0, win_y - 100, 100,100,5);
-	UIConfigure_FillRect(element2,&element2->actions[0],248,221,35);
+	UIConfigure_FillAndBorderRect(element2,&element2->actions[0],248,221,35,0,0,0);
 	UIConfigure_LeftClickRect(element2,&element2->actions[1]);
+		UITrigger_Bind(&element2->actions[1],&element2->actions[2],0,1);
 		UITrigger_Bind(&element2->actions[1],&element2->actions[2],0,1);
     UITrigger_Bind(&element2->actions[1],&element2->actions[1],1,0);
     UITrigger_Bind(&element2->actions[1],&element2->actions[4],0,1);
@@ -237,12 +238,12 @@ static void createGameUI(GameData *gameData){
                                                                                   -100,-150,1.0,1.0,
                                                                                   0,-100,0.0,1.0,
                                                                                   100,100,0.0,0.0);
-  UIConfigure_ToggleObjectSelection(element2,&element->actions[4]);
+  UIConfigure_ToggleObjectSelection(element2,&element2->actions[4]);
   UIElement_Reparent(element2,gameData->uiData.root);
 
   /* Minimize button */
   element = UIElement_Create(50 + win_x - 150, 50, 50, 50,6);
-  UIConfigure_FillRect(element, &element->actions[0],185,122,87);
+  UIConfigure_FillAndBorderRect(element, &element->actions[0],185,122,87,0,0,0);
   UIConfigure_ShrinkFitToParent(element, &element->actions[1]);
   UIConfigure_LeftClickRect(element, &element->actions[2]);
     UITrigger_Bind(&element->actions[2],&element->actions[3],0,1);
@@ -254,12 +255,23 @@ static void createGameUI(GameData *gameData){
   UIConfigure_ToggleObjectSelection(element,&element->actions[5]);
   UIElement_Reparent(element,element2);
 
+  /* This is the output from the B++ compiler */
+  /* I'm making it a little bigger so the border doesn't doublepixel */
+  element4 = UIElement_Create(0,0,0,0,4);
+  UIConfigure_FillAndBorderRect(element4,&element4->actions[0],222,0,0,0,0,0);
+  UIConfigure_ShrinkFitToParent(element4,&element4->actions[1]);
+  UIConfigure_DisplayString(element4,&element4->actions[2],"                                                                                                                          ",0,UISTRING_ALIGN_LEFT);
+	UIConfigure_PercOffsetRect(element4,&element4->actions[3],0.0,1.0,1.0,1.0,50,-125,-269,-100,1,&element4->actions[1]);
+  UIElement_Reparent(element4,element2);
+
   /* The big panel holding all the AI blocks */
-  element3 = UIElement_Create(50,50,win_x - 320,win_y - 200,4);
-  UIConfigure_FillRect(element3, &element3->actions[0],249,252,124);
+  /* I'm making it a little bigger along the bottom and right hand side because otherwise there's some double lapping of pixels
+     when drawing the border */
+  element3 = UIElement_Create(50,50,win_x - 270,win_y - 200,4);
+  UIConfigure_FillAndBorderRect(element3, &element3->actions[0],249,252,124,0,0,0);
   UIConfigure_ShrinkFitToParent(element3, &element3->actions[1]);
-  UIConfigure_ReadAiBlocks(element3,&element3->actions[2]);
-  UIConfigure_InverseRect(element3,&element3->actions[3],50,50,320,100,1,&element3->actions[1]);
+  UIConfigure_ReadAiBlocks(element3,&element3->actions[2],&element4->actions[2]);
+  UIConfigure_InverseRect(element3,&element3->actions[3],50,50,269,124,1,&element3->actions[1]);
   UIElement_Reparent(element3,element2);
 
   /* add block button - DEPRECATED
@@ -273,7 +285,7 @@ static void createGameUI(GameData *gameData){
 
   /* Calculate AI button */
   element = UIElement_Create(0, 0, 50, 50, 5);
-  UIConfigure_FillRect(element, &element->actions[0],249,252,124);
+  UIConfigure_FillAndBorderRect(element, &element->actions[0],249,252,124,0,0,0);
   UIConfigure_ShrinkFitToParent(element, &element->actions[1]);
   UIConfigure_LeftClickRect(element, &element->actions[2]);
 	UITrigger_Bind(&element->actions[2],&element->actions[3],0,1);
@@ -286,7 +298,7 @@ static void createGameUI(GameData *gameData){
 
   makeAIResetButton(-100,170,element2);
 
-  makeAITemplateScrollList(320,230,&gameData->aiData,element2,element3);
+  makeAITemplateScrollList(270,230,&gameData->aiData,element2,element3);
 
   element4 = makeStartBlock(topX,topY,element3);
   topX+=210;

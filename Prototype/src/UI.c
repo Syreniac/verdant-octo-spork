@@ -46,7 +46,7 @@ int UIAction_NullifyAI(UI_Action *action, va_list copy_from);
 UI_Element *makeStartBlock(int x_offset, int y_offset, UI_Element *parent){
 	UI_Element *element;
 	element = UIElement_Create(x_offset,y_offset,200,50,9);
-	UIConfigure_FillRect(element,&element->actions[0],248,221,35);
+	UIConfigure_FillAndBorderRect(element,&element->actions[0],248,221,35,0,0,0);
 	UIConfigure_ShrinkFitToParent(element, &element->actions[1]);
 	UIConfigure_DisplayString(element, &element->actions[2],"START",0,UISTRING_ALIGN_CENTER);
 	UIConfigure_RenderLine(element, &element->actions[3],BR_CORNER,NULL);
@@ -80,7 +80,7 @@ UI_Element *makeStartBlock(int x_offset, int y_offset, UI_Element *parent){
 UI_Element *makeAIResetButton(int x_offset, int y_offset, UI_Element *parent){
 	UI_Element *element;
 	element = UIElement_Create(x_offset,y_offset,200,50,6);
-	UIConfigure_FillRect(element,&element->actions[0],74,74,74);
+	UIConfigure_FillAndBorderRect(element,&element->actions[0],74,74,74,0,0,0);
 	UIConfigure_ShrinkFitToParent(element,&element->actions[1]);
 	UIConfigure_LeftClickRect(element,&element->actions[2]);
 		UITrigger_Bind(&element->actions[2],&element->actions[3],0,1);
@@ -98,12 +98,12 @@ UI_Element *makeAITemplateScrollList(int x_offset, int y_offset, AIData *aiData,
 	BlockFunctionTemplate *template = aiData->templates;
 	int y_offset2 = 0;
 	/* Set up the main panel */
-	element = UIElement_Create(x_offset, y_offset, 220, 360,5);
-	UIConfigure_FillRect(element,&element->actions[0],185,122,87);
+	element = UIElement_Create(x_offset, y_offset, 220, 360,6);
+	UIConfigure_FillAndBorderRect(element,&element->actions[0],185,122,87,0,0,0);
 	UIConfigure_ShrinkFitToParent(element,&element->actions[1]);
 	/* Set up the slider bar */
-		element2 = UIElement_Create(x_offset+200,y_offset,20,20,6);
-		UIConfigure_FillRect(element2,&element2->actions[0],249,252,124);
+		element2 = UIElement_Create(x_offset+200,y_offset,21,20,7);
+		UIConfigure_FillAndBorderRect(element2,&element2->actions[0],249,252,124,0,0,0);
 		UIConfigure_ShrinkFitToParent(element2,&element2->actions[1]);
 		UIConfigure_DraggableVerticalOverride(element2,&element2->actions[2],1,&element2->actions[1]);
 		UIConfigure_LeftClickRect(element2,&element2->actions[3]);
@@ -113,13 +113,16 @@ UI_Element *makeAITemplateScrollList(int x_offset, int y_offset, AIData *aiData,
 			UITrigger_Bind(&element2->actions[4],&element2->actions[2],1,0);
 			UITrigger_Bind(&element2->actions[4],&element2->actions[4],1,0);
 			UIElement_Reparent(element2,element);
-		UIConfigure_PercPositionV(element2,&element2->actions[5],1.0,0.0,-x_offset+200,y_offset,1,&element2->actions[1]);
+		UIConfigure_PercPositionV(element2,&element2->actions[5],1.0,0.0,-x_offset+199,y_offset,1,&element2->actions[1]);
+		UIConfigure_SlideWithMouseWheel(element2,&element2->actions[6],0,1,1,&element2->actions[1]);
+			element2->actions[6].response = NONE;
 		/* Set up the main panel again */
 	UIConfigure_GetDifferenceInChildYOffset(element,&element->actions[2],0.0,y_offset,element2,1,&element->actions[3]);
+	UIConfigure_PassThrough(element,&element->actions[5],MOUSEWHEEL,1,&element2->actions[6]);
 	/* Set up the options */
 	while(template!=NULL){
 		element2 = UIElement_Create(x_offset, y_offset + y_offset2, 200,50,6);
-		UIConfigure_FillRect(element2,&element2->actions[0],248,221,35);
+		UIConfigure_FillAndBorderRect(element2,&element2->actions[0],248,221,35,0,0,0);
 		UIConfigure_ShrinkFitToParentWithYShift(element2,&element2->actions[1],&element->actions[3]);
 		UIConfigure_DisplayString(element2,&element2->actions[2],template->name,0,UISTRING_ALIGN_CENTER);
 		UIConfigure_LeftClickRect(element2,&element2->actions[3]);
@@ -139,7 +142,7 @@ UI_Element *makeAITemplateScrollList(int x_offset, int y_offset, AIData *aiData,
 UI_Element *makeAIBlock(int x_offset, int y_offset, char *aiString, UI_Element *parent){
 	UI_Element *element2;
 	element2 = UIElement_Create(x_offset,y_offset,200,50,19);
-	UIConfigure_FillRect(element2,&element2->actions[0],248,221,35);
+	UIConfigure_FillAndBorderRect(element2,&element2->actions[0],248,221,35,0,0,0);
 	UIConfigure_ShrinkFitToParent(element2,&element2->actions[1]);
 	UIConfigure_RightClickRect(element2, &element2->actions[2]);
 		UITrigger_Bind(&element2->actions[2],&element2->actions[3],0,1);
@@ -266,6 +269,101 @@ UI_Element *UIElement_Create(int x, int y, int w, int h, int num_of_actions){
 	   return element;
 }
 
+int UIAction_SlideWithMouseWheel(UI_Action *action, va_list copy_from){
+	va_list vargs;
+	int i = 0;
+	int x,y;
+	SDL_Event *event;
+	if(action->status != 0){
+		va_copy(vargs, copy_from);
+		event = va_arg(vargs,SDL_Event*);
+		va_end(vargs);
+		printf("mouse wheel did %d,%d\n",event->wheel.x, event->wheel.y);
+		while(i < action->num_of_companions){
+			if(action->integers[0]!=0){
+				x = action->companions[i]->integers[0] + event->wheel.x * -14;
+
+				if(x < action->element->parent->rect.x){
+					x = action->element->parent->rect.x;
+				}
+				else if(x + action->element->rect.h > action->element->parent->rect.x + action->element->parent->rect.w){
+					x = action->element->parent->rect.x + action->element->parent->rect.w - action->element->rect.w;
+				}
+				action->companions[i]->integers[0] = x;
+			}
+			if(action->integers[1]!=0){
+				y = action->companions[i]->integers[1] + event->wheel.y * -14;
+
+				if(y < action->element->parent->rect.y){
+					y = action->element->parent->rect.y;
+				}
+				else if(y + action->element->rect.h > action->element->parent->rect.y + action->element->parent->rect.h){
+					y = action->element->parent->rect.y + action->element->parent->rect.h - action->element->rect.h;
+				}
+				action->companions[i]->integers[1] = y;
+			}
+			i++;
+		}
+		va_end(vargs);
+		return 1;
+	}
+	return 0;
+}
+
+void UIConfigure_SlideWithMouseWheel(UI_Element *element, UI_Action *action, int x, int y, int num_of_companions,...){
+	va_list vargs;
+	int i = 0;
+	va_start(vargs,num_of_companions);
+	UIAction_Init(element,action);
+	action->response = MOUSEWHEEL;
+	action->function = UIAction_SlideWithMouseWheel;
+	action->integers = calloc(2,sizeof(int));
+	action->num_of_integers = 2;
+	action->integers[0] = x;
+	action->integers[1] = y;
+	action->companions = calloc(num_of_companions,sizeof(UI_Action*));
+	action->num_of_companions = num_of_companions;
+	while(i < num_of_companions){
+		action->companions[i] = va_arg(vargs,UI_Action*);
+		printf("adding companion %p\n",action->companions[i]);
+		i++;
+	}
+	va_end(vargs);
+}
+
+int UIAction_PassThrough(UI_Action *action, va_list copy_from){
+	va_list vargs;
+	int i = 0;
+	if(action->status != 0){
+		va_copy(vargs,copy_from);
+		while(i < action->num_of_companions){
+			printf("%d\n",action->companions[i]->response);
+			action->companions[i]->function(action->companions[i],vargs);
+			i++;
+		}
+		va_end(vargs);
+		return 1;
+	}
+	return 0;
+}
+
+void UIConfigure_PassThrough(UI_Element *element, UI_Action *action, enum Response response, int num_of_companions, ...){
+	va_list vargs;
+	int i = 0;
+	va_start(vargs,num_of_companions);
+	UIAction_Init(element,action);
+	action->response = response;
+	action->function = UIAction_PassThrough;
+	action->companions = calloc(num_of_companions,sizeof(UI_Action*));
+	action->num_of_companions = num_of_companions;
+	while(i < num_of_companions){
+		action->companions[i] = va_arg(vargs,UI_Action*);
+		printf("adding companion %p\n",action->companions[i]);
+		i++;
+	}
+	va_end(vargs);
+}
+
 int UIAction_GetAnnouncement(UI_Action *action, va_list copy_from){
 		AnnouncementsData* announcementsData;
 		va_list vargs;
@@ -273,7 +371,6 @@ int UIAction_GetAnnouncement(UI_Action *action, va_list copy_from){
 		announcementsData = va_arg(vargs,AnnouncementsData*);
 		va_end(vargs);
 		if(action->status != 0){
-			printf("RUNNING\n");
 			action->companions[0]->strings[1] = realloc(action->companions[0]->strings[1], strlen(announcementsData->announcement)+1);
 			strcpy(action->companions[0]->strings[1], announcementsData->announcement);
 		}
@@ -550,6 +647,9 @@ int UIAction_ReadAiBlocks(UI_Action *action, va_list copy_from){
 	char *childElementExposedString;
 	va_list vargs;
 	AIData *aiData;
+	BlockFunctionRoot blockFunctionRoot;
+	BlockFunction *erroneousBlockFunction;
+	int i;
 	UI_Element *childElement;
 	int childCount;
 	if(action->status == 1){
@@ -559,6 +659,8 @@ int UIAction_ReadAiBlocks(UI_Action *action, va_list copy_from){
 		va_copy(vargs,copy_from);
 		aiData = va_arg(vargs,AIData*);
 		va_end(vargs);
+		
+		i = 0;
 		while(childElement != NULL){
 			childCount++;
 			childElementExposedString = ((char**)childElement->exposed_data)[0];
@@ -568,8 +670,31 @@ int UIAction_ReadAiBlocks(UI_Action *action, va_list copy_from){
 			strcat(workingSpace,childElementExposedString);
 			childElement = childElement->sibling;
 		}
-		aiData->blockFunctionRoots[0] = makeBlockFunctionRootFromString(workingSpace,childCount);
+		blockFunctionRoot = makeBlockFunctionRootFromString(workingSpace,childCount);
+		printf("strlen working space %d\n",strlen(workingSpace));
 		free(workingSpace);
+	    erroneousBlockFunction = testBlockFunctionRootForLoops(&blockFunctionRoot.blockFunctions[0],NULL,0);
+	    if(erroneousBlockFunction != NULL){
+			while(erroneousBlockFunction != &blockFunctionRoot.blockFunctions[i]){
+			  i++;
+			}
+			nullifyBlockFunctionRoot(&blockFunctionRoot);
+			if(action->companions[0] != NULL){
+				action->companions[0]->strings[1] = realloc(action->companions[0]->strings[1],strlen("ERROR: Loop detected at Block ###: \'BlockFunctionGenericNameThatMakesSureWeHaveSpace\'")+1);
+				sprintf(action->companions[0]->strings[1],"ERROR: Loop detected at Block %d: \'%s\'",i,erroneousBlockFunction->name);
+			}
+	    }
+	    else if(testBlockFunctionRootForStart(&blockFunctionRoot) == 0){
+			nullifyBlockFunctionRoot(&blockFunctionRoot);
+			action->companions[0]->strings[1] = realloc(action->companions[0]->strings[1],strlen("ERROR: No block linked to START")+1);
+			sprintf(action->companions[0]->strings[1],"ERROR: No block linked to START");
+	    }
+	    else{
+			action->companions[0]->strings[1] = realloc(action->companions[0]->strings[1],strlen("Compilation Complete")+1);
+			strcpy(action->companions[0]->strings[1], "Compilation Complete");
+			nullifyBlockFunctionRoot(&aiData->blockFunctionRoots[0]);
+			aiData->blockFunctionRoots[0] = blockFunctionRoot;
+	    }
 		action->new_status = 0;
 	}
 	return action->status;
@@ -885,9 +1010,9 @@ int UIAction_RenderLine(UI_Action *action, va_list copy_from){
 		return 1;
 	}
 	else if(action->status == 1){
-		SDL_SetRenderDrawColor(graphicsData->renderer,255,
-										255,
-										255,
+		SDL_SetRenderDrawColor(graphicsData->renderer,0,
+										0,
+										0,
 										255);
 		SDL_RenderDrawLine(graphicsData->renderer,action->element->rect.x+action->integers[2],action->element->rect.y+action->integers[3],
 									action->integers[0],action->integers[1]);
@@ -901,9 +1026,9 @@ int UIAction_RenderLine(UI_Action *action, va_list copy_from){
 			action->integers[1] = action->element->rect.y;
 			return 0;
 		}
-		SDL_SetRenderDrawColor(graphicsData->renderer,255,
-										255,
-										255,
+		SDL_SetRenderDrawColor(graphicsData->renderer,0,
+										0,
+										0,
 										255);
 		bx = action->external->rect.x + action->element->rect.w/2;
 		by = action->external->rect.y;
@@ -999,6 +1124,27 @@ int UIAction_FillRect(UI_Action *action, va_list copy_from){
 		                                action->RENDERRECT_B,
 		                                255);
 		SDL_RenderFillRect(graphicsData->renderer,&action->element->rect);
+		return 1;
+	}
+	return 0;
+}
+
+int UIAction_FillAndBorderRect(UI_Action *action, va_list copy_from){
+	/* This should be given the necessary rendering information, in this case,
+	   a pointer to the SDL_Window */
+	GraphicsData *graphicsData;
+	va_list vargs;
+	va_copy(vargs,copy_from);
+	graphicsData = va_arg(vargs,GraphicsData*);
+	va_end(vargs);
+	if(action->status == 1 && UIElement_isVisible(action->element)){
+		SDL_SetRenderDrawColor(graphicsData->renderer,action->integers[0],
+		                                action->integers[1],
+		                                action->integers[2],
+		                                255);
+		SDL_RenderFillRect(graphicsData->renderer,&action->element->rect);
+		SDL_SetRenderDrawColor(graphicsData->renderer,action->integers[3],action->integers[4],action->integers[5],255);
+		SDL_RenderDrawRect(graphicsData->renderer,&action->element->rect);
 		return 1;
 	}
 	return 0;
@@ -1200,6 +1346,21 @@ void UIConfigure_FillRect(UI_Element *element, UI_Action *action, int r, int g, 
 	action->RENDERRECT_R = r;
 	action->RENDERRECT_G = g;
 	action->RENDERRECT_B = b;
+}
+
+void UIConfigure_FillAndBorderRect(UI_Element *element, UI_Action *action, int fr, int fg, int fb, int br, int bg, int bb){
+	UIAction_Init(element,action);
+	action->response = RENDER;
+	action->function = UIAction_FillAndBorderRect;
+	action->integers = malloc(sizeof(int) * 6);
+	action->num_of_integers = 6;
+
+	action->integers[0] = fr;
+	action->integers[1] = fg;
+	action->integers[2] = fb;
+	action->integers[3] = br;
+	action->integers[4] = bg;
+	action->integers[5] = bb;
 }
 
 void UIConfigure_LeftClickRect(UI_Element *element, UI_Action *action){
@@ -1569,7 +1730,7 @@ void UIConfigure_AddAiBlock(UI_Element *element, UI_Action *action, BlockFunctio
 	action->extra = template;
 }
 
-void UIConfigure_ReadAiBlocks(UI_Element *element, UI_Action *action){
+void UIConfigure_ReadAiBlocks(UI_Element *element, UI_Action *action, UI_Action *infoOutput){
 	#if DEBUGGING==1
 	printf("UIConfigure_ReadAiBlocks\n");
 	#endif
@@ -1578,6 +1739,9 @@ void UIConfigure_ReadAiBlocks(UI_Element *element, UI_Action *action){
 	action->function = UIAction_ReadAiBlocks;
 	action->status = 0;
 	action->new_status = 0;
+	action->companions = malloc(sizeof(void*));
+	action->companions[0] = infoOutput;
+	action->num_of_companions = 1;
 }
 
 void UIConfigure_SetUpAiBlock(UI_Element *element, UI_Action *action, int num_of_companions, ...){
