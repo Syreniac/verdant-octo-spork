@@ -176,7 +176,7 @@ static void createGameUI(GameData *gameData){
   /*item selected box*/
   element = UIElement_Create(0,0,SCORE_LABEL_WIDTH,TOP_BAR_HEIGHT,3);
   UIConfigure_FillRect(element,&element->actions[0],127,127, 150);
-  UIConfigure_DisplayString(element, &element->actions[1],"   SCORE: ",0);
+  UIConfigure_DisplayString(element, &element->actions[1],"   SCORE: ",0,UISTRING_ALIGN_LEFT);
   UIConfigure_PercPosition(element, &element->actions[2],1.0,0.0,-(SCORE_COUNTER_WIDTH + SCORE_LABEL_WIDTH),0,0);
   UIElement_Reparent(element,gameData->uiData.root);
 

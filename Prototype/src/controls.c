@@ -34,15 +34,15 @@ int handleEvent(SDL_Event *event, GameObjectData *gameObjectData, UIData *uiData
 					/* trust me */
 					if(event->button.button == SDL_BUTTON_LEFT){
 					  UIRoot_ExecuteUpwards(uiData,LEFT_CLICK,1,event);
-					  if(!controlsData->objectSelectionOff){
+					  if(controlsData->objectSelection){
 					  	objectInfoDisplay(gameObjectData, graphicsData, &event->button);
 								controlsData->mouseButtons[LEFT_CLICK_BUTTON] = 1;
 					  }
-					  
+
 					}
 					else if(event->button.button == SDL_BUTTON_RIGHT){
 					  UIRoot_ExecuteUpwards(uiData,RIGHT_CLICK,1,event);
-					  if(!controlsData->objectSelectionOff){					 
+					  if(controlsData->objectSelection){
 					  	objectInfoDisplay(gameObjectData, graphicsData, &event->button);
 								controlsData->mouseButtons[RIGHT_CLICK_BUTTON] = 1;
 					  }
@@ -183,5 +183,5 @@ void initControlData(ControlsData *controlsData){
 		controlsData->mouseButtons[i] = 0;
 		i++;
 	}
-	controlsData->objectSelectionOff = 0;
+	controlsData->objectSelection = 1;
 }

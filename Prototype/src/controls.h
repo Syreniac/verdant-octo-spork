@@ -18,8 +18,9 @@ enum Keybindings {ARROW_DOWN,
 typedef enum Keybindings Keybindings;
 
 struct ControlsData{
+  /* THIS HAS TO STAY EXACTLY HERE */
+  int objectSelection;
 	int keys[MAX_KEYS];
-	int objectSelectionOff;
 	int mouseButtons[NUM_OF_MOUSE_BUTTONS];
 };
 typedef struct ControlsData ControlsData;

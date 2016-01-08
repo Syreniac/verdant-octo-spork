@@ -115,7 +115,7 @@ int blockFunction_SetHeadingRandomly(BlockFunctionArgs *arguments, ProgrammableW
 }
 
 
-int blockFunction_WorkerReturnToHive(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
+int blockFunction_ReturnToHive(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
   programmableWorker->heading = getAngleBetweenRects(&gameObjectData->hive.rect,&programmableWorker->rect);
   programmableWorker->status = RETURNING;
   return(1);
@@ -255,8 +255,8 @@ blockFunction_WrappedFunction getBlockFunctionByName(char *blockFunctionName){
   if(strcmp(blockFunctionName,"SetHeadingRandomly") == 0){
     return &blockFunction_SetHeadingRandomly;
   }
-  if(strcmp(blockFunctionName,"WorkerReturnToHive") == 0){
-    return &blockFunction_WorkerReturnToHive;
+  if(strcmp(blockFunctionName,"ReturnToHive") == 0){
+    return &blockFunction_ReturnToHive;
   }
   if(strcmp(blockFunctionName,"IfNumOfFlowersInRadius") == 0){
     return &blockFunction_IfNumOfFlowersInRadius;
@@ -545,7 +545,7 @@ AIData initAIData(void){
   makeAIBlockTemplate(&aiData,"IfOutsideBounds",2,arguments);
   makeAIBlockTemplate(&aiData,"IfNearHive",2,arguments);
   makeAIBlockTemplate(&aiData,"SetHeadingRandomly",1,arguments);
-  makeAIBlockTemplate(&aiData,"WorkerReturnToHive",1,arguments);
+  makeAIBlockTemplate(&aiData,"ReturnToHive",1,arguments);
   makeAIBlockTemplate(&aiData,"RememberCurrentLocation",1,arguments);
   makeAIBlockTemplate(&aiData,"GoToStoredLocation",2,arguments);
   makeAIBlockTemplate(&aiData,"ForgetStoredLocation",1,arguments);
