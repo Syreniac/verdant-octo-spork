@@ -78,6 +78,8 @@ struct ProgrammableWorker{
   int cargo;
   
   int displayInfo;
+  int xRenderPosWhenSelected;
+  int yRenderPosWhenSelected;
 
   int type;
   enum ProgrammableWorkerStatus status;
