@@ -1,8 +1,6 @@
 #include <check.h>
 #include "../src/main.h"
 
-#define VALID_HEXFILE "assets/test.m7"
-
 
 /* Test passes! */
 /* From generic.h */
@@ -191,10 +189,10 @@ END_TEST
 
 Suite *main_suite(void)
 {
-  Suite *s;
+  Suite *generic;
   TCase *tc_core;
 
-  s = suite_create("main");
+  generic = suite_create("generic");
 
   /* Core test case */
   tc_core = tcase_create("core");
@@ -211,22 +209,22 @@ Suite *main_suite(void)
   tcase_add_test(tc_core, test_generateRandomCoordOffset);
   tcase_add_test(tc_core, test_getAngleBetweenRects);
 //  tcase_add_test(tc_core, test_getCenterOfRect);
-  suite_add_tcase(s, tc_core);
+  suite_add_tcase(generic, tc_core);
 
-  return s;
+  return generic;
 }
 
 int main(void)
 {
   int number_failed;
-  Suite *s;
-  SRunner *sr;
+  Suite *generic;
+  SRunner *genericr;
 
-  s = main_suite();
-  sr = srunner_create(s);
+  generic = main_suite();
+  genericr = srunner_create(generic);
 
-  srunner_run_all(sr, CK_NORMAL);
-  number_failed = srunner_ntests_failed(sr);
-  srunner_free(sr);
+  srunner_run_all(genericr, CK_NORMAL);
+  number_failed = srunner_ntests_failed(genericr);
+  srunner_free(genericr);
   return (number_failed == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
