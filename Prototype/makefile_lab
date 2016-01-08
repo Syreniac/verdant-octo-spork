@@ -16,14 +16,13 @@ COMMON_FILES = init.o game.o world_generation.o game_objects.o AI.o UI.o generic
 SOURCE_FILES = main.o $(COMMON_FILES)
 TEST_FILES = main.test.o $(COMMON_FILES)
 BIN = bin
-TESTBIN = testbin
 PROG = $(BIN)/Prototype
 TEST = $(BIN)/Test
 CXX = gcc
 
 
 #==========
-########### A hypothetical makefile for making both simultaneously, in the same bin.
+########### Makes both executables simultaneously, in the same bin.
 #==========
 
 # Dictates which executables need to be made.
