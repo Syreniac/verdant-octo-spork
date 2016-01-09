@@ -111,6 +111,11 @@ each call to updateProgrammableWorker*/
 #define SUN_LASTS_LONGER_FACTOR 5
 #define FRAME_TIME 20
 
+#define MAX_DAYS_TO_WINTER 300
+
+#define DAYS_LABEL_WIDTH 170
+#define DAYS_COUNTER_WIDTH 40
+
 #define TOP_BAR_HEIGHT 30
 #define SCORE_COUNTER_WIDTH 40
 #define SCORE_LABEL_WIDTH 90

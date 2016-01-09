@@ -33,6 +33,7 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
   gameData.graphicsData = graphicsData;
   gameData.audioData = audioData;
 
+
   gameData.uiData.root = calloc(1, sizeof(UI_Element));
   gameData.running = 1;
 
@@ -176,7 +177,7 @@ static void createGameUI(GameData *gameData){
   UIConfigure_GetAnnouncement(element, &element->actions[3], &element->actions[2]);
   UIElement_Reparent(element,gameData->uiData.root);
 
-  /*item selected box*/
+  /*score counter label*/
   element2 = UIElement_Create(0,0,SCORE_LABEL_WIDTH,TOP_BAR_HEIGHT,3);
   UIConfigure_FillRect(element2,&element2->actions[0],127,127, 150);
   UIConfigure_DisplayString(element2, &element2->actions[1],"   SCORE: ",0,UISTRING_ALIGN_LEFT);
@@ -190,6 +191,23 @@ static void createGameUI(GameData *gameData){
   UIConfigure_DisplayNumber(element2, &element2->actions[1], 0,0,UISTRING_ALIGN_CENTER);
   UIConfigure_ResourceCounter(element2, &element2->actions[2],1,&element2->actions[1]);
   UIConfigure_PercPosition(element2, &element2->actions[3],1.0,0.0,-SCORE_COUNTER_WIDTH,0,0);
+  UIElement_Reparent(element2,element);
+  
+    /*day counter label*/
+  element2 = UIElement_Create(0,0,DAYS_LABEL_WIDTH,TOP_BAR_HEIGHT,3);
+  UIConfigure_FillRect(element2,&element2->actions[0],147,147, 170);
+  UIConfigure_DisplayString(element2, &element2->actions[1],"   DAYS TO WINTER: ",0,UISTRING_ALIGN_LEFT);
+  UIConfigure_PercPosition(element2, &element2->actions[2],1.0,0.0,
+  -(SCORE_COUNTER_WIDTH + SCORE_LABEL_WIDTH)-(DAYS_LABEL_WIDTH + DAYS_COUNTER_WIDTH),0,0);
+  UIElement_Reparent(element2,element);
+
+
+  /* day counter */
+  element2 = UIElement_Create(0,0,DAYS_COUNTER_WIDTH,TOP_BAR_HEIGHT,4);
+  UIConfigure_FillRect(element2,&element2->actions[0],249,252,124);
+  UIConfigure_DisplayNumber(element2, &element2->actions[1], 0,0,UISTRING_ALIGN_CENTER);
+  UIConfigure_DaysCounter(element2, &element2->actions[2],1,&element2->actions[1]);
+  UIConfigure_PercPosition(element2, &element2->actions[3],1.0,0.0,-(SCORE_COUNTER_WIDTH + SCORE_LABEL_WIDTH)-DAYS_COUNTER_WIDTH,0,0);
   UIElement_Reparent(element2,element);
 
 
@@ -395,6 +413,9 @@ int gameLoop(GameData *gameData){
      function ran */
   int delta_t;
   SDL_Event event;
+  
+
+
 
   /* Storing the number of milliseconds since the program was run helps keep it
      moving smoothly by calculating delta_t */
@@ -415,7 +436,10 @@ int gameLoop(GameData *gameData){
 	   printf("Error clearing renderer: %s\n", SDL_GetError());
   }
   paintBackground(&gameData->graphicsData,0,200,100);
+  
+  gameData->gameObjectData.hive.winterCountdown = MAX_DAYS_TO_WINTER - (gameData->gameRunTime / 10000);
   updateGameObjects(&gameData->gameObjectData, &gameData->graphicsData, &gameData->announcementsData, delta_t);
+  
   UIRoot_Execute(&gameData->uiData,RENDER,0,&gameData->graphicsData);
   runAI(&gameData->aiData,&gameData->gameObjectData);
   /*This function is like the blit function, putting pixels to the screen.

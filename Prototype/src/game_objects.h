@@ -93,6 +93,7 @@ struct Hive{
   SDL_Rect rect;
   int displayInfo;
   int flowers_collected;
+  int winterCountdown;
 };
 
 struct Tree{
@@ -150,9 +151,10 @@ struct GameObjectData{
   int programmableWorkerCount;
   int pause_status;
   char announcement[256];
-
+  int num;
   AudioData audioData;
 };
+
 
 ProgrammableWorker *createProgrammableWorker(GameObjectData *gameObjectData);
 void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, AnnouncementsData *announcementsData ,int ticks);

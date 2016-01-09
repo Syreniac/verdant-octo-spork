@@ -219,6 +219,7 @@ Hive createHive(void){
 	hive.rect.y = (Y_SIZE_OF_WORLD/2 - hive.rect.h/2);
 	hive.displayInfo = 0;
 	hive.flowers_collected = 0;
+	hive.winterCountdown = 300;
 	return(hive);
 }
 
@@ -398,10 +399,10 @@ void updateIceCreamPerson(GameObjectData *gameObjectData, int ticks){
 	}
 
 	/*set iceCreamPerson->currently_on_screen to false if he has walked off screen*/
-	if(gameObjectData->iceCreamPerson->xPosition > X_SIZE_OF_WORLD ||
-	gameObjectData->iceCreamPerson->yPosition > Y_SIZE_OF_WORLD ||
-	gameObjectData->iceCreamPerson->xPosition < 0 - PERSON_WIDTH ||
-	gameObjectData->iceCreamPerson->yPosition < 0 - PERSON_HEIGHT){
+	if(gameObjectData->iceCreamPerson->xPosition > (X_SIZE_OF_WORLD + PERSON_WIDTH) ||
+	gameObjectData->iceCreamPerson->yPosition > (Y_SIZE_OF_WORLD + PERSON_HEIGHT) ||
+	gameObjectData->iceCreamPerson->xPosition < 0 - (PERSON_WIDTH*2) ||
+	gameObjectData->iceCreamPerson->yPosition < 0 - (PERSON_HEIGHT*2)){
 	gameObjectData->iceCreamPerson->currently_on_screen = 0;
 	}
 
@@ -638,20 +639,20 @@ void reInitialiseIceCreamPerson(IceCreamPerson *iceCreamPerson){
 	/*random chance of appearing at the edge of the world*/
 	if(rand()%2){
 		if(rand()%2){
-			iceCreamPerson->xPosition = X_SIZE_OF_WORLD - PERSON_WIDTH;
+			iceCreamPerson->xPosition = X_SIZE_OF_WORLD - (PERSON_WIDTH*2);
 			iceCreamPerson->heading = 1.571;
 		}else{
-			iceCreamPerson->xPosition = 0;
+			iceCreamPerson->xPosition = 0 - PERSON_WIDTH;
 			iceCreamPerson->heading = 4.713;
 		}
 		iceCreamPerson->yPosition = rand() % Y_SIZE_OF_WORLD;
 
 	}else{
 		if(rand()%2){
-			iceCreamPerson->yPosition = Y_SIZE_OF_WORLD - PERSON_HEIGHT;
+			iceCreamPerson->yPosition = Y_SIZE_OF_WORLD - (PERSON_HEIGHT*2);
 			iceCreamPerson->heading = 3.142;
 		}else{
-			iceCreamPerson->yPosition = 0;
+			iceCreamPerson->yPosition = 0 - PERSON_HEIGHT;
 			iceCreamPerson->heading = 0;
 		}
 		iceCreamPerson->xPosition = rand() % X_SIZE_OF_WORLD;
@@ -1055,3 +1056,5 @@ void objectInfoDisplay(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 
 
 }
+
+
