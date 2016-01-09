@@ -84,11 +84,11 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
   gameData.graphicsData.shelter = (Tree*) malloc(sizeof(Tree));
   
   gameData.graphicsData.shelter->graphic[SUMMER_INDEX] =
-  loadTextureFromFile("images/tree.bmp",
+  loadTextureFromFile("images/tree1.bmp",
 					  &gameData.graphicsData, 1);
 					  
   gameData.graphicsData.shelter->graphic[AUTUMN_INDEX] =
-  loadTextureFromFile("images/treeAutumn.bmp",
+  loadTextureFromFile("images/treeAutumn1.bmp",
 					  &gameData.graphicsData, 1);
 					  
   gameData.graphicsData.shelter->graphic[WINTER_INDEX] =
@@ -277,13 +277,14 @@ static void createGameUI(GameData *gameData){
 
 
 
-  element2 = UIElement_Create(0, win_y - 100, 100,100,5);
+  element2 = UIElement_Create(0, win_y - 100, 100,100,6);
 	UIConfigure_FillAndBorderRect(element2,&element2->actions[0],248,221,35,0,0,0);
 	UIConfigure_LeftClickRect(element2,&element2->actions[1]);
 		UITrigger_Bind(&element2->actions[1],&element2->actions[2],0,1);
 		UITrigger_Bind(&element2->actions[1],&element2->actions[2],0,1);
     UITrigger_Bind(&element2->actions[1],&element2->actions[1],1,0);
     UITrigger_Bind(&element2->actions[1],&element2->actions[4],0,1);
+    UIConfigure_DisplayString(element2, &element2->actions[5],"     B + +     ^",0, UISTRING_ALIGN_CENTER);
 	UIConfigure_TwoRectOverride(element2,&element2->actions[2],0,win_y - 100, 100, 100,
                                                                50, 50, win_x - 100, win_y - 200,
                                                                200, 0, 0);

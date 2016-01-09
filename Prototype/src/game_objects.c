@@ -239,7 +239,7 @@ Hive createHive(void){
 	hive.rect.x = (X_SIZE_OF_WORLD/2 - hive.rect.w/2);
 	hive.rect.y = (Y_SIZE_OF_WORLD/2 - hive.rect.h/2);
 	hive.displayInfo = 0;
-	hive.flowers_collected = HONEY_REQUIRED_FOR_WINTER;
+	hive.flowers_collected = 0;
 	hive.winterCountdown = MAX_DAYS_TO_WINTER;
 	hive.scoreBeforeWinter = 0;
 	hive.years_survived = 0;
@@ -886,7 +886,7 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 		if(programmableWorker->wet_and_cant_fly || programmableWorker->cold_and_about_to_die){
 			printf("and here also i might presuem\n");
 			if(!gameObjectData->pause_status){
-				/*updateProgrammableWorker(programmableWorker,gameObjectData,announcementsData,ticks);*/
+				updateProgrammableWorker(programmableWorker,gameObjectData,announcementsData,ticks);
 			}
 
 			if(programmableWorker->displayInfo){
@@ -1018,7 +1018,7 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 	for(programmableWorker = gameObjectData->first_programmable_worker; programmableWorker != NULL ; programmableWorker = programmableWorker->next){
 		if(!(programmableWorker->wet_and_cant_fly || programmableWorker->cold_and_about_to_die)){
 			if(!gameObjectData->pause_status){
-				/*updateProgrammableWorker(programmableWorker,gameObjectData,announcementsData,ticks);*/
+				updateProgrammableWorker(programmableWorker,gameObjectData,announcementsData,ticks);
 			}
 
 			if(programmableWorker->displayInfo && graphicsData->trackingMode){
