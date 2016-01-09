@@ -277,7 +277,10 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
 					j++;
 				}
 			}
-			if(j == NUMBER_OF_TREES){
+			if(!isPointInRangeOf(getCenterOfRect(programmableWorker->rect), getCenterOfRect(gameObjectData->hive.rect), X_SIZE_OF_HIVE/2)){
+				j++;
+			}
+			if(j == NUMBER_OF_TREES + 1 /* + 1 includes the hive as shelter*/){
 				programmableWorker->wet_and_cant_fly = 1; /*true*/
 			}
 		}
