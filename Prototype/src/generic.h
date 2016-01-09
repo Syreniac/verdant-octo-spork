@@ -121,7 +121,7 @@ each call to updateProgrammableWorker*/
 
 #define WINTER_COUNTDOWN_SPEED 0.001
 
-#define MAX_DAYS_TO_WINTER 11
+#define MAX_DAYS_TO_WINTER 301
 #define AUTUMN_THRESHOLD (MAX_DAYS_TO_WINTER / 3)
 #define WINTER_THRESHOLD 1
 

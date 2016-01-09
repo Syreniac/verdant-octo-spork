@@ -882,9 +882,9 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 		smallerBeeRect.h = (int)((float)programmableWorker->rect.h/BEE_SHRINK_FACTOR_ON_GROUND);
 		smallerBeeRect.y = programmableWorker->rect.y;
 		smallerBeeRect.x = programmableWorker->rect.x;
-		printf("here\n");
+
 		if(programmableWorker->wet_and_cant_fly || programmableWorker->cold_and_about_to_die){
-			printf("and here also i might presuem\n");
+
 			if(!gameObjectData->pause_status){
 				updateProgrammableWorker(programmableWorker,gameObjectData,announcementsData,ticks);
 			}
@@ -904,7 +904,7 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 					 	SDL_FLIP_NONE);
 		}
 		
-		printf("coldandabouttodie = %d\n", programmableWorker->cold_and_about_to_die);
+
 
 		if(programmableWorker->cold_and_about_to_die > COLD_DEATH_THRESHOLD && !(rand()%CHANCE_OF_DIEING)){
 
