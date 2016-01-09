@@ -73,6 +73,7 @@ struct ProgrammableWorker{
   int currentGraphicIndex;
 
   int wet_and_cant_fly;
+  int cold_and_about_to_die;
 
 
   int cargo;
@@ -93,7 +94,11 @@ struct Hive{
   SDL_Rect rect;
   int displayInfo;
   int flowers_collected;
+  int scoreBeforeWinter;
+  int delayBeforeSummer;
   int winterCountdown;
+  float winterCountdownFloat;
+  int years_survived;
 };
 
 struct Tree{
@@ -103,6 +108,7 @@ struct Tree{
   SDL_Rect stumpRect;
   int bees_taking_shelter;
   int displayInfo;
+  int currentGraphicIndex;
 };
 
 struct DroppedIceCream{
@@ -155,7 +161,7 @@ struct GameObjectData{
   AudioData audioData;
 };
 
-
+void killProgrammableWorker(GameObjectData *gameObjectData, ProgrammableWorker **programmableWorker);
 ProgrammableWorker *createProgrammableWorker(GameObjectData *gameObjectData);
 void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, AnnouncementsData *announcementsData ,int ticks);
 void updateIceCreamPerson(GameObjectData *gameObjectData, int ticks);

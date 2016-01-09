@@ -41,6 +41,7 @@ int UIAction_ClickAnywhere(UI_Action *action, va_list copy_from);
 int UIAction_ClickRect(UI_Action *action, va_list copy_from);
 int UIAction_ResourceCounter(UI_Action *action, va_list copy_from);
 int UIAction_DaysCounter(UI_Action *action, va_list copy_from);
+int UIAction_YearsCounter(UI_Action *action, va_list copy_from);
 int UIAction_Auto(UI_Action *action, va_list copy_from);
 int UIAction_NullifyAI(UI_Action *action, va_list copy_from);
 
@@ -1001,6 +1002,24 @@ int UIAction_DaysCounter(UI_Action *action, va_list copy_from){
 	return 0;
 }
 
+int UIAction_YearsCounter(UI_Action *action, va_list copy_from){
+	va_list vargs;
+	int i = 0;
+	GameObjectData *gameObjectData;
+	va_copy(vargs, copy_from);
+	gameObjectData = va_arg(vargs, GameObjectData*);
+	va_end(vargs);
+	if(action->status == 1){
+		action->integers[0] = gameObjectData->hive.years_survived;
+		while(i < action->num_of_companions){
+			action->companions[i]->integers[0] = action->integers[0];
+			i++;
+		}
+		return 1;
+	}
+	return 0;
+}
+
 int UIAction_Counter(UI_Action *action, va_list copy_from){
 	action->new_status = 0;
 	return 1;
@@ -1629,6 +1648,27 @@ void UIConfigure_DaysCounter(UI_Element *element, UI_Action *action, int num_of_
 	va_start(vargs,num_of_companions);
 	action->response = GAME_OBJECT_UPDATE;
 	action->function = UIAction_DaysCounter;
+	action->companions = malloc(sizeof(UI_Action*) * num_of_companions);
+	action->num_of_companions = num_of_companions;
+	while(i < num_of_companions){
+		action->companions[i] = va_arg(vargs,UI_Action*);
+		i++;
+	}
+	action->integers = calloc(1, sizeof(int));
+	action->num_of_integers = 1;
+	va_end(vargs);
+}
+
+void UIConfigure_YearsCounter(UI_Element *element, UI_Action *action, int num_of_companions, ...){
+	va_list vargs;
+	int i = 0;
+	#if DEBUGGING==1
+	printf("UIConfigure_YearsCounter\n");
+	#endif
+	UIAction_Init(element,action);
+	va_start(vargs,num_of_companions);
+	action->response = GAME_OBJECT_UPDATE;
+	action->function = UIAction_YearsCounter;
 	action->companions = malloc(sizeof(UI_Action*) * num_of_companions);
 	action->num_of_companions = num_of_companions;
 	while(i < num_of_companions){

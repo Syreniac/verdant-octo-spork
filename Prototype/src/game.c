@@ -77,10 +77,25 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
 
 
   gameData.graphicsData.grassTexture = loadTextureFromFile("images/grass/grass4.bmp",&gameData.graphicsData, 0);
-  gameData.graphicsData.treeTexture = loadTextureFromFile("images/tree.bmp",&gameData.graphicsData, 1);
   gameData.graphicsData.treeStumpTexture = loadTextureFromFile("images/stump.bmp",&gameData.graphicsData, 1);
   gameData.graphicsData.nodeTexture = loadTextureFromFile("images/blueFlower.bmp",
 														  &gameData.graphicsData, 1);
+														  
+  gameData.graphicsData.shelter = (Tree*) malloc(sizeof(Tree));
+  
+  gameData.graphicsData.shelter->graphic[SUMMER_INDEX] =
+  loadTextureFromFile("images/tree.bmp",
+					  &gameData.graphicsData, 1);
+					  
+  gameData.graphicsData.shelter->graphic[AUTUMN_INDEX] =
+  loadTextureFromFile("images/treeAutumn.bmp",
+					  &gameData.graphicsData, 1);
+					  
+  gameData.graphicsData.shelter->graphic[WINTER_INDEX] =
+  loadTextureFromFile("images/treeWinter.bmp",
+					  &gameData.graphicsData, 1);	
+
+
 
   gameData.graphicsData.person = (Person*) malloc(sizeof(Person));
 
@@ -141,6 +156,7 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
   announce_init(&gameData.announcementsData);
   playMusic(&gameData.audioData,1);
   printf("gameStarted %d\n",gameLoopReturn);
+
   while(gameLoopReturn){
     gameLoopReturn = gameLoop(&gameData);
   }
@@ -176,12 +192,31 @@ static void createGameUI(GameData *gameData){
   UIConfigure_DisplayString(element, &element->actions[2], "Hello",0,UISTRING_ALIGN_LEFT);
   UIConfigure_GetAnnouncement(element, &element->actions[3], &element->actions[2]);
   UIElement_Reparent(element,gameData->uiData.root);
+  
+  
+      /*YEARS label*/
+  element2 = UIElement_Create(0,0,YEARS_LABEL_WIDTH,TOP_BAR_HEIGHT,3);
+  UIConfigure_FillRect(element2,&element2->actions[0],147,147, 170);
+  UIConfigure_DisplayString(element2, &element2->actions[1],"  YEARS SURVIVED: ",0,UISTRING_ALIGN_LEFT);
+  UIConfigure_PercPosition(element2, &element2->actions[2],1.0,0.0,
+  -(YEARS_LABEL_WIDTH + YEARS_COUNTER_WIDTH),0,0);
+  UIElement_Reparent(element2,element);
+
+
+  /* YEARS counter*/
+  element2 = UIElement_Create(0,0,YEARS_COUNTER_WIDTH,TOP_BAR_HEIGHT,4);
+  UIConfigure_FillRect(element2,&element2->actions[0],249,252,220);
+  UIConfigure_DisplayNumber(element2, &element2->actions[1], 0,0,UISTRING_ALIGN_CENTER);
+  UIConfigure_YearsCounter(element2, &element2->actions[2],1,&element2->actions[1]);
+  UIConfigure_PercPosition(element2, &element2->actions[3],1.0,0.0,-YEARS_COUNTER_WIDTH,0,0);
+  UIElement_Reparent(element2,element);
 
   /*score counter label*/
   element2 = UIElement_Create(0,0,SCORE_LABEL_WIDTH,TOP_BAR_HEIGHT,3);
   UIConfigure_FillRect(element2,&element2->actions[0],127,127, 150);
-  UIConfigure_DisplayString(element2, &element2->actions[1],"   SCORE: ",0,UISTRING_ALIGN_LEFT);
-  UIConfigure_PercPosition(element2, &element2->actions[2],1.0,0.0,-(SCORE_COUNTER_WIDTH + SCORE_LABEL_WIDTH),0,0);
+  UIConfigure_DisplayString(element2, &element2->actions[1],"  SUGAR: ",0,UISTRING_ALIGN_LEFT);
+  UIConfigure_PercPosition(element2, &element2->actions[2],1.0,0.0,
+  -(SCORE_COUNTER_WIDTH + SCORE_LABEL_WIDTH)-(YEARS_LABEL_WIDTH + YEARS_COUNTER_WIDTH),0,0);
   UIElement_Reparent(element2,element);
 
 
@@ -190,15 +225,15 @@ static void createGameUI(GameData *gameData){
   UIConfigure_FillRect(element2,&element2->actions[0],249,252,124);
   UIConfigure_DisplayNumber(element2, &element2->actions[1], 0,0,UISTRING_ALIGN_CENTER);
   UIConfigure_ResourceCounter(element2, &element2->actions[2],1,&element2->actions[1]);
-  UIConfigure_PercPosition(element2, &element2->actions[3],1.0,0.0,-SCORE_COUNTER_WIDTH,0,0);
+  UIConfigure_PercPosition(element2, &element2->actions[3],1.0,0.0,-SCORE_COUNTER_WIDTH -(YEARS_LABEL_WIDTH + YEARS_COUNTER_WIDTH),0,0);
   UIElement_Reparent(element2,element);
   
     /*day counter label*/
   element2 = UIElement_Create(0,0,DAYS_LABEL_WIDTH,TOP_BAR_HEIGHT,3);
   UIConfigure_FillRect(element2,&element2->actions[0],147,147, 170);
-  UIConfigure_DisplayString(element2, &element2->actions[1],"   DAYS TO WINTER: ",0,UISTRING_ALIGN_LEFT);
+  UIConfigure_DisplayString(element2, &element2->actions[1],"  DAYS TO WINTER: ",0,UISTRING_ALIGN_LEFT);
   UIConfigure_PercPosition(element2, &element2->actions[2],1.0,0.0,
-  -(SCORE_COUNTER_WIDTH + SCORE_LABEL_WIDTH)-(DAYS_LABEL_WIDTH + DAYS_COUNTER_WIDTH),0,0);
+  -(SCORE_COUNTER_WIDTH + SCORE_LABEL_WIDTH)-(DAYS_LABEL_WIDTH + DAYS_COUNTER_WIDTH) -(YEARS_LABEL_WIDTH + YEARS_COUNTER_WIDTH),0,0);
   UIElement_Reparent(element2,element);
 
 
@@ -207,7 +242,8 @@ static void createGameUI(GameData *gameData){
   UIConfigure_FillRect(element2,&element2->actions[0],249,252,124);
   UIConfigure_DisplayNumber(element2, &element2->actions[1], 0,0,UISTRING_ALIGN_CENTER);
   UIConfigure_DaysCounter(element2, &element2->actions[2],1,&element2->actions[1]);
-  UIConfigure_PercPosition(element2, &element2->actions[3],1.0,0.0,-(SCORE_COUNTER_WIDTH + SCORE_LABEL_WIDTH)-DAYS_COUNTER_WIDTH,0,0);
+  UIConfigure_PercPosition(element2, &element2->actions[3],1.0,0.0,
+  -(SCORE_COUNTER_WIDTH + SCORE_LABEL_WIDTH)-DAYS_COUNTER_WIDTH -(YEARS_LABEL_WIDTH + YEARS_COUNTER_WIDTH),0,0);
   UIElement_Reparent(element2,element);
 
 
@@ -437,9 +473,9 @@ int gameLoop(GameData *gameData){
   }
   paintBackground(&gameData->graphicsData,0,200,100);
   
-  gameData->gameObjectData.hive.winterCountdown = MAX_DAYS_TO_WINTER - (gameData->gameRunTime / 10000);
-  updateGameObjects(&gameData->gameObjectData, &gameData->graphicsData, &gameData->announcementsData, delta_t);
   
+  
+  updateGameObjects(&gameData->gameObjectData, &gameData->graphicsData, &gameData->announcementsData, delta_t);
   UIRoot_Execute(&gameData->uiData,RENDER,0,&gameData->graphicsData);
   runAI(&gameData->aiData,&gameData->gameObjectData);
   /*This function is like the blit function, putting pixels to the screen.

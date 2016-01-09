@@ -5,6 +5,7 @@ typedef struct GraphicsData GraphicsData;
 typedef struct Person Person;
 typedef struct Rainy Rainy;
 typedef struct Bee Bee;
+typedef struct Shelter shelter;
 
 enum WeatherStatus {/*Should belong in game_objects.h, but graphics.c needs to access it*/
   Sun = 0,
@@ -29,16 +30,20 @@ struct GraphicsData{
   SDL_Renderer *renderer;
   SDL_Texture *nodeTexture;
   SDL_Texture *hiveTexture;
-  SDL_Texture *treeTexture;
   SDL_Texture *treeStumpTexture;
   SDL_Texture *grassTexture;
   TTF_Font *fonts[2];
   SDL_Texture *droppedIceCreamTexture;
   SDL_Texture *meltedIceCreamTexture;
+  struct Shelter *shelter;
   struct Bee *bee;
   struct Rainy *rainy;
   struct Person *person;
   SDL_Texture *mainMenuImage;
+};
+
+struct Shelter{
+	SDL_Texture *graphic[3];
 };
 
 struct Bee{

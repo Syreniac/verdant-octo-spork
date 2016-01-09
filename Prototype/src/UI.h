@@ -110,6 +110,7 @@ void UIConfigure_RightReleaseAnywhere(UI_Element *element, UI_Action *action);
 void UIConfigure_Counter(UI_Element *element, UI_Action *action);
 void UIConfigure_ResourceCounter(UI_Element *element, UI_Action *action, int num_of_companions, ...);
 void UIConfigure_DaysCounter(UI_Element *element, UI_Action *action, int num_of_companions, ...);
+void UIConfigure_YearsCounter(UI_Element *element, UI_Action *action, int num_of_companions, ...);
 void UIConfigure_DisplayString(UI_Element *element, UI_Action *action, char *string, int font, enum UIString_Align align);
 void UIConfigure_DisplayNumber(UI_Element *element, UI_Action *action, int number, int font, enum UIString_Align align);
 void UIConfigure_ShrinkFitToParent(UI_Element *element, UI_Action *action);

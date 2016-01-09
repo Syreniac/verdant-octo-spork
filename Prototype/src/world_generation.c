@@ -21,7 +21,7 @@ void generateProgrammableWorkers(GameObjectData *gameObjectData){
   /* Create two ProgrammableWorkers */
   int i = 0;
   
-  while(i < NUMBER_OF_WORKERS){
+  while(i < INITIAL_NUMBER_OF_WORKERS){
 	createProgrammableWorker(gameObjectData);
 	i++;
   }
