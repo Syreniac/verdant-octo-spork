@@ -479,7 +479,9 @@ void nullifyBlockFunctionRoot(BlockFunctionRoot *root){
 		}
 		i++;
 	}
-	free(root->blockFunctions);
+  if(root->blockFunctions != NULL){
+  	free(root->blockFunctions);
+  }
 	root->blockFunctions = NULL;
 	root->numOfBlockFunctions = 0;
 }
@@ -503,22 +505,23 @@ void runAI(AIData *aiData, GameObjectData *gameObjectData){
 BlockFunction *testBlockFunctionRootForLoops(BlockFunction *toTest, BlockFunction **testAgainst, int countToTestAgainst){
   int i = 0;
   BlockFunction *returnValue = NULL;
-  BlockFunction **testAgainstCopy = calloc(countToTestAgainst+2,sizeof(BlockFunction*));
+  BlockFunction **testAgainstCopy = calloc(countToTestAgainst+1,sizeof(BlockFunction*));
   /* Make a copy of the testAgainst array that we can work with */
-  if(testAgainst!=NULL){
+  if(testAgainst!=NULL && testAgainstCopy !=NULL){
     memcpy(testAgainstCopy,testAgainst,sizeof(BlockFunction*) * countToTestAgainst);
   }
+  testAgainstCopy[countToTestAgainst] = toTest;
   printf("testing block function %s\n",toTest->name);
   /* If the block function we're testing against is in this list, we've found something that loops on itself */
   while(i < countToTestAgainst){
     if(testAgainst[i] == toTest){
       printf("uh, we found a copy\n");
+      free(testAgainstCopy);
       return toTest;
     }
     i++;
   }
   /* Add the block function we're testing against to the test array and then test the next block functions */
-  testAgainstCopy[countToTestAgainst] = toTest;
   if(toTest->primary != NULL){
     returnValue = testBlockFunctionRootForLoops(toTest->primary,testAgainstCopy,countToTestAgainst+1);
   }

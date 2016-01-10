@@ -150,6 +150,12 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
 
   gameData.aiData = initAIData();
 
+  initUIData(&gameData.uiData);
+  gameData.uiData.graphicsData = &gameData.graphicsData;
+  gameData.uiData.gameObjectData = &gameData.gameObjectData;
+  gameData.uiData.aiData = &gameData.aiData;
+  gameData.uiData.announcementsData = &gameData.announcementsData;
+  gameData.uiData.ticks = &gameData.delta;
   createGameUI(&gameData);
 
   /* Then run the gameLoop until it returns 0 or exits */
@@ -263,7 +269,7 @@ static void createGameUI(GameData *gameData){
                                                                                   -100,-150,1.0,1.0,
                                                                                   -99,-99,1.0,1.0,
                                                                                   100,100,0.0,0.0);
-  UIConfigure_ToggleObjectSelection(element,&element->actions[6]);
+  UIConfigure_ToggleInteger(element,&element->actions[6],&gameData->controlsData.objectSelection);
   UIConfigure_MinimapMouseMove(element,&element->actions[7]);
     element->actions[7].status = 0;
     element->actions[7].new_status = 0;
@@ -318,7 +324,7 @@ static void createGameUI(GameData *gameData){
                                                                                   -100,-150,1.0,1.0,
                                                                                   -1,-99,0.0,1.0,
                                                                                   100,100,0.0,0.0);
-  UIConfigure_ToggleObjectSelection(element2,&element2->actions[4]);
+  UIConfigure_ToggleInteger(element2,&element2->actions[4],&gameData->controlsData.objectSelection);
   UIElement_Reparent(element2,gameData->uiData.root);
 
   /* Minimize button */
@@ -332,7 +338,7 @@ static void createGameUI(GameData *gameData){
     UITrigger_Bind(&element->actions[3], &element2->actions[2], 3,2);
     UITrigger_Bind(&element->actions[3], &element2->actions[1], 0,1);
   UIConfigure_PercPosition(element, &element->actions[4],1.0,0.0,-100,50,1,&element->actions[1]);
-  UIConfigure_ToggleObjectSelection(element,&element->actions[5]);
+  UIConfigure_ToggleInteger(element,&element->actions[5],&gameData->controlsData.objectSelection);
   UIElement_Reparent(element,element2);
 
   /* This is the output from the B++ compiler */
@@ -473,7 +479,6 @@ int gameLoop(GameData *gameData){
 
   /* delta_t is the time in milliseconds elapsed since the last time this
      function ran */
-  int delta_t;
   SDL_Event event;
 
 
@@ -481,17 +486,17 @@ int gameLoop(GameData *gameData){
 
   /* Storing the number of milliseconds since the program was run helps keep it
      moving smoothly by calculating delta_t */
-  delta_t = calculateDt(gameData->gameRunTime);
+  gameData->delta = calculateDt(gameData->gameRunTime);
   gameData->gameRunTime = SDL_GetTicks();
 
   /*clear helps get rid of things on the screen that shouldn't be there anymore
   and is also essential due to the way that render buffers can change unpredictably
   after the function SDL_RenderPresent*/
   UIRoot_Execute(&gameData->uiData,AI_RESPONSE,0,&gameData->aiData);
-  UIRoot_Execute(&gameData->uiData,UPDATE,0,delta_t);
+  UIRoot_Execute(&gameData->uiData,UPDATE,0,gameData->delta);
 
   if(!gameData->graphicsData.trackingMode){
-  	panScreen(&gameData->graphicsData, &gameData->controlsData, delta_t);
+  	panScreen(&gameData->graphicsData, &gameData->controlsData, gameData->delta);
   }
 
   if(SDL_RenderClear(gameData->graphicsData.renderer) == -1){
@@ -501,7 +506,7 @@ int gameLoop(GameData *gameData){
 
 
 
-  updateGameObjects(&gameData->gameObjectData, &gameData->graphicsData, &gameData->announcementsData, delta_t);
+  updateGameObjects(&gameData->gameObjectData, &gameData->graphicsData, &gameData->announcementsData, gameData->delta);
   UIRoot_Execute(&gameData->uiData,RENDER,0,&gameData->graphicsData);
   runAI(&gameData->aiData,&gameData->gameObjectData);
   /*This function is like the blit function, putting pixels to the screen.
@@ -512,7 +517,7 @@ int gameLoop(GameData *gameData){
   UIRoot_Execute(&gameData->uiData,GAME_OBJECT_UPDATE,0,&gameData->gameObjectData);
   UIRoot_Execute(&gameData->uiData,EXTERNAL,0);
   UIRoot_Execute(&gameData->uiData,ANNOUNCEMENTS,0,&gameData->announcementsData);
-  announce_update(&gameData->announcementsData, delta_t);
+  announce_update(&gameData->announcementsData, gameData->delta);
   UIRoot_Execute(&gameData->uiData,CONTROLS,0,&gameData->controlsData);
   UIRoot_Execute(&gameData->uiData,MINIMAP,0,&gameData->gameObjectData,&gameData->graphicsData);
   /* At the end of the loop we need to update the main application window to
@@ -530,10 +535,10 @@ int gameLoop(GameData *gameData){
   }
   SDL_RenderPresent(gameData->graphicsData.renderer);
   UIRoot_ExecuteUpwards(&gameData->uiData,DISPOSAL,0);
-  delta_t = calculateDt(gameData->gameRunTime);
+  gameData->delta = calculateDt(gameData->gameRunTime);
   gameData->gameRunTime = SDL_GetTicks();
-  if(delta_t<FRAME_TIME){
-	SDL_Delay(FRAME_TIME-delta_t);
+  if(gameData->delta<FRAME_TIME){
+	SDL_Delay(FRAME_TIME-gameData->delta);
   }
   return(1);
 }

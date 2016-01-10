@@ -3,7 +3,6 @@
 #define UITRIGGER_PLUSONE -2
 
 enum Response {NONE = 0,
-			   RENDER_BASE,										/* 1 */
                RENDER,												/* 2 */
                LEFT_CLICK,										/* 3 */
 		       RIGHT_CLICK,										/* 4 */
@@ -11,7 +10,6 @@ enum Response {NONE = 0,
 			   RIGHT_RELEASE,									/* 6 */
                MOTION,												/* 7 */
                UPDATE,												/* 8 */
-               INTERNAL,											/* 9 */
                EXTERNAL,											/* 10 */
 			   GAME_OBJECT_UPDATE,						/* 11 */
 			   RESPONSE_PAUSE,
@@ -37,11 +35,18 @@ typedef struct UI_Element UI_Element;
 typedef struct UI_Action UI_Action;
 typedef struct UI_Trigger UI_Trigger;
 typedef struct UIData UIData;
-typedef int(UI_ActionFunction)(UI_Action *action, va_list vargs);
+typedef int(UI_ActionFunction)(UI_Action *action, UIData *uiData, va_list vargs);
 typedef enum UIDataTypes UIDataTypes;
+typedef struct UI_Hook *hooks;
 
 struct UIData{
   UI_Element *root;
+	GraphicsData *graphicsData;
+	GameObjectData *gameObjectData;
+	AIData *aiData;
+	AnnouncementsData *announcementsData;
+	SDL_Event *event;
+	int *ticks;
 };
 
 struct UI_Element{
@@ -141,7 +146,7 @@ void UIConfigure_UpdateTwoRectOverrideOnWindowResize(UI_Element *element, UI_Act
 																																																											   int sxid, int syid, float sxfd, float syfd);
 
 void UIConfigure_PercOffsetRect(UI_Element *element, UI_Action *action, float xfp, float yfp, float xfd, float yfd, int xip, int yip, int xid, int yid, int num_of_companions,...);
-void UIConfigure_ToggleObjectSelection(UI_Element *element, UI_Action *action);
+void UIConfigure_ToggleInteger(UI_Element *element, UI_Action *action, int* target);
 void UIConfigure_GetAnnouncement(UI_Element *element, UI_Action *action, UI_Action *placeToPut);
 void UIConfigure_FillAndBorderRect(UI_Element *element, UI_Action *action, int fr, int fg, int fb, int br, int bg, int bb);
 void UIConfigure_PassThrough(UI_Element *element, UI_Action *action, enum Response response, int num_of_companions, ...);
@@ -154,7 +159,7 @@ void UITrigger_Bind(UI_Action *action, UI_Action *target, int state_from, int st
 void UIElement_Free(UI_Element *element);
 void UIElement_Reparent(UI_Element *element, UI_Element *parent);
 void UIElement_Deparent(UI_Element *element);
-int UIElement_Execute(UI_Element *element, enum Response response, va_list copy_from);
+int UIElement_Execute(UI_Element *element, UIData *uiData, enum Response response, va_list copy_from);
 UI_Element *UIElement_Create(int x, int y, int w, int h, int num_of_actions);
 UI_Element *UIElement_CreateByPercentage(float rx, float ry, float rw, float rh, int x, int y, int num_of_actions);
 
@@ -167,3 +172,8 @@ UI_Element *makeAIBlock(int x_offset, int y_offset, char *aiString, UI_Element *
 UI_Element *makeStartBlock(int x_offset, int y_offset, UI_Element *parent);
 UI_Element *makeAIResetButton(int x_offset, int y_offset, UI_Element *parent);
 UI_Element *makeAITemplateScrollList(int x_offset, int y_offset, AIData *aiData, UI_Element *parent, UI_Element *blockHolder);
+void initUIData(UIData *uiData);
+
+/* This is clever, but unnecessary */
+#define UIData_SetHook(x,y,z) _UIData_SetHook(x,offsetof(UIData,y),z);
+void _UIData_SetHook(UIData *uiData, size_t memoffset, void *pointer);

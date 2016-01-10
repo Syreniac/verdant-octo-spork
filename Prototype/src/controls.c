@@ -12,6 +12,7 @@ static int isMouseFree(ControlsData *controlsData){
 }
 
 int handleEvent(SDL_Event *event, GameObjectData *gameObjectData, UIData *uiData, ControlsData *controlsData, GraphicsData *graphicsData){
+		uiData->event = event;
 		switch (event->type)
 		{
 			/* Closing the Window will exit the program */

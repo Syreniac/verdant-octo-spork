@@ -12,7 +12,7 @@
 #include <SDL_ttf.h>
 #include <stdarg.h>
 
-#define DEBUGGING 0
+#define DEBUGGING 1
 #if DEBUGGING==1
 #define calloc(x,y) debug_calloc(__LINE__,__FILE__,x,y)
 #define malloc(x) debug_malloc(__LINE__,__FILE__,x)
