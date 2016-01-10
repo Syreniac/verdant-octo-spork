@@ -103,7 +103,7 @@ each call to updateProgrammableWorker*/
 
 #define WORKER_PERCEPTION_RADIUS 250
 #define COLD_DEATH_THRESHOLD 200
-#define CHANCE_OF_DIEING 100
+
 
 #define X_SIZE_OF_HIVE 64
 #define Y_SIZE_OF_HIVE 80
@@ -119,9 +119,9 @@ each call to updateProgrammableWorker*/
 #define SUN_LASTS_LONGER_FACTOR 5
 #define FRAME_TIME 20
 
-#define WINTER_COUNTDOWN_SPEED 0.001
+#define WINTER_COUNTDOWN_SPEED 0.01
 
-#define MAX_DAYS_TO_WINTER 301
+#define MAX_DAYS_TO_WINTER 11
 #define AUTUMN_THRESHOLD (MAX_DAYS_TO_WINTER / 3)
 #define WINTER_THRESHOLD 1
 

@@ -41,6 +41,10 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
 
   gameData.gameObjectData.pause_status = 0;
   gameData.gameObjectData.first_programmable_worker = NULL;
+  gameData.gameObjectData.gameOver = 0;
+  gameData.gameObjectData.gameOverBoxVisible = 0; 
+  gameData.gameObjectData.gameOverEventNum = SDL_RegisterEvents(1);
+  gameData.gameObjectData.gameRestart = 0;
 
   initControlData(&gameData.controlsData);
 
@@ -160,7 +164,12 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
   while(gameLoopReturn){
     gameLoopReturn = gameLoop(&gameData);
   }
-  return(0);
+  
+  if(gameData.gameObjectData.gameRestart){
+  	return(1);
+  }else{
+  	return(0);
+  }
 }
 
 static void createGameUI(GameData *gameData){
@@ -191,6 +200,34 @@ static void createGameUI(GameData *gameData){
   UIConfigure_PercPosition(element, &element->actions[1],1.0,0.0,-dm.w,0,0);
   UIConfigure_DisplayString(element, &element->actions[2], "Hello",0,UISTRING_ALIGN_LEFT);
   UIConfigure_GetAnnouncement(element, &element->actions[3], &element->actions[2]);
+  UIElement_Reparent(element,gameData->uiData.root);
+  
+  /*game Over box*/
+  element = UIElement_Create(0,0,win_x/2,win_y/2,6);
+  UIConfigure_Auto(element, &element->actions[0], GAME_OVER);
+    UITrigger_Bind(&element->actions[0],&element->actions[0],-1,0);
+    UITrigger_Bind(&element->actions[0],&element->actions[1],0,2);
+    UITrigger_Bind(&element->actions[0],&element->actions[2],-1,0);
+    UITrigger_Bind(&element->actions[0],&element->actions[3],-1,0);
+	  element->actions[0].status = 0;
+	  element->actions[0].new_status = 0;
+  UIConfigure_Auto(element, &element->actions[1], GAME_OVER);
+    UITrigger_Bind(&element->actions[1],&element->actions[0],0,2);
+    UITrigger_Bind(&element->actions[1],&element->actions[1],1,0);
+    UITrigger_Bind(&element->actions[1],&element->actions[2],0,1);
+    UITrigger_Bind(&element->actions[1],&element->actions[3],0,1);
+	  element->actions[1].status = 1;
+	  element->actions[1].new_status = 1;
+  UIConfigure_FillAndBorderRect(element, &element->actions[2],255,255,255,0,0,0);
+	  element->actions[2].status = 0;
+	  element->actions[2].new_status = 0;
+  UIConfigure_DisplayString(element, &element->actions[3],"GAME OVER",0, UISTRING_ALIGN_CENTER);
+	  element->actions[3].status = 0;
+	  element->actions[3].new_status = 0;
+  UIConfigure_Auto(element,&element->actions[4],UPDATE);
+	UITrigger_Bind(&element->actions[4],&element->actions[0],2,1);
+	UITrigger_Bind(&element->actions[4],&element->actions[1],2,1);
+  UIConfigure_PercPosition(element, &element->actions[5], 0.5, 1.0, -(win_x/2) + (win_x/4), -(win_y/2) - (win_y/4),0);
   UIElement_Reparent(element,gameData->uiData.root);
   
   
@@ -475,39 +512,75 @@ int gameLoop(GameData *gameData){
   paintBackground(&gameData->graphicsData,0,200,100);
   
   
-  
+
   updateGameObjects(&gameData->gameObjectData, &gameData->graphicsData, &gameData->announcementsData, delta_t);
-  UIRoot_Execute(&gameData->uiData,RENDER,0,&gameData->graphicsData);
+  
+
+
+ UIRoot_Execute(&gameData->uiData,RENDER,0,&gameData->graphicsData);
+
+
   runAI(&gameData->aiData,&gameData->gameObjectData);
-  /*This function is like the blit function, putting pixels to the screen.
+ 
+
+/*This function is like the blit function, putting pixels to the screen.
   but it needs to be called after all of the graphicall changes have been made,
   including those in the renderUI() function. After the call to render present
   the pixel buffer becomes unpredictable and should be followed by SDL_RenderClear
   (as above in this loop)*/
   SDL_RenderPresent(gameData->graphicsData.renderer);
+
   UIRoot_Execute(&gameData->uiData,GAME_OBJECT_UPDATE,0,&gameData->gameObjectData);
+
   UIRoot_Execute(&gameData->uiData,EXTERNAL,0);
+
   UIRoot_Execute(&gameData->uiData,ANNOUNCEMENTS,0,&gameData->announcementsData);
+
   announce_update(&gameData->announcementsData, delta_t);
+
   UIRoot_Execute(&gameData->uiData,CONTROLS,0,&gameData->controlsData);
   /* At the end of the loop we need to update the main application window to
-     reflect the changes we've made to the graphics */
+   reflect the changes we've made to the graphics */
   /*SDL_UpdateWindowSurface(gameData->graphicsData.window);*/
-
   /* This bit makes sure our application keeps responding and doesn't crash */
   /* Don't worry too much about this for now */
-	while (SDL_PollEvent(&event))
-	{
-		handleEvent(&event,&gameData->gameObjectData,&gameData->uiData,&gameData->controlsData, &gameData->graphicsData);
-	}
+
+  if(gameData->gameObjectData.gameOver){
+  
+  	  if(gameData->gameObjectData.gameOverCause == STARVATION){
+  		gameData->gameObjectData.hive.flowers_collected = 0;
+  	  }
+  	  
+  	  if(!gameData->gameObjectData.gameOverBoxVisible){
+		SDL_Event gameOverEvent;
+		gameOverEvent.type = gameData->gameObjectData.gameOverEventNum;
+  	  	gameData->gameObjectData.gameOverBoxVisible = 1;
+		SDL_PushEvent(&gameOverEvent);
+  	  }
+
+	  while (SDL_PollEvent(&event))
+	  {
+			handleEvent(&event,&gameData->gameObjectData,&gameData->uiData,&gameData->controlsData, &gameData->graphicsData);
+	  }
+  
+  	  if(gameData->gameObjectData.gameRestart){
+        	return(0);
+  	  }else{
+        	return(1);
+      }
+  }
+  while (SDL_PollEvent(&event))
+  {
+	handleEvent(&event,&gameData->gameObjectData,&gameData->uiData,&gameData->controlsData, &gameData->graphicsData);
+  }
   if (Mix_Playing(1) == 0) {
-	 playMusic(&gameData->audioData,1);
+ 	playMusic(&gameData->audioData,1);
   }
   UIRoot_ExecuteUpwards(&gameData->uiData,DISPOSAL,0);
   delta_t = calculateDt(gameData->gameRunTime);
   gameData->gameRunTime = SDL_GetTicks();
   if(delta_t<FRAME_TIME){
-	SDL_Delay(FRAME_TIME-delta_t);
+    SDL_Delay(FRAME_TIME-delta_t);
   }
-  return(1);
+  return(1);  	  
 }

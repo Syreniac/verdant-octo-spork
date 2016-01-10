@@ -22,7 +22,8 @@ enum Response {NONE = 0,
 				 ANNOUNCEMENTS,
 				 CONTROLS,
 				 MOUSEWHEEL,
-               FREED};												/* 13 */
+               FREED,												/* 13 */
+               GAME_OVER};
 
 enum UIDataTypes{UI_NULL,
 				 UI_INT,

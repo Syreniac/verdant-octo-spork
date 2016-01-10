@@ -61,6 +61,7 @@ int handleEvent(SDL_Event *event, GameObjectData *gameObjectData, UIData *uiData
 				break;
 			case SDL_KEYDOWN:
 				keydown(controlsData,gameObjectData, graphicsData, uiData,event);
+				printf("              keydown registered\n");
 				break;
 			case SDL_KEYUP:
 				keyup(controlsData,gameObjectData, uiData,event);
@@ -72,6 +73,11 @@ int handleEvent(SDL_Event *event, GameObjectData *gameObjectData, UIData *uiData
 			case SDL_MOUSEWHEEL:
 				UIRoot_Execute(uiData,MOUSEWHEEL,0,event);
 				break;
+		    default:
+		    	if(gameObjectData->gameOverEventNum == event->type){
+		      		UIRoot_Execute(uiData,GAME_OVER,0);
+		      	}
+		    	break;
 		}
 		return 1;
 }
@@ -79,20 +85,28 @@ int handleEvent(SDL_Event *event, GameObjectData *gameObjectData, UIData *uiData
 void keydown(ControlsData *controlsData, GameObjectData *gameObjectData, GraphicsData *graphicsData, UIData *uiData, SDL_Event *event){
     switch (event->key.keysym.scancode){
         case (SDL_SCANCODE_DOWN):
-			controlsData->keys[ARROW_DOWN] = 1;
-			graphicsData->trackingMode = 0;
+        	if(!gameObjectData->gameOver){
+				controlsData->keys[ARROW_DOWN] = 1;
+				graphicsData->trackingMode = 0;
+			}
             break;
         case (SDL_SCANCODE_UP):
-			controlsData->keys[ARROW_UP] = 1;
-			graphicsData->trackingMode = 0;
+        	if(!gameObjectData->gameOver){
+				controlsData->keys[ARROW_UP] = 1;
+				graphicsData->trackingMode = 0;
+			}
             break;
         case (SDL_SCANCODE_RIGHT):
-			controlsData->keys[ARROW_RIGHT] = 1;
-			graphicsData->trackingMode = 0;
+            if(!gameObjectData->gameOver){
+				controlsData->keys[ARROW_RIGHT] = 1;
+				graphicsData->trackingMode = 0;
+			}
             break;
         case (SDL_SCANCODE_LEFT):
-			controlsData->keys[ARROW_LEFT] = 1;
-			graphicsData->trackingMode = 0;
+            if(!gameObjectData->gameOver){
+				controlsData->keys[ARROW_LEFT] = 1;
+				graphicsData->trackingMode = 0;
+			}
             break;
 		case (SDL_SCANCODE_P):
             gameObjectData->pause_status = 1 - gameObjectData->pause_status; /* 1 for pause, 0 for go on */
@@ -102,6 +116,18 @@ void keydown(ControlsData *controlsData, GameObjectData *gameObjectData, Graphic
 			printf("DELETE key pressed\n");
 			controlsData->keys[DELETE] = 1;
 			UIRoot_ExecuteUpwards(uiData,RESPONSE_DELETE,1);
+			break;
+		case (SDL_SCANCODE_RETURN):
+			printf("ENTER Key pressed\n");
+			if(gameObjectData->gameOver){
+				gameObjectData->gameRestart = 1;
+			}
+			break;
+		case (SDL_SCANCODE_KP_ENTER):
+			printf("ENTER Key pressed\n");
+			if(gameObjectData->gameOver){
+				gameObjectData->gameRestart = 1;
+			}
 			break;
         default:
 			return;

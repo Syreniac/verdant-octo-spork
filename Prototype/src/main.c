@@ -9,13 +9,16 @@ int main(int argc, char *argv[]){
      functions from other modules */
 
   InitData initData;
+  int game_return = 1;
 
   #if DEBUGGING==1
   DEBUGGING_FILE_ALLOC= fopen("debug_output_alloc.txt","w");
   DEBUGGING_FILE_FREE= fopen("debug_output_free.txt","w");
   #endif
   initData  = initialise();
-  game_welcome_page(initData.graphicsData,initData.audioData);
+  while(game_return){
+  	game_return = game_welcome_page(initData.graphicsData,initData.audioData);
+  }
   uninitialise();
   exit(0);
 }

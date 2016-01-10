@@ -94,6 +94,7 @@ struct Hive{
   SDL_Rect rect;
   int displayInfo;
   int flowers_collected;
+  int bees_taking_shelter;
   int scoreBeforeWinter;
   int delayBeforeSummer;
   int winterCountdown;
@@ -145,6 +146,8 @@ struct Weather{
   int tickCount;
 };
 
+typedef enum {STARVATION, COLD} gameOverCause;
+
 struct GameObjectData{
   Weather weather;
   Hive hive;
@@ -157,10 +160,16 @@ struct GameObjectData{
   int programmableWorkerCount;
   int pause_status;
   char announcement[256];
-  int num;
+  int gameOver;
+  int gameOverBoxVisible;
+  gameOverCause gameOverCause;
+  Uint32 gameOverEventNum;
+  int gameRestart;
   AudioData audioData;
 };
 
+
+void killAllBees(ProgrammableWorker **programmableWorker);
 void killProgrammableWorker(GameObjectData *gameObjectData, ProgrammableWorker **programmableWorker);
 ProgrammableWorker *createProgrammableWorker(GameObjectData *gameObjectData);
 void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, AnnouncementsData *announcementsData ,int ticks);
