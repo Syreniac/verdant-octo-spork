@@ -108,7 +108,7 @@ each call to updateProgrammableWorker*/
 #define X_SIZE_OF_HIVE 64
 #define Y_SIZE_OF_HIVE 80
 
-#define HIVE_SHELTER_RADIUS (X_SIZE_OF_HIVE/3)
+#define HIVE_SHELTER_RADIUS (X_SIZE_OF_HIVE/2)
 
 
 #define DEFAULT_RESOURCEUNITS 100

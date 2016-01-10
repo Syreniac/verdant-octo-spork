@@ -121,7 +121,7 @@ int getFirstDeadResourceNode(ResourceNodeSpawner *resourceNodeSpawner){
 
 void killAllBees(ProgrammableWorker **programmableWorker){
 	ProgrammableWorker *p = (*programmableWorker);
-
+printf("top of kill all bees function\n");
 	while(*programmableWorker != NULL){
 
 		p = *programmableWorker;
@@ -129,22 +129,46 @@ void killAllBees(ProgrammableWorker **programmableWorker){
 
 		free(p);
 	}
-
+printf("bottom of kill all bees function\n");
 }
 
 void killProgrammableWorker(GameObjectData *gameObjectData, ProgrammableWorker **programmableWorker){
-
+printf("top of kill programmable worker function\n");
+	if(*programmableWorker == NULL){
+		printf("programmable worker == NULL, this shouldn't be\n");
+	}
 	if((*programmableWorker)->next == NULL){
-
+		ProgrammableWorker *p = *programmableWorker;
+		printf("here\n");
+	    for(*programmableWorker = gameObjectData->first_programmable_worker;
+	    (*programmableWorker)->next != p ;
+	    *programmableWorker = (*programmableWorker)->next){
+	    }
+	    (*programmableWorker)->next = NULL;
+	    *programmableWorker = p;
 		free(*programmableWorker);
 		*programmableWorker = NULL;
+	}else if(*programmableWorker == gameObjectData->first_programmable_worker){
+		printf("hhhhhhere\n");
+		ProgrammableWorker *p = *programmableWorker;
+		gameObjectData->first_programmable_worker = gameObjectData->first_programmable_worker->next;
+		*programmableWorker = gameObjectData->first_programmable_worker;
+		free(p);
 	}else{
-		ProgrammableWorker *p;
-		
-		p->next = (*programmableWorker)->next;
+		ProgrammableWorker *p = *programmableWorker;
+    	printf("here0000\n");		
+	    for(*programmableWorker = gameObjectData->first_programmable_worker;
+	    (*programmableWorker)->next != p ;
+	    *programmableWorker = (*programmableWorker)->next){
+	    }
+	    printf("here0\n");
+	    (*programmableWorker)->next = p->next;
+	    *programmableWorker = p;
+		printf("here1\n");
 		free(*programmableWorker);
 		*programmableWorker = NULL;
 	}
+printf("bottom of kill programmable worker function\n");
 }
 
 ProgrammableWorker *createProgrammableWorker(GameObjectData *gameObjectData){
@@ -304,7 +328,7 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
 	if(gameObjectData->hive.winterCountdown < WINTER_THRESHOLD){
 		if(!isPointInRangeOf(getCenterOfRect(programmableWorker->rect), getCenterOfRect(gameObjectData->hive.rect),
 		HIVE_SHELTER_RADIUS)){
-
+			
 			programmableWorker->cold_and_about_to_die++;
 			
 		}		
@@ -928,6 +952,7 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 				updateProgrammableWorker(programmableWorker,gameObjectData,announcementsData,ticks);
 			}
 
+
 			if(programmableWorker->displayInfo){
 				SDL_Point point = getCenterOfRect(programmableWorker->rect);
 				point.x -= 5;
@@ -948,7 +973,7 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 		if(programmableWorker->cold_and_about_to_die > COLD_DEATH_THRESHOLD){
 
 		
-			if(programmableWorker != gameObjectData->first_programmable_worker){
+			if(!(programmableWorker == gameObjectData->first_programmable_worker && programmableWorker->next == NULL)){
 				ProgrammableWorker *worker;
 				
 				int i = 0;
