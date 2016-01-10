@@ -58,7 +58,7 @@ set(SOURCE_FILES
     src/main.c
     src/main.h
     ${COMMON_FILES})
-set(TEST_SOURCE_FILES src/main.test.c)
+set(TEST_SOURCE_FILES src/all.test.c src/all.test.h ${COMMON_FILES})
 
 set(ASSETS_DIR assets)
 set(AI_DIR ${ASSETS_DIR})
