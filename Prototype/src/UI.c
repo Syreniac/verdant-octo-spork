@@ -26,24 +26,24 @@ static void UIElement_DeExternalise(UI_Element *root, UI_Element *external);
 static void UITrigger_Destroy(UI_Action *action, UI_Trigger *trigger);
 static void UIElement_RemoveExposedData(UI_Element *element);
 
-int UIAction_External(UI_Action *action, va_list copy_from);
-int UIAction_DisplayNumber(UI_Action *action, va_list copy_from);
-int UIAction_DisplayString(UI_Action *action, va_list copy_from);
-int UIAction_Counter(UI_Action *action, va_list copy_from);
-int UIAction_RenderSquare(UI_Action *action, va_list copy_from);
-int UIAction_FillRect(UI_Action *action, va_list copy_from);
-int UIAction_TwoRectOverride(UI_Action *action, va_list copy_from);
-int UIAction_ToggleActionStatus(UI_Action *action, va_list copy_from);
-int UIAction_DraggableRectOverride(UI_Action *action, va_list copy_from);
-int UIAction_RenderLine(UI_Action *action, va_list copy_from);
-int UIAction_CalculateSibling(UI_Action *action, va_list copy_from);
-int UIAction_ClickAnywhere(UI_Action *action, va_list copy_from);
-int UIAction_ClickRect(UI_Action *action, va_list copy_from);
-int UIAction_ResourceCounter(UI_Action *action, va_list copy_from);
-int UIAction_DaysCounter(UI_Action *action, va_list copy_from);
-int UIAction_YearsCounter(UI_Action *action, va_list copy_from);
-int UIAction_Auto(UI_Action *action, va_list copy_from);
-int UIAction_NullifyAI(UI_Action *action, va_list copy_from);
+int UIAction_External(UI_Action *action, UIData *uiData, va_list copy_from);
+int UIAction_DisplayNumber(UI_Action *action, UIData *uiData, va_list copy_from);
+int UIAction_DisplayString(UI_Action *action, UIData *uiData, va_list copy_from);
+int UIAction_Counter(UI_Action *action, UIData *uiData, va_list copy_from);
+int UIAction_RenderSquare(UI_Action *action, UIData *uiData, va_list copy_from);
+int UIAction_FillRect(UI_Action *action, UIData *uiData, va_list copy_from);
+int UIAction_TwoRectOverride(UI_Action *action, UIData *uiData, va_list copy_from);
+int UIAction_ToggleActionStatus(UI_Action *action, UIData *uiData, va_list copy_from);
+int UIAction_DraggableRectOverride(UI_Action *action, UIData *uiData, va_list copy_from);
+int UIAction_RenderLine(UI_Action *action, UIData *uiData, va_list copy_from);
+int UIAction_CalculateSibling(UI_Action *action, UIData *uiData, va_list copy_from);
+int UIAction_ClickAnywhere(UI_Action *action, UIData *uiData, va_list copy_from);
+int UIAction_ClickRect(UI_Action *action, UIData *uiData, va_list copy_from);
+int UIAction_ResourceCounter(UI_Action *action, UIData *uiData, va_list copy_from);
+int UIAction_DaysCounter(UI_Action *action, UIData *uiData, va_list copy_from);
+int UIAction_YearsCounter(UI_Action *action, UIData *uiData, va_list copy_from);
+int UIAction_Auto(UI_Action *action, UIData *uiData, va_list copy_from);
+int UIAction_NullifyAI(UI_Action *action, UIData *uiData, va_list copy_from);
 
 UI_Element *makeStartBlock(int x_offset, int y_offset, UI_Element *parent){
 	UI_Element *element;
@@ -271,15 +271,127 @@ UI_Element *UIElement_Create(int x, int y, int w, int h, int num_of_actions){
 	   return element;
 }
 
-int UIAction_SlideWithMouseWheel(UI_Action *action, va_list copy_from){
+int UIAction_MinimapMouseMove(UI_Action *action, UIData *uiData, va_list copy_from){
+	va_list vargs;
+	GraphicsData *graphicsData;
+	SDL_Point p;
+	int x,y;
+	if(action->status != 0){
+		graphicsData = uiData->graphicsData;
+		SDL_GetMouseState(&x,&y);
+		if(isPointInRect(x,y,action->element->rect)){
+			p.x = (double)(-action->element->rect.x + x) / (double)action->element->rect.w *(double)X_SIZE_OF_WORLD;
+			p.y = (double)(-action->element->rect.y + y) / (double)action->element->rect.h *(double)Y_SIZE_OF_WORLD;
+			SDL_GetWindowSize(graphicsData->window,&x,&y);
+			setNavigationOffset(graphicsData,p.x - x/2,p.y - y/2);
+		}
+		return 1;
+	}
+	return 0;
+}
+
+void UIConfigure_MinimapMouseMove(UI_Element *element, UI_Action *action){
+	UIAction_Init(element,action);
+	action->response = RENDER;
+	action->function = UIAction_MinimapMouseMove;
+}
+
+int UIAction_Minimap(UI_Action *action, UIData *uiData, va_list copy_from){
+	va_list vargs;
+	GameObjectData *gameObjectData;
+	GraphicsData *graphicsData;
+	SDL_Point point;
+	SDL_Rect rect;
+	int i = 0,j = 0;
+	double relx, rely;
+	ProgrammableWorker *p;
+	if(action->status != 0){
+		gameObjectData = uiData->gameObjectData;
+		graphicsData = uiData->graphicsData;
+		/* Then we draw all the game object stuff into our element's rectangle */
+		SDL_SetRenderDrawColor(graphicsData->renderer,0xFE,0x2E,0xF7,0xFF);
+		while(i < gameObjectData->resourceNodeSpawnerCount){
+			j = 0;
+			while(j < gameObjectData->resourceNodeSpawners[i].maximumNodeCount){
+				if(gameObjectData->resourceNodeSpawners[i].resourceNodes[j].alive){
+					point = getCenterOfRect(gameObjectData->resourceNodeSpawners[i].resourceNodes[j].rect);
+					relx = (double)point.x / X_SIZE_OF_WORLD;
+					rely = (double)point.y / Y_SIZE_OF_WORLD;
+					//printf("drawing flower at %lf,%lf\n",relx,rely);
+					rect.x = relx*action->element->rect.w+action->element->rect.x;
+					rect.y = rely*action->element->rect.h+action->element->rect.y;
+					rect.w = ((double)X_SIZE_OF_NODE / X_SIZE_OF_WORLD) * action->element->rect.w;
+					rect.h = ((double)Y_SIZE_OF_NODE / Y_SIZE_OF_WORLD) * action->element->rect.h;
+					shrinkRectToFit(&rect,&action->element->rect);
+					SDL_RenderFillRect(graphicsData->renderer,&rect);
+				}
+				j++;
+			}
+			i++;
+		}
+		SDL_SetRenderDrawColor(graphicsData->renderer,0x0B,0x61,0x0B,255);
+		i = 0;
+		while(i < NUMBER_OF_TREES){
+			point = getCenterOfRect(gameObjectData->tree[i].stumpRect);
+			relx = (double)point.x / X_SIZE_OF_WORLD;
+			rely = (double)point.y / Y_SIZE_OF_WORLD;
+			rect.x = relx*action->element->rect.w+action->element->rect.x;
+			rect.y = rely*action->element->rect.h+action->element->rect.y;
+			rect.w = ((double)SIZE_OF_TREE/2 / X_SIZE_OF_WORLD) * action->element->rect.w;
+			rect.h = ((double)SIZE_OF_TREE/2 / Y_SIZE_OF_WORLD) * action->element->rect.h;
+			//printf("drawing flower at %lf,%lf\n",relx,rely);
+			shrinkRectToFit(&rect,&action->element->rect);
+			SDL_RenderFillRect(graphicsData->renderer,&rect);
+			i++;
+		}
+		SDL_SetRenderDrawColor(graphicsData->renderer,0x8A,0x4B,0x08,0xFF);
+		point = getCenterOfRect(gameObjectData->hive.rect);
+		relx = (double)point.x / X_SIZE_OF_WORLD;
+		rely = (double)point.y / Y_SIZE_OF_WORLD;
+		rect.x = relx*action->element->rect.w+action->element->rect.x;
+		rect.y = rely*action->element->rect.h+action->element->rect.y;
+		rect.w = ((double)X_SIZE_OF_HIVE / X_SIZE_OF_WORLD) * action->element->rect.w;
+		rect.h = ((double)Y_SIZE_OF_HIVE / Y_SIZE_OF_WORLD) * action->element->rect.h;
+		shrinkRectToFit(&rect,&action->element->rect);
+		SDL_RenderFillRect(graphicsData->renderer,&rect);
+		SDL_SetRenderDrawColor(graphicsData->renderer,0xDB,0xA9,0x01,0xFF);
+		p = gameObjectData->first_programmable_worker;
+		while(p != NULL){
+			point = getCenterOfRect(p->rect);
+			relx = (double)point.x / X_SIZE_OF_WORLD;
+			rely = (double)point.y / Y_SIZE_OF_WORLD;
+			rect.x = relx*action->element->rect.w+action->element->rect.x;
+			rect.y = rely*action->element->rect.h+action->element->rect.y;
+			rect.w = ((double)X_SIZE_OF_WORKER / X_SIZE_OF_WORLD) * action->element->rect.w;
+			rect.h = ((double)Y_SIZE_OF_WORKER / Y_SIZE_OF_WORLD) * action->element->rect.h;
+			shrinkRectToFit(&rect,&action->element->rect);
+			SDL_RenderFillRect(graphicsData->renderer,&rect);
+			p = p->next;
+		}
+		SDL_SetRenderDrawColor(graphicsData->renderer,255,255,255,255);
+		rect.x = (double)-graphicsData->navigationOffset.x / X_SIZE_OF_WORLD * action->element->rect.w + action->element->rect.x;
+		rect.y = (double)-graphicsData->navigationOffset.y / Y_SIZE_OF_WORLD * action->element->rect.h + action->element->rect.y;
+		SDL_GetWindowSize(graphicsData->window,&rect.w,&rect.h);
+		rect.w = (double)rect.w / X_SIZE_OF_WORLD * action->element->rect.w;
+		rect.h = (double)rect.h / Y_SIZE_OF_WORLD * action->element->rect.h;
+		SDL_RenderDrawRect(graphicsData->renderer,&rect);
+	}
+	return 0;
+}
+
+void UIConfigure_Minimap(UI_Element *element, UI_Action *action){
+	UIAction_Init(element,action);
+	action->response = RENDER;
+	action->function = UIAction_Minimap;
+}
+
+int UIAction_SlideWithMouseWheel(UI_Action *action, UIData *uiData, va_list copy_from){
 	va_list vargs;
 	int i = 0;
 	int x,y;
 	SDL_Event *event;
 	if(action->status != 0){
-		va_copy(vargs, copy_from);
-		event = va_arg(vargs,SDL_Event*);
-		va_end(vargs);
+		event = uiData->event;
 		printf("mouse wheel did %d,%d\n",event->wheel.x, event->wheel.y);
 		while(i < action->num_of_companions){
 			if(action->integers[0]!=0){
@@ -306,7 +418,6 @@ int UIAction_SlideWithMouseWheel(UI_Action *action, va_list copy_from){
 			}
 			i++;
 		}
-		va_end(vargs);
 		return 1;
 	}
 	return 0;
@@ -333,14 +444,14 @@ void UIConfigure_SlideWithMouseWheel(UI_Element *element, UI_Action *action, int
 	va_end(vargs);
 }
 
-int UIAction_PassThrough(UI_Action *action, va_list copy_from){
+int UIAction_PassThrough(UI_Action *action, UIData *uiData, va_list copy_from){
 	va_list vargs;
 	int i = 0;
 	if(action->status != 0){
 		va_copy(vargs,copy_from);
 		while(i < action->num_of_companions){
 			printf("%d\n",action->companions[i]->response);
-			action->companions[i]->function(action->companions[i],vargs);
+			action->companions[i]->function(action->companions[i],uiData,vargs);
 			i++;
 		}
 		va_end(vargs);
@@ -366,12 +477,10 @@ void UIConfigure_PassThrough(UI_Element *element, UI_Action *action, enum Respon
 	va_end(vargs);
 }
 
-int UIAction_GetAnnouncement(UI_Action *action, va_list copy_from){
+int UIAction_GetAnnouncement(UI_Action *action, UIData *uiData, va_list copy_from){
 		AnnouncementsData* announcementsData;
 		va_list vargs;
-		va_copy(vargs,copy_from);
-		announcementsData = va_arg(vargs,AnnouncementsData*);
-		va_end(vargs);
+		announcementsData = uiData->announcementsData;
 		if(action->status != 0){
 			action->companions[0]->strings[1] = realloc(action->companions[0]->strings[1], strlen(announcementsData->announcement)+1);
 			strcpy(action->companions[0]->strings[1], announcementsData->announcement);
@@ -387,41 +496,38 @@ void UIConfigure_GetAnnouncement(UI_Element *element, UI_Action *action, UI_Acti
 	action->companions[0] = placeToPut;
 }
 
-int UIAction_ToggleObjectSelection(UI_Action *action, va_list copy_from){
+int UIAction_ToggleInteger(UI_Action *action, UIData *uiData, va_list copy_from){
 	va_list vargs;
-	int *integer;
-	va_copy(vargs,copy_from);
-	integer = va_arg(vargs,int*);
-	va_end(vargs);
+	int *p;
 	if(action->status == 1){
-		*integer = !(*integer);
+		p = action->extra;
+		*p = !*(p);
 		action->new_status = 0;
 	}
 	return 0;
 }
 
-void UIConfigure_ToggleObjectSelection(UI_Element *element, UI_Action *action){
+void UIConfigure_ToggleInteger(UI_Element *element, UI_Action *action, int *target){
 	UIAction_Init(element,action);
 	action->response = CONTROLS;
-	action->function = UIAction_ToggleObjectSelection;
+	action->function = UIAction_ToggleInteger;
 	action->status = 0;
 	action->new_status = 0;
+	action->extra = target;
 }
 
-int UIAction_PercOffsetRect(UI_Action *action, va_list copy_from){
+int UIAction_PercOffsetRect(UI_Action *action, UIData *uiData, va_list copy_from){
 		va_list vargs;
 		SDL_Event *event;
 		SDL_Point point;
 		SDL_Point point2;
 		int i = 0;
-		va_copy(vargs, copy_from);
-		event = va_arg(vargs,SDL_Event*);
-		va_end(vargs);
+		event = uiData->event;
 		if(action->status == 1){
-			point = getPointFromPerc(SDL_GetWindowFromID(event->window.windowID),
+			point = getPointFromPerc(uiData->graphicsData->window,
 													                             action->floats[0],
 													                             action->floats[1]);
-			point2 = getPointFromPerc(SDL_GetWindowFromID(event->window.windowID),
+			point2 = getPointFromPerc(uiData->graphicsData->window,
 		                            action->floats[2],
 															  action->floats[3]);
 			action->element->rect.x = point.x + action->integers[0];
@@ -441,16 +547,14 @@ int UIAction_PercOffsetRect(UI_Action *action, va_list copy_from){
 
 }
 
-int UIAction_PercPositionV(UI_Action *action, va_list copy_from){
+int UIAction_PercPositionV(UI_Action *action, UIData *uiData, va_list copy_from){
 		va_list vargs;
 		SDL_Event *event;
 		SDL_Point point;
 		int i = 0;
-		va_copy(vargs, copy_from);
-		event = va_arg(vargs,SDL_Event*);
-		va_end(vargs);
+		event = uiData->event;
 		if(action->status == 1){
-			point = getPointFromPerc(SDL_GetWindowFromID(event->window.windowID),
+			point = getPointFromPerc(uiData->graphicsData->window,
 													                             action->floats[0],
 													                             action->floats[1]);
 			action->element->rect.x = point.x + action->integers[0];
@@ -465,16 +569,14 @@ int UIAction_PercPositionV(UI_Action *action, va_list copy_from){
 		return 0;
 }
 
-int UIAction_PercPosition(UI_Action *action, va_list copy_from){
+int UIAction_PercPosition(UI_Action *action, UIData *uiData, va_list copy_from){
 		va_list vargs;
 		SDL_Event *event;
 		SDL_Point point;
 		int i = 0;
-		va_copy(vargs, copy_from);
-		event = va_arg(vargs,SDL_Event*);
-		va_end(vargs);
+		event = uiData->event;
 		if(action->status == 1){
-			point = getPointFromPerc(SDL_GetWindowFromID(event->window.windowID),
+			point = getPointFromPerc(uiData->graphicsData->window,
 													                             action->floats[0],
 													                             action->floats[1]);
 			action->element->rect.x = point.x + action->integers[0];
@@ -489,15 +591,13 @@ int UIAction_PercPosition(UI_Action *action, va_list copy_from){
 		return 0;
 }
 
-int UIAction_InversePosition(UI_Action *action, va_list copy_from){
+int UIAction_InversePosition(UI_Action *action, UIData *uiData, va_list copy_from){
 	va_list vargs;
 	SDL_Event *event;
 	SDL_Point point;
-	va_copy(vargs, copy_from);
-	event = va_arg(vargs,SDL_Event*);
-	va_end(vargs);
+	event = uiData->event;
 	if(action->status == 1){
-		point = getPointFromInvPoint(SDL_GetWindowFromID(event->window.windowID),
+		point = getPointFromInvPoint(uiData->graphicsData->window,
 												                             action->integers[0],
 												                             action->integers[1]);
 		action->element->rect.x = point.x;
@@ -507,7 +607,7 @@ int UIAction_InversePosition(UI_Action *action, va_list copy_from){
 	return 0;
 }
 
-int UIAction_CalculateScrollListOffset(UI_Action *action, va_list copy_from){
+int UIAction_CalculateScrollListOffset(UI_Action *action, UIData *uiData, va_list copy_from){
 	if(action->status == 1){
 		if(action->integers[1] <= action->element->rect.h){
 			action->integers[0] = 0;
@@ -519,7 +619,7 @@ int UIAction_CalculateScrollListOffset(UI_Action *action, va_list copy_from){
 	return 0;
 }
 
-int UIAction_ShrinkFitToParentWithYShift(UI_Action *action, va_list copy_from){
+int UIAction_ShrinkFitToParentWithYShift(UI_Action *action, UIData *uiData, va_list copy_from){
 	SDL_Rect temp_rect;
 	SDL_Rect *parent_rect = &action->element->parent->rect;
 	if(action->status == 1){
@@ -555,13 +655,12 @@ int UIAction_ShrinkFitToParentWithYShift(UI_Action *action, va_list copy_from){
 	return 0;
 }
 
-int UIAction_GetDifferenceInChildYOffset(UI_Action *action, va_list copy_from){
+int UIAction_GetDifferenceInChildYOffset(UI_Action *action, UIData *uiData, va_list copy_from){
 	va_list vargs;
 	GraphicsData *graphicsData;
 	int y,i=0,win_x,win_y,base_offset;
 	if(action->status == 1 && action->external != NULL){
-		va_copy(vargs,copy_from);
-		graphicsData = va_arg(vargs,GraphicsData*);
+		graphicsData = uiData->graphicsData;
 		SDL_GetWindowSize(graphicsData->window,&win_x,&win_y);
 
 		base_offset = (int)(win_y * action->floats[0]) + action->integers[0];
@@ -573,19 +672,16 @@ int UIAction_GetDifferenceInChildYOffset(UI_Action *action, va_list copy_from){
 			action->companions[i]->integers[0] = y;
 			i++;
 		}
-		va_end(vargs);
 		return 1;
 	}
 	return 0;
 }
 
-int UIAction_DraggableVerticalOverride(UI_Action *action, va_list copy_from){
+int UIAction_DraggableVerticalOverride(UI_Action *action, UIData *uiData, va_list copy_from){
 	SDL_Event *event;
 	int x,y,i=0;
 	va_list vargs;
-	va_copy(vargs,copy_from);
-	event = va_arg(vargs,SDL_Event*);
-	va_end(vargs);
+	event = uiData->event;
 
 	/* UIACTION_INTS is the status, 0 = rooted, 1 = grabbed */
 
@@ -609,13 +705,11 @@ int UIAction_DraggableVerticalOverride(UI_Action *action, va_list copy_from){
 	return 0;
 }
 
-int UIAction_NullifyAI(UI_Action *action, va_list copy_from){
+int UIAction_NullifyAI(UI_Action *action, UIData *uiData, va_list copy_from){
 	va_list vargs;
 	AIData *aiData;
 	if(action->status == 1){
-		va_copy(vargs,copy_from);
-		aiData = va_arg(vargs,AIData*);
-		va_end(vargs);
+		aiData = uiData->aiData;
 		nullifyBlockFunctionRoot(&aiData->blockFunctionRoots[0]);
 		action->new_status = 0;
 		return 1;
@@ -623,15 +717,13 @@ int UIAction_NullifyAI(UI_Action *action, va_list copy_from){
 	return 0;
 }
 
-int UIAction_RecallWorkers(UI_Action *action, va_list copy_from){
+int UIAction_RecallWorkers(UI_Action *action, UIData *uiData, va_list copy_from){
 	va_list vargs;
 	int i = 0;
 	GameObjectData *gameObjectData;
 	ProgrammableWorker *programmableWorker;
 	if(action->status == 1){
-		va_copy(vargs, copy_from);
-		gameObjectData = va_arg(vargs, GameObjectData*);
-		va_end(vargs);
+		gameObjectData = uiData->gameObjectData;
 		programmableWorker = gameObjectData->first_programmable_worker;
 		while(programmableWorker != NULL){
 			programmableWorker->status = RETURNING;
@@ -644,7 +736,7 @@ int UIAction_RecallWorkers(UI_Action *action, va_list copy_from){
 	return 0;
 }
 
-int UIAction_ReadAiBlocks(UI_Action *action, va_list copy_from){
+int UIAction_ReadAiBlocks(UI_Action *action, UIData *uiData, va_list copy_from){
 	char *workingSpace;
 	char *childElementExposedString;
 	va_list vargs;
@@ -658,10 +750,8 @@ int UIAction_ReadAiBlocks(UI_Action *action, va_list copy_from){
 		childElement = action->element->child;
 		childCount = 0;
 		workingSpace = calloc(1,sizeof(char));
-		va_copy(vargs,copy_from);
-		aiData = va_arg(vargs,AIData*);
-		va_end(vargs);
-		
+		aiData = uiData->aiData;
+
 		i = 0;
 		while(childElement != NULL){
 			childCount++;
@@ -673,18 +763,16 @@ int UIAction_ReadAiBlocks(UI_Action *action, va_list copy_from){
 			childElement = childElement->sibling;
 		}
 		blockFunctionRoot = makeBlockFunctionRootFromString(workingSpace,childCount);
-		printf("strlen working space %d\n",strlen(workingSpace));
-		free(workingSpace);
 	    erroneousBlockFunction = testBlockFunctionRootForLoops(&blockFunctionRoot.blockFunctions[0],NULL,0);
 	    if(erroneousBlockFunction != NULL){
-			while(erroneousBlockFunction != &blockFunctionRoot.blockFunctions[i]){
-			  i++;
-			}
-			nullifyBlockFunctionRoot(&blockFunctionRoot);
-			if(action->companions[0] != NULL){
-				action->companions[0]->strings[1] = realloc(action->companions[0]->strings[1],strlen("ERROR: Loop detected at Block ###: \'BlockFunctionGenericNameThatMakesSureWeHaveSpace\'")+1);
-				sprintf(action->companions[0]->strings[1],"ERROR: Loop detected at Block %d: \'%s\'",i,erroneousBlockFunction->name);
-			}
+				while(erroneousBlockFunction != &blockFunctionRoot.blockFunctions[i]){
+				  i++;
+				}
+				if(action->companions[0] != NULL){
+					action->companions[0]->strings[1] = realloc(action->companions[0]->strings[1],strlen("ERROR: Loop detected at Block ###: \'BlockFunctionGenericNameThatMakesSureWeHaveSpace\'")+1);
+					sprintf(action->companions[0]->strings[1],"ERROR: Loop detected at Block %d: \'%s\'",i,erroneousBlockFunction->name);
+				}
+				nullifyBlockFunctionRoot(&blockFunctionRoot);
 	    }
 	    else if(testBlockFunctionRootForStart(&blockFunctionRoot) == 0){
 			nullifyBlockFunctionRoot(&blockFunctionRoot);
@@ -698,11 +786,13 @@ int UIAction_ReadAiBlocks(UI_Action *action, va_list copy_from){
 			aiData->blockFunctionRoots[0] = blockFunctionRoot;
 	    }
 		action->new_status = 0;
+		printf("strlen working space %d\n",strlen(workingSpace));
+		free(workingSpace);
 	}
 	return action->status;
 }
 
-int UIAction_SetUpAiBlock(UI_Action *action, va_list copy_from){
+int UIAction_SetUpAiBlock(UI_Action *action, UIData *uiData, va_list copy_from){
 	int i = 0;
 	int stringLength = 1;
 	char workingSpace[30] = {0};
@@ -721,12 +811,12 @@ int UIAction_SetUpAiBlock(UI_Action *action, va_list copy_from){
 		/* action->companions[0].strings[0] This should be the action holding the string */
 		stringLength = stringLength + 1 + strlen(action->companions[0]->strings[0]);
 		action->element->exposed_data[0] = realloc(action->element->exposed_data[0],
-		                                        stringLength);
+		                                           stringLength);
 		strcat(action->element->exposed_data[0],action->companions[0]->strings[0]);
 		strcat(action->element->exposed_data[0],"\n");
 		/* This should be the action holding the primary link */
 		if(action->num_of_companions > 1 && action->companions[1] != NULL && action->companions[1]->external != NULL){
-			stringLength = stringLength + 16;
+			stringLength = stringLength + 160;
 			action->element->exposed_data[0] = realloc(action->element->exposed_data[0],
 													stringLength);
 			sprintf(workingSpace,"\tprimary = %d\n",action->companions[1]->external->sibling_position + 1);
@@ -734,7 +824,7 @@ int UIAction_SetUpAiBlock(UI_Action *action, va_list copy_from){
 		}
 		/* This should be the action holding the secondary link */
 		if(action->num_of_companions > 2 && action->companions[2] != NULL && action->companions[2]->external != NULL){
-			stringLength = stringLength + 18;
+			stringLength = stringLength + 180;
 			action->element->exposed_data[0] = realloc(action->element->exposed_data[0],
 													stringLength);
 			sprintf(workingSpace,"\tsecondary = %d\n",action->companions[2]->external->sibling_position + 1);
@@ -745,7 +835,7 @@ int UIAction_SetUpAiBlock(UI_Action *action, va_list copy_from){
 	return 0;
 }
 
-int UIAction_DeleteKeyFlagDestroy(UI_Action *action, va_list copy_from){
+int UIAction_DeleteKeyFlagDestroy(UI_Action *action, UIData *uiData, va_list copy_from){
 	int x,y;
 	if(action->status == 1){
 		SDL_GetMouseState(&x,&y);
@@ -761,7 +851,7 @@ int UIAction_DeleteKeyFlagDestroy(UI_Action *action, va_list copy_from){
 	return 0;
 }
 
-int UIAction_AddAiBlock(UI_Action *action, va_list copy_from){
+int UIAction_AddAiBlock(UI_Action *action, UIData *uiData, va_list copy_from){
 	va_list vargs;
 	UI_Element *element2;
 	BlockFunctionTemplate *template;
@@ -776,14 +866,12 @@ int UIAction_AddAiBlock(UI_Action *action, va_list copy_from){
 	return 0;
 }
 
-int UIAction_PercRect(UI_Action *action, va_list copy_from){
+int UIAction_PercRect(UI_Action *action, UIData *uiData, va_list copy_from){
 	va_list vargs;
 	SDL_Event *event;
-	va_copy(vargs, copy_from);
-	event = va_arg(vargs,SDL_Event*);
-	va_end(vargs);
+	event = uiData->event;
 	if(action->status == 1){
-		action->element->rect = getRectFromPercRect(SDL_GetWindowFromID(event->window.windowID),
+		action->element->rect = getRectFromPercRect(uiData->graphicsData->window,
 												   action->floats[0],
 												   action->floats[1],
 												   action->floats[2],
@@ -793,15 +881,13 @@ int UIAction_PercRect(UI_Action *action, va_list copy_from){
 	return 0;
 }
 
-int UIAction_InverseRect(UI_Action *action, va_list copy_from){
+int UIAction_InverseRect(UI_Action *action, UIData *uiData, va_list copy_from){
 	va_list vargs;
 	int i = 0;
 	SDL_Event *event;
-	va_copy(vargs, copy_from);
-	event = va_arg(vargs,SDL_Event*);
-	va_end(vargs);
+	event = uiData->event;
 	if(action->status == 1){
-		action->element->rect = getRectFromInvRect(SDL_GetWindowFromID(event->window.windowID),
+		action->element->rect = getRectFromInvRect(uiData->graphicsData->window,
 												                       action->integers[0],
 												                       action->integers[1],
 												                       action->integers[2],
@@ -818,12 +904,10 @@ int UIAction_InverseRect(UI_Action *action, va_list copy_from){
 	return 0;
 }
 
-int UIAction_DisplayImage(UI_Action *action, va_list copy_from){
+int UIAction_DisplayImage(UI_Action *action, UIData *uiData, va_list copy_from){
 	va_list vargs;
 	GraphicsData *graphicsData;
-	va_copy(vargs, copy_from);
-	graphicsData = va_arg(vargs,GraphicsData*);
-	va_end(vargs);
+	graphicsData = uiData->graphicsData;
 
 	if(action->status == 1){
 		SDL_RenderCopy(graphicsData->renderer,action->texture,NULL,&action->element->rect);
@@ -832,7 +916,7 @@ int UIAction_DisplayImage(UI_Action *action, va_list copy_from){
 	return 0;
 }
 
-int UIAction_Auto(UI_Action *action, va_list copy_from){
+int UIAction_Auto(UI_Action *action, UIData *uiData, va_list copy_from){
 	if(action->status == 1){
 		UITrigger_Execute(action);
 		return 1;
@@ -840,7 +924,7 @@ int UIAction_Auto(UI_Action *action, va_list copy_from){
 	return 0;
 }
 
-int UIAction_External(UI_Action *action, va_list copy_from){
+int UIAction_External(UI_Action *action, UIData *uiData, va_list copy_from){
 	if(action->status == 1 && action->external != NULL){
 		UITrigger_Execute(action);
 		action->new_status = 0;
@@ -849,7 +933,7 @@ int UIAction_External(UI_Action *action, va_list copy_from){
 	return 0;
 }
 
-int UIAction_ShrinkFitToParent(UI_Action *action, va_list copy_from){
+int UIAction_ShrinkFitToParent(UI_Action *action, UIData *uiData, va_list copy_from){
 	SDL_Rect temp_rect;
 	SDL_Rect *parent_rect = &action->element->parent->rect;
 	if(action->status == 1){
@@ -885,7 +969,7 @@ int UIAction_ShrinkFitToParent(UI_Action *action, va_list copy_from){
 	return 0;
 }
 
-int UIAction_DisplayNumber(UI_Action *action, va_list copy_from){
+int UIAction_DisplayNumber(UI_Action *action, UIData *uiData, va_list copy_from){
 	va_list vargs;
 	GraphicsData *graphicsData;
 	SDL_Color colour;
@@ -895,9 +979,7 @@ int UIAction_DisplayNumber(UI_Action *action, va_list copy_from){
 	colour.r = 0;
 	colour.g = 0;
 	colour.b = 0;
-	va_copy(vargs,copy_from);
-	graphicsData = va_arg(vargs,GraphicsData*);
-	va_end(vargs);
+	graphicsData = uiData->graphicsData;
 	if(action->integers[0] != action->integers[1]){
 		action->integers[1] = action->integers[0];
 		sprintf(action->strings[0],"%d",action->integers[1]);
@@ -926,7 +1008,7 @@ int UIAction_DisplayNumber(UI_Action *action, va_list copy_from){
 	return 0;
 }
 
-int UIAction_DisplayString(UI_Action *action, va_list copy_from){
+int UIAction_DisplayString(UI_Action *action, UIData *uiData, va_list copy_from){
 	va_list vargs;
 	GraphicsData *graphicsData;
 	SDL_Color colour;
@@ -936,9 +1018,7 @@ int UIAction_DisplayString(UI_Action *action, va_list copy_from){
 	colour.r = 0;
 	colour.g = 0;
 	colour.b = 0;
-	va_copy(vargs,copy_from);
-	graphicsData = va_arg(vargs,GraphicsData*);
-	va_end(vargs);
+	graphicsData = uiData->graphicsData;
 	if(action->strings[0] != NULL && action->strings[1] != NULL && strcmp(action->strings[0],action->strings[1]) != 0){
 		action->strings[0] = realloc(action->strings[0], strlen(action->strings[1])+1);
 		strcpy(action->strings[0],action->strings[1]);
@@ -966,13 +1046,11 @@ int UIAction_DisplayString(UI_Action *action, va_list copy_from){
 	return 0;
 }
 
-int UIAction_ResourceCounter(UI_Action *action, va_list copy_from){
+int UIAction_ResourceCounter(UI_Action *action, UIData *uiData, va_list copy_from){
 	va_list vargs;
 	int i = 0;
 	GameObjectData *gameObjectData;
-	va_copy(vargs, copy_from);
-	gameObjectData = va_arg(vargs, GameObjectData*);
-	va_end(vargs);
+	gameObjectData = uiData->gameObjectData;
 	if(action->status == 1){
 		action->integers[0] = gameObjectData->hive.flowers_collected;
 		while(i < action->num_of_companions){
@@ -984,13 +1062,11 @@ int UIAction_ResourceCounter(UI_Action *action, va_list copy_from){
 	return 0;
 }
 
-int UIAction_DaysCounter(UI_Action *action, va_list copy_from){
+int UIAction_DaysCounter(UI_Action *action, UIData *uiData, va_list copy_from){
 	va_list vargs;
 	int i = 0;
 	GameObjectData *gameObjectData;
-	va_copy(vargs, copy_from);
-	gameObjectData = va_arg(vargs, GameObjectData*);
-	va_end(vargs);
+	gameObjectData = uiData->gameObjectData;
 	if(action->status == 1){
 		action->integers[0] = gameObjectData->hive.winterCountdown;
 		while(i < action->num_of_companions){
@@ -1002,13 +1078,11 @@ int UIAction_DaysCounter(UI_Action *action, va_list copy_from){
 	return 0;
 }
 
-int UIAction_YearsCounter(UI_Action *action, va_list copy_from){
+int UIAction_YearsCounter(UI_Action *action, UIData *uiData, va_list copy_from){
 	va_list vargs;
 	int i = 0;
 	GameObjectData *gameObjectData;
-	va_copy(vargs, copy_from);
-	gameObjectData = va_arg(vargs, GameObjectData*);
-	va_end(vargs);
+	gameObjectData = uiData->gameObjectData;
 	if(action->status == 1){
 		action->integers[0] = gameObjectData->hive.years_survived;
 		while(i < action->num_of_companions){
@@ -1020,18 +1094,16 @@ int UIAction_YearsCounter(UI_Action *action, va_list copy_from){
 	return 0;
 }
 
-int UIAction_Counter(UI_Action *action, va_list copy_from){
+int UIAction_Counter(UI_Action *action, UIData *uiData, va_list copy_from){
 	action->new_status = 0;
 	return 1;
 }
 
-int UIAction_RenderLine(UI_Action *action, va_list copy_from){
+int UIAction_RenderLine(UI_Action *action, UIData *uiData, va_list copy_from){
 	int bx,by;
 	GraphicsData *graphicsData;
 	va_list vargs;
-	va_copy(vargs,copy_from);
-	graphicsData = va_arg(vargs, GraphicsData*);
-	va_end(vargs);
+	graphicsData = uiData->graphicsData;
 	if(!UIElement_isVisible(action->element) || (action->external != NULL && !UIElement_isVisible(action->external))){
 		return 0;
 	}
@@ -1084,7 +1156,7 @@ int UIAction_RenderLine(UI_Action *action, va_list copy_from){
 	return 0;
 }
 
-int UIAction_ClickAnywhere(UI_Action *action, va_list copy_from){
+int UIAction_ClickAnywhere(UI_Action *action, UIData *uiData, va_list copy_from){
 	if(action->status == 1){
 		UITrigger_Execute(action);
 		return 1;
@@ -1092,7 +1164,7 @@ int UIAction_ClickAnywhere(UI_Action *action, va_list copy_from){
 	return 0;
 }
 
-int UIAction_ReleaseAnywhere(UI_Action *action, va_list copy_from){
+int UIAction_ReleaseAnywhere(UI_Action *action, UIData *uiData, va_list copy_from){
 	if(action->status == 1){
 		UITrigger_Execute(action);
 		return 1;
@@ -1100,7 +1172,7 @@ int UIAction_ReleaseAnywhere(UI_Action *action, va_list copy_from){
 	return 0;
 }
 
-int UIAction_CalculateSibling(UI_Action *action, va_list copy_from){
+int UIAction_CalculateSibling(UI_Action *action, UIData *uiData, va_list copy_from){
 	UI_Element *element;
 	int i = 0;
 	if(action->status == 1){
@@ -1128,16 +1200,14 @@ int UIAction_CalculateSibling(UI_Action *action, va_list copy_from){
 	return 1;
 }
 
-int UIAction_StoreMousePosition(UI_Action *action, va_list copy_from){
+int UIAction_StoreMousePosition(UI_Action *action, UIData *uiData, va_list copy_from){
 	SDL_Event *event;
 	int i = 0;
 	va_list vargs;
-	va_copy(vargs,copy_from);
-	event = va_arg(vargs,SDL_Event*);
-	va_end(vargs);
-	action->integers[0] = event->motion.x;
-	action->integers[1] = event->motion.y;
+	event = uiData->event;
 	if(action->status == 1){
+		action->integers[0] = event->motion.x;
+		action->integers[1] = event->motion.y;
 		while(i < action->num_of_companions){
 			action->companions[i]->integers[0] = action->integers[0];
 			action->companions[i]->integers[1] = action->integers[1];
@@ -1148,14 +1218,12 @@ int UIAction_StoreMousePosition(UI_Action *action, va_list copy_from){
 	return 0;
 }
 
-int UIAction_FillRect(UI_Action *action, va_list copy_from){
+int UIAction_FillRect(UI_Action *action, UIData *uiData, va_list copy_from){
 	/* This should be given the necessary rendering information, in this case,
 	   a pointer to the SDL_Window */
 	GraphicsData *graphicsData;
 	va_list vargs;
-	va_copy(vargs,copy_from);
-	graphicsData = va_arg(vargs,GraphicsData*);
-	va_end(vargs);
+	graphicsData = uiData->graphicsData;
 	if(action->status == 1){
 		SDL_SetRenderDrawColor(graphicsData->renderer,action->RENDERRECT_R,
 		                                action->RENDERRECT_G,
@@ -1167,14 +1235,12 @@ int UIAction_FillRect(UI_Action *action, va_list copy_from){
 	return 0;
 }
 
-int UIAction_FillAndBorderRect(UI_Action *action, va_list copy_from){
+int UIAction_FillAndBorderRect(UI_Action *action, UIData *uiData, va_list copy_from){
 	/* This should be given the necessary rendering information, in this case,
 	   a pointer to the SDL_Window */
 	GraphicsData *graphicsData;
 	va_list vargs;
-	va_copy(vargs,copy_from);
-	graphicsData = va_arg(vargs,GraphicsData*);
-	va_end(vargs);
+	graphicsData = uiData->graphicsData;
 	if(action->status == 1 && UIElement_isVisible(action->element)){
 		SDL_SetRenderDrawColor(graphicsData->renderer,action->integers[0],
 		                                action->integers[1],
@@ -1188,13 +1254,11 @@ int UIAction_FillAndBorderRect(UI_Action *action, va_list copy_from){
 	return 0;
 }
 
-int UIAction_ClickRect(UI_Action *action, va_list copy_from){
+int UIAction_ClickRect(UI_Action *action, UIData *uiData, va_list copy_from){
 	/* This should get a SDL_Event pointer */
 	SDL_Event *event;
 	va_list vargs;
-	va_copy(vargs,copy_from);
-	event = va_arg(vargs,SDL_Event*);
-	va_end(vargs);
+	event = uiData->event;
 
 	if(action->status == 0){return 0;}
 	if(event->button.x < action->element->rect.x || event->button.x > action->element->rect.x + action->element->rect.w){
@@ -1207,13 +1271,11 @@ int UIAction_ClickRect(UI_Action *action, va_list copy_from){
 	return 1;
 }
 
-int UIAction_DraggableRectOverride(UI_Action *action, va_list copy_from){
+int UIAction_DraggableRectOverride(UI_Action *action, UIData *uiData, va_list copy_from){
 	SDL_Event *event;
 	int x,y,i=0;
 	va_list vargs;
-	va_copy(vargs,copy_from);
-	event = va_arg(vargs,SDL_Event*);
-	va_end(vargs);
+	event = uiData->event;
 
 	/* UIACTION_INTS is the status, 0 = rooted, 1 = grabbed */
 
@@ -1246,13 +1308,11 @@ int UIAction_DraggableRectOverride(UI_Action *action, va_list copy_from){
 	return 0;
 }
 
-int UIAction_TwoRectOverride(UI_Action *action, va_list copy_from){
+int UIAction_TwoRectOverride(UI_Action *action, UIData *uiData, va_list copy_from){
 	int dt;
 	float transition_multiplier;
 	va_list vargs;
-	va_copy(vargs,copy_from);
-	dt = va_arg(vargs,int);
-	va_end(vargs);
+	dt = *uiData->ticks;
 
 	if(action->status == 0){
 		action->element->rect.x = action->TWORECTOVERRIDE_SX;
@@ -1301,33 +1361,31 @@ int UIAction_TwoRectOverride(UI_Action *action, va_list copy_from){
   return 0;
 }
 
-int UIAction_UpdateTwoRectOverrideOnWindowResize(UI_Action *action, va_list copy_from){
+int UIAction_UpdateTwoRectOverrideOnWindowResize(UI_Action *action, UIData *uiData, va_list copy_from){
 		va_list vargs;
 		SDL_Event *event;
 		SDL_Point point;
-		va_copy(vargs, copy_from);
-		event = va_arg(vargs,SDL_Event*);
-		va_end(vargs);
+		event = uiData->event;
 		if(action->status == 1){
-			point = getPointFromPerc(SDL_GetWindowFromID(event->window.windowID),
+			point = getPointFromPerc(uiData->graphicsData->window,
 													                             action->floats[0],
 													                             action->floats[1]);
 			action->companions[0]->TWORECTOVERRIDE_BX = point.x + action->integers[0];
 			action->companions[0]->TWORECTOVERRIDE_BY = point.y + action->integers[1];
 
-			point = getPointFromPerc(SDL_GetWindowFromID(event->window.windowID),
+			point = getPointFromPerc(uiData->graphicsData->window,
 		                           action->floats[2],
 														   action->floats[3]);
 			action->companions[0]->TWORECTOVERRIDE_BW = point.x + action->integers[2];
 			action->companions[0]->TWORECTOVERRIDE_BH = point.y + action->integers[3];
 
-			point = getPointFromPerc(SDL_GetWindowFromID(event->window.windowID),
+			point = getPointFromPerc(uiData->graphicsData->window,
 													                             action->floats[4],
 													                             action->floats[5]);
 			action->companions[0]->TWORECTOVERRIDE_SX = point.x + action->integers[4];
 			action->companions[0]->TWORECTOVERRIDE_SY = point.y + action->integers[5];
 
-			point = getPointFromPerc(SDL_GetWindowFromID(event->window.windowID),
+			point = getPointFromPerc(uiData->graphicsData->window,
 		                           action->floats[6],
 														   action->floats[7]);
 			action->companions[0]->TWORECTOVERRIDE_SW = point.x + action->integers[6];
@@ -1610,7 +1668,7 @@ void UIConfigure_External(UI_Element *element, UI_Action *action, UI_Element *ex
 	printf("UIConfigure_External\n");
 	#endif
 	UIAction_Init(element,action);
-	action->response = EXTERNAL;
+	action->response = UPDATE;
 	action->function = UIAction_External;
 	action->external = external;
 	action->status = 0;
@@ -1802,7 +1860,7 @@ void UIConfigure_AddAiBlock(UI_Element *element, UI_Action *action, BlockFunctio
 	printf("UIConfigure_AddAiBlock\n");
 	#endif
 	UIAction_Init(element,action);
-	action->response = EXTERNAL;
+	action->response = UPDATE;
 	action->function = UIAction_AddAiBlock;
 	action->external = target;
 	action->status = 0;
@@ -2056,6 +2114,7 @@ void UIElement_Free(UI_Element *element){
 	int i = 0;
 	UI_Element *root = element;
 	UI_Element *sibling = element->parent;
+	printf("DESTORYING ELEMENT %p\n",element);
 	while(root->parent != NULL){
 		root = root->parent;
 	}
@@ -2080,13 +2139,23 @@ static void UIAction_Free(UI_Action *action){
 	}
 
 	while(i < action->num_of_strings){
-		free(action->strings[i]);
+		if(action->strings[i] != NULL){
+			free(action->strings[i]);
+		}
 		i++;
 	}
-	free(action->strings);
-	free(action->companions);
-	free(action->integers);
-	free(action->floats);
+	if(action->strings != NULL){
+		free(action->strings);
+	}
+	if(action->companions != NULL){
+		free(action->companions);
+	}
+	if(action->integers != NULL){
+		free(action->integers);
+	}
+	if(action->floats != NULL){
+		free(action->floats);
+	}
 
 	return;
 }
@@ -2188,13 +2257,13 @@ static void UITrigger_Destroy(UI_Action *action, UI_Trigger *trigger){
 	free(trigger);
 }
 
-int UIElement_Execute(UI_Element *element, enum Response response, va_list vargs){
+int UIElement_Execute(UI_Element *element, UIData *uiData, enum Response response, va_list vargs){
 	int i = 0;
 	int ret = 0;
 	int result = 0;
 	while(i < element->num_of_actions){
 		if(element->actions[i].response == response){
-			result = element->actions[i].function(&element->actions[i],vargs);
+			result = element->actions[i].function(&element->actions[i],uiData,vargs);
 			ret = result || ret;
 		}
 		i++;
@@ -2254,7 +2323,7 @@ void UIRoot_Execute(UIData *uiData, enum Response response, int stopAtFirst, ...
 	while(front != back){
 		queue_element = queue[front];
 		front = (front + 1) % 255;
-		shouldStop = UIElement_Execute(queue_element,response,vargs);
+		shouldStop = UIElement_Execute(queue_element,uiData,response,vargs);
 		if(shouldStop && stopAtFirst){
 			break;
 		}
@@ -2306,7 +2375,7 @@ void UIRoot_ExecuteUpwards(UIData *uiData, enum Response response, int stopAtFir
 			UIElement_Free(queue_element);
 		}
 		else{
-			if(UIElement_Execute(queue_element,response,vargs) && stopAtFirst){
+			if(UIElement_Execute(queue_element,uiData,response,vargs) && stopAtFirst){
 				break;
 			}
 		}
@@ -2316,6 +2385,7 @@ void UIRoot_ExecuteUpwards(UIData *uiData, enum Response response, int stopAtFir
  }
 
 static void UIAction_Init(UI_Element *element, UI_Action *action){
+	assert(element->num_of_actions >= action-element->actions);
 	action->response = NONE;
 	action->function = NULL;
 	action->element = element;
@@ -2383,13 +2453,37 @@ void UIRoot_Pack(UIData *uiData, GraphicsData *graphicsData){
 static void UIElement_RemoveExposedData(UI_Element *element){
 	/* I'm going to do some hax with void pointers here */
 	int i = 0;
-	free(element->exposed_data_types);
+	void *thingToFree;
+	if(element->exposed_data_types!=NULL){
+		thingToFree = element->exposed_data_types;
+		free(thingToFree);
+	}
 	while(i < element->exposed_data_count){
-		free(element->exposed_data[i]);
+		if(element->exposed_data[i] != NULL){
+			thingToFree = element->exposed_data[i];
+			free(thingToFree);
+		}
 		i++;
 	}
-	free(element->exposed_data);
+	if(element->exposed_data != NULL){
+		thingToFree = element->exposed_data;
+		free(thingToFree);
+	}
 	element->exposed_data_types = NULL;
 	element->exposed_data = NULL;
 	element->exposed_data_count = 0;
+}
+
+void initUIData(UIData *uiData){
+	uiData->graphicsData = NULL;
+	uiData->gameObjectData = NULL;
+	uiData->aiData = NULL;
+	uiData->announcementsData = NULL;
+	uiData->event = NULL;
+	uiData->ticks = 0;
+}
+
+void _UIData_SetHook(UIData *uiData, size_t memoffset, void *pointer){
+	void **targetPointer = uiData+memoffset;
+	*targetPointer = pointer;
 }

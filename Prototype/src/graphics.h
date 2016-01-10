@@ -77,3 +77,4 @@ SDL_Texture *loadTextureFromFile(char *file_name, GraphicsData *graphicsData, ch
 void paintBackground(GraphicsData *graphicsData, int r, int g, int b);
 void renderRadius(GraphicsData *graphicsData, SDL_Point *point, double radius, Uint8 r, Uint8 g, Uint8 b, Uint8 a);
 void renderFillRadius(GraphicsData *graphicsData, SDL_Point *point, double radius, Uint8 r, Uint8 g, Uint8 b, Uint8 a);
+void setNavigationOffset(GraphicsData *graphicsData, int x, int y);

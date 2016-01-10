@@ -223,6 +223,31 @@ SDL_Point getPointFromPerc(SDL_Window *window, float x, float y){
   return point;
 }
 
+void shrinkRectToFit(SDL_Rect *toShrink, SDL_Rect *fitTo){
+
+  if(!testRectIntersection(*toShrink,*fitTo)){
+    /* It's outside of the limit, make it 0 */
+    toShrink->w = 0;
+    toShrink->h = 0;
+  }
+  else{
+    if(toShrink->x < fitTo->x){
+      toShrink->x = fitTo->x;
+    }
+    if(toShrink->x + toShrink->w > fitTo->x + fitTo->w){
+      toShrink->w = (fitTo->x + fitTo->w) - toShrink->x;
+    }
+
+    if(toShrink->y < fitTo->y){
+      toShrink->h -= fitTo->y - toShrink->y;
+      toShrink->y = fitTo->y;
+    }
+    else if(toShrink->y + toShrink->h > fitTo->y + fitTo->h){
+      toShrink->h -= toShrink->y + toShrink->h - fitTo->y - fitTo->h;
+    }
+  }
+}
+
 #if DEBUGGING==1
 #undef calloc
 #undef malloc
@@ -232,11 +257,11 @@ SDL_Point getPointFromPerc(SDL_Window *window, float x, float y){
 void *debug_calloc(int line, char *filename, int itemCount, int itemSize){
   char *p;
   size_t vp;
-  printf("callocing @ %s:%d ",filename,line);
+  //printf("callocing @ %s:%d ",filename,line);
   fprintf(DEBUGGING_FILE_ALLOC,"callocing @ %s:%d ",filename,line);
   p = calloc(itemCount,itemSize);
   vp = p;
-  printf("getting block %p of size %d (%p)\n",vp,itemCount*itemSize,p+itemCount*itemSize*8);
+  //printf("getting block %p of size %d (%p)\n",vp,itemCount*itemSize,p+itemCount*itemSize*8);
   fprintf(DEBUGGING_FILE_ALLOC,"getting block %p of size %d (%p)\n",vp,itemCount*itemSize,p+itemCount*itemSize*8);
   fflush(DEBUGGING_FILE_ALLOC);
   return p;
@@ -245,11 +270,11 @@ void *debug_calloc(int line, char *filename, int itemCount, int itemSize){
 void *debug_malloc(int line, char *filename, int totalSize){
   char *p;
   size_t vp;
-  printf("mAlLoCiNg @ %s:%d ",filename,line);
-  fprintf(DEBUGGING_FILE_ALLOC,"callocing @ %s:%d ",filename,line);
+  //printf("mAlLoCiNg @ %s:%d ",filename,line);
+  fprintf(DEBUGGING_FILE_ALLOC,"mallocing @ %s:%d ",filename,line);
   p = malloc(totalSize);
   vp = p;
-  printf("getting block %p of size %d (%p)\n",p,totalSize,vp+totalSize*8);
+  //printf("getting block %p of size %d (%p)\n",p,totalSize,vp+totalSize*8);
   fprintf(DEBUGGING_FILE_ALLOC,"getting block %p of size %d (%p)\n",p,totalSize,vp+totalSize*8);
   fflush(DEBUGGING_FILE_ALLOC);
   return p;
@@ -259,19 +284,19 @@ void *debug_malloc(int line, char *filename, int totalSize){
 void *debug_realloc(int line, char *filename, void* oldPointer, int newSize){
   char *p;
   size_t vp;
-  printf("reallocing @ %s:%d from %p to ",filename,line,oldPointer);
+  //printf("reallocing @ %s:%d from %p to ",filename,line,oldPointer);
   fprintf(DEBUGGING_FILE_ALLOC,"reallocing @ %s:%d from %p to ",filename,line,oldPointer);
   p = realloc(oldPointer,newSize);
   vp = p;
-  printf("getting block %p of size %d (%p)\n",vp,newSize,p+newSize);
+  //printf("getting block %p of size %d (%p)\n",vp,newSize,p+newSize);
   fprintf(DEBUGGING_FILE_ALLOC,"getting block %p of size %d (%p)\n",vp,newSize,vp+newSize*8);
   fflush(DEBUGGING_FILE_ALLOC);
   return p;
 }
 
 void debug_free(int line, char *filename, void* pointer){
-  fprintf(DEBUGGING_FILE_FREE,"freeing @ %s:%d pointer %p\n",filename,line,pointer);
-  fflush(DEBUGGING_FILE_FREE);
+  fprintf(DEBUGGING_FILE_ALLOC,"freeing @ %s:%d pointer %p\n",filename,line,pointer);
+  fflush(DEBUGGING_FILE_ALLOC);
   printf("freeing @ %s:%d pointer %p",filename,line,pointer);
   free(pointer);
   printf("\n");

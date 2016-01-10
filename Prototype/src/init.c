@@ -36,6 +36,8 @@ InitData initialise(void){
                                                -1,
                                                SDL_RENDERER_TARGETTEXTURE|SDL_RENDERER_PRESENTVSYNC);
 	assert(initData.graphicsData.renderer != NULL);
+  initData.graphicsData.navigationOffset.w = 0;
+  initData.graphicsData.navigationOffset.h = 0;
 
   initData.graphicsData.mainMenuImage = loadTextureFromFile("images/mainMenuImage.bmp", &initData.graphicsData, 0);
 
@@ -105,6 +107,10 @@ int game_welcome_page(GraphicsData graphicsData, AudioData audioData){
 
    SDL_GetWindowSize(graphicsData.window,&win_x,&win_y);
 
+   initUIData(&initData.uiData);
+
+   initData.uiData.graphicsData = &initData.graphicsData;
+
    initData.uiData.root = UIElement_Create(0,0,win_x,win_y,2);
    UIConfigure_DisplayImage(initData.uiData.root,&initData.uiData.root->actions[0],graphicsData.mainMenuImage);
    UIConfigure_InverseRect(initData.uiData.root,&initData.uiData.root->actions[1],0,0,0,0,0);
@@ -124,9 +130,9 @@ int game_welcome_page(GraphicsData graphicsData, AudioData audioData){
 
     element2 = UIElement_Create((win_x - 30), win_y - 30, 30, 30, 2);
     UIConfigure_FillRect(element2, &element2->actions[0],228,240,3);
-	UIConfigure_InverseRect(element2, &element2->actions[1],-30,-30,30,30,0);
+	   UIConfigure_InverseRect(element2, &element2->actions[1],-30,-30,30,30,0);
     UIElement_Reparent(element2,initData.uiData.root);
-	UIRoot_Pack(&initData.uiData,&initData.graphicsData);
+	   UIRoot_Pack(&initData.uiData,&initData.graphicsData);
 
    playMusic(&initData.audioData,0);
 
@@ -140,14 +146,16 @@ int game_welcome_page(GraphicsData graphicsData, AudioData audioData){
       SDL_RenderPresent(initData.graphicsData.renderer);
     	while (SDL_PollEvent(&event))
     	{
+        initData.uiData.event = &event;
     		switch (event.type)
     		{
-				case SDL_WINDOWEVENT:
-					switch (event.window.event){
-						case SDL_WINDOWEVENT_RESIZED:
-							UIRoot_Execute(&initData.uiData,WINDOW_RESIZE,0,&event);
-							break;
-					}
+  				case SDL_WINDOWEVENT:
+  					switch (event.window.event){
+  						case SDL_WINDOWEVENT_RESIZED:
+  							UIRoot_Execute(&initData.uiData,WINDOW_RESIZE,0,&event);
+  							break;
+  					}
+            break;
     			/* Closing the Window will exit the program */
     			case SDL_MOUSEBUTTONDOWN:
    				   UIRoot_ExecuteUpwards(&initData.uiData,LEFT_CLICK,1,&event);

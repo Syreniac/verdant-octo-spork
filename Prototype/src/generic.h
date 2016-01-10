@@ -112,7 +112,7 @@ each call to updateProgrammableWorker*/
 
 
 #define DEFAULT_RESOURCEUNITS 100
-#define DEFAULT_SPAWNDELAY 1000*10
+#define DEFAULT_SPAWNDELAY 1000
 #define DEFAULT_SPAWNRADIUS 100.0
 #define DEFAULT_MAXNODECOUNT 10
 #define TICKSPERWEATHER 30000
@@ -121,7 +121,7 @@ each call to updateProgrammableWorker*/
 
 #define WINTER_COUNTDOWN_SPEED 0.01
 
-#define MAX_DAYS_TO_WINTER 11
+#define MAX_DAYS_TO_WINTER 301
 #define AUTUMN_THRESHOLD (MAX_DAYS_TO_WINTER / 3)
 #define WINTER_THRESHOLD 1
 
@@ -176,3 +176,4 @@ SDL_Rect getRectFromPercRect(SDL_Window *window, float from_left, float from_rig
 char *fileToString(FILE *file);
 SDL_Point getPointFromInvPoint(SDL_Window *window, int x, int y);
 SDL_Point getPointFromPerc(SDL_Window *window, float x, float y);
+void shrinkRectToFit(SDL_Rect *toShrink, SDL_Rect *fitTo);
