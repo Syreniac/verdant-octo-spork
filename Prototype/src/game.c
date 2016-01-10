@@ -46,8 +46,8 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
   /* initialise navigationOffset values */
   gameData.graphicsData.navigationOffset.x = X_INITIAL_SCREEN_OFFSET; /*setting initial x offset to center of world*/
   gameData.graphicsData.navigationOffset.y = Y_INITIAL_SCREEN_OFFSET; /*setting initial y offset ot center of world*/
-  gameData.graphicsData.navigationOffset.w = X_SIZE_OF_WORLD;
-  gameData.graphicsData.navigationOffset.h = Y_SIZE_OF_WORLD;
+  gameData.graphicsData.navigationOffset.w = 0;
+  gameData.graphicsData.navigationOffset.h = 0;
 
   gameData.graphicsData.trackingMode = 0;
 
@@ -192,6 +192,32 @@ static void createGameUI(GameData *gameData){
   UIConfigure_PercPosition(element2, &element2->actions[3],1.0,0.0,-SCORE_COUNTER_WIDTH,0,0);
   UIElement_Reparent(element2,element);
 
+  /* Minimap */
+  element = UIElement_Create(0,0,100,100,10);
+  UIConfigure_FillAndBorderRect(element,&element->actions[0],0x5F,0xB4,0x04,0,0,0);
+  UIConfigure_PercPosition(element,&element->actions[1],1.0,1.0,-99,-99,0);
+  UIConfigure_Minimap(element,&element->actions[2]);
+	UIConfigure_LeftClickRect(element,&element->actions[3]);
+		UITrigger_Bind(&element->actions[3],&element->actions[4],0,1);
+		UITrigger_Bind(&element->actions[3],&element->actions[4],3,2);
+    UITrigger_Bind(&element->actions[3],&element->actions[6],0,1);
+	UIConfigure_TwoRectOverride(element,&element->actions[4],0,win_y - 100, 100, 100,
+                                                               50, 50, win_x - 100, win_y - 200,
+                                                               200, 0, 0);
+  UIConfigure_UpdateTwoRectOverrideOnWindowResize(element, &element->actions[5],&element->actions[4],
+                                                                                  50,50,0.0,0.0,
+                                                                                  -100,-150,1.0,1.0,
+                                                                                  -99,-99,1.0,1.0,
+                                                                                  100,100,0.0,0.0);
+  UIConfigure_ToggleObjectSelection(element,&element->actions[6]);
+  UIConfigure_MinimapMouseMove(element,&element->actions[7]);
+    element->actions[7].status = 0;
+    element->actions[7].new_status = 0;
+  UIConfigure_RightClickRect(element,&element->actions[8]);
+    UITrigger_Bind(&element->actions[8],&element->actions[7],0,1);
+  UIConfigure_RightReleaseAnywhere(element,&element->actions[9]);
+    UITrigger_Bind(&element->actions[9],&element->actions[7],1,0);
+  UIElement_Reparent(element,gameData->uiData.root);
 
 
   element = UIElement_Create(win_x/2,win_y - 50,200,25,6);
@@ -227,7 +253,6 @@ static void createGameUI(GameData *gameData){
 	UIConfigure_FillAndBorderRect(element2,&element2->actions[0],248,221,35,0,0,0);
 	UIConfigure_LeftClickRect(element2,&element2->actions[1]);
 		UITrigger_Bind(&element2->actions[1],&element2->actions[2],0,1);
-		UITrigger_Bind(&element2->actions[1],&element2->actions[2],0,1);
     UITrigger_Bind(&element2->actions[1],&element2->actions[1],1,0);
     UITrigger_Bind(&element2->actions[1],&element2->actions[4],0,1);
 	UIConfigure_TwoRectOverride(element2,&element2->actions[2],0,win_y - 100, 100, 100,
@@ -236,7 +261,7 @@ static void createGameUI(GameData *gameData){
   UIConfigure_UpdateTwoRectOverrideOnWindowResize(element2, &element2->actions[3],&element2->actions[2],
                                                                                   50,50,0.0,0.0,
                                                                                   -100,-150,1.0,1.0,
-                                                                                  0,-100,0.0,1.0,
+                                                                                  -1,-99,0.0,1.0,
                                                                                   100,100,0.0,0.0);
   UIConfigure_ToggleObjectSelection(element2,&element2->actions[4]);
   UIElement_Reparent(element2,gameData->uiData.root);
@@ -423,12 +448,12 @@ int gameLoop(GameData *gameData){
   including those in the renderUI() function. After the call to render present
   the pixel buffer becomes unpredictable and should be followed by SDL_RenderClear
   (as above in this loop)*/
-  SDL_RenderPresent(gameData->graphicsData.renderer);
   UIRoot_Execute(&gameData->uiData,GAME_OBJECT_UPDATE,0,&gameData->gameObjectData);
   UIRoot_Execute(&gameData->uiData,EXTERNAL,0);
   UIRoot_Execute(&gameData->uiData,ANNOUNCEMENTS,0,&gameData->announcementsData);
   announce_update(&gameData->announcementsData, delta_t);
   UIRoot_Execute(&gameData->uiData,CONTROLS,0,&gameData->controlsData);
+  UIRoot_Execute(&gameData->uiData,MINIMAP,0,&gameData->gameObjectData,&gameData->graphicsData);
   /* At the end of the loop we need to update the main application window to
      reflect the changes we've made to the graphics */
   /*SDL_UpdateWindowSurface(gameData->graphicsData.window);*/
@@ -442,6 +467,7 @@ int gameLoop(GameData *gameData){
   if (Mix_Playing(1) == 0) {
 	 playMusic(&gameData->audioData,1);
   }
+  SDL_RenderPresent(gameData->graphicsData.renderer);
   UIRoot_ExecuteUpwards(&gameData->uiData,DISPOSAL,0);
   delta_t = calculateDt(gameData->gameRunTime);
   gameData->gameRunTime = SDL_GetTicks();

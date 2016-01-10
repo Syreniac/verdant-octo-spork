@@ -194,7 +194,7 @@ void renderRadius(GraphicsData *graphicsData, SDL_Point *point, double radius, U
 	point->y += graphicsData->navigationOffset.y;
 
 	SDL_SetRenderDrawColor(graphicsData->renderer, r,g,b, a);
-			   
+
     for (currOffsetY = 1; currOffsetY <= radius; currOffsetY ++) {
          currOffsetX = floor(sqrt((2.0 * radius * currOffsetY) - (pow(currOffsetY, 2))));
          SDL_RenderDrawPoint(graphicsData->renderer, point->x - currOffsetX, point->y + radius - currOffsetY);
@@ -212,7 +212,7 @@ void renderFillRadius(GraphicsData *graphicsData, SDL_Point *point, double radiu
 	point->y += graphicsData->navigationOffset.y;
 
 	SDL_SetRenderDrawColor(graphicsData->renderer, r,g,b, a);
-			   
+
     for (currOffsetY = 1; currOffsetY <= radius; currOffsetY ++) {
          currOffsetX = floor(sqrt((2.0 * radius * currOffsetY) - (pow(currOffsetY, 2))));
          SDL_RenderDrawLine(graphicsData->renderer,
@@ -232,4 +232,27 @@ void renderFillRadius(GraphicsData *graphicsData, SDL_Point *point, double radiu
 
 }
 
+void setNavigationOffset(GraphicsData *graphicsData, int x, int y){
+	int sx,sy;
+	printf("trying to set navigation offset to %d,%d\n",x,y);
+	SDL_GetWindowSize(graphicsData->window,&sx,&sy);
+	if(x + sx > X_SIZE_OF_WORLD){
+		x = X_SIZE_OF_WORLD - sx;
+	}
+	else if(x < 0){
+		x = 0;
+	}
+	if(y + sy > Y_SIZE_OF_WORLD){
+		y = Y_SIZE_OF_WORLD - sy;
+	}
+	else if(y < 0){
+		y = 0;
+	}
 
+	x = -x;
+	y = -y;
+
+	printf("actually set navigation offset to %d,%d\n",x,y);
+	graphicsData->navigationOffset.x = x;
+	graphicsData->navigationOffset.y = y;
+}

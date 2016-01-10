@@ -591,7 +591,7 @@ void updateWeather(GameObjectData *gameObjectData, Weather *weather, int ticks){
 	/* Advance weather every TICKSPERWEATHER ticks; this may be semi-random due to tick-skipping. */
 	int weatherChannel = 3;
 	int ticksPerWeather;
-	
+
 	if(weather->present_weather != Sun){
 		ticksPerWeather = TICKSPERWEATHER / SUN_LASTS_LONGER_FACTOR;
 	}else{
@@ -907,7 +907,7 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 			}
 		}
 
-
+		fitRectToWorld(&programmableWorker->rect);
 
 		blitGameObject(programmableWorker->rect,
 					 	graphicsData,

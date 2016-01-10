@@ -22,6 +22,8 @@ enum Response {NONE = 0,
 				 ANNOUNCEMENTS,
 				 CONTROLS,
 				 MOUSEWHEEL,
+				 MINIMAP,
+				 MINIMAP_MOVE,
                FREED};												/* 13 */
 
 enum UIDataTypes{UI_NULL,
@@ -132,9 +134,9 @@ void UIConfigure_InversePosition(UI_Element *element, UI_Action *action, int x_o
 void UIConfigure_PercPosition(UI_Element *element, UI_Action *action, float x_offset, float y_offset, int xi_offset, int yi_offset, int num_of_companions, ...);
 void UIConfigure_PercPositionV(UI_Element *element, UI_Action *action, float x_offset, float y_offset, int xi_offset, int yi_offset, int num_of_companions, ...);
 void UIConfigure_UpdateTwoRectOverrideOnWindowResize(UI_Element *element, UI_Action *action, UI_Action *twoRectOverride, int bxip, int byip, float bxfp, float byfp,
-	                                                                                                                      int bxid, int byid, float bxfd, float byfd,
-                                                                                                                        int sxip, int syip, float sxfp, float syfp,
-																																																											  int sxid, int syid, float sxfd, float syfd);
+	                                                                                                                       int bxid, int byid, float bxfd, float byfd,
+                                                                                                                         int sxip, int syip, float sxfp, float syfp,
+																																																											   int sxid, int syid, float sxfd, float syfd);
 
 void UIConfigure_PercOffsetRect(UI_Element *element, UI_Action *action, float xfp, float yfp, float xfd, float yfd, int xip, int yip, int xid, int yid, int num_of_companions,...);
 void UIConfigure_ToggleObjectSelection(UI_Element *element, UI_Action *action);
@@ -142,7 +144,8 @@ void UIConfigure_GetAnnouncement(UI_Element *element, UI_Action *action, UI_Acti
 void UIConfigure_FillAndBorderRect(UI_Element *element, UI_Action *action, int fr, int fg, int fb, int br, int bg, int bb);
 void UIConfigure_PassThrough(UI_Element *element, UI_Action *action, enum Response response, int num_of_companions, ...);
 void UIConfigure_SlideWithMouseWheel(UI_Element *element, UI_Action *action, int x, int y, int num_of_companions,...);
-
+void UIConfigure_Minimap(UI_Element *element, UI_Action *action);
+void UIConfigure_MinimapMouseMove(UI_Element *element, UI_Action *action);
 
 void UITrigger_Bind(UI_Action *action, UI_Action *target, int state_from, int state_to);
 

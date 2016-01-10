@@ -223,6 +223,31 @@ SDL_Point getPointFromPerc(SDL_Window *window, float x, float y){
   return point;
 }
 
+void shrinkRectToFit(SDL_Rect *toShrink, SDL_Rect *fitTo){
+
+  if(!testRectIntersection(*toShrink,*fitTo)){
+    /* It's outside of the limit, make it 0 */
+    toShrink->w = 0;
+    toShrink->h = 0;
+  }
+  else{
+    if(toShrink->x < fitTo->x){
+      toShrink->x = fitTo->x;
+    }
+    if(toShrink->x + toShrink->w > fitTo->x + fitTo->w){
+      toShrink->w = (fitTo->x + fitTo->w) - toShrink->x;
+    }
+
+    if(toShrink->y < fitTo->y){
+      toShrink->h -= fitTo->y - toShrink->y;
+      toShrink->y = fitTo->y;
+    }
+    else if(toShrink->y + toShrink->h > fitTo->y + fitTo->h){
+      toShrink->h -= toShrink->y + toShrink->h - fitTo->y - fitTo->h;
+    }
+  }
+}
+
 #if DEBUGGING==1
 #undef calloc
 #undef malloc

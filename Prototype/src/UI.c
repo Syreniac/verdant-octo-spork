@@ -269,6 +269,124 @@ UI_Element *UIElement_Create(int x, int y, int w, int h, int num_of_actions){
 	   return element;
 }
 
+int UIAction_MinimapMouseMove(UI_Action *action, va_list copy_from){
+	va_list vargs;
+	GraphicsData *graphicsData;
+	SDL_Point p;
+	int x,y;
+	if(action->status != 0){
+		va_copy(vargs,copy_from);
+		graphicsData = va_arg(vargs,GraphicsData*);
+		va_end(vargs);
+		SDL_GetMouseState(&x,&y);
+		if(isPointInRect(x,y,action->element->rect)){
+			p.x = (double)(-action->element->rect.x + x) / (double)action->element->rect.w *(double)X_SIZE_OF_WORLD;
+			p.y = (double)(-action->element->rect.y + y) / (double)action->element->rect.h *(double)Y_SIZE_OF_WORLD;
+			SDL_GetWindowSize(graphicsData->window,&x,&y);
+			setNavigationOffset(graphicsData,p.x - x/2,p.y - y/2);
+		}
+		return 1;
+	}
+	return 0;
+}
+
+void UIConfigure_MinimapMouseMove(UI_Element *element, UI_Action *action){
+	UIAction_Init(element,action);
+	action->response = RENDER;
+	action->function = UIAction_MinimapMouseMove;
+}
+
+int UIAction_Minimap(UI_Action *action, va_list copy_from){
+	va_list vargs;
+	GameObjectData *gameObjectData;
+	GraphicsData *graphicsData;
+	SDL_Point point;
+	SDL_Rect rect;
+	int i = 0,j = 0;
+	double relx, rely;
+	ProgrammableWorker *p;
+	if(action->status != 0){
+		va_copy(vargs, copy_from);
+		gameObjectData = va_arg(vargs,GameObjectData*);
+		graphicsData = va_arg(vargs,GraphicsData*);
+		va_end(vargs);
+		/* Then we draw all the game object stuff into our element's rectangle */
+		SDL_SetRenderDrawColor(graphicsData->renderer,0xFE,0x2E,0xF7,0xFF);
+		while(i < gameObjectData->resourceNodeSpawnerCount){
+			j = 0;
+			while(j < gameObjectData->resourceNodeSpawners[i].maximumNodeCount){
+				if(gameObjectData->resourceNodeSpawners[i].resourceNodes[j].alive){
+					point = getCenterOfRect(gameObjectData->resourceNodeSpawners[i].resourceNodes[j].rect);
+					relx = (double)point.x / X_SIZE_OF_WORLD;
+					rely = (double)point.y / Y_SIZE_OF_WORLD;
+					//printf("drawing flower at %lf,%lf\n",relx,rely);
+					rect.x = relx*action->element->rect.w+action->element->rect.x;
+					rect.y = rely*action->element->rect.h+action->element->rect.y;
+					rect.w = ((double)X_SIZE_OF_NODE / X_SIZE_OF_WORLD) * action->element->rect.w;
+					rect.h = ((double)Y_SIZE_OF_NODE / Y_SIZE_OF_WORLD) * action->element->rect.h;
+					shrinkRectToFit(&rect,&action->element->rect);
+					SDL_RenderFillRect(graphicsData->renderer,&rect);
+				}
+				j++;
+			}
+			i++;
+		}
+		SDL_SetRenderDrawColor(graphicsData->renderer,0x0B,0x61,0x0B,255);
+		i = 0;
+		while(i < NUMBER_OF_TREES){
+			point = getCenterOfRect(gameObjectData->tree[i].stumpRect);
+			relx = (double)point.x / X_SIZE_OF_WORLD;
+			rely = (double)point.y / Y_SIZE_OF_WORLD;
+			rect.x = relx*action->element->rect.w+action->element->rect.x;
+			rect.y = rely*action->element->rect.h+action->element->rect.y;
+			rect.w = ((double)SIZE_OF_TREE/2 / X_SIZE_OF_WORLD) * action->element->rect.w;
+			rect.h = ((double)SIZE_OF_TREE/2 / Y_SIZE_OF_WORLD) * action->element->rect.h;
+			//printf("drawing flower at %lf,%lf\n",relx,rely);
+			shrinkRectToFit(&rect,&action->element->rect);
+			SDL_RenderFillRect(graphicsData->renderer,&rect);
+			i++;
+		}
+		SDL_SetRenderDrawColor(graphicsData->renderer,0x8A,0x4B,0x08,0xFF);
+		point = getCenterOfRect(gameObjectData->hive.rect);
+		relx = (double)point.x / X_SIZE_OF_WORLD;
+		rely = (double)point.y / Y_SIZE_OF_WORLD;
+		rect.x = relx*action->element->rect.w+action->element->rect.x;
+		rect.y = rely*action->element->rect.h+action->element->rect.y;
+		rect.w = ((double)X_SIZE_OF_HIVE / X_SIZE_OF_WORLD) * action->element->rect.w;
+		rect.h = ((double)Y_SIZE_OF_HIVE / Y_SIZE_OF_WORLD) * action->element->rect.h;
+		shrinkRectToFit(&rect,&action->element->rect);
+		SDL_RenderFillRect(graphicsData->renderer,&rect);
+		SDL_SetRenderDrawColor(graphicsData->renderer,0x00,0x00,0x00,0xFF);
+		p = gameObjectData->first_programmable_worker;
+		while(p != NULL){
+			point = getCenterOfRect(p->rect);
+			relx = (double)point.x / X_SIZE_OF_WORLD;
+			rely = (double)point.y / Y_SIZE_OF_WORLD;
+			rect.x = relx*action->element->rect.w+action->element->rect.x;
+			rect.y = rely*action->element->rect.h+action->element->rect.y;
+			rect.w = ((double)X_SIZE_OF_WORKER / X_SIZE_OF_WORLD) * action->element->rect.w;
+			rect.h = ((double)Y_SIZE_OF_WORKER / Y_SIZE_OF_WORLD) * action->element->rect.h;
+			shrinkRectToFit(&rect,&action->element->rect);
+			SDL_RenderFillRect(graphicsData->renderer,&rect);
+			p = p->next;
+		}
+		SDL_SetRenderDrawColor(graphicsData->renderer,255,255,255,255);
+		rect.x = (double)-graphicsData->navigationOffset.x / X_SIZE_OF_WORLD * action->element->rect.w + action->element->rect.x;
+		rect.y = (double)-graphicsData->navigationOffset.y / Y_SIZE_OF_WORLD * action->element->rect.h + action->element->rect.y;
+		SDL_GetWindowSize(graphicsData->window,&rect.w,&rect.h);
+		rect.w = (double)rect.w / X_SIZE_OF_WORLD * action->element->rect.w;
+		rect.h = (double)rect.h / Y_SIZE_OF_WORLD * action->element->rect.h;
+		SDL_RenderDrawRect(graphicsData->renderer,&rect);
+	}
+	return 0;
+}
+
+void UIConfigure_Minimap(UI_Element *element, UI_Action *action){
+	UIAction_Init(element,action);
+	action->response = MINIMAP;
+	action->function = UIAction_Minimap;
+}
+
 int UIAction_SlideWithMouseWheel(UI_Action *action, va_list copy_from){
 	va_list vargs;
 	int i = 0;
@@ -659,7 +777,7 @@ int UIAction_ReadAiBlocks(UI_Action *action, va_list copy_from){
 		va_copy(vargs,copy_from);
 		aiData = va_arg(vargs,AIData*);
 		va_end(vargs);
-		
+
 		i = 0;
 		while(childElement != NULL){
 			childCount++;

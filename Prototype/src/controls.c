@@ -42,6 +42,7 @@ int handleEvent(SDL_Event *event, GameObjectData *gameObjectData, UIData *uiData
 					}
 					else if(event->button.button == SDL_BUTTON_RIGHT){
 					  UIRoot_ExecuteUpwards(uiData,RIGHT_CLICK,1,event);
+						UIRoot_ExecuteUpwards(uiData,MINIMAP_MOVE,0,event,graphicsData);
 					  if(controlsData->objectSelection){
 					  	objectInfoDisplay(gameObjectData, graphicsData, &event->button);
 								controlsData->mouseButtons[RIGHT_CLICK_BUTTON] = 1;

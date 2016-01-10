@@ -151,11 +151,12 @@ int blockFunction_RememberCurrentLocation(BlockFunctionArgs *arguments, Programm
 }
 
 int blockFunction_GoToStoredLocation(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
+    SDL_Point p = getCenterOfRect(programmableWorker->rect);
     if(!programmableWorker->brain.is_point_remembered){
       return 2;
     }
-    programmableWorker->heading = atan2((double)(programmableWorker->brain.remembered_point.x - programmableWorker->rect.x),
-                                        (double)(programmableWorker->brain.remembered_point.y - programmableWorker->rect.y));
+    programmableWorker->heading = atan2((double)(programmableWorker->brain.remembered_point.x - p.x),
+                                        (double)(programmableWorker->brain.remembered_point.y - p.y));
     programmableWorker->status = LEAVING;
     return 1;
 }

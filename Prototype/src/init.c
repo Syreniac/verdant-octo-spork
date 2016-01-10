@@ -36,6 +36,8 @@ InitData initialise(void){
                                                -1,
                                                SDL_RENDERER_TARGETTEXTURE|SDL_RENDERER_PRESENTVSYNC);
 	assert(initData.graphicsData.renderer != NULL);
+  initData.graphicsData.navigationOffset.w = 0;
+  initData.graphicsData.navigationOffset.h = 0;
 
   initData.graphicsData.mainMenuImage = loadTextureFromFile("images/mainMenuImage.bmp", &initData.graphicsData, 0);
 
