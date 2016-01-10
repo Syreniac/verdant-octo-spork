@@ -10,9 +10,12 @@ CFLAGS = -g -pedantic -Wall -Wextra -Wno-unused-variable -Wno-unused-parameter -
 
 # File structure variables
 ASSETS_CONTENTS = .\assets
-OBJS = main.o init.o game.o world_generation.o game_objects.o AI.o UI.o generic.o controls.o graphics.o audio.o announcements.o
+COMMON_FILES = init.o game.o world_generation.o game_objects.o AI.o UI.o generic.o controls.o graphics.o audio.o announcements.o
 BIN = bin
 PROG = $(BIN)\Prototype2
+SOURCE_FILES = main.o $(COMMON_FILES)
+# ALLTEST_FILES = all.test.o $(COMMON_FILES)
+# ALLTEST = $(BIN)/Test
 CXX = gcc
 
 ifeq ($(PROCESSOR_ARCHITECTURE),AMD64)
@@ -27,6 +30,7 @@ SDL_FLAGS = -I$(DEPENDENCY_FOLDER)\SDL2\include\SDL2 -I$(DEPENDENCY_FOLDER)\SDL2
 IMAGE_FLAGS = -I$(DEPENDENCY_FOLDER)\SDL_image\include -L$(DEPENDENCY_FOLDER)\SDL_image\lib
 TTF_FLAGS = -I$(DEPENDENCY_FOLDER)\SDL_ttf\include -L$(DEPENDENCY_FOLDER)\SDL_ttf\lib
 MIXER_FLAGS = -I$(DEPENDENCY_FOLDER)\SDL_mixer\include -L$(DEPENDENCY_FOLDER)\SDL_mixer\lib
+# TEST_FLAGS = Need to install or build Check for Win64 to figure out how to link it.
 
 LFLAGS =  $(SDL_FLAGS) $(IMAGE_FLAGS) $(TTF_FLAGS) $(MIXER_FLAGS) -lmingw32 -lSDL2main -lSDL2 -lSDL_image -lSDL_mixer -lSDL_ttf -lm
 DELETE = del
@@ -39,15 +43,19 @@ ASSET_COPY_COMMAND = Xcopy /s /f  "$(ASSETS_CONTENTS)" ".\$(BIN)"
 
 # top-level rule to create the program.
 all: $(PROG)
-
+# Need to add $(ALLTEST) alongside this later.
 
 # compiling other source files.
 %.o: src\%.c src\%.h
 	$(CXX) $(CFLAGS) $(LFLAGS) -c -s $<
+# all.test.o: src/all.test.c src/all.test.h
+# 	$(CXX) $(CFLAGS) $(LFLAGS) -c -s $<
 
 # linking the program. | $(BIN) makes the bin\ directory if it does not yet exist.
-$(PROG): $(BIN) | $(OBJS)
-	$(CXX) $(OBJS) -o $(PROG) $(LFLAGS)
+$(PROG): $(BIN) | $(SOURCE_FILES)
+	$(CXX) $(SOURCE_FILES) -o $(PROG) $(LFLAGS)
+# $(ALLTEST): $(ALLTEST_FILES) | $(BIN)
+# 	$(CXX) $(ALLTEST_FILES) -o $(ALLTEST) $(LFLAGS) $(TEST_FLAGS) -lcheck
 
 # makes bin\ directory and copies assets to bin\ so we don't have to drag them in manually.
 $(BIN):
