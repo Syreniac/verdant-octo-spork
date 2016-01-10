@@ -24,6 +24,10 @@ FILE *DEBUGGING_FILE_FREE;
 #endif
 #define VERBOSE 1
 
+#define HONEY_REQUIRED_FOR_WINTER 100
+#define REQUIREMENT_YEAR_INCREASE_PERCENTAGE 10
+#define DELAY_BEFORE_SUMMER 10
+
 #define PROGRAM_NAME "Prototype"
 #define X_SIZE_OF_SCREEN 960
 #define Y_SIZE_OF_SCREEN 720
@@ -44,7 +48,7 @@ FILE *DEBUGGING_FILE_FREE;
 #define RAIN_TILE_HEIGHT 9
 #define RAIN_FRAME_DELAY 4
 
-#define NUMBER_OF_WORKERS 10
+#define INITIAL_NUMBER_OF_WORKERS 10
 
 /*lower values result in a higher chance of bees regaining flight when wet, with
 each call to updateProgrammableWorker*/
@@ -98,9 +102,13 @@ each call to updateProgrammableWorker*/
 #define WORKER_SPEED 0.3
 
 #define WORKER_PERCEPTION_RADIUS 250
+#define COLD_DEATH_THRESHOLD 200
+#define CHANCE_OF_DIEING 100
 
 #define X_SIZE_OF_HIVE 64
 #define Y_SIZE_OF_HIVE 80
+
+#define HIVE_SHELTER_RADIUS (X_SIZE_OF_HIVE/3)
 
 
 #define DEFAULT_RESOURCEUNITS 100
@@ -111,9 +119,21 @@ each call to updateProgrammableWorker*/
 #define SUN_LASTS_LONGER_FACTOR 5
 #define FRAME_TIME 20
 
+#define WINTER_COUNTDOWN_SPEED 0.001
+
+#define MAX_DAYS_TO_WINTER 301
+#define AUTUMN_THRESHOLD (MAX_DAYS_TO_WINTER / 3)
+#define WINTER_THRESHOLD 1
+
+#define DAYS_LABEL_WIDTH 155
+#define DAYS_COUNTER_WIDTH 40
+
 #define TOP_BAR_HEIGHT 30
 #define SCORE_COUNTER_WIDTH 40
-#define SCORE_LABEL_WIDTH 90
+#define SCORE_LABEL_WIDTH 75
+
+#define YEARS_COUNTER_WIDTH 40
+#define YEARS_LABEL_WIDTH 145
 
 #define NUM_OF_KEYS 30
 #define PANSPEEDMULTI 0.5
@@ -121,6 +141,10 @@ each call to updateProgrammableWorker*/
 #define PI 3.14159
 #define DEGREESINCIRCLE 360.0
 #define RADIANSTODEGREES 57.2958
+
+#define SUMMER_INDEX 0
+#define AUTUMN_INDEX 1
+#define WINTER_INDEX 2
 
 #define FILE_TO_STRING_STEP_SIZE 10
 

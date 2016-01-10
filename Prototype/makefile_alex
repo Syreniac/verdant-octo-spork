@@ -11,7 +11,7 @@ DELETE_RECURSIVE = rm -r
 
 # List all the files here
 ASSETS_CONTENTS = assets/.
-OBJS = main.o init.o game.o world_generation.o game_objects.o AI.o UI.o generic.o controls.o graphics.o audio.o
+OBJS = main.o init.o game.o world_generation.o game_objects.o AI.o UI.o generic.o controls.o graphics.o audio.o announcements.o
 BIN = bin
 PROG = $(BIN)/Prototype
 CXX = gcc
