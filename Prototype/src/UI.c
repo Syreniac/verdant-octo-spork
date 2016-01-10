@@ -2382,9 +2382,7 @@ void UIRoot_ExecuteUpwards(UIData *uiData, enum Response response, int stopAtFir
 		}
 	}
 	va_end(vargs);
-	#undef free(x)
 	free(queue);
-	#define free(x) debug_free(__LINE__,__FILE__,x)
  }
 
 static void UIAction_Init(UI_Element *element, UI_Action *action){
@@ -2459,24 +2457,18 @@ static void UIElement_RemoveExposedData(UI_Element *element){
 	void *thingToFree;
 	if(element->exposed_data_types!=NULL){
 		thingToFree = element->exposed_data_types;
-		#undef free(x)
 		free(thingToFree);
-		#define free(x) debug_free(__LINE__,__FILE__,x)
 	}
 	while(i < element->exposed_data_count){
 		if(element->exposed_data[i] != NULL){
 			thingToFree = element->exposed_data[i];
-			#undef free(x)
 			free(thingToFree);
-			#define free(x) debug_free(__LINE__,__FILE__,x)
 		}
 		i++;
 	}
 	if(element->exposed_data != NULL){
 		thingToFree = element->exposed_data;
-		#undef free(x)
 		free(thingToFree);
-		#define free(x) debug_free(__LINE__,__FILE__,x)
 	}
 	element->exposed_data_types = NULL;
 	element->exposed_data = NULL;
