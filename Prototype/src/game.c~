@@ -35,7 +35,7 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
   gameData.audioData = audioData;
 
 
-  gameData.uiData.root = calloc(1, sizeof(UI_Element));
+  gameData.uiData.root = UIElement_Create(0,0,0,0,0);
   gameData.running = 1;
 
   initAudio(&gameData.gameObjectData, gameData.audioData);
@@ -180,12 +180,7 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
   }
 
   cleanUpGameData(&gameData);
-
-  if(gameData.gameObjectData.gameRestart){
-  	return(1);
-  }else{
-  	return(0);
-  }
+  return 0;
 }
 
 static void cleanUpGameData(GameData *gameData){
@@ -217,8 +212,13 @@ static void createGameUI(GameData *gameData){
   /* top information bar */
   element = UIElement_Create(0,0,dm.w,31,4);
   UIConfigure_FillAndBorderRect(element,&element->actions[0],248,221,35,0,0,0);
+<<<<<<< HEAD
   UIConfigure_PercPosition(element, &element->actions[1],0.0,0.0,0,0,0);
   UIConfigure_DisplayString(element, &element->actions[2], "Hello",0,UISTRING_ALIGN_LEFT);
+=======
+
+  UIConfigure_DisplayString(element, &element->actions[2], " ",0,UISTRING_ALIGN_LEFT);
+>>>>>>> infoDisplay
   UIConfigure_GetAnnouncement(element, &element->actions[3], &element->actions[2]);
   UIElement_Reparent(element,gameData->uiData.root);
 
@@ -246,14 +246,12 @@ static void createGameUI(GameData *gameData){
   	UITrigger_Bind(&element->actions[4],&element->actions[1],2,1);
   UIConfigure_PercOffsetRect(element, &element->actions[5], 0.25, 0.25, 0.75,0.75, 0,0,0,0,0);
   UIElement_Reparent(element,gameData->uiData.root);
-<<<<<<< HEAD
 
-=======
   
   
   
       /*objectInfoDisplay box*/
-  element = UIElement_Create(0,0,70,70,7);
+  element = UIElement_Create(0,31,170,70,7);
   UIConfigure_Auto(element, &element->actions[0], OBJECT_DISPLAY);
     UITrigger_Bind(&element->actions[0],&element->actions[0],-1,0);
     UITrigger_Bind(&element->actions[0],&element->actions[1],0,2);
@@ -268,15 +266,38 @@ static void createGameUI(GameData *gameData){
   	quickSetStatus(&element->actions[1],1);
   UIConfigure_FillAndBorderRect(element,&element->actions[2],248,221,35,255,255,255);
 	  quickSetStatus(&element->actions[2],0);
-  UIConfigure_DisplayString(element, &element->actions[3],"InfoDisplay",0, UISTRING_ALIGN_LEFT);
+  UIConfigure_DisplayString(element, &element->actions[3]," ",0, UISTRING_ALIGN_CENTER);
 	  quickSetStatus(&element->actions[3],0);
   UIConfigure_Auto(element,&element->actions[4],UPDATE);
   	UITrigger_Bind(&element->actions[4],&element->actions[0],2,1);
   	UITrigger_Bind(&element->actions[4],&element->actions[1],2,1);
   UIConfigure_GetInfoDisplayString(element, &element->actions[6], &element->actions[3]);
   UIElement_Reparent(element,gameData->uiData.root);
+        /*objectInfoDisplay box - status*/
+  element = UIElement_Create(1,51,168,31,7);
+  UIConfigure_Auto(element, &element->actions[0], OBJECT_DISPLAY);
+    UITrigger_Bind(&element->actions[0],&element->actions[0],-1,0);
+    UITrigger_Bind(&element->actions[0],&element->actions[1],0,2);
+    UITrigger_Bind(&element->actions[0],&element->actions[2],-1,0);
+    UITrigger_Bind(&element->actions[0],&element->actions[3],-1,0);
+	  quickSetStatus(&element->actions[0],0);
+  UIConfigure_Auto(element, &element->actions[1], OBJECT_DISPLAY);
+    UITrigger_Bind(&element->actions[1],&element->actions[0],0,2);
+    UITrigger_Bind(&element->actions[1],&element->actions[1],1,0);
+    UITrigger_Bind(&element->actions[1],&element->actions[2],0,1);
+    UITrigger_Bind(&element->actions[1],&element->actions[3],0,1);
+  	quickSetStatus(&element->actions[1],1);
+  UIConfigure_FillAndBorderRect(element,&element->actions[2],248,221,35,248,221,35);
+	  quickSetStatus(&element->actions[2],0);
+  UIConfigure_DisplayString(element, &element->actions[3]," ",0, UISTRING_ALIGN_LEFT);
+	  quickSetStatus(&element->actions[3],0);
+  UIConfigure_Auto(element,&element->actions[4],UPDATE);
+  	UITrigger_Bind(&element->actions[4],&element->actions[0],2,1);
+  	UITrigger_Bind(&element->actions[4],&element->actions[1],2,1);
+  UIConfigure_GetObjectStatusString(element, &element->actions[6], &element->actions[3]);
+  UIElement_Reparent(element,gameData->uiData.root);
   
->>>>>>> infoDisplay
+
     /*gameOverInformation*/
   element = UIElement_Create(0,0,200,25,7);
   UIConfigure_Auto(element, &element->actions[0], GAME_OVER);
@@ -449,12 +470,12 @@ static void createGameUI(GameData *gameData){
     UITrigger_Bind(&element->actions[0],&element->actions[1],0,1);
     UITrigger_Bind(&element->actions[0],&element->actions[2],-1,0);
     UITrigger_Bind(&element->actions[0],&element->actions[3],-1,0);
+  	  quickSetStatus(&element->actions[0],0);
   UIConfigure_Auto(element, &element->actions[1], RESPONSE_PAUSE);
-    UITrigger_Bind(&element->actions[1],&element->actions[0],0,2);
+    UITrigger_Bind(&element->actions[1],&element->actions[0],-1,1);
     UITrigger_Bind(&element->actions[1],&element->actions[1],1,0);
     UITrigger_Bind(&element->actions[1],&element->actions[2],0,1);
     UITrigger_Bind(&element->actions[1],&element->actions[3],0,1);
-  	  quickSetStatus(&element->actions[1],0);
   UIConfigure_FillAndBorderRect(element, &element->actions[2],255,0,0,0,0,0);
 	  quickSetStatus(&element->actions[2],0);
   UIConfigure_DisplayString(element, &element->actions[3],"PAUSED",0, UISTRING_ALIGN_CENTER);
@@ -581,6 +602,13 @@ int gameLoop(GameData *gameData){
   printf("t @ benchmark %d: %d\n", testMarker++,SDL_GetTicks() - gameData->gameRunTime);
   #endif
 
+  while (SDL_PollEvent(&event)){
+	  if(handleEvent(&event,&gameData->gameObjectData,&gameData->uiData,&gameData->controlsData, &gameData->graphicsData) == 0){
+      printf("escape\n");
+      return 0;
+    }
+  }
+
   if(!gameData->graphicsData.trackingMode){
   	panScreen(&gameData->graphicsData, &gameData->controlsData, gameData->delta);
   }
@@ -588,6 +616,7 @@ int gameLoop(GameData *gameData){
   if(SDL_RenderClear(gameData->graphicsData.renderer) == -1){
 	   printf("Error clearing renderer: %s\n", SDL_GetError());
   }
+
   paintBackground(&gameData->graphicsData,0,200,100);
 
   updateGameObjects(&gameData->gameObjectData, &gameData->graphicsData, &gameData->announcementsData, gameData->delta);
@@ -596,10 +625,6 @@ int gameLoop(GameData *gameData){
 
   SDL_RenderPresent(gameData->graphicsData.renderer);
   announce_update(&gameData->announcementsData, gameData->delta);
-
-  while (SDL_PollEvent(&event)){
-	  handleEvent(&event,&gameData->gameObjectData,&gameData->uiData,&gameData->controlsData, &gameData->graphicsData);
-  }
   if (Mix_Playing(1) == 0) {
  	  playMusic(&gameData->audioData,1);
   }
@@ -616,12 +641,11 @@ int gameLoop(GameData *gameData){
 	      SDL_PushEvent(&gameOverEvent);
   	  }
    	  while (SDL_PollEvent(&event)){
-		      continuing = continuing || handleEvent(&event,&gameData->gameObjectData,&gameData->uiData,&gameData->controlsData, &gameData->graphicsData);
+		      if(handleEvent(&event,&gameData->gameObjectData,&gameData->uiData,&gameData->controlsData, &gameData->graphicsData) == 0){
+            return 0;
+          }
   	  }
 
-  }
-  while (SDL_PollEvent(&event)){
-	   handleEvent(&event,&gameData->gameObjectData,&gameData->uiData,&gameData->controlsData, &gameData->graphicsData);
   }
   if (Mix_Playing(1) == 0) {
  	  playMusic(&gameData->audioData,1);
@@ -634,10 +658,4 @@ int gameLoop(GameData *gameData){
   printf("--------------------------\n");
   #endif
 
-  if(gameData->gameObjectData.gameRestart){
-     return(0);
-  }
-  else{
-     return(1);
-  }
 }

@@ -910,10 +910,8 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 					gameObjectData->gameOverCause = STARVATION;
 					gameObjectData->hive.years_survived++;
 					sprintf(GOCause,"Your bees ran out of food over winter and died!");
-					sprintf(finalScore,"YEARS SURVIVED = %d    FINAL SCORE: (%d + (%d / %d)) = %d", gameObjectData->hive.years_survived,
-					gameObjectData->hive.years_survived,
-					gameObjectData->hive.flowers_collected, gameObjectData->hive.years_survived,
-					gameObjectData->hive.years_survived + (gameObjectData->hive.flowers_collected / gameObjectData->hive.years_survived));
+					sprintf(finalScore,"YEARS SURVIVED = %d    SUGAR: %d", gameObjectData->hive.years_survived,
+					gameObjectData->hive.flowers_collected);
 
 					setGameOverInfo(&announcementsData->gameOverData, GOCause);
 				    setFinalScore(&announcementsData->gameOverData, finalScore);
@@ -1056,10 +1054,9 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 				gameObjectData->gameOverCause = COLD;
 				gameObjectData->hive.years_survived++;
 				sprintf(GOCause,"None of your bees took shelter in the hive over winter!");
-				sprintf(finalScore,"YEARS SURVIVED = %d    FINAL SCORE: (%d + (%d / %d)) = %d", gameObjectData->hive.years_survived,
-				gameObjectData->hive.years_survived,
-				gameObjectData->hive.flowers_collected, gameObjectData->hive.years_survived,
-				gameObjectData->hive.years_survived + (gameObjectData->hive.flowers_collected / gameObjectData->hive.years_survived));
+				sprintf(finalScore,"YEARS SURVIVED = %d    SUGAR: %d", gameObjectData->hive.years_survived,
+				gameObjectData->hive.flowers_collected);
+
 				setGameOverInfo(&announcementsData->gameOverData, GOCause);
 				setFinalScore(&announcementsData->gameOverData, finalScore);
 				printf("gameOver, all bees die from the cold\n");
@@ -1259,7 +1256,7 @@ void objectInfoDisplay(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 	int displayInfoAlreadySet = 0, i;
 	point.x = mbEvent->x - graphicsData->navigationOffset.x;
 	point.y = mbEvent->y - graphicsData->navigationOffset.y;
-	char displayName[10];
+	char displayString[10];
 
 	graphicsData->trackingMode = 0;
 
@@ -1268,8 +1265,10 @@ void objectInfoDisplay(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 			if(!displayInfoAlreadySet){
 				gameObjectData->tree[i].displayInfo = 1;
 				displayInfoAlreadySet = 1;
-				sprintf(displayName," Tree: ");
-				setObjectInfoDisplay(&announcementsData->objectInfoDisplay, displayName);
+				sprintf(displayString," TREE ");
+				setObjectInfoDisplay(&announcementsData->objectInfoDisplay, displayString, NAME);
+				sprintf(displayString," Status: ");
+				setObjectInfoDisplay(&announcementsData->objectInfoDisplay, displayString, STATUS);
 			}else{
 				gameObjectData->tree[i].displayInfo = 0;
 			}
@@ -1286,8 +1285,10 @@ void objectInfoDisplay(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 				worker->xRenderPosWhenSelected = worker->rect.x + graphicsData->navigationOffset.x;
 				worker->yRenderPosWhenSelected = worker->rect.y + graphicsData->navigationOffset.y;
 				displayInfoAlreadySet = 1;
-				sprintf(displayName," Bee: ");
-				setObjectInfoDisplay(&announcementsData->objectInfoDisplay, displayName);
+				sprintf(displayString," BEE ");
+				setObjectInfoDisplay(&announcementsData->objectInfoDisplay, displayString, NAME);
+				sprintf(displayString," Status: ");
+				setObjectInfoDisplay(&announcementsData->objectInfoDisplay, displayString, STATUS);
 				graphicsData->trackingMode = 1;
 			}else{
 				worker->displayInfo = 0;
@@ -1301,8 +1302,10 @@ void objectInfoDisplay(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 		if(!displayInfoAlreadySet){
 			gameObjectData->iceCreamPerson->displayInfo = 1;
 			displayInfoAlreadySet = 1;
-			sprintf(displayName," Garry: ");
-			setObjectInfoDisplay(&announcementsData->objectInfoDisplay, displayName);
+			sprintf(displayString," GARRY ");
+			setObjectInfoDisplay(&announcementsData->objectInfoDisplay, displayString, NAME);
+			sprintf(displayString," Status: ");
+			setObjectInfoDisplay(&announcementsData->objectInfoDisplay, displayString, STATUS);
 		}else{
 			gameObjectData->iceCreamPerson->displayInfo = 0;
 		}
@@ -1314,8 +1317,10 @@ void objectInfoDisplay(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 		if(!displayInfoAlreadySet){
 			gameObjectData->droppedIceCream->displayInfo = 1;
 			displayInfoAlreadySet = 1;
-			sprintf(displayName," Icecream: ");
-			setObjectInfoDisplay(&announcementsData->objectInfoDisplay, displayName);
+			sprintf(displayString," ICECREAM ");
+			setObjectInfoDisplay(&announcementsData->objectInfoDisplay, displayString, NAME);
+			sprintf(displayString," Status: ");
+			setObjectInfoDisplay(&announcementsData->objectInfoDisplay, displayString, STATUS);
 		}else{
 			gameObjectData->droppedIceCream->displayInfo = 0;
 		}
@@ -1333,8 +1338,10 @@ void objectInfoDisplay(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 				if(!displayInfoAlreadySet){
 					gameObjectData->resourceNodeSpawners[i].resourceNodes[j].displayInfo = 1;
 					displayInfoAlreadySet = 1;
-					sprintf(displayName," Flower: ");
-					setObjectInfoDisplay(&announcementsData->objectInfoDisplay, displayName);
+					sprintf(displayString," FLOWER ");
+			    	setObjectInfoDisplay(&announcementsData->objectInfoDisplay, displayString, NAME);
+					sprintf(displayString," Status: ");
+					setObjectInfoDisplay(&announcementsData->objectInfoDisplay, displayString, STATUS);
 
 				}else{
 					gameObjectData->resourceNodeSpawners[i].resourceNodes[j].displayInfo = 0;
@@ -1352,8 +1359,10 @@ void objectInfoDisplay(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 		if(!displayInfoAlreadySet){
 			gameObjectData->hive.displayInfo = 1;
 			displayInfoAlreadySet = 1;
-			sprintf(displayName," Hive: ");
-			setObjectInfoDisplay(&announcementsData->objectInfoDisplay, displayName);
+			sprintf(displayString," HIVE ");
+			setObjectInfoDisplay(&announcementsData->objectInfoDisplay, displayString, NAME);
+			sprintf(displayString," Status: ");
+			setObjectInfoDisplay(&announcementsData->objectInfoDisplay, displayString, STATUS);
 		}else{
 			gameObjectData->hive.displayInfo = 0;
 		}

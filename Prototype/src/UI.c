@@ -565,6 +565,28 @@ void UIConfigure_GetInfoDisplayString(UI_Element *element, UI_Action *action, UI
 	action->displayStringAction = placeToPut;
 }
 
+int UIAction_GetObjectStatusString(UI_Action *action, UIData *uiData){
+		ObjectInfoDisplay* objectInfoDisplay;
+		va_list vargs;
+		objectInfoDisplay = uiData->objectInfoDisplay;
+		if(action->status != 0){
+			action->displayStringAction->companionChangeDisplayString = realloc(action->displayStringAction->companionChangeDisplayString,
+				                                                                  strlen(objectInfoDisplay->objectStatusString)+1);
+			strcpy(action->displayStringAction->companionChangeDisplayString, objectInfoDisplay->objectStatusString);
+		}
+		return 0;
+}
+
+void UIConfigure_GetObjectStatusString(UI_Element *element, UI_Action *action, UI_Action *placeToPut){
+	UIAction_Init(element,action);
+	action->response = UPDATE;
+
+	action->function = UIAction_GetObjectStatusString;
+	action->companions = calloc(1,sizeof(void*));
+	action->num_of_companions = 1;
+	action->displayStringAction = placeToPut;
+}
+
 int UIAction_GetFinalScoreString(UI_Action *action, UIData *uiData){
 		GameOverData* gameOverData;
 		gameOverData = uiData->gameOverData;
@@ -2445,9 +2467,9 @@ int UIAction_UpdateTwoRectOverrideOnWindowResize(UI_Action *action, UIData *uiDa
 	return 0;
 }
 /* These argument names are horrible, but they stand for Big/Small X/Y Int/Float Point/Dimension */
-void UIConfigure_UpdateTwoRectOverrideOnWindowResize(UI_Element *element, UI_Action *action, UI_Action *twoRectOverride, int bxip, int byip, float bxfp, float byfp,
-	                                                                                                                      int bxid, int byid, float bxfd, float byfd,
-                                                                                                                        int sxip, int syip, float sxfp, float syfp,
+void UIConfigure_UpdateTwoRectOverrideOnWindowResize(UI_Element *element, UI_Action *action,
+UI_Action *twoRectOverride, int bxip, int byip, float bxfp, float byfp, int bxid, int byid, float bxfd, float byfd,
+int sxip, int syip, float sxfp, float syfp,
 																																																											  int sxid, int syid, float sxfd, float syfd){
 	UIAction_Init(element,action);
 	action->response = WINDOW_RESIZE;

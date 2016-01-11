@@ -13,8 +13,17 @@ void setFinalScore(GameOverData *gameOverData, char* string){
 		strcpy(gameOverData->finalScoreString, string);
 }
 
-void setObjectInfoDisplay(ObjectInfoDisplay *objectInfoDisplay, char* string){
-		strcpy(objectInfoDisplay->infoDisplayString, string);
+void setObjectInfoDisplay(ObjectInfoDisplay *objectInfoDisplay, char* string, attribute att){
+	switch(att){
+		case NAME:
+			strcpy(objectInfoDisplay->infoDisplayString, string);
+			break;
+		case STATUS:
+			strcpy(objectInfoDisplay->objectStatusString, string);
+			break;
+		case OTHER:
+			break;
+	}
 }
 
 void announce_clear(AnnouncementsData *announcementsData){
@@ -42,7 +51,9 @@ void gameOverInfo_init(GameOverData *gameOverData){
 
 void objectInfoDisplay_init(ObjectInfoDisplay *objectInfoDisplay){
 		memset(objectInfoDisplay->infoDisplayString,'\0', 256);
+		memset(objectInfoDisplay->objectStatusString,'\0', 256);
 }
+
 
 
 void announce_update(AnnouncementsData *announcementsData, int ticks){

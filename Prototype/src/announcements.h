@@ -12,6 +12,7 @@ struct GameOverData{
 
 struct ObjectInfoDisplay{
 	char infoDisplayString[256];
+	char objectStatusString[256];
 };
 
 struct AnnouncementsData{
@@ -21,6 +22,8 @@ struct AnnouncementsData{
     GameOverData gameOverData;
     ObjectInfoDisplay objectInfoDisplay;
 };
+
+typedef enum {NAME, STATUS, OTHER} attribute;
 
 
 void announce(AnnouncementsData *announcementsData, char* string);
@@ -37,6 +40,6 @@ void setFinalScore(GameOverData *gameOverData, char* string);
 
 
 void objectInfoDisplay_init(ObjectInfoDisplay *objectInfoDisplay);
-void setObjectInfoDisplay(ObjectInfoDisplay *objectInfoDisplay, char* string);
+void setObjectInfoDisplay(ObjectInfoDisplay *objectInfoDisplay, char* string, attribute att);
 void objectInfoDisplay_clear(ObjectInfoDisplay *objectInfoDisplay);
 

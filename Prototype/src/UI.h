@@ -148,6 +148,7 @@ void UIConfigure_GetAnnouncement(UI_Element *element, UI_Action *action, UI_Acti
 void UIConfigure_GetGameOverString(UI_Element *element, UI_Action *action, UI_Action *placeToPut);
 void UIConfigure_GetFinalScoreString(UI_Element *element, UI_Action *action, UI_Action *placeToPut);
 void UIConfigure_GetInfoDisplayString(UI_Element *element, UI_Action *action, UI_Action *placeToPut);
+void UIConfigure_GetObjectStatusString(UI_Element *element, UI_Action *action, UI_Action *placeToPut);
 void UIConfigure_FillAndBorderRect(UI_Element *element, UI_Action *action, int fr, int fg, int fb, int br, int bg, int bb);
 void UIConfigure_PassThrough(UI_Element *element, UI_Action *action, enum Response response, int num_of_companions, ...);
 void UIConfigure_SlideWithMouseWheel(UI_Element *element, UI_Action *action, int x, int y, int num_of_companions,...);
