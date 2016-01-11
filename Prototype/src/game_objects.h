@@ -61,6 +61,7 @@ struct ProgrammableWorkerBrain{
   ProgrammableWorker *followTarget;
   int aiStartPoint;
   int waitTime;
+  int storedCount;
 };
 
 struct ProgrammableWorker{
@@ -79,9 +80,9 @@ struct ProgrammableWorker{
   int stunned_after_sting;
 
   int flapTimer;
-  
+
   char *beeStatus;
-  
+
   int insideHive;
 
 
@@ -215,3 +216,4 @@ void objectInfoDisplay(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 SDL_MouseButtonEvent *mbEvent);
 
 void nullifyLocalAIInformation(GameObjectData *gameObjectData);
+int countResourceNodesInRadius(GameObjectData *gameObjectData, int x, int y, double radius);
