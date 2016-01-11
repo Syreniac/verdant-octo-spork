@@ -206,12 +206,19 @@ ProgrammableWorker *createProgrammableWorker(GameObjectData *gameObjectData){
 	programmableWorker->rect.y = 100;
 	programmableWorker->rect.w = X_SIZE_OF_WORKER;
 	programmableWorker->rect.h = Y_SIZE_OF_WORKER;
+	
+	programmableWorker->beeStatus = (char*) calloc(LENGTH_OF_STATUS_STRING, sizeof(char));
+	
+
 
 	programmableWorker->wet_and_cant_fly = 0;
 	programmableWorker->cold_and_about_to_die = 0;
 	programmableWorker->flapTimer = rand() % 100;
 
 	programmableWorker->stunned_after_sting = 0;
+	programmableWorker->insideHive = 0;
+	
+
 
 	programmableWorker->currentGraphicIndex = BEE_FLAP_GRAPHIC_1;
 	/* heading is measured in radians because maths in C all take radians */
@@ -336,15 +343,94 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
 	ResourceNodeSpawner *resourceNodeSpawner = NULL;
 	ResourceNode *resourceNode = NULL;
 	char announcement[256];
+	
+	switch(programmableWorker->status){
+		case LEAVING:
+			programmableWorker->beeStatus = "Leaving hive";
+			if(programmableWorker->displayInfo){
+				char tempString[16];
+				sprintf(tempString," Status: %s", programmableWorker
+				->beeStatus);
+				setObjectInfoDisplay(&announcementsData->objectInfoDisplay, tempString, STATUS);
+			}
+			break;
+		case RETURNING:
+			programmableWorker->beeStatus = "Returning to hive";
+			if(programmableWorker->displayInfo){
+				char tempString[16];
+				sprintf(tempString," Status: %s", programmableWorker
+				->beeStatus);
+				setObjectInfoDisplay(&announcementsData->objectInfoDisplay, tempString, STATUS);
+			}
+			break;
+		case WANTING_TO_RETURN:
+			programmableWorker->beeStatus = "Wants to return";
+			if(programmableWorker->displayInfo){
+				char tempString[16];
+				sprintf(tempString," Status: %s", programmableWorker
+				->beeStatus);
+				setObjectInfoDisplay(&announcementsData->objectInfoDisplay, tempString, STATUS);
+			}
+			break;
+		case NODE_FOUND:
+			programmableWorker->beeStatus = "Found resource";
+			if(programmableWorker->displayInfo){
+				char tempString[16];
+				sprintf(tempString," Status: %s", programmableWorker
+				->beeStatus);
+				setObjectInfoDisplay(&announcementsData->objectInfoDisplay, tempString, STATUS);
+			}
+			break;
+		case IDLE:
+			programmableWorker->beeStatus = "Idle";
+			if(programmableWorker->displayInfo){
+				char tempString[16];
+				sprintf(tempString," Status: %s", programmableWorker
+				->beeStatus);
+				setObjectInfoDisplay(&announcementsData->objectInfoDisplay, tempString, STATUS);
+			}
+			break;
+		case BLANK:
+			programmableWorker->beeStatus = "Blank";
+			if(programmableWorker->displayInfo){
+				char tempString[16];
+				sprintf(tempString," Status: %s", programmableWorker
+				->beeStatus);
+				setObjectInfoDisplay(&announcementsData->objectInfoDisplay, tempString, STATUS);
+			}
+			break;		
+	}
+
 
 	if(gameObjectData->hive.winterCountdown < WINTER_THRESHOLD){
 		if(!isPointInRangeOf(getCenterOfRect(programmableWorker->rect), getCenterOfRect(gameObjectData->hive.rect),
 		HIVE_SHELTER_RADIUS)){
 
 			programmableWorker->cold_and_about_to_die++;
+			programmableWorker->beeStatus = "Freezing / dieing";
+			if(programmableWorker->displayInfo){
+				char tempString[16];
+				sprintf(tempString," Status: %s", programmableWorker
+				->beeStatus);
+				setObjectInfoDisplay(&announcementsData->objectInfoDisplay, tempString, STATUS);
+			}
 
 		}
 	}else{
+		if(isPointInRangeOf(getCenterOfRect(programmableWorker->rect), getCenterOfRect(gameObjectData->hive.rect),
+		HIVE_SHELTER_RADIUS)){
+			programmableWorker->insideHive = 1;
+			programmableWorker->beeStatus = "Inside hive";
+			if(programmableWorker->displayInfo){
+				char tempString[16];
+				sprintf(tempString," Status: %s", programmableWorker
+				->beeStatus);
+				setObjectInfoDisplay(&announcementsData->objectInfoDisplay, tempString, STATUS);
+			}
+
+		}else{
+			programmableWorker->insideHive = 0;	
+		}
 		programmableWorker->cold_and_about_to_die = 0;
 
 		if(!programmableWorker->wet_and_cant_fly){ /*programmable worker has not been caught in rain recently*/
@@ -361,8 +447,17 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
 						j++;
 					}
 				}
-				if(!isPointInRangeOf(getCenterOfRect(programmableWorker->rect), getCenterOfRect(gameObjectData->hive.rect),
-				HIVE_SHELTER_RADIUS)){
+				if(j == NUMBER_OF_TREES){
+					programmableWorker->beeStatus = "Sheltered / under tree";
+					
+					if(programmableWorker->displayInfo){
+						char tempString[16];
+						sprintf(tempString," Status: %s", programmableWorker
+						->beeStatus);
+						setObjectInfoDisplay(&announcementsData->objectInfoDisplay, tempString, STATUS);
+					}
+				}
+				if(programmableWorker->insideHive){
 					j++;
 				}
 				if(j == NUMBER_OF_TREES + 1 /* + 1 includes the hive as shelter*/){
@@ -371,11 +466,20 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
 			}
 
 			if(programmableWorker->stunned_after_sting){
-
+				programmableWorker->beeStatus = "Stunned after sting";
+					
+				if(programmableWorker->displayInfo){
+					char tempString[16];
+					sprintf(tempString," Status: %s", programmableWorker
+					->beeStatus);
+					setObjectInfoDisplay(&announcementsData->objectInfoDisplay, tempString, STATUS);
+				}
+				
 				programmableWorker->heading += (rand()%3)-1;
 
 				if(programmableWorker->stunned_after_sting++ > STUNNED_AFTER_STING_DURATION){
 					programmableWorker->stunned_after_sting = 0;
+	
 				}
 
 			}
@@ -464,8 +568,16 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
 		}
 		else{ /*programmable worker has been caught in rain and hasn't regained ability to fly yet*/
   		int flapChance;
+  		programmableWorker->beeStatus = "Wet, can't fly";
+  		if(programmableWorker->displayInfo){
+				char tempString[16];
+				sprintf(tempString," Status: %s", programmableWorker
+				->beeStatus);
+				setObjectInfoDisplay(&announcementsData->objectInfoDisplay, tempString, STATUS);
+		}
   		if(!(rand() % CHANCE_OF_REGAINING_FLIGHT)){
   			programmableWorker->wet_and_cant_fly = 0;
+
   		}
   		if((flapChance = rand() % 100)){
     		if(!(rand() % flapChance)){
@@ -485,6 +597,15 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
 		   programmableWorker->brain.foundNode = resourceNode;
 		 }
 	}
+}
+
+if(programmableWorker->cargo != 0){
+
+  		if(programmableWorker->displayInfo){
+				char *tempString = "has cargo";
+				sprintf(tempString,"%s, %s",programmableWorker->beeStatus , tempString);
+				setObjectInfoDisplay(&announcementsData->objectInfoDisplay, tempString, STATUS);
+		}
 }
 
 }
@@ -1288,7 +1409,7 @@ void objectInfoDisplay(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 				displayInfoAlreadySet = 1;
 				sprintf(displayString," BEE ");
 				setObjectInfoDisplay(&announcementsData->objectInfoDisplay, displayString, NAME);
-				sprintf(displayString," Status: ");
+				sprintf(displayString," Status: %s", worker->beeStatus);
 				setObjectInfoDisplay(&announcementsData->objectInfoDisplay, displayString, STATUS);
 				graphicsData->trackingMode = 1;
 			}else{
