@@ -1,10 +1,10 @@
-IfWorkerIdle
+IfIdle
 	primary = 2
 	secondary = 3
-SetWorkerHeadingRandomly
-IfWorkerOutsideBounds
+SetHeadingRandomly
+IfOutsideBounds
 	primary = 4
 	secondary = 5
-WorkerReturnToHive
-IfWorkerHasCargo
+ReturnToHive
+IfHasCargo
 	primary = 4

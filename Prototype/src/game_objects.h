@@ -75,6 +75,8 @@ struct ProgrammableWorker{
   int wet_and_cant_fly;
   int cold_and_about_to_die;
 
+  int flapTimer;
+
 
   int cargo;
 
@@ -163,7 +165,7 @@ struct GameObjectData{
 
 void killProgrammableWorker(GameObjectData *gameObjectData, ProgrammableWorker **programmableWorker);
 ProgrammableWorker *createProgrammableWorker(GameObjectData *gameObjectData);
-void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, AnnouncementsData *announcementsData ,int ticks);
+void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, AnnouncementsData *announcementsData, int ticks);
 void updateIceCreamPerson(GameObjectData *gameObjectData, int ticks);
 
 Hive createHive(void);

@@ -95,7 +95,10 @@ each call to updateProgrammableWorker*/
 
 #define CARRYING_FLOWER_INDEX_OFFSET 2
 #define CARRYING_ICECREAM_INDEX_OFFSET 4
+#define MS_BETWEEN_FLAPPING 60
 
+
+#define BENCHMARK_TEST 0
 
 #define X_SIZE_OF_WORKER 40
 #define Y_SIZE_OF_WORKER 40
@@ -117,7 +120,7 @@ each call to updateProgrammableWorker*/
 #define DEFAULT_MAXNODECOUNT 10
 #define TICKSPERWEATHER 30000
 #define SUN_LASTS_LONGER_FACTOR 5
-#define FRAME_TIME 20
+#define FRAME_TIME 15
 
 #define WINTER_COUNTDOWN_SPEED 0.001
 

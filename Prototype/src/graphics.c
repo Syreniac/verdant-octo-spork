@@ -67,8 +67,6 @@ void blitRainRandomly(GraphicsData *graphicsData){
 
   	SDL_GetWindowSize(graphicsData->window,&winRect.w, &winRect.h);
 
-	printf("winRect.w = %d  winRect.h = %d\n", winRect.w, winRect.h);
-
 	srcRect.w = RAIN_TILE_WIDTH;
 	srcRect.h = RAIN_TILE_HEIGHT;
 
@@ -144,9 +142,9 @@ void blitTiledBackground(GraphicsData *graphicsData, SDL_Texture *texture){
 
 		}
 	}
-	
+
 	rect.x = window_x;
-	
+
 	if((window_x - graphicsData->navigationOffset.x) > X_SIZE_OF_WORLD){
 		rect.y = 0;
 		rect.w = (window_x - graphicsData->navigationOffset.x) - X_SIZE_OF_WORLD;
@@ -156,7 +154,7 @@ void blitTiledBackground(GraphicsData *graphicsData, SDL_Texture *texture){
 		SDL_RenderFillRect(graphicsData->renderer, &rect);
 		graphicsData->navigationOffset.x+= ceil((float)rect.w/10.0);
 	}
-	
+
 	if((window_y - graphicsData->navigationOffset.y) > Y_SIZE_OF_WORLD){
 		rect.w = rect.x;
 		rect.x = 0;
@@ -173,10 +171,10 @@ SDL_Texture *loadTextureFromFile(char *file_name, GraphicsData *graphicsData, ch
 	SDL_Surface *image;
 	SDL_Texture *texture;
 
-	printf("loading texture file %s\n",file_name);
 	image = SDL_LoadBMP(file_name);
 	if(image == NULL){
-		printf("Image loading has failed: %s\n", SDL_GetError());
+		fprintf(stderr,"Image loading has failed: %s\n", SDL_GetError());
+		fflush(stderr);
 		assert(image != NULL);
 	}
 	if(toggleAlpha == 1){
@@ -184,7 +182,8 @@ SDL_Texture *loadTextureFromFile(char *file_name, GraphicsData *graphicsData, ch
 	}
 	texture = SDL_CreateTextureFromSurface(graphicsData->renderer, image);
 	if(texture == NULL){
-		printf("Texture conversion has failed: %s\n", SDL_GetError());
+		fprintf(stderr,"Texture conversion has failed: %s\n", SDL_GetError());
+		fflush(stderr);
 		assert(texture != NULL);
 	}
 	SDL_FreeSurface(image);
@@ -258,7 +257,6 @@ void renderFillRadius(GraphicsData *graphicsData, SDL_Point *point, double radiu
 
 void setNavigationOffset(GraphicsData *graphicsData, int x, int y){
 	int sx,sy;
-	printf("trying to set navigation offset to %d,%d\n",x,y);
 	SDL_GetWindowSize(graphicsData->window,&sx,&sy);
 	if(x + sx > X_SIZE_OF_WORLD){
 		x = X_SIZE_OF_WORLD - sx;
@@ -276,7 +274,6 @@ void setNavigationOffset(GraphicsData *graphicsData, int x, int y){
 	x = -x;
 	y = -y;
 
-	printf("actually set navigation offset to %d,%d\n",x,y);
 	graphicsData->navigationOffset.x = x;
 	graphicsData->navigationOffset.y = y;
 }

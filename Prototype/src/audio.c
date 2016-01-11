@@ -14,11 +14,9 @@ void loadMusic(char *music, int season, AudioData *audioData) {
 
 	if (pointer == NULL) {
 		audioData->music = newMusic;
-		printf("first music file loaded\n");
 	}
 
 	else {
-		printf("adding music file to end of linked-list\n");
 		while(pointer->next != NULL) {
 			pointer = pointer->next;
 		}
@@ -33,7 +31,6 @@ void playMusic(AudioData *audioData, int season) {
 	int i = 1 + rand() % audioData->seasonal_music_count[season];
 
 	if (active == NULL){
-		printf("No Music loaded\n");
 		exit(1);
 	}
 
@@ -89,11 +86,9 @@ void loadSoundEffect(char *sound, char *name, AudioData *audioData) {
 
 	if (pointer == NULL) {
 		audioData->soundEffect = newSoundEffect;
-		printf("first sound effect file loaded: SoundEffect->name = \"%s\"\n", newSoundEffect->name);
 	}
 
 	else {
-		printf("adding soundEffect file to end of linked-list: SoundEffect->name = \"%s\"\n", newSoundEffect->name);
 		while(pointer->next != NULL) {
 			pointer = pointer->next;
 		}
@@ -107,7 +102,6 @@ void playSoundEffect(int channel, AudioData *audioData, char* name) {
 	SoundEffect *active = audioData->soundEffect;
 
 	if (active == NULL){
-		printf("No matching sound effect loaded\n");
 		exit(1);
 	}
 
@@ -136,7 +130,6 @@ void fadeInChannel(int channel, AudioData *audioData, char* name) {
 	SoundEffect *active = audioData->soundEffect;
 
 	if (active == NULL){
-		printf("No matching sound effect loaded\n");
 		exit(1);
 	}
 

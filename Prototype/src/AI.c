@@ -45,29 +45,6 @@ int blockFunction_IfHasCargo(BlockFunctionArgs *arguments, ProgrammableWorker *p
 	return 2;
 }
 
-int blockFunction_Print(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
-  int i = 0;
- /* printf("PRINTING OUT BLOCK FUNCTION DATA\n");*/
-  while(i < arguments->numOfChars){
-      printf("%c",arguments->characters[i]);
-      i++;
-  }
- /* printf("\nINTEGERS\n");*/
-  i = 0;
-  while(i < arguments->numOfInts){
-    printf("%d ",arguments->integers[i]);
-    i++;
-  }
-  /*printf("\nFLOATS\n");*/
-  i=0;
-  while(i<arguments->numOfFloats){
-    printf("%f ",arguments->floats[i]);
-    i++;
-  }
- /* printf("------------------");*/
-  return(1);
-}
-
 int blockFunction_IfCargoGreaterThan(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
   if(programmableWorker->cargo > arguments->integers[0]){
     return(1);
@@ -301,8 +278,8 @@ blockFunction_WrappedFunction getBlockFunctionByName(char *blockFunctionName){
   if(strcmp(blockFunctionName,"IfReturning") == 0){
 	  return &blockFunction_IfReturning;
   }
-  printf("ERROR: Unrecognised function name: \"%s\".\n Substituting a print function.\n",blockFunctionName);
-  return &blockFunction_Print;
+  printf("ERROR: Unrecognised function name: \"%s\".\n Substituting a VOID function.\n",blockFunctionName);
+  return &blockFunction_Void;
 }
 
 int countCharsInString(char *string, char countChar){
@@ -392,12 +369,6 @@ BlockFunctionRoot makeBlockFunctionRootFromString(char *str, int numOfBlocks){
 		blockFunctionRoot.blockFunctions[blockFunctionRoot.numOfBlockFunctions-1] = createAIBlockFunctionFromTokens(&blockFunctionRoot,
 																													i,tokensToUse);
 	}
-	/*i = 0;
-	while(i < blockFunctionRoot.numOfBlockFunctions){
-		printf("%s\n",blockFunctionRoot.blockFunctions[i].name);
-		printf("%p\n",&blockFunctionRoot.blockFunctions[i]);
-		i++;
-	}*/
 	return blockFunctionRoot;
 }
 
@@ -422,6 +393,7 @@ BlockFunction createAIBlockFunctionFromTokens(BlockFunctionRoot *blockFunctionRo
 	while(i < numOfLinesToUse){
 		if(tokensToUse[i][0] != '\t'){
 			strcpy(blockFunction.name,tokensToUse[i]);
+      printf("making blockFunction: %s\n",blockFunction.name);
 			blockFunction.wrapped_function = getBlockFunctionByName(tokensToUse[i]);
 		}
 		else if(strncmp(tokensToUse[i],"\tprimary = ",10) == 0){
@@ -511,11 +483,9 @@ BlockFunction *testBlockFunctionRootForLoops(BlockFunction *toTest, BlockFunctio
     memcpy(testAgainstCopy,testAgainst,sizeof(BlockFunction*) * countToTestAgainst);
   }
   testAgainstCopy[countToTestAgainst] = toTest;
-  printf("testing block function %s\n",toTest->name);
   /* If the block function we're testing against is in this list, we've found something that loops on itself */
   while(i < countToTestAgainst){
     if(testAgainst[i] == toTest){
-      printf("uh, we found a copy\n");
       free(testAgainstCopy);
       return toTest;
     }
@@ -561,7 +531,6 @@ static void makeAIBlockTemplate(AIData *aiData, char name[50], int numOfArgument
     template->numOfArguments = 0;
   }
   template->next = NULL;
-  printf("prepared block template\n");
   if(previous == NULL){
     aiData->templates = template;
   }
@@ -589,7 +558,6 @@ AIData initAIData(void){
 		while(erroneousBlockFunction != &aiData.blockFunctionRoots[0].blockFunctions[i]){
 		  i++;
 		}
-		printf("dumping loaded AI File: Loop detected in function %d: \'%s\'",i,erroneousBlockFunction->name);
 		nullifyBlockFunctionRoot(&aiData.blockFunctionRoots[0]);
 	}
 	makeAIBlockTemplate(&aiData,"Void",1,arguments);

@@ -165,7 +165,7 @@ ProgrammableWorker *createProgrammableWorker(GameObjectData *gameObjectData){
 
 	programmableWorker->wet_and_cant_fly = 0;
 	programmableWorker->cold_and_about_to_die = 0;
-
+	programmableWorker->flapTimer = rand() % 100;
 
 
 
@@ -304,7 +304,11 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
 		programmableWorker->cold_and_about_to_die = 0;
 
 		if(!programmableWorker->wet_and_cant_fly){ /*programmable worker has not been caught in rain recently*/
-			programmableWorker->currentGraphicIndex = (programmableWorker->currentGraphicIndex + 1) % 2;
+			programmableWorker->flapTimer += ticks;
+			if(programmableWorker->flapTimer > MS_BETWEEN_FLAPPING){
+				programmableWorker->flapTimer -= MS_BETWEEN_FLAPPING;
+				programmableWorker->currentGraphicIndex = (programmableWorker->currentGraphicIndex + 1) % 2;
+			}
 
 			if(gameObjectData->weather.present_weather == Rain){
 				int i, j = 0;

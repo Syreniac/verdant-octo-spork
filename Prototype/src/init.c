@@ -113,14 +113,16 @@ int game_welcome_page(GraphicsData graphicsData, AudioData audioData){
 
    initData.uiData.root = UIElement_Create(0,0,win_x,win_y,2);
    UIConfigure_DisplayImage(initData.uiData.root,&initData.uiData.root->actions[0],graphicsData.mainMenuImage);
-   UIConfigure_InverseRect(initData.uiData.root,&initData.uiData.root->actions[1],0,0,0,0,0);
+   UIConfigure_PercOffsetRect(initData.uiData.root,&initData.uiData.root->actions[1],0.0,0.0,1.0,1.0,
+                                                                                     0,  0,  0,  0,  0);
 
-   element = UIElement_CreateByPercentage(0.56f,0.7f,0.35f,0.1f,win_x,win_y,3);
-   UIConfigure_Counter(element,&element->actions[0]);
+   element = UIElement_Create(0,0,0,0,4);
+   UIConfigure_Counter(element,&element->actions[0],NONE);
    UIConfigure_LeftClickRect(element,&element->actions[1]);
        UITrigger_Bind(&element->actions[1],&element->actions[0],-1,UITRIGGER_PLUSONE);
-   UIConfigure_PercRect(element,&element->actions[2],0.56f,0.7f,0.35f,0.1f);
-   //UIConfigure_FillRect(element,&element->actions[3],255,255,255);
+   UIConfigure_PercOffsetRect(element,&element->actions[2],0.55, 0.69, 0.9, 0.82,
+                                                           0,    0,  0,0,0);
+   UIConfigure_FillRect(element,&element->actions[3],255,255,255);
 
    UIElement_Reparent(element,initData.uiData.root);
 
@@ -130,7 +132,7 @@ int game_welcome_page(GraphicsData graphicsData, AudioData audioData){
 
     element2 = UIElement_Create((win_x - 30), win_y - 30, 30, 30, 2);
     UIConfigure_FillRect(element2, &element2->actions[0],228,240,3);
-	   UIConfigure_InverseRect(element2, &element2->actions[1],-30,-30,30,30,0);
+	   UIConfigure_PercPosition(element2, &element2->actions[1],1.0,1.0,-30,-30,0);
     UIElement_Reparent(element2,initData.uiData.root);
 	   UIRoot_Pack(&initData.uiData,&initData.graphicsData);
 
@@ -141,7 +143,7 @@ int game_welcome_page(GraphicsData graphicsData, AudioData audioData){
       /*UIRoot_Execute(&initData.uiData,UPDATE,0);*/
 
       paintBackground(&initData.graphicsData,0,200,100);
-      UIRoot_Execute(&initData.uiData,RENDER,0,&initData.graphicsData);
+      UIRoot_Execute(&initData.uiData,UPDATE,0);
 
       SDL_RenderPresent(initData.graphicsData.renderer);
     	while (SDL_PollEvent(&event))
@@ -152,13 +154,14 @@ int game_welcome_page(GraphicsData graphicsData, AudioData audioData){
   				case SDL_WINDOWEVENT:
   					switch (event.window.event){
   						case SDL_WINDOWEVENT_RESIZED:
-  							UIRoot_Execute(&initData.uiData,WINDOW_RESIZE,0,&event);
+  							UIRoot_Execute(&initData.uiData,WINDOW_RESIZE,0);
   							break;
   					}
             break;
     			/* Closing the Window will exit the program */
     			case SDL_MOUSEBUTTONDOWN:
-   				   UIRoot_ExecuteUpwards(&initData.uiData,LEFT_CLICK,1,&event);
+            printf("click\b\n");
+   				   UIRoot_ExecuteUpwards(&initData.uiData,LEFT_CLICK,1);
    				   break;
     			case SDL_QUIT:
     				exit(0);
