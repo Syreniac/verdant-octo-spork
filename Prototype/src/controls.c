@@ -65,6 +65,8 @@ int handleEvent(SDL_Event *event, GameObjectData *gameObjectData, UIData *uiData
 				keyup(controlsData,gameObjectData, uiData,event);
 				break;
 			case SDL_QUIT:
+				UIRoot_Destroy(&uiData);
+				SDL_Quit();
 				exit(0);
 				break;
 			case SDL_MOUSEWHEEL:

@@ -20,6 +20,7 @@ void gameOverInfo_clear(GameOverData *gameOverData){
 
 void announce_init(AnnouncementsData *announcementsData){
 		memset(announcementsData->announcement,'\0', 256);
+		announcementsData->timer = 0;
 }
 
 void gameOverInfo_init(GameOverData *gameOverData){

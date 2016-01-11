@@ -1,6 +1,7 @@
 #include "game.h"
 
 static void createGameUI(GameData *gameData);
+static void cleanUpGameData(GameData *gameData);
 
 int calculateDt(int previousRunTime){
   /* float previousRunTime = the milliseconds you want to calculate from
@@ -79,6 +80,8 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
   generateIceCreamPerson(&gameData.gameObjectData);
   generateDroppedIceCream(&gameData.gameObjectData);
 
+  memset(&gameData.gameObjectData.droppedIceCream->rect.x,256,sizeof(int));
+  memset(&gameData.gameObjectData.droppedIceCream->rect.y,256,sizeof(int));
 
   gameData.graphicsData.grassTexture = loadTextureFromFile("images/grass/grass4.bmp",&gameData.graphicsData, 0);
   gameData.graphicsData.treeStumpTexture = loadTextureFromFile("images/stump.bmp",&gameData.graphicsData, 1);
@@ -172,11 +175,17 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
     gameLoopReturn = gameLoop(&gameData);
   }
 
+  cleanUpGameData(&gameData);
+
   if(gameData.gameObjectData.gameRestart){
   	return(1);
   }else{
   	return(0);
   }
+}
+
+static void cleanUpGameData(GameData *gameData){
+  UIRoot_Destroy(&gameData->uiData);
 }
 
 static void createGameUI(GameData *gameData){
@@ -208,8 +217,8 @@ static void createGameUI(GameData *gameData){
   UIConfigure_DisplayString(element, &element->actions[2], "Hello",0,UISTRING_ALIGN_LEFT);
   UIConfigure_GetAnnouncement(element, &element->actions[3], &element->actions[2]);
   UIElement_Reparent(element,gameData->uiData.root);
-  
-  
+
+
     /*game Over box*/
   element = UIElement_Create(0,0,win_x/2,win_y/2,6);
   UIConfigure_Auto(element, &element->actions[0], GAME_OVER);
@@ -233,7 +242,7 @@ static void createGameUI(GameData *gameData){
   	UITrigger_Bind(&element->actions[4],&element->actions[1],2,1);
   UIConfigure_PercOffsetRect(element, &element->actions[5], 0.25, 0.25, 0.75,0.75, 0,0,0,0,0);
   UIElement_Reparent(element,gameData->uiData.root);
-  
+
     /*gameOverInformation*/
   element = UIElement_Create(0,0,200,25,7);
   UIConfigure_Auto(element, &element->actions[0], GAME_OVER);
@@ -258,10 +267,10 @@ static void createGameUI(GameData *gameData){
    UIConfigure_PercPosition(element, &element->actions[5],0.5,1.0,-100,-315,0);
   UIConfigure_GetGameOverString(element, &element->actions[6], &element->actions[3]);
   UIElement_Reparent(element,gameData->uiData.root);
-  
 
-  
-  
+
+
+
     /*gameOverInformation*/
  /* element = UIElement_Create(0,0,200,25,4);
   UIConfigure_FillAndBorderRect(element,&element->actions[0],255,255,255,255,255,255);
@@ -269,7 +278,7 @@ static void createGameUI(GameData *gameData){
   UIConfigure_DisplayString(element, &element->actions[2], "Hello",0,UISTRING_ALIGN_LEFT);
   UIConfigure_GetGameOverString(element, &element->actions[3], &element->actions[2]);
   UIElement_Reparent(element,gameData->uiData.root);*/
- 
+
 
  /*press enter to restart (part of game over box)*/
    element = UIElement_Create(0,0,200,25,6);
@@ -578,6 +587,7 @@ int gameLoop(GameData *gameData){
   /* delta_t is the time in milliseconds elapsed since the last time this
      function ran */
   SDL_Event event;
+  int continuing = 1;
 
   #if BENCHMARK_TEST==1
   int testMarker = 0;
@@ -601,41 +611,28 @@ int gameLoop(GameData *gameData){
   if(!gameData->graphicsData.trackingMode){
   	panScreen(&gameData->graphicsData, &gameData->controlsData, gameData->delta);
   }
-  #if BENCHMARK_TEST==1
-  printf("t @ benchmark %d: %d\n", testMarker++,SDL_GetTicks() - gameData->gameRunTime);
-  #endif
 
   if(SDL_RenderClear(gameData->graphicsData.renderer) == -1){
 	   printf("Error clearing renderer: %s\n", SDL_GetError());
   }
   paintBackground(&gameData->graphicsData,0,200,100);
-  #if BENCHMARK_TEST==1
-  printf("t @ benchmark %d: %d\n", testMarker++,SDL_GetTicks() - gameData->gameRunTime);
-  #endif
 
   updateGameObjects(&gameData->gameObjectData, &gameData->graphicsData, &gameData->announcementsData, gameData->delta);
   UIRoot_Execute(&gameData->uiData,UPDATE,0);
   runAI(&gameData->aiData,&gameData->gameObjectData);
 
-  #if BENCHMARK_TEST==1
-  printf("t @ benchmark %d: %d\n", testMarker++,SDL_GetTicks() - gameData->gameRunTime);
-  #endif
-
   SDL_RenderPresent(gameData->graphicsData.renderer);
   announce_update(&gameData->announcementsData, gameData->delta);
 
-  #if BENCHMARK_TEST==1
-  printf("t @ benchmark %d: %d\n", testMarker++,SDL_GetTicks() - gameData->gameRunTime);
-  #endif
-
   while (SDL_PollEvent(&event)){
-	   handleEvent(&event,&gameData->gameObjectData,&gameData->uiData,&gameData->controlsData, &gameData->graphicsData);
+	  handleEvent(&event,&gameData->gameObjectData,&gameData->uiData,&gameData->controlsData, &gameData->graphicsData);
   }
   if (Mix_Playing(1) == 0) {
  	  playMusic(&gameData->audioData,1);
   }
 
   if(gameData->gameObjectData.gameOver){
+
   	  if(gameData->gameObjectData.gameOverCause == STARVATION){
   		    gameData->gameObjectData.hive.flowers_collected = 0;
   	  }
@@ -646,7 +643,7 @@ int gameLoop(GameData *gameData){
 	      SDL_PushEvent(&gameOverEvent);
   	  }
    	  while (SDL_PollEvent(&event)){
-		      handleEvent(&event,&gameData->gameObjectData,&gameData->uiData,&gameData->controlsData, &gameData->graphicsData);
+		      continuing = continuing || handleEvent(&event,&gameData->gameObjectData,&gameData->uiData,&gameData->controlsData, &gameData->graphicsData);
   	  }
 
   }
@@ -656,9 +653,6 @@ int gameLoop(GameData *gameData){
   if (Mix_Playing(1) == 0) {
  	  playMusic(&gameData->audioData,1);
   }
-  #if BENCHMARK_TEST==1
-  printf("t @ benchmark %d: %d\n", testMarker++,SDL_GetTicks() - gameData->gameRunTime);
-  #endif
 
   UIRoot_ExecuteUpwards(&gameData->uiData,DISPOSAL,0);
 

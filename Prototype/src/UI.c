@@ -1440,6 +1440,7 @@ int UIAction_DisplayNumber(UI_Action *action, UIData *uiData){
 		SDL_DestroyTexture(action->texture);
 		temp = TTF_RenderText_Blended(graphicsData->fonts[action->fontID], action->numberAsString, colour);
 		action->texture = SDL_CreateTextureFromSurface(graphicsData->renderer,temp);
+		SDL_FreeSurface(temp);
 		TTF_SizeText(graphicsData->fonts[action->fontID],action->numberAsString,&w,&h);
 		action->alignOffset = w;
 
@@ -1524,6 +1525,7 @@ int UIAction_DisplayString(UI_Action *action, UIData *uiData){
 		SDL_DestroyTexture(action->texture);
 		temp = TTF_RenderText_Blended(graphicsData->fonts[action->fontID],action->currentString,colour);
 		action->texture = SDL_CreateTextureFromSurface(graphicsData->renderer,temp);
+		SDL_FreeSurface(temp);
 		TTF_SizeText(graphicsData->fonts[action->fontID],action->currentString,&w,&h);
 		action->alignOffset = w;
 	}
@@ -2531,6 +2533,7 @@ void UIElement_Free(UI_Element *element){
 	while(root->parent != NULL){
 		root = root->parent;
 	}
+	UIElement_RemoveExposedData(element);
 	UIElement_Deparent(element);
 	/* Clean out all references to this element */
 	UIElement_DeExternalise(root,element);

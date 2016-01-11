@@ -172,9 +172,6 @@ struct GameObjectData{
   AudioData audioData;
 };
 
-
-
-
 void killAllBees(ProgrammableWorker **programmableWorker);
 void killProgrammableWorker(GameObjectData *gameObjectData, ProgrammableWorker **programmableWorker);
 ProgrammableWorker *createProgrammableWorker(GameObjectData *gameObjectData);

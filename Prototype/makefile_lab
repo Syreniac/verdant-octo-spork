@@ -1,6 +1,6 @@
 # Please run the clean command detailed at the bottom, before running: make -f makefile_lab
 
-CFLAGS = -pedantic -Wall -Wextra -std=c99 -Wno-unused-parameter
+CFLAGS = -pedantic -Wall -Wextra -std=c99 -Wno-unused-parameter -O3 -g
 TTF_FLAGS = -Ilibraries_Lab/SDL_ttf/include -Llibraries_Lab/SDL_ttf/lib
 TEST_FLAGS = -I/usr/include -L/usr/lib64 -Wl,-rpath,/usr/lib64
 IMAGE_FLAGS = -Ilibraries_Lab/SDL_image/include -Llibraries_Lab/SDL_image/lib
@@ -12,7 +12,7 @@ DELETE_RECURSIVE = rm -r
 # List all the files here
 #Add a /. after assets to copy only the contents inside, rather than the folder too.
 ASSETS_CONTENTS = assets/*
-COMMON_FILES = init.o game.o world_generation.o game_objects.o AI.o UI.o generic.o controls.o graphics.o audio.o
+COMMON_FILES = init.o game.o world_generation.o game_objects.o AI.o UI.o generic.o controls.o graphics.o audio.o announcements.o
 SOURCE_FILES = main.o $(COMMON_FILES)
 ALLTEST_FILES = all.test.o $(COMMON_FILES)
 BIN = bin
