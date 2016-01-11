@@ -106,6 +106,7 @@ each call to updateProgrammableWorker*/
 
 #define WORKER_PERCEPTION_RADIUS 250
 #define COLD_DEATH_THRESHOLD 200
+#define STUNNED_AFTER_STING_DURATION (MELT_TIME_THRESHOLD + 200)
 
 
 #define X_SIZE_OF_HIVE 64

@@ -74,6 +74,7 @@ struct ProgrammableWorker{
 
   int wet_and_cant_fly;
   int cold_and_about_to_die;
+  int stunned_after_sting;
 
   int flapTimer;
 
