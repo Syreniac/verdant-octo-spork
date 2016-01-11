@@ -38,6 +38,7 @@ struct UIData{
 	GameObjectData *gameObjectData;
 	AIData *aiData;
 	AnnouncementsData *announcementsData;
+	GameOverData *gameOverData;
 	SDL_Event *event;
 	int *ticks;
 };
@@ -142,6 +143,7 @@ void UIConfigure_PercOffsetRect(UI_Element *element, UI_Action *action, float xP
 																																			  int num_of_companions, ...);
 void UIConfigure_ToggleInteger(UI_Element *element, UI_Action *action, int* target);
 void UIConfigure_GetAnnouncement(UI_Element *element, UI_Action *action, UI_Action *placeToPut);
+void UIConfigure_GetGameOverString(UI_Element *element, UI_Action *action, UI_Action *placeToPut);
 void UIConfigure_FillAndBorderRect(UI_Element *element, UI_Action *action, int fr, int fg, int fb, int br, int bg, int bb);
 void UIConfigure_PassThrough(UI_Element *element, UI_Action *action, enum Response response, int num_of_companions, ...);
 void UIConfigure_SlideWithMouseWheel(UI_Element *element, UI_Action *action, int x, int y, int num_of_companions,...);

@@ -531,6 +531,27 @@ void UIConfigure_GetAnnouncement(UI_Element *element, UI_Action *action, UI_Acti
 	action->displayStringAction = placeToPut;
 }
 
+int UIAction_GetGameOverString(UI_Action *action, UIData *uiData){
+		GameOverData* gameOverData;
+		va_list vargs;
+		gameOverData = uiData->gameOverData;
+		if(action->status != 0){
+			action->displayStringAction->companionChangeDisplayString = realloc(action->displayStringAction->companionChangeDisplayString,
+				                                                                  strlen(gameOverData->gameOverString)+1);
+			strcpy(action->displayStringAction->companionChangeDisplayString, gameOverData->gameOverString);
+		}
+		return 0;
+}
+
+void UIConfigure_GetGameOverString(UI_Element *element, UI_Action *action, UI_Action *placeToPut){
+	UIAction_Init(element,action);
+	action->response = UPDATE;
+	action->function = UIAction_GetGameOverString;
+	action->companions = calloc(1,sizeof(void*));
+	action->num_of_companions = 1;
+	action->displayStringAction = placeToPut;
+}
+
 #undef companionChangeDisplayString
 #undef displayStringAction
 

@@ -832,6 +832,7 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 	 static int paa = 0;
 	int i, j;
 	ProgrammableWorker *programmableWorker;
+		char GOCause[256];
 
 
 	if(gameObjectData->pause_status){
@@ -880,9 +881,11 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 				}
 
 
-				if(gameObjectData->hive.flowers_collected <= 0){
+				if(gameObjectData->hive.flowers_collected <= 0 && gameObjectData->hive.bees_taking_shelter){
 					gameObjectData->gameOver = 1;
 					gameObjectData->gameOverCause = STARVATION;
+					sprintf(GOCause,"Your bees ran out of food over winter and died!");
+					setGameOverInfo(&announcementsData->gameOverData, GOCause);
 					printf("gameover by starvation\n");
 					killAllBees(&gameObjectData->first_programmable_worker);
 					return;
@@ -1021,6 +1024,8 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 			}else{
 				gameObjectData->gameOver = 1;
 				gameObjectData->gameOverCause = COLD;
+				sprintf(GOCause,"None of your bees took shelter in the hive over winter!");
+				setGameOverInfo(&announcementsData->gameOverData, GOCause);
 				printf("gameOver, all bees die from the cold\n");
 				free(gameObjectData->first_programmable_worker);
 				gameObjectData->first_programmable_worker = NULL;

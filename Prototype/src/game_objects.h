@@ -163,6 +163,7 @@ struct GameObjectData{
   int programmableWorkerCount;
   int pause_status;
   char announcement[256];
+  char gameOverString[256];
   int gameOver;
   int gameOverBoxVisible;
   gameOverCause gameOverCause;
@@ -170,6 +171,8 @@ struct GameObjectData{
   int gameRestart;
   AudioData audioData;
 };
+
+
 
 
 void killAllBees(ProgrammableWorker **programmableWorker);

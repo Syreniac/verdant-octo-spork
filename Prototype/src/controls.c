@@ -106,7 +106,9 @@ void keydown(ControlsData *controlsData, GameObjectData *gameObjectData, Graphic
 			}
             break;
 		case (SDL_SCANCODE_P):
+
             gameObjectData->pause_status = 1 - gameObjectData->pause_status; /* 1 for pause, 0 for go on */
+
 			UIRoot_Execute(uiData,RESPONSE_PAUSE,0);
             break;
 		case (SDL_SCANCODE_Q):
