@@ -45,6 +45,7 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
   gameData.gameObjectData.gameOver = 0;
   gameData.gameObjectData.gameOverBoxVisible = 0;
   gameData.gameObjectData.gameOverEventNum = SDL_RegisterEvents(1);
+  gameData.gameObjectData.objectDisplayEventNum = SDL_RegisterEvents(1);
   gameData.gameObjectData.gameRestart = 0;
 
   initControlData(&gameData.controlsData);
@@ -164,12 +165,14 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
   gameData.uiData.aiData = &gameData.aiData;
   gameData.uiData.announcementsData = &gameData.announcementsData;
   gameData.uiData.gameOverData = &gameData.announcementsData.gameOverData;
+  gameData.uiData.objectInfoDisplay = &gameData.announcementsData.objectInfoDisplay;
   gameData.uiData.ticks = &gameData.delta;
   createGameUI(&gameData);
 
   /* Then run the gameLoop until it returns 0 or exits */
   announce_init(&gameData.announcementsData);
   gameOverInfo_init(&gameData.announcementsData.gameOverData);
+  objectInfoDisplay_init(&gameData.announcementsData.objectInfoDisplay);
   playMusic(&gameData.audioData,1);
 
   while(gameLoopReturn){
@@ -238,6 +241,34 @@ static void createGameUI(GameData *gameData){
   	UITrigger_Bind(&element->actions[4],&element->actions[1],2,1);
   UIConfigure_PercOffsetRect(element, &element->actions[5], 0.25, 0.25, 0.75,0.75, 0,0,0,0,0);
   UIElement_Reparent(element,gameData->uiData.root);
+
+  
+  
+  
+      /*objectInfoDisplay box*/
+  element = UIElement_Create(0,0,70,70,7);
+  UIConfigure_Auto(element, &element->actions[0], OBJECT_DISPLAY);
+    UITrigger_Bind(&element->actions[0],&element->actions[0],-1,0);
+    UITrigger_Bind(&element->actions[0],&element->actions[1],0,2);
+    UITrigger_Bind(&element->actions[0],&element->actions[2],-1,0);
+    UITrigger_Bind(&element->actions[0],&element->actions[3],-1,0);
+	  quickSetStatus(&element->actions[0],0);
+  UIConfigure_Auto(element, &element->actions[1], OBJECT_DISPLAY);
+    UITrigger_Bind(&element->actions[1],&element->actions[0],0,2);
+    UITrigger_Bind(&element->actions[1],&element->actions[1],1,0);
+    UITrigger_Bind(&element->actions[1],&element->actions[2],0,1);
+    UITrigger_Bind(&element->actions[1],&element->actions[3],0,1);
+  	quickSetStatus(&element->actions[1],1);
+  UIConfigure_FillAndBorderRect(element,&element->actions[2],248,221,35,255,255,255);
+	  quickSetStatus(&element->actions[2],0);
+  UIConfigure_DisplayString(element, &element->actions[3],"InfoDisplay",0, UISTRING_ALIGN_LEFT);
+	  quickSetStatus(&element->actions[3],0);
+  UIConfigure_Auto(element,&element->actions[4],UPDATE);
+  	UITrigger_Bind(&element->actions[4],&element->actions[0],2,1);
+  	UITrigger_Bind(&element->actions[4],&element->actions[1],2,1);
+  UIConfigure_GetInfoDisplayString(element, &element->actions[6], &element->actions[3]);
+  UIElement_Reparent(element,gameData->uiData.root);
+  
 
     /*gameOverInformation*/
   element = UIElement_Create(0,0,200,25,7);

@@ -290,7 +290,7 @@ Tree createTree(Hive *hive, int forceX, int forceY){
 	tree.rect.x = forceX;
 	tree.rect.y = forceY;
 	/*if tree is too close to hive, rellocate*/
-	while(isPointInRangeOf(getCenterOfRect(tree.rect), getCenterOfRect(hive->rect), 1)){
+	while(isPointInRangeOf(getCenterOfRect(tree.rect), getCenterOfRect(hive->rect), 100)){
 
 		if(rand()%2){
 			tree.rect.x += SIZE_OF_TREE;
@@ -1227,13 +1227,16 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 
 }
 
-void objectInfoDisplay(GameObjectData *gameObjectData, GraphicsData *graphicsData, SDL_MouseButtonEvent *mbEvent)
+void objectInfoDisplay(GameObjectData *gameObjectData, GraphicsData *graphicsData, AnnouncementsData *announcementsData, SDL_MouseButtonEvent *mbEvent)
 {
+	static int objectDisplayShowing = 0;
+    SDL_Event objectInfoDisplayEvent;
 	ProgrammableWorker *worker;
 	SDL_Point point;
 	int displayInfoAlreadySet = 0, i;
 	point.x = mbEvent->x - graphicsData->navigationOffset.x;
 	point.y = mbEvent->y - graphicsData->navigationOffset.y;
+	char displayName[10];
 
 	graphicsData->trackingMode = 0;
 
@@ -1242,6 +1245,8 @@ void objectInfoDisplay(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 			if(!displayInfoAlreadySet){
 				gameObjectData->tree[i].displayInfo = 1;
 				displayInfoAlreadySet = 1;
+				sprintf(displayName,"Tree: ");
+				setObjectInfoDisplay(&announcementsData->objectInfoDisplay, displayName);
 			}else{
 				gameObjectData->tree[i].displayInfo = 0;
 			}
@@ -1258,6 +1263,8 @@ void objectInfoDisplay(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 				worker->xRenderPosWhenSelected = worker->rect.x + graphicsData->navigationOffset.x;
 				worker->yRenderPosWhenSelected = worker->rect.y + graphicsData->navigationOffset.y;
 				displayInfoAlreadySet = 1;
+				sprintf(displayName,"Bee: ");
+				setObjectInfoDisplay(&announcementsData->objectInfoDisplay, displayName);
 				graphicsData->trackingMode = 1;
 			}else{
 				worker->displayInfo = 0;
@@ -1271,6 +1278,8 @@ void objectInfoDisplay(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 		if(!displayInfoAlreadySet){
 			gameObjectData->iceCreamPerson->displayInfo = 1;
 			displayInfoAlreadySet = 1;
+			sprintf(displayName,"Garry: ");
+			setObjectInfoDisplay(&announcementsData->objectInfoDisplay, displayName);
 		}else{
 			gameObjectData->iceCreamPerson->displayInfo = 0;
 		}
@@ -1282,6 +1291,8 @@ void objectInfoDisplay(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 		if(!displayInfoAlreadySet){
 			gameObjectData->droppedIceCream->displayInfo = 1;
 			displayInfoAlreadySet = 1;
+			sprintf(displayName,"Icecream: ");
+			setObjectInfoDisplay(&announcementsData->objectInfoDisplay, displayName);
 		}else{
 			gameObjectData->droppedIceCream->displayInfo = 0;
 		}
@@ -1299,6 +1310,9 @@ void objectInfoDisplay(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 				if(!displayInfoAlreadySet){
 					gameObjectData->resourceNodeSpawners[i].resourceNodes[j].displayInfo = 1;
 					displayInfoAlreadySet = 1;
+					sprintf(displayName,"Flower: ");
+					setObjectInfoDisplay(&announcementsData->objectInfoDisplay, displayName);
+
 				}else{
 					gameObjectData->resourceNodeSpawners[i].resourceNodes[j].displayInfo = 0;
 				}
@@ -1315,6 +1329,8 @@ void objectInfoDisplay(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 		if(!displayInfoAlreadySet){
 			gameObjectData->hive.displayInfo = 1;
 			displayInfoAlreadySet = 1;
+			sprintf(displayName,"Hive: ");
+			setObjectInfoDisplay(&announcementsData->objectInfoDisplay, displayName);
 		}else{
 			gameObjectData->hive.displayInfo = 0;
 		}
@@ -1322,6 +1338,17 @@ void objectInfoDisplay(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 		gameObjectData->hive.displayInfo = 0;
 	}
 
-
-
+	if(displayInfoAlreadySet){
+		if(!objectDisplayShowing){
+			objectDisplayShowing = 1;
+			objectInfoDisplayEvent.type = gameObjectData->objectDisplayEventNum;
+			SDL_PushEvent(&objectInfoDisplayEvent);
+		}
+	}else{
+		if(objectDisplayShowing){
+			objectDisplayShowing = 0;
+			objectInfoDisplayEvent.type = gameObjectData->objectDisplayEventNum;
+			SDL_PushEvent(&objectInfoDisplayEvent);		
+		}
+	}
 }
