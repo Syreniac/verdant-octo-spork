@@ -46,6 +46,7 @@ int UIAction_ToggleInteger(UI_Action *action, UIData *uiData);
 UI_Element *makeStartBlock(int x_offset, int y_offset, UI_Element *parent){
 	UI_Element *element;
 	element = UIElement_Create(x_offset,y_offset,200,50,9);
+	printf("start block @ %p\n",element);
 	UIConfigure_FillAndBorderRect(element,&element->actions[0],248,221,35,0,0,0);
 	UIConfigure_ShrinkFitToParent(element, &element->actions[1]);
 	UIConfigure_DisplayString(element, &element->actions[2],"START",0,UISTRING_ALIGN_CENTER);
@@ -79,6 +80,7 @@ UI_Element *makeStartBlock(int x_offset, int y_offset, UI_Element *parent){
 
 UI_Element *makeAIResetButton(int x_offset, int y_offset, UI_Element *parent){
 	UI_Element *element;
+	printf("AI reset button @ %p\n",element);
 	element = UIElement_Create(x_offset,y_offset,200,50,6);
 	UIConfigure_FillAndBorderRect(element,&element->actions[0],74,74,74,0,0,0);
 	UIConfigure_ShrinkFitToParent(element,&element->actions[1]);
@@ -99,10 +101,12 @@ UI_Element *makeAITemplateScrollList(int x_offset, int y_offset, AIData *aiData,
 	int y_offset2 = 0;
 	/* Set up the main panel */
 	element = UIElement_Create(x_offset, y_offset, 220, 360,6);
+	printf("scroll bar panel @ %p\n",element);
 	UIConfigure_FillAndBorderRect(element,&element->actions[0],185,122,87,0,0,0);
 	UIConfigure_ShrinkFitToParent(element,&element->actions[1]);
 	/* Set up the slider bar */
 		element2 = UIElement_Create(x_offset+200,y_offset,21,20,7);
+		printf("scroll bar slider @ %p\n",element2);
 		UIConfigure_FillAndBorderRect(element2,&element2->actions[0],249,252,124,0,0,0);
 		UIConfigure_ShrinkFitToParent(element2,&element2->actions[1]);
 		UIConfigure_DraggableVerticalOverride(element2,&element2->actions[2],1,&element2->actions[1]);
@@ -122,6 +126,7 @@ UI_Element *makeAITemplateScrollList(int x_offset, int y_offset, AIData *aiData,
 	/* Set up the options */
 	while(template!=NULL){
 		element2 = UIElement_Create(x_offset, y_offset + y_offset2, 200,50,6);
+		printf("block template @ %p\n",element2);
 		UIConfigure_FillAndBorderRect(element2,&element2->actions[0],248,221,35,0,0,0);
 		UIConfigure_ShrinkFitToParentWithYShift(element2,&element2->actions[1],&element->actions[3]);
 		UIConfigure_DisplayString(element2,&element2->actions[2],template->name,0,UISTRING_ALIGN_CENTER);
@@ -142,6 +147,7 @@ UI_Element *makeAITemplateScrollList(int x_offset, int y_offset, AIData *aiData,
 UI_Element *makeAIBlock(int x_offset, int y_offset, char *aiString, UI_Element *parent){
 	UI_Element *element2;
 	element2 = UIElement_Create(x_offset,y_offset,200,50,19);
+	printf("AI block made @ %p\n",element2);
 	UIConfigure_FillAndBorderRect(element2,&element2->actions[0],248,221,35,0,0,0);
 	UIConfigure_ShrinkFitToParent(element2,&element2->actions[1]);
 	UIConfigure_RightClickRect(element2, &element2->actions[2]);
@@ -2565,7 +2571,7 @@ void UIElement_Free(UI_Element *element){
 
 static void UIAction_Free(UI_Action *action){
 	int i = 0;
-
+	printf("freeing action %p\n",action);
 	while(action->triggers!=NULL){
 		UITrigger_Destroy(action,action->triggers);
 	}
@@ -2650,19 +2656,21 @@ static void UIElement_DeExternalise(UI_Element *root, UI_Element *external){
 	int i = 0;
 	UI_Trigger *trigger;
 	UI_Trigger *trigger2;
-	while(i < root->num_of_actions){
-		if(root->actions[i].external == external){
-			root->actions[i].external = NULL;
-			trigger = root->actions[i].triggers;
-			while(trigger != NULL){
-				trigger2 = trigger->next;
-				if(trigger->action->element == external){
-					UITrigger_Destroy(&root->actions[i],trigger);
+	if(root != external){
+		while(i < root->num_of_actions){
+			if(root->actions[i].external == external){
+				root->actions[i].external = NULL;
+				trigger = root->actions[i].triggers;
+				while(trigger != NULL){
+					trigger2 = trigger->next;
+					if(trigger->action->element == external){
+						trigger->action = NULL;
+					}
+					trigger = trigger2;
 				}
-				trigger = trigger2;
 			}
+			i++;
 		}
-		i++;
 	}
 	root = root->child;
 	/* Suddenly, recursion */
@@ -2754,7 +2762,12 @@ void UIRoot_Execute(UIData *uiData, enum Response response, int stopAtFirst){
 	while(front != back){
 		queue_element = queue[front];
 		front = (front + 1) % 255;
-		shouldStop = UIElement_Execute(queue_element,uiData,response);
+		if(response != DEBUG){
+			shouldStop = UIElement_Execute(queue_element,uiData,response);
+		}
+		else{
+			UIElement_Debug(queue_element);
+		}
 		if(shouldStop && stopAtFirst){
 			break;
 		}
@@ -2889,4 +2902,12 @@ void initUIData(UIData *uiData){
 void quickSetStatus(UI_Action *action, int status){
 	action->new_status = status;
 	action->status = 0;
+}
+
+void UIElement_Debug(UI_Element *element){
+	int i = 0;
+	while(i < element->num_of_actions){
+		assert(element->actions[i].function != NULL);
+		i++;
+	}
 }

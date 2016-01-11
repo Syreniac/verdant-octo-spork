@@ -614,7 +614,7 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
 if(programmableWorker->cargo != 0){
 
   		if(programmableWorker->displayInfo){
-				sprintf(tempString,"%s, %s",programmableWorker->beeStatus , "& has cargo");
+				sprintf(tempString,"%s %s",programmableWorker->beeStatus , "& has cargo");
 				setObjectInfoDisplay(&announcementsData->objectInfoDisplay, tempString, STATUS);
 		}
 }

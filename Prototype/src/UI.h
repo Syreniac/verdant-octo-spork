@@ -16,7 +16,8 @@ enum Response {NONE = 0,										/* 2 */
 				       MOUSEWHEEL,
                GAME_OVER,
                FREED,
-               OBJECT_DISPLAY};
+               OBJECT_DISPLAY,
+               DEBUG};
 
 enum UIDataTypes{UI_NULL,
 				 UI_INT,
@@ -175,3 +176,4 @@ UI_Element *makeAIResetButton(int x_offset, int y_offset, UI_Element *parent);
 UI_Element *makeAITemplateScrollList(int x_offset, int y_offset, AIData *aiData, UI_Element *parent, UI_Element *blockHolder);
 void initUIData(UIData *uiData);
 void quickSetStatus(UI_Action *action, int status);
+void UIElement_Debug(UI_Element *element);

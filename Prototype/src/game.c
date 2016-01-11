@@ -211,19 +211,19 @@ static void createGameUI(GameData *gameData){
   SDL_GetCurrentDisplayMode(0, &dm);
 
   /* top information bar */
-  element = UIElement_Create(0,0,dm.w,31,4);
+  element = UIElement_Create(0,0,dm.w,31,3);
+  printf("top information bar is %p\n",element);
   UIConfigure_FillAndBorderRect(element,&element->actions[0],248,221,35,0,0,0);
 
-  UIConfigure_DisplayString(element, &element->actions[2], " ",0,UISTRING_ALIGN_LEFT);
+  UIConfigure_DisplayString(element, &element->actions[1], " ",0,UISTRING_ALIGN_LEFT);
 
-  UIConfigure_DisplayString(element, &element->actions[2], " ",0,UISTRING_ALIGN_LEFT);
-
-  UIConfigure_GetAnnouncement(element, &element->actions[3], &element->actions[2]);
+  UIConfigure_GetAnnouncement(element, &element->actions[2], &element->actions[1]);
   UIElement_Reparent(element,gameData->uiData.root);
 
 
     /*game Over box*/
   element = UIElement_Create(0,0,win_x/2,win_y/2,6);
+  printf("game over box is %p\n",element);
   UIConfigure_Auto(element, &element->actions[0], GAME_OVER);
     UITrigger_Bind(&element->actions[0],&element->actions[0],-1,0);
     UITrigger_Bind(&element->actions[0],&element->actions[1],0,2);
@@ -250,7 +250,8 @@ static void createGameUI(GameData *gameData){
 
 
       /*objectInfoDisplay box*/
-  element = UIElement_Create(0,31,250,52,7);
+  element = UIElement_Create(0,31,250,52,6);
+  printf("object info display box is %p\n",element);
   UIConfigure_Auto(element, &element->actions[0], OBJECT_DISPLAY);
     UITrigger_Bind(&element->actions[0],&element->actions[0],-1,0);
     UITrigger_Bind(&element->actions[0],&element->actions[1],0,2);
@@ -270,10 +271,11 @@ static void createGameUI(GameData *gameData){
   UIConfigure_Auto(element,&element->actions[4],UPDATE);
   	UITrigger_Bind(&element->actions[4],&element->actions[0],2,1);
   	UITrigger_Bind(&element->actions[4],&element->actions[1],2,1);
-  UIConfigure_GetInfoDisplayString(element, &element->actions[6], &element->actions[3]);
+  UIConfigure_GetInfoDisplayString(element, &element->actions[5], &element->actions[3]);
   UIElement_Reparent(element,gameData->uiData.root);
         /*objectInfoDisplay box - status*/
-  element = UIElement_Create(1,51,248,31,7);
+  element = UIElement_Create(1,51,248,31,6);
+  printf("object info display box status label is %p\n",element);
   UIConfigure_Auto(element, &element->actions[0], OBJECT_DISPLAY);
     UITrigger_Bind(&element->actions[0],&element->actions[0],-1,0);
     UITrigger_Bind(&element->actions[0],&element->actions[1],0,2);
@@ -293,12 +295,13 @@ static void createGameUI(GameData *gameData){
   UIConfigure_Auto(element,&element->actions[4],UPDATE);
   	UITrigger_Bind(&element->actions[4],&element->actions[0],2,1);
   	UITrigger_Bind(&element->actions[4],&element->actions[1],2,1);
-  UIConfigure_GetObjectStatusString(element, &element->actions[6], &element->actions[3]);
+  UIConfigure_GetObjectStatusString(element, &element->actions[5], &element->actions[3]);
   UIElement_Reparent(element,gameData->uiData.root);
 
 
     /*gameOverInformation*/
   element = UIElement_Create(0,0,200,25,7);
+  printf("game over information is %p\n",element);
   UIConfigure_Auto(element, &element->actions[0], GAME_OVER);
     UITrigger_Bind(&element->actions[0],&element->actions[0],-1,0);
     UITrigger_Bind(&element->actions[0],&element->actions[1],0,2);
@@ -322,30 +325,6 @@ static void createGameUI(GameData *gameData){
   UIConfigure_GetGameOverString(element, &element->actions[6], &element->actions[3]);
   UIElement_Reparent(element,gameData->uiData.root);
 
-  element = UIElement_Create(0,0,200,25,7);
-  UIConfigure_Auto(element, &element->actions[0], GAME_OVER);
-    UITrigger_Bind(&element->actions[0],&element->actions[0],-1,0);
-    UITrigger_Bind(&element->actions[0],&element->actions[1],0,2);
-    UITrigger_Bind(&element->actions[0],&element->actions[2],-1,0);
-    UITrigger_Bind(&element->actions[0],&element->actions[3],-1,0);
-	  quickSetStatus(&element->actions[0],0);
-  UIConfigure_Auto(element, &element->actions[1], GAME_OVER);
-    UITrigger_Bind(&element->actions[1],&element->actions[0],0,2);
-    UITrigger_Bind(&element->actions[1],&element->actions[1],1,0);
-    UITrigger_Bind(&element->actions[1],&element->actions[2],0,1);
-    UITrigger_Bind(&element->actions[1],&element->actions[3],0,1);
-  	quickSetStatus(&element->actions[1],1);
-  UIConfigure_FillAndBorderRect(element,&element->actions[2],255,255,255,255,255,255);
-	  quickSetStatus(&element->actions[2],0);
-  UIConfigure_DisplayString(element, &element->actions[3]," ",0, UISTRING_ALIGN_CENTER);
-	  quickSetStatus(&element->actions[3],0);
-  UIConfigure_Auto(element,&element->actions[4],UPDATE);
-  	UITrigger_Bind(&element->actions[4],&element->actions[0],2,1);
-  	UITrigger_Bind(&element->actions[4],&element->actions[1],2,1);
-   UIConfigure_PercPosition(element, &element->actions[5],0.5,1.0,-100,-415,0);
-  UIConfigure_GetFinalScoreString(element, &element->actions[6], &element->actions[3]);
-  UIElement_Reparent(element,gameData->uiData.root);
-
     /*gameOverInformation*/
  /* element = UIElement_Create(0,0,200,25,4);
   UIConfigure_FillAndBorderRect(element,&element->actions[0],255,255,255,255,255,255);
@@ -357,6 +336,7 @@ static void createGameUI(GameData *gameData){
 
  /*press enter to restart (part of game over box)*/
    element = UIElement_Create(0,0,200,25,6);
+   printf("enter to restart is %p\n",element);
   UIConfigure_Auto(element, &element->actions[0], GAME_OVER);
     UITrigger_Bind(&element->actions[0],&element->actions[0],-1,0);
     UITrigger_Bind(&element->actions[0],&element->actions[1],0,2);
@@ -387,6 +367,7 @@ static void createGameUI(GameData *gameData){
 
       /*YEARS label*/
   element2 = UIElement_Create(0,0,YEARS_LABEL_WIDTH,TOP_BAR_HEIGHT,3);
+  printf("years label is %p\n",element2);
   UIConfigure_FillRect(element2,&element2->actions[0],147,147, 170);
   UIConfigure_DisplayString(element2, &element2->actions[1],"  YEARS SURVIVED: ",0,UISTRING_ALIGN_LEFT);
   UIConfigure_PercPosition(element2, &element2->actions[2],1.0,0.0,
@@ -396,6 +377,7 @@ static void createGameUI(GameData *gameData){
 
   /* YEARS counter*/
   element2 = UIElement_Create(0,0,YEARS_COUNTER_WIDTH,TOP_BAR_HEIGHT,4);
+  printf("years counter is %p\n",element2);
   UIConfigure_FillRect(element2,&element2->actions[0],249,252,220);
   UIConfigure_DisplayNumber(element2, &element2->actions[1], 0,0,UISTRING_ALIGN_CENTER);
   UIConfigure_YearsCounter(element2, &element2->actions[2],1,&element2->actions[1]);
@@ -404,6 +386,7 @@ static void createGameUI(GameData *gameData){
 
   /*score counter label*/
   element2 = UIElement_Create(0,0,SCORE_LABEL_WIDTH,TOP_BAR_HEIGHT,3);
+  printf("score counter label is %p\n",element2);
   UIConfigure_FillRect(element2,&element2->actions[0],127,127, 150);
   UIConfigure_DisplayString(element2, &element2->actions[1],"  SUGAR: ",0,UISTRING_ALIGN_LEFT);
   UIConfigure_PercPosition(element2, &element2->actions[2],1.0,0.0,
@@ -413,6 +396,7 @@ static void createGameUI(GameData *gameData){
 
   /* Score counter */
   element2 = UIElement_Create(0,0,SCORE_COUNTER_WIDTH,TOP_BAR_HEIGHT,4);
+  printf("score counter is %p\n",element2);
   UIConfigure_FillRect(element2,&element2->actions[0],249,252,124);
   UIConfigure_DisplayNumber(element2, &element2->actions[1], 0,0,UISTRING_ALIGN_CENTER);
   UIConfigure_ResourceCounter(element2, &element2->actions[2],1,&element2->actions[1]);
@@ -421,6 +405,7 @@ static void createGameUI(GameData *gameData){
 
     /*day counter label*/
   element2 = UIElement_Create(0,0,DAYS_LABEL_WIDTH,TOP_BAR_HEIGHT,3);
+  printf("day counter label is %p\n",element2);
   UIConfigure_FillRect(element2,&element2->actions[0],147,147, 170);
   UIConfigure_DisplayString(element2, &element2->actions[1],"  DAYS TO WINTER: ",0,UISTRING_ALIGN_LEFT);
   UIConfigure_PercPosition(element2, &element2->actions[2],1.0,0.0,
@@ -430,6 +415,7 @@ static void createGameUI(GameData *gameData){
 
   /* day counter */
   element2 = UIElement_Create(0,0,DAYS_COUNTER_WIDTH,TOP_BAR_HEIGHT,4);
+  printf("day counter is %p\n",element2);
   UIConfigure_FillRect(element2,&element2->actions[0],249,252,124);
   UIConfigure_DisplayNumber(element2, &element2->actions[1], 0,0,UISTRING_ALIGN_CENTER);
   UIConfigure_DaysCounter(element2, &element2->actions[2],1,&element2->actions[1]);
@@ -439,6 +425,7 @@ static void createGameUI(GameData *gameData){
 
   /* Minimap */
   element = UIElement_Create(0,0,100,100,10);
+  printf("minimap is %p\n",element);
   UIConfigure_FillAndBorderRect(element,&element->actions[0],0x5F,0xB4,0x04,0,0,0);
   UIConfigure_PercPosition(element,&element->actions[1],1.0,1.0,-99,-99,0);
   UIConfigure_Minimap(element,&element->actions[2]);
@@ -464,6 +451,7 @@ static void createGameUI(GameData *gameData){
 
 
   element = UIElement_Create(win_x/2,win_y - 50,200,25,6);
+  printf("pause box is %p\n",element);
   UIConfigure_Auto(element, &element->actions[0], RESPONSE_PAUSE);
     UITrigger_Bind(&element->actions[0],&element->actions[0],-1,0);
     UITrigger_Bind(&element->actions[0],&element->actions[1],0,1);
@@ -487,6 +475,7 @@ static void createGameUI(GameData *gameData){
 
 
   element2 = UIElement_Create(0, win_y - 100, 100,100,6);
+  printf("BPP editor panel is %p\n",element2);
 	UIConfigure_FillAndBorderRect(element2,&element2->actions[0],248,221,35,0,0,0);
 	UIConfigure_LeftClickRect(element2,&element2->actions[1]);
 		UITrigger_Bind(&element2->actions[1],&element2->actions[2],0,1);
@@ -506,6 +495,7 @@ static void createGameUI(GameData *gameData){
 
   /* Minimize button */
   element = UIElement_Create(50 + win_x - 150, 50, 50, 50,6);
+  printf("minimise button is %p\n",element);
   UIConfigure_FillAndBorderRect(element, &element->actions[0],185,122,87,0,0,0);
   UIConfigure_ShrinkFitToParent(element, &element->actions[1]);
   UIConfigure_LeftClickRect(element, &element->actions[2]);
@@ -522,6 +512,7 @@ static void createGameUI(GameData *gameData){
   /* This is the output from the B++ compiler */
   /* I'm making it a little bigger so the border doesn't doublepixel */
   element4 = UIElement_Create(0,0,0,0,4);
+  printf("compiler output bar is %p\n",element4);
   UIConfigure_FillAndBorderRect(element4,&element4->actions[0],222,0,0,0,0,0);
   UIConfigure_ShrinkFitToParent(element4,&element4->actions[1]);
   UIConfigure_DisplayString(element4,&element4->actions[2],"                                                                                                                          ",0,UISTRING_ALIGN_LEFT);
@@ -532,6 +523,7 @@ static void createGameUI(GameData *gameData){
   /* I'm making it a little bigger along the bottom and right hand side because otherwise there's some double lapping of pixels
      when drawing the border */
   element3 = UIElement_Create(50,50,win_x - 270,win_y - 200,4);
+  printf("block panel is %p\n",element3);
   UIConfigure_FillAndBorderRect(element3, &element3->actions[0],249,252,124,0,0,0);
   UIConfigure_ShrinkFitToParent(element3, &element3->actions[1]);
   UIConfigure_ReadAiBlocks(element3,&element3->actions[2],&element4->actions[2]);
@@ -549,6 +541,7 @@ static void createGameUI(GameData *gameData){
 
   /* Calculate AI button */
   element = UIElement_Create(0, 0, 50, 50, 5);
+  printf("compile button is %p\n",element);
   UIConfigure_FillAndBorderRect(element, &element->actions[0],249,252,124,0,0,0);
   UIConfigure_ShrinkFitToParent(element, &element->actions[1]);
   UIConfigure_LeftClickRect(element, &element->actions[2]);
