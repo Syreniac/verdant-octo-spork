@@ -1,4 +1,6 @@
 *.o
 *.idea
-src/*~
+*.c~
+*.h~
+*.txt~
 bin
