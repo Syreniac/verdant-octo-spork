@@ -15,7 +15,8 @@ enum Response {NONE = 0,										/* 2 */
 			         DISPOSAL,
 				       MOUSEWHEEL,
                GAME_OVER,
-               FREED};
+               FREED,
+               OBJECT_DISPLAY};
 
 enum UIDataTypes{UI_NULL,
 				 UI_INT,
@@ -146,6 +147,7 @@ void UIConfigure_ToggleInteger(UI_Element *element, UI_Action *action, int* targ
 void UIConfigure_GetAnnouncement(UI_Element *element, UI_Action *action, UI_Action *placeToPut);
 void UIConfigure_GetGameOverString(UI_Element *element, UI_Action *action, UI_Action *placeToPut);
 void UIConfigure_GetFinalScoreString(UI_Element *element, UI_Action *action, UI_Action *placeToPut);
+void UIConfigure_GetInfoDisplayString(UI_Element *element, UI_Action *action, UI_Action *placeToPut);
 void UIConfigure_GetInfoDisplayString(UI_Element *element, UI_Action *action, UI_Action *placeToPut);
 void UIConfigure_FillAndBorderRect(UI_Element *element, UI_Action *action, int fr, int fg, int fb, int br, int bg, int bb);
 void UIConfigure_PassThrough(UI_Element *element, UI_Action *action, enum Response response, int num_of_companions, ...);

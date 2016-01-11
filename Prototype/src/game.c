@@ -208,8 +208,8 @@ static void createGameUI(GameData *gameData){
   /* top information bar */
   element = UIElement_Create(0,0,dm.w,31,4);
   UIConfigure_FillAndBorderRect(element,&element->actions[0],248,221,35,0,0,0);
-  UIConfigure_PercPosition(element, &element->actions[1],1.0,0.0,-dm.w,0,0);
-  UIConfigure_DisplayString(element, &element->actions[2], "Hello",0,UISTRING_ALIGN_LEFT);
+
+  UIConfigure_DisplayString(element, &element->actions[2], " ",0,UISTRING_ALIGN_LEFT);
   UIConfigure_GetAnnouncement(element, &element->actions[3], &element->actions[2]);
   UIElement_Reparent(element,gameData->uiData.root);
   
@@ -241,7 +241,7 @@ static void createGameUI(GameData *gameData){
   
   
       /*objectInfoDisplay box*/
-  element = UIElement_Create(0,0,70,70,7);
+  element = UIElement_Create(0,31,170,70,7);
   UIConfigure_Auto(element, &element->actions[0], OBJECT_DISPLAY);
     UITrigger_Bind(&element->actions[0],&element->actions[0],-1,0);
     UITrigger_Bind(&element->actions[0],&element->actions[1],0,2);
@@ -256,12 +256,35 @@ static void createGameUI(GameData *gameData){
   	quickSetStatus(&element->actions[1],1);
   UIConfigure_FillAndBorderRect(element,&element->actions[2],248,221,35,255,255,255);
 	  quickSetStatus(&element->actions[2],0);
-  UIConfigure_DisplayString(element, &element->actions[3],"InfoDisplay",0, UISTRING_ALIGN_LEFT);
+  UIConfigure_DisplayString(element, &element->actions[3]," ",0, UISTRING_ALIGN_CENTER);
 	  quickSetStatus(&element->actions[3],0);
   UIConfigure_Auto(element,&element->actions[4],UPDATE);
   	UITrigger_Bind(&element->actions[4],&element->actions[0],2,1);
   	UITrigger_Bind(&element->actions[4],&element->actions[1],2,1);
   UIConfigure_GetInfoDisplayString(element, &element->actions[6], &element->actions[3]);
+  UIElement_Reparent(element,gameData->uiData.root);
+        /*objectInfoDisplay box - status*/
+  element = UIElement_Create(1,51,168,31,7);
+  UIConfigure_Auto(element, &element->actions[0], OBJECT_DISPLAY);
+    UITrigger_Bind(&element->actions[0],&element->actions[0],-1,0);
+    UITrigger_Bind(&element->actions[0],&element->actions[1],0,2);
+    UITrigger_Bind(&element->actions[0],&element->actions[2],-1,0);
+    UITrigger_Bind(&element->actions[0],&element->actions[3],-1,0);
+	  quickSetStatus(&element->actions[0],0);
+  UIConfigure_Auto(element, &element->actions[1], OBJECT_DISPLAY);
+    UITrigger_Bind(&element->actions[1],&element->actions[0],0,2);
+    UITrigger_Bind(&element->actions[1],&element->actions[1],1,0);
+    UITrigger_Bind(&element->actions[1],&element->actions[2],0,1);
+    UITrigger_Bind(&element->actions[1],&element->actions[3],0,1);
+  	quickSetStatus(&element->actions[1],1);
+  UIConfigure_FillAndBorderRect(element,&element->actions[2],248,221,35,248,221,35);
+	  quickSetStatus(&element->actions[2],0);
+  UIConfigure_DisplayString(element, &element->actions[3]," ",0, UISTRING_ALIGN_LEFT);
+	  quickSetStatus(&element->actions[3],0);
+  UIConfigure_Auto(element,&element->actions[4],UPDATE);
+  	UITrigger_Bind(&element->actions[4],&element->actions[0],2,1);
+  	UITrigger_Bind(&element->actions[4],&element->actions[1],2,1);
+  UIConfigure_GetObjectStatusString(element, &element->actions[6], &element->actions[3]);
   UIElement_Reparent(element,gameData->uiData.root);
   
     /*gameOverInformation*/
