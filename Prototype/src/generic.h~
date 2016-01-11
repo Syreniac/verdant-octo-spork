@@ -95,10 +95,7 @@ each call to updateProgrammableWorker*/
 
 #define CARRYING_FLOWER_INDEX_OFFSET 2
 #define CARRYING_ICECREAM_INDEX_OFFSET 4
-#define MS_BETWEEN_FLAPPING 60
 
-
-#define BENCHMARK_TEST 0
 
 #define X_SIZE_OF_WORKER 40
 #define Y_SIZE_OF_WORKER 40
@@ -106,25 +103,25 @@ each call to updateProgrammableWorker*/
 
 #define WORKER_PERCEPTION_RADIUS 250
 #define COLD_DEATH_THRESHOLD 200
-
+#define CHANCE_OF_DIEING 50
 
 #define X_SIZE_OF_HIVE 64
 #define Y_SIZE_OF_HIVE 80
 
-#define HIVE_SHELTER_RADIUS (X_SIZE_OF_HIVE/2)
+#define HIVE_SHELTER_RADIUS (X_SIZE_OF_HIVE/3)
 
 
 #define DEFAULT_RESOURCEUNITS 100
-#define DEFAULT_SPAWNDELAY 1000
+#define DEFAULT_SPAWNDELAY 1000*10
 #define DEFAULT_SPAWNRADIUS 100.0
 #define DEFAULT_MAXNODECOUNT 10
 #define TICKSPERWEATHER 30000
 #define SUN_LASTS_LONGER_FACTOR 5
-#define FRAME_TIME 15
+#define FRAME_TIME 20
 
 #define WINTER_COUNTDOWN_SPEED 0.01
 
-#define MAX_DAYS_TO_WINTER 301
+#define MAX_DAYS_TO_WINTER 11
 #define AUTUMN_THRESHOLD (MAX_DAYS_TO_WINTER / 3)
 #define WINTER_THRESHOLD 1
 
@@ -179,4 +176,3 @@ SDL_Rect getRectFromPercRect(SDL_Window *window, float from_left, float from_rig
 char *fileToString(FILE *file);
 SDL_Point getPointFromInvPoint(SDL_Window *window, int x, int y);
 SDL_Point getPointFromPerc(SDL_Window *window, float x, float y);
-void shrinkRectToFit(SDL_Rect *toShrink, SDL_Rect *fitTo);

@@ -19,20 +19,22 @@ int handleEvent(SDL_Event *event, GameObjectData *gameObjectData, UIData *uiData
 			case SDL_WINDOWEVENT:
 				switch (event->window.event){
 					case SDL_WINDOWEVENT_RESIZED:
-						UIRoot_Execute(uiData,WINDOW_RESIZE,0);
+						printf("window resized\n");
+						UIRoot_Execute(uiData,WINDOW_RESIZE,0,event);
 						break;
 				}
 				break;
 			case SDL_MOUSEMOTION:
-				UIRoot_Execute(uiData,MOTION,0);
+				UIRoot_Execute(uiData,MOTION,0,event);
 				break;
 			case SDL_MOUSEBUTTONDOWN:
+				printf("controlsData->objectSelection = %d\n",controlsData->objectSelection);
 				if(isMouseFree(controlsData)){
 					/* We only want to catch new mouse clicks if the mouse is not having
 					   a button held down */
 					/* trust me */
 					if(event->button.button == SDL_BUTTON_LEFT){
-					  UIRoot_ExecuteUpwards(uiData,LEFT_CLICK,1);
+					  UIRoot_ExecuteUpwards(uiData,LEFT_CLICK,1,event);
 					  if(controlsData->objectSelection){
 					  	objectInfoDisplay(gameObjectData, graphicsData, &event->button);
 								controlsData->mouseButtons[LEFT_CLICK_BUTTON] = 1;
@@ -40,7 +42,8 @@ int handleEvent(SDL_Event *event, GameObjectData *gameObjectData, UIData *uiData
 
 					}
 					else if(event->button.button == SDL_BUTTON_RIGHT){
-					  UIRoot_ExecuteUpwards(uiData,RIGHT_CLICK,1);
+					  UIRoot_ExecuteUpwards(uiData,RIGHT_CLICK,1,event);
+						UIRoot_ExecuteUpwards(uiData,MINIMAP_MOVE,0,event,graphicsData);
 					  if(controlsData->objectSelection){
 					  	objectInfoDisplay(gameObjectData, graphicsData, &event->button);
 								controlsData->mouseButtons[RIGHT_CLICK_BUTTON] = 1;
@@ -50,11 +53,11 @@ int handleEvent(SDL_Event *event, GameObjectData *gameObjectData, UIData *uiData
 				break;
 			case SDL_MOUSEBUTTONUP:
 				if(event->button.button == SDL_BUTTON_LEFT){
-				  UIRoot_Execute(uiData,LEFT_RELEASE,0);
+				  UIRoot_Execute(uiData,LEFT_RELEASE,0,event);
 							controlsData->mouseButtons[LEFT_CLICK_BUTTON] = 0;
 				}
 				else if(event->button.button == SDL_BUTTON_RIGHT){
-				  UIRoot_Execute(uiData,RIGHT_RELEASE,0);
+				  UIRoot_Execute(uiData,RIGHT_RELEASE,0,event);
 							controlsData->mouseButtons[RIGHT_CLICK_BUTTON] = 0;
 				}
 				break;
@@ -66,10 +69,11 @@ int handleEvent(SDL_Event *event, GameObjectData *gameObjectData, UIData *uiData
 				keyup(controlsData,gameObjectData, uiData,event);
 				break;
 			case SDL_QUIT:
+				printf("exiting\n");
 				exit(0);
 				break;
 			case SDL_MOUSEWHEEL:
-				UIRoot_Execute(uiData,MOUSEWHEEL,0);
+				UIRoot_Execute(uiData,MOUSEWHEEL,0,event);
 				break;
 		    default:
 		    	if(gameObjectData->gameOverEventNum == event->type){
@@ -111,6 +115,7 @@ void keydown(ControlsData *controlsData, GameObjectData *gameObjectData, Graphic
 			UIRoot_Execute(uiData,RESPONSE_PAUSE,0);
             break;
 		case (SDL_SCANCODE_Q):
+			printf("DELETE key pressed\n");
 			controlsData->keys[DELETE] = 1;
 			UIRoot_ExecuteUpwards(uiData,RESPONSE_DELETE,1);
 			break;
@@ -153,10 +158,12 @@ void keyup(ControlsData *controlsData, GameObjectData *gameObjectData, UIData *u
     }
 }
 
-void panScreen(GraphicsData *graphicsData, ControlsData *controlsData, int delta_t)
+void panScreen(GraphicsData *graphicsData, ControlsData *controlsData, double delta_t)
 {
   int window_x,window_y;
   SDL_GetWindowSize(graphicsData->window,&window_x,&window_y);
+  
+  printf("f\n", delta_t);
 
   if(window_x > X_SIZE_OF_WORLD){
     graphicsData->navigationOffset.x = -(X_SIZE_OF_WORLD - window_x)/2;

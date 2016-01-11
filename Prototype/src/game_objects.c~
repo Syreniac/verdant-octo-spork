@@ -119,56 +119,19 @@ int getFirstDeadResourceNode(ResourceNodeSpawner *resourceNodeSpawner){
 	return(-1);
 }
 
-void killAllBees(ProgrammableWorker **programmableWorker){
-	ProgrammableWorker *p = (*programmableWorker);
-printf("top of kill all bees function\n");
-	while(*programmableWorker != NULL){
-
-		p = *programmableWorker;
-		*programmableWorker = (*programmableWorker)->next;
-
-		free(p);
-	}
-printf("bottom of kill all bees function\n");
-}
-
 void killProgrammableWorker(GameObjectData *gameObjectData, ProgrammableWorker **programmableWorker){
-printf("top of kill programmable worker function\n");
-	if(*programmableWorker == NULL){
-		printf("programmable worker == NULL, this shouldn't be\n");
-	}
+	printf("top of kill function\n");
 	if((*programmableWorker)->next == NULL){
-		ProgrammableWorker *p = *programmableWorker;
-		printf("here\n");
-	    for(*programmableWorker = gameObjectData->first_programmable_worker;
-	    (*programmableWorker)->next != p ;
-	    *programmableWorker = (*programmableWorker)->next){
-	    }
-	    (*programmableWorker)->next = NULL;
-	    *programmableWorker = p;
-		free(*programmableWorker);
+		printf("next worker = NULL\n");
 		*programmableWorker = NULL;
-	}else if(*programmableWorker == gameObjectData->first_programmable_worker){
-		printf("hhhhhhere\n");
-		ProgrammableWorker *p = *programmableWorker;
-		gameObjectData->first_programmable_worker = gameObjectData->first_programmable_worker->next;
-		*programmableWorker = gameObjectData->first_programmable_worker;
-		free(p);
+		free(*programmableWorker);
 	}else{
-		ProgrammableWorker *p = *programmableWorker;
-    	printf("here0000\n");		
-	    for(*programmableWorker = gameObjectData->first_programmable_worker;
-	    (*programmableWorker)->next != p ;
-	    *programmableWorker = (*programmableWorker)->next){
-	    }
-	    printf("here0\n");
-	    (*programmableWorker)->next = p->next;
-	    *programmableWorker = p;
-		printf("here1\n");
-		free(*programmableWorker);
+		ProgrammableWorker *p;
+
+		p->next = (*programmableWorker)->next;
 		*programmableWorker = NULL;
+		free(*programmableWorker);
 	}
-printf("bottom of kill programmable worker function\n");
 }
 
 ProgrammableWorker *createProgrammableWorker(GameObjectData *gameObjectData){
@@ -197,7 +160,7 @@ ProgrammableWorker *createProgrammableWorker(GameObjectData *gameObjectData){
 
 	programmableWorker->wet_and_cant_fly = 0;
 	programmableWorker->cold_and_about_to_die = 0;
-	programmableWorker->flapTimer = rand() % 100;
+
 
 
 
@@ -277,6 +240,7 @@ Hive createHive(void){
 	hive.years_survived = 0;
 	hive.delayBeforeSummer = DELAY_BEFORE_SUMMER;
 	hive.winterCountdownFloat = MAX_DAYS_TO_WINTER;
+	hive.bees_taking_shelter = 0;
 	return(hive);
 }
 
@@ -328,7 +292,7 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
 	if(gameObjectData->hive.winterCountdown < WINTER_THRESHOLD){
 		if(!isPointInRangeOf(getCenterOfRect(programmableWorker->rect), getCenterOfRect(gameObjectData->hive.rect),
 		HIVE_SHELTER_RADIUS)){
-			
+
 			programmableWorker->cold_and_about_to_die++;
 
 		}
@@ -336,11 +300,7 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
 		programmableWorker->cold_and_about_to_die = 0;
 
 		if(!programmableWorker->wet_and_cant_fly){ /*programmable worker has not been caught in rain recently*/
-			programmableWorker->flapTimer += ticks;
-			if(programmableWorker->flapTimer > MS_BETWEEN_FLAPPING){
-				programmableWorker->flapTimer -= MS_BETWEEN_FLAPPING;
-				programmableWorker->currentGraphicIndex = (programmableWorker->currentGraphicIndex + 1) % 2;
-			}
+			programmableWorker->currentGraphicIndex = (programmableWorker->currentGraphicIndex + 1) % 2;
 
 			if(gameObjectData->weather.present_weather == Rain){
 				int i, j = 0;
@@ -803,11 +763,10 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 	 This function makes all the GameObjects move around on the screen and show
 	 up graphically. It gets called every frame from the main gameLoop function
 	 in game.c.*/
-	 static int paa = 0;
 	int i, j;
 	ProgrammableWorker *programmableWorker;
 
-	
+
 	if(gameObjectData->pause_status){
 		if(paa++ == 0)
 		printf("bees taking shelter in hive = %d\n", gameObjectData->hive.bees_taking_shelter);
@@ -825,7 +784,12 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
   			gameObjectData->hive.winterCountdown = (int) gameObjectData->hive.winterCountdownFloat;
   		}
 
-  	}	
+
+  	}else{
+  	
+  		printf("game over!\n");
+  	}
+  	
   	
 
 
@@ -843,23 +807,20 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 			}
 
 			if(gameObjectData->hive.flowers_collected > (gameObjectData->hive.scoreBeforeWinter -
-			(HONEY_REQUIRED_FOR_WINTER-1 + 
-			((float)HONEY_REQUIRED_FOR_WINTER *
-			((float)gameObjectData->hive.years_survived / (float)REQUIREMENT_YEAR_INCREASE_PERCENTAGE))))){
+			(HONEY_REQUIRED_FOR_WINTER-1 + (gameObjectData->hive.years_survived / REQUIREMENT_YEAR_INCREASE_PERCENTAGE)))){
 				/*decrease score over winter (as bees are eating honey), decremented by HONEY_REQUIRED_FOR_WINTER-1*/
+
 
 				/*but only if there is at least one bee in the hive*/
 				if(gameObjectData->hive.bees_taking_shelter > 0 && !gameObjectData->pause_status){
 					gameObjectData->hive.flowers_collected -= (rand()%10) ? 0 : 1;
 				}
+
 				
 
 				if(gameObjectData->hive.flowers_collected <= 0){
-					gameObjectData->gameOver = 1;
-					gameObjectData->gameOverCause = STARVATION;
-					printf("gameover by starvation\n");
-					killAllBees(&gameObjectData->first_programmable_worker);
-					return;
+					printf("GAME OVER - all of the bees ran out of food over winter and died!\n");
+					exit(1);
 				}
 			}else{
 				blitTiledBackground(graphicsData, graphicsData->grassTexture);
@@ -887,20 +848,13 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 		gameObjectData->tree->currentGraphicIndex = SUMMER_INDEX;
 		blitTiledBackground(graphicsData, graphicsData->grassTexture);
 	}
-	
-	}else{/*end of it not game over*/
-			SDL_SetRenderDrawColor(graphicsData->renderer, 230, 230, 230, 255);
-			SDL_RenderFillRect(graphicsData->renderer, NULL);	
-	}
 
-
-
+	}/*end of it not game over*/
 
 	if(gameObjectData->hive.displayInfo){
 		SDL_Point point = getCenterOfRect(gameObjectData->hive.rect);
 		renderFillRadius(graphicsData, &point, 40, 255,255,255, 80);
 	}
-	
 
 	/* First, we need to draw the Hive in at the correct position. */
 	blitGameObject(gameObjectData->hive.rect,
@@ -942,9 +896,6 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 	i++;
 	}
 
-
-	if(!gameObjectData->gameOver){ /*start of if not game over*/
-	
 	/*BEES ON GROUND NEED RENDERING BEFORE PERSON*/
 	for(programmableWorker = gameObjectData->first_programmable_worker; programmableWorker != NULL ;){
 		ProgrammableWorker *progWork;
@@ -959,7 +910,6 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 			if(!gameObjectData->pause_status){
 				updateProgrammableWorker(programmableWorker,gameObjectData,announcementsData,ticks);
 			}
-
 
 			if(programmableWorker->displayInfo){
 				SDL_Point point = getCenterOfRect(programmableWorker->rect);
@@ -978,27 +928,16 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 
 
 
-		if(programmableWorker->cold_and_about_to_die > COLD_DEATH_THRESHOLD){
+		if(programmableWorker->cold_and_about_to_die > COLD_DEATH_THRESHOLD && !(rand()%CHANCE_OF_DIEING)){
 
 
-		
-			if(!(programmableWorker == gameObjectData->first_programmable_worker && programmableWorker->next == NULL)){
-				ProgrammableWorker *worker;
-				
-				int i = 0;
-
+			if(programmableWorker != gameObjectData->first_programmable_worker){
 				killProgrammableWorker(gameObjectData, &programmableWorker);
-				for(worker = gameObjectData->first_programmable_worker; worker != NULL; worker = worker->next){
-					printf("%d  ", i++);
-				}
-				printf("\n");
 			}else{
-				gameObjectData->gameOver = 1;
-				gameObjectData->gameOverCause = COLD;
-				printf("gameOver, all bees die from the cold\n");
-				free(gameObjectData->first_programmable_worker);
-				gameObjectData->first_programmable_worker = NULL;
-				return;
+				printf("GAME OVER_ ALL BEES HAVE DIED FROM THE COLD!\n");
+				programmableWorker = NULL;
+				free(programmableWorker);
+				exit(1);
 			}
 
 
@@ -1097,7 +1036,7 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 	 inheritance issues. */
 	/* Also, remember the important rule - AI should tell workers to do things rather
 	 than directly doing things itself! */
-			gameObjectData->hive.bees_taking_shelter = 0;
+
 	for(programmableWorker = gameObjectData->first_programmable_worker; programmableWorker != NULL ; programmableWorker = programmableWorker->next){
 		if(!(programmableWorker->wet_and_cant_fly || programmableWorker->cold_and_about_to_die)){
 			if(!gameObjectData->pause_status){
@@ -1124,6 +1063,7 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 			}
 
 
+
 			/* This needs to have some changes to adjust the rawX and rawY values too */
 			//fitRectToWorld(&programmableWorker->rect);
 			/*render if now currently just above (in) hive*/
@@ -1139,8 +1079,6 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 							 	DEGREESINCIRCLE-(programmableWorker->heading * RADIANSTODEGREES),
 							 	NULL,
 							 	SDL_FLIP_NONE);
-			}else{
-				gameObjectData->hive.bees_taking_shelter++;
 			}
 
 			i++;
@@ -1148,7 +1086,7 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 	}
 
 
-	}/*end of if not game over*/
+
 
 
 	/* render tree tops last, so that they appear above everything else*/
@@ -1179,7 +1117,6 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 	updateWeather(gameObjectData, &gameObjectData->weather, ticks);
 
 	paintWeatherLayer(graphicsData, gameObjectData->weather.present_weather);
-
 
 }
 
