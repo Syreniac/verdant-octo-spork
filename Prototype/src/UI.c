@@ -1064,7 +1064,7 @@ int UIAction_NullifyAI(UI_Action *action, UIData *uiData){
 	AIData *aiData;
 	if(action->status == 1){
 		aiData = uiData->aiData;
-		nullifyBlockFunctionRoot(&aiData->blockFunctionRoots[0]);
+		nullifyBlockFunctionRoot(&aiData->blockFunctionRoots[0],uiData->gameObjectData);
 		action->new_status = 0;
 		return 1;
 	}
@@ -1161,18 +1161,18 @@ int UIAction_ReadAiBlocks(UI_Action *action, UIData *uiData){
 					sprintf(action->infoOuput->changeString,"ERROR: Loop detected at Block %d: \'%s\'",i,erroneousBlockFunction->name);
 				}
 				/* THIS FUNCTION BEING ONE LINE HIGHER CAUSED A SEGFAULT DO NOT TOUCH IT */
-				nullifyBlockFunctionRoot(&blockFunctionRoot);
+				nullifyBlockFunctionRoot(&blockFunctionRoot,NULL);
 	    }
 	    else if(testBlockFunctionRootForStart(&blockFunctionRoot) == 0){
-			nullifyBlockFunctionRoot(&blockFunctionRoot);
-			action->infoOuput->changeString = realloc(action->infoOuput->changeString,strlen("ERROR: No block linked to START")+1);
-			sprintf(action->infoOuput->changeString,"ERROR: No block linked to START");
+				nullifyBlockFunctionRoot(&blockFunctionRoot, NULL);
+				action->infoOuput->changeString = realloc(action->infoOuput->changeString,strlen("ERROR: No block linked to START")+1);
+				sprintf(action->infoOuput->changeString,"ERROR: No block linked to START");
 	    }
 	    else{
-			action->infoOuput->changeString = realloc(action->infoOuput->changeString,strlen("Compilation Complete")+1);
-			strcpy(action->infoOuput->changeString, "Compilation Complete");
-			nullifyBlockFunctionRoot(&aiData->blockFunctionRoots[0]);
-			aiData->blockFunctionRoots[0] = blockFunctionRoot;
+				action->infoOuput->changeString = realloc(action->infoOuput->changeString,strlen("Compilation Complete")+1);
+				strcpy(action->infoOuput->changeString, "Compilation Complete");
+				nullifyBlockFunctionRoot(&aiData->blockFunctionRoots[0],uiData->gameObjectData);
+				aiData->blockFunctionRoots[0] = blockFunctionRoot;
 	    }
 		action->new_status = 0;
 		free(workingSpace);

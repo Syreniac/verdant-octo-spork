@@ -84,7 +84,7 @@ void audioSystem(AudioData *AudioSettings){
 
 }
 
-int game_welcome_page(GraphicsData graphicsData, AudioData audioData){
+void game_welcome_page(GraphicsData graphicsData, AudioData audioData){
 
    InitData initData;
 
@@ -178,8 +178,6 @@ int game_welcome_page(GraphicsData graphicsData, AudioData audioData){
 
    fadeOutMusic(&initData.audioData);
    /*stopMusic(&initData.audioData, 0);*/
-
-   return gameStart(graphicsData,audioData);
 }
 
 /*

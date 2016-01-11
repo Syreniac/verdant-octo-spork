@@ -1,6 +1,7 @@
 #include "game_objects.h"
 
 static ResourceNode *chooseNodeRandomly(ResourceNodeSpawner *resourceNodeSpawner);
+static void nullifyProgrammableWorkerBrain(ProgrammableWorkerBrain *brain);
 
 void initAudio(GameObjectData *gameObjectData, AudioData audioData){
 	gameObjectData->audioData = audioData;
@@ -333,7 +334,7 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
 	double newX,newY;
 	double pX,pY;
 	ResourceNodeSpawner *resourceNodeSpawner = NULL;
-	ResourceNode *resourceNode;
+	ResourceNode *resourceNode = NULL;
 	char announcement[256];
 
 	if(gameObjectData->hive.winterCountdown < WINTER_THRESHOLD){
@@ -1380,7 +1381,20 @@ void objectInfoDisplay(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 		if(objectDisplayShowing){
 			objectDisplayShowing = 0;
 			objectInfoDisplayEvent.type = gameObjectData->objectDisplayEventNum;
-			SDL_PushEvent(&objectInfoDisplayEvent);		
+			SDL_PushEvent(&objectInfoDisplayEvent);
 		}
+	}
+}
+
+static void nullifyProgrammableWorkerBrain(ProgrammableWorkerBrain *brain){
+	brain->aiStartPoint = 0;
+}
+
+void nullifyLocalAIInformation(GameObjectData *gameObjectData){
+	ProgrammableWorker *p = gameObjectData->first_programmable_worker;
+
+	while(p != NULL){
+		nullifyProgrammableWorkerBrain(&p->brain);
+		p = p->next;
 	}
 }

@@ -59,10 +59,10 @@ int handleEvent(SDL_Event *event, GameObjectData *gameObjectData, UIData *uiData
 				}
 				break;
 			case SDL_KEYDOWN:
-				keydown(controlsData,gameObjectData, graphicsData, uiData,event);
+				return keydown(controlsData,gameObjectData, graphicsData, uiData,event);
 				break;
 			case SDL_KEYUP:
-				keyup(controlsData,gameObjectData, uiData,event);
+				return keyup(controlsData,gameObjectData, uiData,event);
 				break;
 			case SDL_QUIT:
 				printf("SDL_QUIT\n");
@@ -82,7 +82,7 @@ int handleEvent(SDL_Event *event, GameObjectData *gameObjectData, UIData *uiData
 		return 1;
 }
 
-void keydown(ControlsData *controlsData, GameObjectData *gameObjectData, GraphicsData *graphicsData, UIData *uiData, SDL_Event *event){
+int keydown(ControlsData *controlsData, GameObjectData *gameObjectData, GraphicsData *graphicsData, UIData *uiData, SDL_Event *event){
     switch (event->key.keysym.scancode){
         case (SDL_SCANCODE_DOWN):
         	if(!gameObjectData->gameOver){
@@ -114,21 +114,16 @@ void keydown(ControlsData *controlsData, GameObjectData *gameObjectData, Graphic
 
 			UIRoot_Execute(uiData,RESPONSE_PAUSE,0);
             break;
-            
+
 		case (SDL_SCANCODE_Q):
 			controlsData->keys[DELETE] = 1;
 			UIRoot_ExecuteUpwards(uiData,RESPONSE_DELETE,1);
 			break;
 		case (SDL_SCANCODE_RETURN):
-			printf("ENTER Key pressed\n");
-			if(gameObjectData->gameOver){
-				gameObjectData->gameRestart = 1;
-			}
-			break;
 		case (SDL_SCANCODE_KP_ENTER):
 			printf("ENTER Key pressed\n");
 			if(gameObjectData->gameOver){
-				gameObjectData->gameRestart = 1;
+				return 2;
 			}
 			break;
 		case (SDL_SCANCODE_H):
@@ -136,11 +131,12 @@ void keydown(ControlsData *controlsData, GameObjectData *gameObjectData, Graphic
 			centerViewOnHive(graphicsData,gameObjectData);
 			break;
     default:
-			return;
+			return 1;
     }
+		return 1;
 }
 
-void keyup(ControlsData *controlsData, GameObjectData *gameObjectData, UIData *uiData, SDL_Event *event){
+int keyup(ControlsData *controlsData, GameObjectData *gameObjectData, UIData *uiData, SDL_Event *event){
     switch (event->key.keysym.scancode){
         case (SDL_SCANCODE_DOWN):
 			controlsData->keys[ARROW_DOWN] = 0;
@@ -158,8 +154,9 @@ void keyup(ControlsData *controlsData, GameObjectData *gameObjectData, UIData *u
 			controlsData->keys[DELETE] = 0;
 			break;
     default:
-        return;
+        return 1;
     }
+		return 1;
 }
 
 void panScreen(GraphicsData *graphicsData, ControlsData *controlsData, int delta_t)

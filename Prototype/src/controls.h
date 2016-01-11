@@ -25,8 +25,8 @@ struct ControlsData{
 };
 typedef struct ControlsData ControlsData;
 
-void keydown(ControlsData *controlsData, GameObjectData *gameObjectData, GraphicsData *graphicsData, UIData *uiData, SDL_Event *event);
-void keyup(ControlsData *controlsData, GameObjectData *gameObjectData, UIData *uiData, SDL_Event *event);
+int keydown(ControlsData *controlsData, GameObjectData *gameObjectData, GraphicsData *graphicsData, UIData *uiData, SDL_Event *event);
+int keyup(ControlsData *controlsData, GameObjectData *gameObjectData, UIData *uiData, SDL_Event *event);
 void panScreen(GraphicsData *graphicsData, ControlsData *controlsData, int delta_t);
 void initControlData(ControlsData *controlsData);
 int handleEvent(SDL_Event *event, GameObjectData *gameObjectData, UIData *uiData, ControlsData *controlsData, GraphicsData *graphicsData);

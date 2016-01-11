@@ -59,6 +59,8 @@ struct ProgrammableWorkerBrain{
   ResourceNode *foundNode;
   int is_point_remembered;
   ProgrammableWorker *followTarget;
+  int aiStartPoint;
+  int waitTime;
 };
 
 struct ProgrammableWorker{
@@ -207,3 +209,5 @@ void initAudio(GameObjectData *gameObjectData, AudioData audioData);
 void centerViewOnHive(GraphicsData *graphicsData, GameObjectData *gameObjectData);
 void objectInfoDisplay(GameObjectData *gameObjectData, GraphicsData *graphicsData, AnnouncementsData *announcementsData,
 SDL_MouseButtonEvent *mbEvent);
+
+void nullifyLocalAIInformation(GameObjectData *gameObjectData);

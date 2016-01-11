@@ -175,12 +175,13 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
   objectInfoDisplay_init(&gameData.announcementsData.objectInfoDisplay);
   playMusic(&gameData.audioData,1);
 
-  while(gameLoopReturn){
+  gameLoopReturn = 1;
+  while(gameLoopReturn == 1){
     gameLoopReturn = gameLoop(&gameData);
   }
 
   cleanUpGameData(&gameData);
-  return 0;
+  return gameLoopReturn;
 }
 
 static void cleanUpGameData(GameData *gameData){
@@ -246,9 +247,9 @@ static void createGameUI(GameData *gameData){
   UIConfigure_PercOffsetRect(element, &element->actions[5], 0.25, 0.25, 0.75,0.75, 0,0,0,0,0);
   UIElement_Reparent(element,gameData->uiData.root);
 
-  
-  
-  
+
+
+
       /*objectInfoDisplay box*/
   element = UIElement_Create(0,31,170,70,7);
   UIConfigure_Auto(element, &element->actions[0], OBJECT_DISPLAY);
@@ -295,7 +296,7 @@ static void createGameUI(GameData *gameData){
   	UITrigger_Bind(&element->actions[4],&element->actions[1],2,1);
   UIConfigure_GetObjectStatusString(element, &element->actions[6], &element->actions[3]);
   UIElement_Reparent(element,gameData->uiData.root);
-  
+
 
     /*gameOverInformation*/
   element = UIElement_Create(0,0,200,25,7);
@@ -602,9 +603,10 @@ int gameLoop(GameData *gameData){
   #endif
 
   while (SDL_PollEvent(&event)){
-	  if(handleEvent(&event,&gameData->gameObjectData,&gameData->uiData,&gameData->controlsData, &gameData->graphicsData) == 0){
+    continuing = handleEvent(&event,&gameData->gameObjectData,&gameData->uiData,&gameData->controlsData, &gameData->graphicsData);
+	  if(continuing != 1){
       printf("escape\n");
-      return 0;
+      return continuing;
     }
   }
 
@@ -620,7 +622,7 @@ int gameLoop(GameData *gameData){
 
   updateGameObjects(&gameData->gameObjectData, &gameData->graphicsData, &gameData->announcementsData, gameData->delta);
   UIRoot_Execute(&gameData->uiData,UPDATE,0);
-  runAI(&gameData->aiData,&gameData->gameObjectData);
+  runAI(&gameData->aiData,&gameData->gameObjectData,gameData->delta);
 
   SDL_RenderPresent(gameData->graphicsData.renderer);
   announce_update(&gameData->announcementsData, gameData->delta);
@@ -629,7 +631,6 @@ int gameLoop(GameData *gameData){
   }
 
   if(gameData->gameObjectData.gameOver){
-
   	  if(gameData->gameObjectData.gameOverCause == STARVATION){
   		    gameData->gameObjectData.hive.flowers_collected = 0;
   	  }
@@ -640,11 +641,12 @@ int gameLoop(GameData *gameData){
 	      SDL_PushEvent(&gameOverEvent);
   	  }
    	  while (SDL_PollEvent(&event)){
-		      if(handleEvent(&event,&gameData->gameObjectData,&gameData->uiData,&gameData->controlsData, &gameData->graphicsData) == 0){
-            return 0;
-          }
-  	  }
-
+        continuing = handleEvent(&event,&gameData->gameObjectData,&gameData->uiData,&gameData->controlsData, &gameData->graphicsData);
+    	  if(continuing != 1){
+          printf("escape\n");
+          return continuing;
+        }
+      }
   }
   if (Mix_Playing(1) == 0) {
  	  playMusic(&gameData->audioData,1);
@@ -656,5 +658,5 @@ int gameLoop(GameData *gameData){
   printf("t @ benchmark %d: %d\n", testMarker++,SDL_GetTicks() - gameData->gameRunTime);
   printf("--------------------------\n");
   #endif
-
+  return 1;
 }
