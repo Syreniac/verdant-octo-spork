@@ -168,6 +168,7 @@ struct GameObjectData{
   int gameOverBoxVisible;
   gameOverCause gameOverCause;
   Uint32 gameOverEventNum;
+  Uint32 objectDisplayEventNum;
   int gameRestart;
   AudioData audioData;
 };
@@ -206,4 +207,5 @@ int countProgrammableWorkersInRange(GameObjectData *gameObjectData, SDL_Point ce
 int isPointInRangeOf(SDL_Point point, SDL_Point center, double radius);
 
 void initAudio(GameObjectData *gameObjectData, AudioData audioData);
-void objectInfoDisplay(GameObjectData *gameObjectData, GraphicsData *graphicsData, SDL_MouseButtonEvent *mbEvent);
+void objectInfoDisplay(GameObjectData *gameObjectData, GraphicsData *graphicsData, AnnouncementsData *announcementsData,
+SDL_MouseButtonEvent *mbEvent);
