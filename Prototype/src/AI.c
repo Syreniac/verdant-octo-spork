@@ -548,18 +548,20 @@ AIData initAIData(void){
 	int i = 0;
 	BlockFunction *erroneousBlockFunction = NULL;
     BlockFunctionArgumentType arguments[2] = {BF_PRIMARY,BF_SECONDARY};
-	file = fopenAndVerify("GenericWorkerAI.txt","r");
-	aiData.blockFunctionRoots = calloc(1,sizeof(BlockFunctionRoot));
-	aiData.blockFunctionRoots[0] = makeBlockFunctionRootFromFile(file);
-    aiData.templates = NULL;
-	fclose(file);
-	erroneousBlockFunction = testBlockFunctionRootForLoops(&aiData.blockFunctionRoots[0].blockFunctions[0],NULL,0);
-	if(erroneousBlockFunction != NULL){
-		while(erroneousBlockFunction != &aiData.blockFunctionRoots[0].blockFunctions[i]){
-		  i++;
-		}
-		nullifyBlockFunctionRoot(&aiData.blockFunctionRoots[0]);
-	}
+	file = fopen("GenericWorkerAI.txt","r");
+  aiData.blockFunctionRoots = calloc(1,sizeof(BlockFunctionRoot));
+  if(file != NULL){
+  	aiData.blockFunctionRoots[0] = makeBlockFunctionRootFromFile(file);
+      aiData.templates = NULL;
+  	fclose(file);
+  	erroneousBlockFunction = testBlockFunctionRootForLoops(&aiData.blockFunctionRoots[0].blockFunctions[0],NULL,0);
+  	if(erroneousBlockFunction != NULL){
+  		while(erroneousBlockFunction != &aiData.blockFunctionRoots[0].blockFunctions[i]){
+  		  i++;
+  		}
+  		nullifyBlockFunctionRoot(&aiData.blockFunctionRoots[0]);
+  	}
+  }
 	makeAIBlockTemplate(&aiData,"Void",1,arguments);
 	makeAIBlockTemplate(&aiData,"IfIdle",2,arguments);
 	makeAIBlockTemplate(&aiData,"IfReturning",2,arguments);
