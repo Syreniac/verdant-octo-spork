@@ -34,7 +34,7 @@ int handleEvent(SDL_Event *event, GameObjectData *gameObjectData, UIData *uiData
 					if(event->button.button == SDL_BUTTON_LEFT){
 					  UIRoot_ExecuteUpwards(uiData,LEFT_CLICK,1);
 					  if(controlsData->objectSelection){
-					  	objectInfoDisplay(gameObjectData, graphicsData, &event->button);
+					  	objectInfoDisplay(gameObjectData, graphicsData, uiData->announcementsData, &event->button);
 								controlsData->mouseButtons[LEFT_CLICK_BUTTON] = 1;
 					  }
 
@@ -42,7 +42,7 @@ int handleEvent(SDL_Event *event, GameObjectData *gameObjectData, UIData *uiData
 					else if(event->button.button == SDL_BUTTON_RIGHT){
 					  UIRoot_ExecuteUpwards(uiData,RIGHT_CLICK,1);
 					  if(controlsData->objectSelection){
-					  	objectInfoDisplay(gameObjectData, graphicsData, &event->button);
+					  	objectInfoDisplay(gameObjectData, graphicsData,uiData->announcementsData, &event->button);
 								controlsData->mouseButtons[RIGHT_CLICK_BUTTON] = 1;
 					  }
 					}
@@ -75,6 +75,8 @@ int handleEvent(SDL_Event *event, GameObjectData *gameObjectData, UIData *uiData
 		    default:
 		    	if(gameObjectData->gameOverEventNum == event->type){
 		      		UIRoot_Execute(uiData,GAME_OVER,0);
+		      	}else if(gameObjectData->objectDisplayEventNum == event->type){
+		      		UIRoot_Execute(uiData,OBJECT_DISPLAY,0);
 		      	}
 		    	break;
 		}
@@ -113,6 +115,7 @@ void keydown(ControlsData *controlsData, GameObjectData *gameObjectData, Graphic
 
 			UIRoot_Execute(uiData,RESPONSE_PAUSE,0);
             break;
+            
 		case (SDL_SCANCODE_Q):
 			controlsData->keys[DELETE] = 1;
 			UIRoot_ExecuteUpwards(uiData,RESPONSE_DELETE,1);

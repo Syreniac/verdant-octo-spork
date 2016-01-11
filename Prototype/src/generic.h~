@@ -86,7 +86,7 @@ each call to updateProgrammableWorker*/
 
 #define SIZE_OF_TREE 200
 #define SIZE_OF_TREESTUMP 70
-#define NUMBER_OF_TREES 250
+#define NUMBER_OF_TREES 500
 #define NUMBER_OF_FLOWER_PATCHES 50
 
 #define SIZE_OF_FLOWER 20
