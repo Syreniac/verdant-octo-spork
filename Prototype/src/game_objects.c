@@ -1389,7 +1389,7 @@ void objectInfoDisplay(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 	int displayInfoAlreadySet = 0, i;
 	point.x = mbEvent->x - graphicsData->navigationOffset.x;
 	point.y = mbEvent->y - graphicsData->navigationOffset.y;
-	char displayString[10];
+	char displayString[255];
 
 	graphicsData->trackingMode = 0;
 
