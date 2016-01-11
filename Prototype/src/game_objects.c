@@ -156,7 +156,7 @@ printf("top of kill programmable worker function\n");
 		free(p);
 	}else{
 		ProgrammableWorker *p = *programmableWorker;
-    	printf("here0000\n");		
+    	printf("here0000\n");
 	    for(*programmableWorker = gameObjectData->first_programmable_worker;
 	    (*programmableWorker)->next != p ;
 	    *programmableWorker = (*programmableWorker)->next){
@@ -328,7 +328,7 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
 	if(gameObjectData->hive.winterCountdown < WINTER_THRESHOLD){
 		if(!isPointInRangeOf(getCenterOfRect(programmableWorker->rect), getCenterOfRect(gameObjectData->hive.rect),
 		HIVE_SHELTER_RADIUS)){
-			
+
 			programmableWorker->cold_and_about_to_die++;
 
 		}
@@ -607,7 +607,7 @@ ResourceNodeSpawner createResourceNodeSpawner(int maximumNodeCount, float xPosit
 	/* Set the ticksSinceSpawn to 0 because we haven't spawned anything yet */
 	resourceNodeSpawner.spawnDelay = DEFAULT_SPAWNDELAY;
 	resourceNodeSpawner.ticksSinceSpawn = rand() % resourceNodeSpawner.spawnDelay;
-	resourceNodeSpawner.spawnRadius = radius;
+	resourceNodeSpawner.spawnRadius = radius + rand() % RANDOMISE_SPAWNRADIUS;
 	resourceNodeSpawner.collisionRect.x = (int)floor(xPosition - radius/2);
 	resourceNodeSpawner.collisionRect.y = (int)floor(yPosition - radius/2);
 	resourceNodeSpawner.collisionRect.w = (int)floor(radius);
@@ -807,7 +807,7 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 	int i, j;
 	ProgrammableWorker *programmableWorker;
 
-	
+
 	if(gameObjectData->pause_status){
 		if(paa++ == 0)
 		printf("bees taking shelter in hive = %d\n", gameObjectData->hive.bees_taking_shelter);
@@ -815,9 +815,9 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 		paa = 0;
 	}
 
-	
+
 	if(!gameObjectData->gameOver){/*start of it not game over*/
-	
+
 
 	if(gameObjectData->hive.winterCountdown >= WINTER_THRESHOLD && !gameObjectData->pause_status){
   		if(!gameObjectData->pause_status){
@@ -825,8 +825,8 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
   			gameObjectData->hive.winterCountdown = (int) gameObjectData->hive.winterCountdownFloat;
   		}
 
-  	}	
-  	
+  	}
+
 
 
 	if(gameObjectData->hive.winterCountdown <= WINTER_THRESHOLD){
@@ -843,7 +843,7 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 			}
 
 			if(gameObjectData->hive.flowers_collected > (gameObjectData->hive.scoreBeforeWinter -
-			(HONEY_REQUIRED_FOR_WINTER-1 + 
+			(HONEY_REQUIRED_FOR_WINTER-1 +
 			((float)HONEY_REQUIRED_FOR_WINTER *
 			((float)gameObjectData->hive.years_survived / (float)REQUIREMENT_YEAR_INCREASE_PERCENTAGE))))){
 				/*decrease score over winter (as bees are eating honey), decremented by HONEY_REQUIRED_FOR_WINTER-1*/
@@ -852,7 +852,7 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 				if(gameObjectData->hive.bees_taking_shelter > 0 && !gameObjectData->pause_status){
 					gameObjectData->hive.flowers_collected -= (rand()%10) ? 0 : 1;
 				}
-				
+
 
 				if(gameObjectData->hive.flowers_collected <= 0){
 					gameObjectData->gameOver = 1;
@@ -887,10 +887,10 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 		gameObjectData->tree->currentGraphicIndex = SUMMER_INDEX;
 		blitTiledBackground(graphicsData, graphicsData->grassTexture);
 	}
-	
+
 	}else{/*end of it not game over*/
 			SDL_SetRenderDrawColor(graphicsData->renderer, 230, 230, 230, 255);
-			SDL_RenderFillRect(graphicsData->renderer, NULL);	
+			SDL_RenderFillRect(graphicsData->renderer, NULL);
 	}
 
 
@@ -900,7 +900,7 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 		SDL_Point point = getCenterOfRect(gameObjectData->hive.rect);
 		renderFillRadius(graphicsData, &point, 40, 255,255,255, 80);
 	}
-	
+
 
 	/* First, we need to draw the Hive in at the correct position. */
 	blitGameObject(gameObjectData->hive.rect,
@@ -944,7 +944,7 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 
 
 	if(!gameObjectData->gameOver){ /*start of if not game over*/
-	
+
 	/*BEES ON GROUND NEED RENDERING BEFORE PERSON*/
 	for(programmableWorker = gameObjectData->first_programmable_worker; programmableWorker != NULL ;){
 		ProgrammableWorker *progWork;
@@ -981,10 +981,10 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 		if(programmableWorker->cold_and_about_to_die > COLD_DEATH_THRESHOLD){
 
 
-		
+
 			if(!(programmableWorker == gameObjectData->first_programmable_worker && programmableWorker->next == NULL)){
 				ProgrammableWorker *worker;
-				
+
 				int i = 0;
 
 				killProgrammableWorker(gameObjectData, &programmableWorker);

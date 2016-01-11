@@ -49,10 +49,10 @@ UI_Element *makeStartBlock(int x_offset, int y_offset, UI_Element *parent){
 	UIConfigure_FillAndBorderRect(element,&element->actions[0],248,221,35,0,0,0);
 	UIConfigure_ShrinkFitToParent(element, &element->actions[1]);
 	UIConfigure_DisplayString(element, &element->actions[2],"START",0,UISTRING_ALIGN_CENTER);
-	UIConfigure_RenderLine(element, &element->actions[3],BR_CORNER,NULL);
+	UIConfigure_RenderLine(element, &element->actions[7],BR_CORNER,NULL);
 
 	UIConfigure_LeftClickRect(element, &element->actions[4]);
-		UITrigger_Bind(&element->actions[4],&element->actions[3],-1,1);
+		UITrigger_Bind(&element->actions[4],&element->actions[7],-1,1);
 		UITrigger_Bind(&element->actions[4],&element->actions[4],1,0);
 		UITrigger_Bind(&element->actions[4],&element->actions[5],0,1);
 		UITrigger_Bind(&element->actions[4],&element->actions[6],0,1);
@@ -60,19 +60,19 @@ UI_Element *makeStartBlock(int x_offset, int y_offset, UI_Element *parent){
 	UIConfigure_LeftReleaseAnywhere(element, &element->actions[5]);
 		element->actions[5].status = 0;
 		element->actions[5].new_status = 0;
-		UITrigger_Bind(&element->actions[5],&element->actions[3],1,2);
+		UITrigger_Bind(&element->actions[5],&element->actions[7],1,2);
 		UITrigger_Bind(&element->actions[5],&element->actions[4],0,1);
-		UITrigger_Bind(&element->actions[5],&element->actions[7],0,1);
-		UITrigger_Bind(&element->actions[5],&element->actions[6],0,1);
+		UITrigger_Bind(&element->actions[5],&element->actions[3],-1,1);
+		UITrigger_Bind(&element->actions[5],&element->actions[6],1,0);
 		UITrigger_Bind(&element->actions[5],&element->actions[5],1,0);
 
-	UIConfigure_StoreMousePosition(element, &element->actions[6],2,&element->actions[3],&element->actions[7]);
+	UIConfigure_StoreMousePosition(element, &element->actions[6],2,&element->actions[7],&element->actions[3]);
 		element->actions[6].status = 0;
 		element->actions[6].new_status = 0;
-	UIConfigure_CalculateSibling(element, &element->actions[7],1,&element->actions[3]);
-		element->actions[7].status = 0;
-		element->actions[7].new_status = 0;
-	UIConfigure_SetUpAiBlock(element,&element->actions[8],2,&element->actions[2],&element->actions[3]);
+	UIConfigure_CalculateSibling(element, &element->actions[3],1,&element->actions[7]);
+		element->actions[3].status = 0;
+		element->actions[3].new_status = 0;
+	UIConfigure_SetUpAiBlock(element,&element->actions[8],2,&element->actions[2],&element->actions[7]);
 	UIElement_Reparent(element,parent);
 	return element;
 }
@@ -156,52 +156,52 @@ UI_Element *makeAIBlock(int x_offset, int y_offset, char *aiString, UI_Element *
 	UIConfigure_DisplayString(element2, &element2->actions[5],aiString,0,UISTRING_ALIGN_CENTER);
 
 	/* Line 1 */
-	UIConfigure_RenderLine(element2, &element2->actions[6],BL_CORNER,NULL);
+	UIConfigure_RenderLine(element2, &element2->actions[9],BL_CORNER,NULL);
 	UIConfigure_LeftClickRect(element2, &element2->actions[7]);
 		element2->actions[7].status = 1;
 		element2->actions[7].new_status = 1;
-		UITrigger_Bind(&element2->actions[7],&element2->actions[6],-1,1);
+		UITrigger_Bind(&element2->actions[7],&element2->actions[9],-1,1);
 		UITrigger_Bind(&element2->actions[7],&element2->actions[7],1,0);
-		UITrigger_Bind(&element2->actions[7],&element2->actions[8],0,1);
+		UITrigger_Bind(&element2->actions[7],&element2->actions[6],0,1);
 		UITrigger_Bind(&element2->actions[7],&element2->actions[10],0,1);
-	UIConfigure_StoreMousePosition(element2, &element2->actions[8],2,&element2->actions[6],&element2->actions[9]);
+	UIConfigure_StoreMousePosition(element2, &element2->actions[6],2,&element2->actions[9],&element2->actions[8]);
+		element2->actions[6].status = 0;
+		element2->actions[6].new_status = 0;
+	UIConfigure_CalculateSibling(element2, &element2->actions[8],1,&element2->actions[9]);
 		element2->actions[8].status = 0;
 		element2->actions[8].new_status = 0;
-	UIConfigure_CalculateSibling(element2, &element2->actions[9],1,&element2->actions[6]);
-		element2->actions[9].status = 0;
-		element2->actions[9].new_status = 0;
 	UIConfigure_LeftReleaseAnywhere(element2, &element2->actions[10]);
 		element2->actions[10].status = 0;
 		element2->actions[10].new_status = 0;
-		UITrigger_Bind(&element2->actions[10],&element2->actions[6],1,2);
+		UITrigger_Bind(&element2->actions[10],&element2->actions[9],1,2);
 		UITrigger_Bind(&element2->actions[10],&element2->actions[12],0,1);
-		UITrigger_Bind(&element2->actions[10],&element2->actions[8],1,0);
-		UITrigger_Bind(&element2->actions[10],&element2->actions[9],0,1);
+		UITrigger_Bind(&element2->actions[10],&element2->actions[6],1,0);
+		UITrigger_Bind(&element2->actions[10],&element2->actions[8],0,1);
 		UITrigger_Bind(&element2->actions[10],&element2->actions[10],1,0);
 		UITrigger_Bind(&element2->actions[10],&element2->actions[18],0,1);
 
 	/* Line 2 */
-	UIConfigure_RenderLine(element2, &element2->actions[11],BR_CORNER,NULL);
+	UIConfigure_RenderLine(element2, &element2->actions[14],BR_CORNER,NULL);
 	UIConfigure_LeftClickRect(element2, &element2->actions[12]);
 		element2->actions[12].status = 0;
 		element2->actions[12].new_status = 0;
-		UITrigger_Bind(&element2->actions[12],&element2->actions[11],-1,1);
+		UITrigger_Bind(&element2->actions[12],&element2->actions[14],-1,1);
 		UITrigger_Bind(&element2->actions[12],&element2->actions[12],1,0);
-		UITrigger_Bind(&element2->actions[12],&element2->actions[13],0,1);
+		UITrigger_Bind(&element2->actions[12],&element2->actions[11],0,1);
 		UITrigger_Bind(&element2->actions[12],&element2->actions[15],0,1);
-	UIConfigure_StoreMousePosition(element2, &element2->actions[13],2,&element2->actions[11],&element2->actions[14]);
+	UIConfigure_StoreMousePosition(element2, &element2->actions[11],2,&element2->actions[14],&element2->actions[13]);
+		element2->actions[11].status = 0;
+		element2->actions[11].new_status = 0;
+	UIConfigure_CalculateSibling(element2, &element2->actions[13],1,&element2->actions[14]);
 		element2->actions[13].status = 0;
 		element2->actions[13].new_status = 0;
-	UIConfigure_CalculateSibling(element2, &element2->actions[14],1,&element2->actions[11]);
-		element2->actions[14].status = 0;
-		element2->actions[14].new_status = 0;
 	UIConfigure_LeftReleaseAnywhere(element2, &element2->actions[15]);
 		element2->actions[15].status = 0;
 		element2->actions[15].new_status = 0;
-		UITrigger_Bind(&element2->actions[15],&element2->actions[11],1,2);
+		UITrigger_Bind(&element2->actions[15],&element2->actions[14],1,2);
 		UITrigger_Bind(&element2->actions[15],&element2->actions[16],0,1);
-		UITrigger_Bind(&element2->actions[15],&element2->actions[13],1,0);
-		UITrigger_Bind(&element2->actions[15],&element2->actions[14],0,1);
+		UITrigger_Bind(&element2->actions[15],&element2->actions[11],1,0);
+		UITrigger_Bind(&element2->actions[15],&element2->actions[13],0,1);
 		UITrigger_Bind(&element2->actions[15],&element2->actions[15],1,0);
 		UITrigger_Bind(&element2->actions[15],&element2->actions[18],0,1);
 
@@ -209,14 +209,14 @@ UI_Element *makeAIBlock(int x_offset, int y_offset, char *aiString, UI_Element *
 	UIConfigure_LeftClickRect(element2, &element2->actions[16]);
 		element2->actions[16].status = 0;
 		element2->actions[16].new_status = 0;
-		UITrigger_Bind(&element2->actions[16],&element2->actions[6],-1,4);
-		UITrigger_Bind(&element2->actions[16],&element2->actions[11],-1,4);
+		UITrigger_Bind(&element2->actions[16],&element2->actions[9],-1,4);
+		UITrigger_Bind(&element2->actions[16],&element2->actions[14],-1,4);
 		UITrigger_Bind(&element2->actions[16],&element2->actions[7],0,1);
 		UITrigger_Bind(&element2->actions[16],&element2->actions[16],1,0);
 		UITrigger_Bind(&element2->actions[16],&element2->actions[18],0,1);
 
 	UIConfigure_DeleteKeyFlagDestroy(element2, &element2->actions[17]);
-	UIConfigure_SetUpAiBlock(element2,&element2->actions[18],3,&element2->actions[5],&element2->actions[6],&element2->actions[11]);
+	UIConfigure_SetUpAiBlock(element2,&element2->actions[18],3,&element2->actions[5],&element2->actions[9],&element2->actions[14]);
 
 	UIElement_Reparent(element2,parent);
 	return element2;
@@ -1755,6 +1755,7 @@ int UIAction_RenderLine(UI_Action *action, UIData *uiData){
 				action->external = NULL;
 				action->drawPosX = action->element->rect.x;
 				action->drawPosY = action->element->rect.y;
+				printf("TEST FAILED\n");
 			}
 			else{
 				action->new_status = 2;
@@ -1935,8 +1936,16 @@ int UIAction_CalculateSibling(UI_Action *action, UIData *uiData){
 						break;
 					 }
 			}
+			printf("checked element, no luck :(\n");
 			element = element->sibling;
 		}
+		if(element!=NULL){
+			printf("FOUND ELEMENT %p\n",element);
+		}
+		else{
+			printf("can't find element\n");
+		}
+
 		while(i < action->num_of_companions){
 			action->companions[i]->external = element;
 			i++;

@@ -34,7 +34,7 @@ InitData initialise(void){
 
     initData.graphicsData.renderer = SDL_CreateRenderer(initData.graphicsData.window,
                                                -1,
-                                               SDL_RENDERER_TARGETTEXTURE|SDL_RENDERER_PRESENTVSYNC);
+                                               SDL_RENDERER_TARGETTEXTURE|SDL_RENDERER_PRESENTVSYNC|SDL_RENDERER_ACCELERATED);
 	assert(initData.graphicsData.renderer != NULL);
   initData.graphicsData.navigationOffset.w = 0;
   initData.graphicsData.navigationOffset.h = 0;

@@ -206,7 +206,7 @@ static void createGameUI(GameData *gameData){
   UIConfigure_DisplayString(element, &element->actions[2], "Hello",0,UISTRING_ALIGN_LEFT);
   UIConfigure_GetAnnouncement(element, &element->actions[3], &element->actions[2]);
   UIElement_Reparent(element,gameData->uiData.root);
-  
+
   /*game Over box*/
   element = UIElement_Create(0,0,win_x/2,win_y/2,6);
   UIConfigure_Auto(element, &element->actions[0], GAME_OVER);
@@ -220,11 +220,11 @@ static void createGameUI(GameData *gameData){
     UITrigger_Bind(&element->actions[1],&element->actions[1],1,0);
     UITrigger_Bind(&element->actions[1],&element->actions[2],0,1);
     UITrigger_Bind(&element->actions[1],&element->actions[3],0,1);
-  	quickSetStatus(&element->actions[1],1)
+  	quickSetStatus(&element->actions[1],1);
   UIConfigure_FillAndBorderRect(element, &element->actions[2],255,255,255,0,0,0);
-	  quickSetStatus(&element->actions[2],0)
+	  quickSetStatus(&element->actions[2],0);
   UIConfigure_DisplayString(element, &element->actions[3],"GAME OVER",0, UISTRING_ALIGN_CENTER);
-	  quickSetStatus(&element->actions[3],0)
+	  quickSetStatus(&element->actions[3],0);
   UIConfigure_Auto(element,&element->actions[4],UPDATE);
   	UITrigger_Bind(&element->actions[4],&element->actions[0],2,1);
   	UITrigger_Bind(&element->actions[4],&element->actions[1],2,1);
@@ -626,12 +626,6 @@ int gameLoop(GameData *gameData){
   printf("t @ benchmark %d: %d\n", testMarker++,SDL_GetTicks() - gameData->gameRunTime);
   printf("--------------------------\n");
   #endif
-  if(gameData->delta<FRAME_TIME){
-	   SDL_Delay(FRAME_TIME-gameData->delta);
-  }
-  if(gameData->delta<FRAME_TIME){
-	   SDL_Delay(FRAME_TIME-gameData->delta);
-  }
 
   if(gameData->gameObjectData.gameRestart){
      return(0);

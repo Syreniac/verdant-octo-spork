@@ -60,7 +60,6 @@ int handleEvent(SDL_Event *event, GameObjectData *gameObjectData, UIData *uiData
 				break;
 			case SDL_KEYDOWN:
 				keydown(controlsData,gameObjectData, graphicsData, uiData,event);
-				printf("              keydown registered\n");
 				break;
 			case SDL_KEYUP:
 				keyup(controlsData,gameObjectData, uiData,event);

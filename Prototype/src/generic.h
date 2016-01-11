@@ -32,8 +32,8 @@ FILE *DEBUGGING_FILE_FREE;
 #define X_SIZE_OF_SCREEN 960
 #define Y_SIZE_OF_SCREEN 720
 
-#define X_SIZE_OF_WORLD 2100
-#define Y_SIZE_OF_WORLD 1700
+#define X_SIZE_OF_WORLD 21000
+#define Y_SIZE_OF_WORLD 17000
 
 #define X_INITIAL_SCREEN_OFFSET -(X_SIZE_OF_WORLD/2)+(X_SIZE_OF_SCREEN/2)
 #define Y_INITIAL_SCREEN_OFFSET -(Y_SIZE_OF_WORLD/2)+(Y_SIZE_OF_SCREEN/2)
@@ -48,7 +48,7 @@ FILE *DEBUGGING_FILE_FREE;
 #define RAIN_TILE_HEIGHT 9
 #define RAIN_FRAME_DELAY 4
 
-#define INITIAL_NUMBER_OF_WORKERS 10
+#define INITIAL_NUMBER_OF_WORKERS 50
 
 /*lower values result in a higher chance of bees regaining flight when wet, with
 each call to updateProgrammableWorker*/
@@ -86,8 +86,8 @@ each call to updateProgrammableWorker*/
 
 #define SIZE_OF_TREE 200
 #define SIZE_OF_TREESTUMP 70
-#define NUMBER_OF_TREES 25
-#define NUMBER_OF_FLOWER_PATCHES 5
+#define NUMBER_OF_TREES 250
+#define NUMBER_OF_FLOWER_PATCHES 50
 
 #define SIZE_OF_FLOWER 20
 
@@ -95,7 +95,7 @@ each call to updateProgrammableWorker*/
 
 #define CARRYING_FLOWER_INDEX_OFFSET 2
 #define CARRYING_ICECREAM_INDEX_OFFSET 4
-#define MS_BETWEEN_FLAPPING 60
+#define MS_BETWEEN_FLAPPING 45
 
 
 #define BENCHMARK_TEST 0
@@ -117,6 +117,7 @@ each call to updateProgrammableWorker*/
 #define DEFAULT_RESOURCEUNITS 100
 #define DEFAULT_SPAWNDELAY 1000
 #define DEFAULT_SPAWNRADIUS 100.0
+#define RANDOMISE_SPAWNRADIUS 1000
 #define DEFAULT_MAXNODECOUNT 10
 #define TICKSPERWEATHER 30000
 #define SUN_LASTS_LONGER_FACTOR 5
