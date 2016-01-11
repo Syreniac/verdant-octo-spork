@@ -280,17 +280,17 @@ Hive createHive(void){
 	return(hive);
 }
 
-Tree createTree(void){
+Tree createTree(Hive *hive, int forceX, int forceY){
 	Tree tree;
+	
 	tree.rect.w = SIZE_OF_TREE;
 	tree.rect.h = SIZE_OF_TREE;
 	tree.stumpRect.w = SIZE_OF_TREESTUMP;
 	tree.stumpRect.h = SIZE_OF_TREESTUMP;
-	tree.rect.x = rand() % X_SIZE_OF_WORLD - SIZE_OF_TREE/2;
-	tree.rect.y = rand() % Y_SIZE_OF_WORLD - SIZE_OF_TREE/2;
+	tree.rect.x = forceX;
+	tree.rect.y = forceY;
 	/*if tree is too close to hive, rellocate*/
-	while(abs(tree.rect.x - (X_SIZE_OF_WORLD/2 - X_SIZE_OF_HIVE/2)) < SIZE_OF_TREE &&
-	abs(tree.rect.y - (Y_SIZE_OF_WORLD/2 - Y_SIZE_OF_HIVE/2)) < SIZE_OF_TREE){
+	while(isPointInRangeOf(getCenterOfRect(tree.rect), getCenterOfRect(hive->rect), 100)){
 
 		if(rand()%2){
 			tree.rect.x += SIZE_OF_TREE;

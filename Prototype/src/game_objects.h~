@@ -163,6 +163,7 @@ struct GameObjectData{
   int programmableWorkerCount;
   int pause_status;
   char announcement[256];
+  char gameOverString[256];
   int gameOver;
   int gameOverBoxVisible;
   gameOverCause gameOverCause;
@@ -173,6 +174,7 @@ struct GameObjectData{
 
 
 
+
 void killAllBees(ProgrammableWorker **programmableWorker);
 void killProgrammableWorker(GameObjectData *gameObjectData, ProgrammableWorker **programmableWorker);
 ProgrammableWorker *createProgrammableWorker(GameObjectData *gameObjectData);
@@ -180,7 +182,7 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
 void updateIceCreamPerson(GameObjectData *gameObjectData, int ticks);
 
 Hive createHive(void);
-Tree createTree(void);
+Tree createTree(int forcedX, int forceY);
 Weather createWeatherLayer(void);
 
 /* I think that it will be better to do static respawning objects through

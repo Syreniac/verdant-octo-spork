@@ -73,6 +73,7 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
   /* This doesn't actually do much, but it lets us give the workers somewhere
      to return home to */
   generateHive(&gameData.gameObjectData);
+  /*hive must be generated before trees, as this allows the last tree to be placed near the hive*/
   generateTrees(&gameData.gameObjectData);
   generateWeatherLayer(&gameData.gameObjectData);
 

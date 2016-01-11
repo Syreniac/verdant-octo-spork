@@ -46,11 +46,23 @@ void generateHive(GameObjectData *gameObjectData){
 void generateTrees(GameObjectData *gameObjectData){
   /* Create a Tree */
   int i;
-  for(i = 0; i < NUMBER_OF_TREES; i++){
+  
+  
+  for(i = 2; i < NUMBER_OF_TREES; i++){
 
-     gameObjectData->tree[i] = createTree();
+     gameObjectData->tree[i] = createTree(&gameObjectData->hive,
+     rand() % X_SIZE_OF_WORLD - SIZE_OF_TREE/2, rand() % Y_SIZE_OF_WORLD - SIZE_OF_TREE/2);
 
   }
+  
+    
+  gameObjectData->tree[0] = createTree(&gameObjectData->hive, (X_SIZE_OF_WORLD/2 - X_SIZE_OF_HIVE/2),
+  									   (Y_SIZE_OF_WORLD/2 - Y_SIZE_OF_HIVE/2));
+  									   
+  gameObjectData->tree[1] = createTree(&gameObjectData->hive, (X_SIZE_OF_WORLD/2 - X_SIZE_OF_HIVE/2),
+  									   (Y_SIZE_OF_WORLD/2 - Y_SIZE_OF_HIVE/2));  
+					  
+
 }
 
 

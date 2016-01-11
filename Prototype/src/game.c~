@@ -73,7 +73,8 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
   /* This doesn't actually do much, but it lets us give the workers somewhere
      to return home to */
   generateHive(&gameData.gameObjectData);
-  generateTrees(&gameData.gameObjectData);
+  /*hive must be generated before trees, as this allows the last tree to be placed near the hive*/
+  generateTrees(&gameData.gameObjectData.hive, &gameData.gameObjectData);
   generateWeatherLayer(&gameData.gameObjectData);
 
   generateIceCreamPerson(&gameData.gameObjectData);
@@ -259,7 +260,7 @@ static void createGameUI(GameData *gameData){
   UIConfigure_GetGameOverString(element, &element->actions[6], &element->actions[3]);
   UIElement_Reparent(element,gameData->uiData.root);
   
- /* element = UIElement_Create(0,0,200,25,7);
+  element = UIElement_Create(0,0,200,25,7);
   UIConfigure_Auto(element, &element->actions[0], GAME_OVER);
     UITrigger_Bind(&element->actions[0],&element->actions[0],-1,0);
     UITrigger_Bind(&element->actions[0],&element->actions[1],0,2);
@@ -281,7 +282,7 @@ static void createGameUI(GameData *gameData){
   	UITrigger_Bind(&element->actions[4],&element->actions[1],2,1);
    UIConfigure_PercPosition(element, &element->actions[5],0.5,1.0,-100,-415,0);
   UIConfigure_GetFinalScoreString(element, &element->actions[6], &element->actions[3]);
-  UIElement_Reparent(element,gameData->uiData.root);*/
+  UIElement_Reparent(element,gameData->uiData.root);
   
   
     /*gameOverInformation*/
