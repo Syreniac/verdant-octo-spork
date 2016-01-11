@@ -41,33 +41,44 @@ ResourceNode *checkResourceNodeCollision(ResourceNodeSpawner **resourceNodeSpawn
 	 attached, doing it simply by checking ResourceNodes will be 1 million
 	 checks at worst whilst this way will be 2000 checks at worst.*/
 	int i = 0, j = 0;
+	int x,y,x2,y2;
+	SDL_Point worker_p;
+	SDL_Point node_p;
+	double d2;
+	worker_p = getCenterOfRect(programmableWorker->rect);
 	/* Loop through all the resourceNodeSpawners in the gameObjectData we got
 	 passed */
 	while(i < gameObjectData->resourceNodeSpawnerCount){
-	/* Get the distance2 between the resourceNodeSpawner and the point to check */
-	/* This checks if we are close enough to a resourceNodeSpawner that we
-		 should check against the individual nodes*/
-	if(testRectIntersection(programmableWorker->rect, gameObjectData->resourceNodeSpawners[i].collisionRect)){
-		/* Reset j every time */
-		j = 0;
-		*resourceNodeSpawnerPointer = &gameObjectData->resourceNodeSpawners[i];
-		/* Loop through the ResourceNodes on the resourceNodeSpawner and check
-		 collisions */
-		while(j < gameObjectData->resourceNodeSpawners[i].maximumNodeCount){
-		/* Get the distance2 between the ResourceNode and the point to check */
-		/* Check whether we are close enough to a ResourceNode to collide and
-			 that the node we're testing is actually alive.*/
-		if(isPointInRect(gameObjectData->resourceNodeSpawners[i].resourceNodes[j].rect.x + X_SIZE_OF_NODE/2,
-			 gameObjectData->resourceNodeSpawners[i].resourceNodes[j].rect.y + Y_SIZE_OF_NODE/2,
-			 programmableWorker->rect)
-			&& gameObjectData->resourceNodeSpawners[i].resourceNodes[j].alive){
-			/* Both these values are essentially returned */
-			return(&gameObjectData->resourceNodeSpawners[i].resourceNodes[j]);
+		/* Get the distance2 between the resourceNodeSpawner and the point to check */
+		/* This checks if we are close enough to a resourceNodeSpawner that we
+			 should check against the individual nodes*/
+
+		d2 = getDistance2BetweenPoints(worker_p.x,
+											 					 worker_p.y,
+											 				   (int)gameObjectData->resourceNodeSpawners[i].xPosition,
+											 				   (int)gameObjectData->resourceNodeSpawners[i].yPosition);
+		if(d2 <= (WORKER_SENSE_RANGE + gameObjectData->resourceNodeSpawners[i].spawnRadius) * (WORKER_SENSE_RANGE + gameObjectData->resourceNodeSpawners[i].spawnRadius)){
+			/* Reset j every time */
+			j = 0;
+			/* Loop through the ResourceNodes on the resourceNodeSpawner and check
+			 collisions */
+			while(j < gameObjectData->resourceNodeSpawners[i].maximumNodeCount){
+				/* Get the distance2 between the ResourceNode and the point to check */
+				/* Check whether we are close enough to a ResourceNode to collide and
+					 that the node we're testing is actually alive.*/
+				node_p = getCenterOfRect(gameObjectData->resourceNodeSpawners[i].resourceNodes[j].rect);
+				if(isPointInRect(node_p.x,node_p.y,programmableWorker->rect)
+					&& gameObjectData->resourceNodeSpawners[i].resourceNodes[j].alive){
+						*resourceNodeSpawnerPointer = &gameObjectData->resourceNodeSpawners[i];
+						return(&gameObjectData->resourceNodeSpawners[i].resourceNodes[j]);
+				}
+				else if(getDistance2BetweenPoints(node_p.x,node_p.y,worker_p.x,worker_p.y)){
+					*resourceNodeSpawnerPointer = &gameObjectData->resourceNodeSpawners[i];
+				}
+				j++;
+			}
 		}
-		j++;
-		}
-	}
-	i++;
+		i++;
 	}
 
 	return(NULL);
@@ -282,7 +293,7 @@ Hive createHive(void){
 
 Tree createTree(Hive *hive, int forceX, int forceY){
 	Tree tree;
-	
+
 	tree.rect.w = SIZE_OF_TREE;
 	tree.rect.h = SIZE_OF_TREE;
 	tree.stumpRect.w = SIZE_OF_TREESTUMP;
@@ -357,17 +368,17 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
 					programmableWorker->wet_and_cant_fly = 1; /*true*/
 				}
 			}
-			
+
 			if(programmableWorker->stunned_after_sting){
-			
+
 				programmableWorker->heading += (rand()%3)-1;
-				
+
 				if(programmableWorker->stunned_after_sting++ > STUNNED_AFTER_STING_DURATION){
 					programmableWorker->stunned_after_sting = 0;
 				}
-			
+
 			}
-			
+
 			/* Because we're using a heading/velocity movement system here, we have to use
 			some trigonometry to work out the new positions */
 			newX = sin(programmableWorker->heading);
@@ -422,16 +433,16 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
   				/*if programmable worker is clsoe enough to dropped icecream, it is not the very same second that the person dropped it*/
   				/* then the worker picks up the iceCream*/
   				if(!programmableWorker->stunned_after_sting){
-  				
+
 					if(isPointInRangeOf(getCenterOfRect(programmableWorker->rect),
 					getCenterOfRect(gameObjectData->droppedIceCream->rect),
 					(double)ICECREAM_PICKUP_RADIUS) && gameObjectData->droppedIceCream->dropped){
-	
+
 						programmableWorker->cargo += SUGAR_VALUE_OF_ICECREAM;
 						gameObjectData->droppedIceCream->dropped = 0;
 						gameObjectData->droppedIceCream->droppedTimer = 0;
 
-	
+
 					}else{
   						/* We want to get back the ResourceNode and ResourceNodeSpawner (if any)
   						that we are colliding with */
@@ -445,7 +456,7 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
   	  						programmableWorker->brain.foundNode = NULL;
   						}
   					}
-  					
+
   				}
 
 			}
@@ -463,15 +474,27 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
 	}
 	  /* Sensory Perception */
 	if(programmableWorker->brain.foundNode != NULL &&
-	(getDistance2BetweenRects(programmableWorker->rect,programmableWorker->brain.foundNode->rect) > 500*500 ||
+	(getDistance2BetweenRects(programmableWorker->rect,programmableWorker->brain.foundNode->rect) >= WORKER_SENSE_RANGE * WORKER_SENSE_RANGE ||
 	!programmableWorker->brain.foundNode->alive)){
 	   programmableWorker->brain.foundNode = NULL;
 	}
 	if(programmableWorker->brain.foundNode == NULL && resourceNodeSpawner != NULL){
-	   programmableWorker->brain.foundNode = chooseNodeRandomly(resourceNodeSpawner);
+		 resourceNode = chooseNodeRandomly(resourceNodeSpawner);
+		 if(resourceNode != NULL && getDistance2BetweenRects(programmableWorker->rect,resourceNode->rect) < WORKER_SENSE_RANGE * WORKER_SENSE_RANGE){
+		   programmableWorker->brain.foundNode = resourceNode;
+		 }
 	}
 }
 
+}
+
+void centerViewOnHive(GraphicsData *graphicsData, GameObjectData *gameObjectData){
+	SDL_Point p = getCenterOfRect(gameObjectData->hive.rect);
+	int win_x, win_y;
+	SDL_GetWindowSize(graphicsData->window,&win_x,&win_y);
+	p.x -= win_x/2;
+	p.y -= win_y/2;
+	setNavigationOffset(graphicsData, p.x, p.y);
 }
 
 
@@ -541,25 +564,25 @@ void updateIceCreamPerson(GameObjectData *gameObjectData, int ticks){
 	/*that is explicitly programmed into the bees, or (as it currently is) bit enough to happy on an occatinal collision*/
 	for(programmableWorker = gameObjectData->first_programmable_worker; programmableWorker != NULL;
 	programmableWorker = programmableWorker->next){
-	
+
   		if(isPointInRangeOf(getCenterOfRect(programmableWorker->rect),
   		getCenterOfRect(gameObjectData->iceCreamPerson->rect), STING_HIT_RADIUS) != 0){
 
 	  		gameObjectData->iceCreamPerson->stung = 1;
 	  		/*drop iceCream!*/
 	  		gameObjectData->iceCreamPerson->has_ice_cream = 0;
-		
+
 	  		gameObjectData->droppedIceCream->xPosition = gameObjectData->iceCreamPerson->xPosition;
 	  		gameObjectData->droppedIceCream->yPosition = gameObjectData->iceCreamPerson->yPosition;
-	
+
 		  	gameObjectData->droppedIceCream->dropped = 1;
-	
+
 	  		/*run for your life!*/
 	  		gameObjectData->iceCreamPerson->speed = 0.1;
-	  		
+
 	  		/*set programmable worker to stunned after sting*/
 	  		programmableWorker->stunned_after_sting = 1;
-  		
+
   		}
 
   	}
@@ -1001,7 +1024,7 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 				SDL_Point point = getCenterOfRect(programmableWorker->rect);
 				point.x -= 5;
 				point.y -= 5;
-				renderRadius(graphicsData, &point, programmableWorker->rect.w/2, 255,255,255, 180);
+				renderRadius(graphicsData, &point, WORKER_SENSE_RANGE, 255,255,255, 255);
 			}
 
 			blitGameObject(smallerBeeRect,
@@ -1152,7 +1175,7 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 			  	int window_x,window_y, tempXOffset, tempYOffset;
 				SDL_Point point = getCenterOfRect(programmableWorker->rect);
 
-				renderRadius(graphicsData, &point, WORKER_PERCEPTION_RADIUS, 255,255,255, 180);
+				renderRadius(graphicsData, &point, WORKER_SENSE_RANGE, 255,255,255, 180);
  					SDL_GetWindowSize(graphicsData->window,&window_x,&window_y);
 				/* I'm internally debating whether to center the screen or not here */
 				tempXOffset = -programmableWorker->rawX + (programmableWorker->xRenderPosWhenSelected);
@@ -1217,7 +1240,7 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 
 	/*finally render a layer or rain splatter if its raining*/
 	if(gameObjectData->weather.present_weather == Rain){
-	blitRainRandomly(graphicsData);
+		blitRainRandomly(graphicsData);
 	}
 
 	updateWeather(gameObjectData, &gameObjectData->weather, ticks);

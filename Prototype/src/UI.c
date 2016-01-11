@@ -1165,8 +1165,6 @@ int UIAction_SetUpAiBlock(UI_Action *action, UIData *uiData){
 	int stringLength = 1;
 	char workingSpace[30] = {0};
 	if(action->status == 1){
-		UIElement_RemoveExposedData(action->element);
-
 		action->element->exposed_data_types = malloc(sizeof(enum UIDataTypes));
 		action->element->exposed_data_types[0] = UI_STRING;
 
@@ -2508,7 +2506,6 @@ void UIElement_Free(UI_Element *element){
 	while(root->parent != NULL){
 		root = root->parent;
 	}
-	UIElement_RemoveExposedData(element);
 	UIElement_Deparent(element);
 	/* Clean out all references to this element */
 	UIElement_DeExternalise(root,element);
@@ -2516,6 +2513,9 @@ void UIElement_Free(UI_Element *element){
 	  UIAction_Free(&element->actions[i]);
 	  i++;
 	}
+	printf("remove exposed data because we want to free the element...\n");
+	UIElement_RemoveExposedData(element);
+	printf("done\n");
 	free(element->actions);
 	free(element);
 }
@@ -2574,6 +2574,7 @@ void UIElement_Deparent(UI_Element *element){
 	UI_Element *child;
 	UI_Element *sibling;
 	int i;
+	printf("deparenting\n");
 	if(parent==NULL){
 		return;
 	}
@@ -2730,6 +2731,7 @@ void UIRoot_ExecuteUpwards(UIData *uiData, enum Response response, int stopAtFir
 	UI_Element **queue = calloc(guesstimated_queue_length,sizeof(UI_Element*));
 	UI_Element *queue_element;
 	UI_Element *queue_element_child;
+	int i = 0;
 	int front = 0,back = 1;
 	queue[0] = uiData->root;
 	assert(queue!=NULL);
@@ -2755,6 +2757,10 @@ void UIRoot_ExecuteUpwards(UIData *uiData, enum Response response, int stopAtFir
 		queue_element = queue[back];
 		/* We have to do our disposal here because doing it in a top down traversal
 		   of the tree would break things */
+		if(response == FREED){
+			printf("freeing element %p\n",queue_element);
+			UIElement_Free(queue_element);
+		}
 		if(response == DISPOSAL && queue_element->destroy){
 			UIElement_Free(queue_element);
 		}
@@ -2797,36 +2803,7 @@ static int percWindowDimension(int dimension, float perc){
 }
 
 void UIRoot_Destroy(UIData *uiData){
-	static int guesstimated_queue_length = 2;
-	UI_Element **queue = calloc(guesstimated_queue_length,sizeof(UI_Element*));
-	UI_Element *queue_element;
-	UI_Element *queue_element_child;
-	int front = 0,back = 1;
-	queue[0] = uiData->root;
-	assert(queue!=NULL);
-	while(queue[front] != NULL && front != back){
-		queue_element = queue[front];
-		front = (front + 1);
-		queue_element_child = queue_element->child;
-		while(queue_element_child != NULL){
-			if(back == guesstimated_queue_length){
-				guesstimated_queue_length = back+1;
-				queue = realloc(queue,guesstimated_queue_length * sizeof(UI_Element*));
-			}
-			queue[back] = queue_element_child;
-			back = (back + 1);
-			queue_element_child = queue_element_child->sibling;
-		}
-	}
-	if(back < guesstimated_queue_length){
-		guesstimated_queue_length = back + 1;
-	}
-	while(back > 0){
-		back--;
-		queue_element = queue[back];
-		UIElement_Free(queue_element);
-	}
-	free(queue);
+	UIRoot_ExecuteUpwards(uiData,FREED,0);
 }
 
 void UIRoot_Pack(UIData *uiData, GraphicsData *graphicsData){

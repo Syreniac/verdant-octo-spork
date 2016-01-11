@@ -204,3 +204,4 @@ int isPointInRangeOf(SDL_Point point, SDL_Point center, double radius);
 
 void initAudio(GameObjectData *gameObjectData, AudioData audioData);
 void objectInfoDisplay(GameObjectData *gameObjectData, GraphicsData *graphicsData, SDL_MouseButtonEvent *mbEvent);
+void centerViewOnHive(GraphicsData *graphicsData, GameObjectData *gameObjectData);

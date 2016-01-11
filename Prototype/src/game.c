@@ -35,7 +35,7 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
   gameData.audioData = audioData;
 
 
-  gameData.uiData.root = calloc(1, sizeof(UI_Element));
+  gameData.uiData.root = UIElement_Create(0,0,0,0,0);
   gameData.running = 1;
 
   initAudio(&gameData.gameObjectData, gameData.audioData);
@@ -177,12 +177,7 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
   }
 
   cleanUpGameData(&gameData);
-
-  if(gameData.gameObjectData.gameRestart){
-  	return(1);
-  }else{
-  	return(0);
-  }
+  return 0;
 }
 
 static void cleanUpGameData(GameData *gameData){
@@ -416,12 +411,12 @@ static void createGameUI(GameData *gameData){
     UITrigger_Bind(&element->actions[0],&element->actions[1],0,1);
     UITrigger_Bind(&element->actions[0],&element->actions[2],-1,0);
     UITrigger_Bind(&element->actions[0],&element->actions[3],-1,0);
+  	  quickSetStatus(&element->actions[0],0);
   UIConfigure_Auto(element, &element->actions[1], RESPONSE_PAUSE);
-    UITrigger_Bind(&element->actions[1],&element->actions[0],0,2);
+    UITrigger_Bind(&element->actions[1],&element->actions[0],-1,1);
     UITrigger_Bind(&element->actions[1],&element->actions[1],1,0);
     UITrigger_Bind(&element->actions[1],&element->actions[2],0,1);
     UITrigger_Bind(&element->actions[1],&element->actions[3],0,1);
-  	  quickSetStatus(&element->actions[1],0);
   UIConfigure_FillAndBorderRect(element, &element->actions[2],255,0,0,0,0,0);
 	  quickSetStatus(&element->actions[2],0);
   UIConfigure_DisplayString(element, &element->actions[3],"PAUSED",0, UISTRING_ALIGN_CENTER);
@@ -548,6 +543,13 @@ int gameLoop(GameData *gameData){
   printf("t @ benchmark %d: %d\n", testMarker++,SDL_GetTicks() - gameData->gameRunTime);
   #endif
 
+  while (SDL_PollEvent(&event)){
+	  if(handleEvent(&event,&gameData->gameObjectData,&gameData->uiData,&gameData->controlsData, &gameData->graphicsData) == 0){
+      printf("escape\n");
+      return 0;
+    }
+  }
+
   if(!gameData->graphicsData.trackingMode){
   	panScreen(&gameData->graphicsData, &gameData->controlsData, gameData->delta);
   }
@@ -555,6 +557,7 @@ int gameLoop(GameData *gameData){
   if(SDL_RenderClear(gameData->graphicsData.renderer) == -1){
 	   printf("Error clearing renderer: %s\n", SDL_GetError());
   }
+
   paintBackground(&gameData->graphicsData,0,200,100);
 
   updateGameObjects(&gameData->gameObjectData, &gameData->graphicsData, &gameData->announcementsData, gameData->delta);
@@ -563,10 +566,6 @@ int gameLoop(GameData *gameData){
 
   SDL_RenderPresent(gameData->graphicsData.renderer);
   announce_update(&gameData->announcementsData, gameData->delta);
-
-  while (SDL_PollEvent(&event)){
-	  handleEvent(&event,&gameData->gameObjectData,&gameData->uiData,&gameData->controlsData, &gameData->graphicsData);
-  }
   if (Mix_Playing(1) == 0) {
  	  playMusic(&gameData->audioData,1);
   }
@@ -583,12 +582,11 @@ int gameLoop(GameData *gameData){
 	      SDL_PushEvent(&gameOverEvent);
   	  }
    	  while (SDL_PollEvent(&event)){
-		      continuing = continuing || handleEvent(&event,&gameData->gameObjectData,&gameData->uiData,&gameData->controlsData, &gameData->graphicsData);
+		      if(handleEvent(&event,&gameData->gameObjectData,&gameData->uiData,&gameData->controlsData, &gameData->graphicsData) == 0){
+            return 0;
+          }
   	  }
 
-  }
-  while (SDL_PollEvent(&event)){
-	   handleEvent(&event,&gameData->gameObjectData,&gameData->uiData,&gameData->controlsData, &gameData->graphicsData);
   }
   if (Mix_Playing(1) == 0) {
  	  playMusic(&gameData->audioData,1);
@@ -601,10 +599,4 @@ int gameLoop(GameData *gameData){
   printf("--------------------------\n");
   #endif
 
-  if(gameData->gameObjectData.gameRestart){
-     return(0);
-  }
-  else{
-     return(1);
-  }
 }

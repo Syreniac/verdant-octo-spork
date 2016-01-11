@@ -65,9 +65,8 @@ int handleEvent(SDL_Event *event, GameObjectData *gameObjectData, UIData *uiData
 				keyup(controlsData,gameObjectData, uiData,event);
 				break;
 			case SDL_QUIT:
-				UIRoot_Destroy(&uiData);
-				SDL_Quit();
-				exit(0);
+				printf("SDL_QUIT\n");
+				return 0;
 				break;
 			case SDL_MOUSEWHEEL:
 				UIRoot_Execute(uiData,MOUSEWHEEL,0);
@@ -129,7 +128,11 @@ void keydown(ControlsData *controlsData, GameObjectData *gameObjectData, Graphic
 				gameObjectData->gameRestart = 1;
 			}
 			break;
-        default:
+		case (SDL_SCANCODE_H):
+			printf("finding home\n");
+			centerViewOnHive(graphicsData,gameObjectData);
+			break;
+    default:
 			return;
     }
 }
@@ -151,8 +154,8 @@ void keyup(ControlsData *controlsData, GameObjectData *gameObjectData, UIData *u
 		case (SDL_SCANCODE_DELETE):
 			controlsData->keys[DELETE] = 0;
 			break;
-        default:
-            return;
+    default:
+        return;
     }
 }
 
