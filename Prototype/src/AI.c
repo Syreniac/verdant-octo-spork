@@ -1,5 +1,7 @@
 #include "AI.h"
 
+static void resetBlockFunctionGlobals(BlockFunctionGlobals *globals);
+
 /* All blockFunctions must:
   - Return either integers between 0 and 2.
   - Have accomodations for resetting any arguments adjusted in the course of the
@@ -20,21 +22,97 @@ FILE *fopenAndVerify(char *file_name, char *permission){
   return file;
 }
 
-int blockFunction_Sleep(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
-  if(programmableWorker->brain.waitTime != -1){
-    programmableWorker->brain.waitTime -= ticks;
-    if(programmableWorker->brain.waitTime <= 0){
-      programmableWorker->brain.waitTime = -1;
+int blockFunction_CountNearFlowers(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
+  SDL_Point p = getCenterOfRect(programmableWorker->rect);
+  globals->count = countResourceNodesInRadius(gameObjectData,p.x,p.y,WORKER_SENSE_RANGE);
+  return 1;
+}
+
+int blockFunction_CopyPointFromSelected(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
+  if(globals->selectedWorker != NULL){
+    programmableWorker->brain.remembered_point = globals->selectedWorker->brain.remembered_point;
+  }
+  return 1;
+}
+
+int blockFunction_IfGreaterThanSaved(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
+  if(globals->count > programmableWorker->brain.storedCount){
+    return 1;
+  }
+  return 2;
+}
+
+int blockFunction_PickNearbyWorker(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
+  ProgrammableWorker *p = gameObjectData->first_programmable_worker;
+  while(p != NULL){
+    if(p != programmableWorker && getDistance2BetweenRects(programmableWorker->rect,p->rect) < WORKER_SENSE_RANGE * WORKER_SENSE_RANGE){
+      globals->selectedWorker = p;
       return 1;
     }
+    p = p->next;
   }
-  // There's essentially an else here
+  return 2;
+}
+
+int blockFunction_LoadCountFromOther(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
+  if(globals->selectedWorker != NULL){
+    globals->count = globals->selectedWorker->brain.storedCount;
+  }
+  return 1;
+}
+
+int blockFunction_SaveCountFromOther(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
+  if(globals->selectedWorker != NULL){
+    programmableWorker->brain.storedCount = globals->selectedWorker->brain.storedCount;
+  }
+  return 1;
+}
+
+int blockFunction_SaveCount(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
+  programmableWorker->brain.storedCount = globals->count;
+  return 1;
+}
+
+int blockFunction_LoadCount(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
+  globals->count = programmableWorker->brain.storedCount;
+  return 1;
+}
+
+int blockFunction_Sleep(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
+    if(programmableWorker->brain.waitTime != -1){
+      programmableWorker->brain.waitTime -= ticks;
+      if(programmableWorker->brain.waitTime <= 0){
+        programmableWorker->brain.waitTime = -1;
+        programmableWorker->brain.aiStartPoint = 0;
+        return 1;
+      }
+      return 0;
+    }
     programmableWorker->brain.waitTime = 1000;
     programmableWorker->brain.aiStartPoint = arguments->blockFunctionIndex;
     return 0;
 }
 
-int blockFunction_IfNearOtherWorker(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
+int blockFunction_CountNearWorkers(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
+  ProgrammableWorker *p = gameObjectData->first_programmable_worker;
+  globals->count = 0;
+  while(p != NULL){
+    if(p != programmableWorker && getDistance2BetweenRects(programmableWorker->rect,p->rect) < WORKER_SENSE_RANGE * WORKER_SENSE_RANGE){
+      globals->count++;
+    }
+    p = p->next;
+  }
+  return 1;
+}
+
+int blockFunction_IfCountZero(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
+  if(globals->count == 0){
+    return 1;
+  }
+  return 2;
+}
+
+int blockFunction_IfNearOtherWorker(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
   ProgrammableWorker *p = gameObjectData->first_programmable_worker;
   while(p != NULL){
     if(p!=programmableWorker && getDistance2BetweenRects(programmableWorker->rect,p->rect) < WORKER_SENSE_RANGE * WORKER_SENSE_RANGE){
@@ -45,7 +123,7 @@ int blockFunction_IfNearOtherWorker(BlockFunctionArgs *arguments, ProgrammableWo
   return 2;
 }
 
-int blockFunction_OneInAHundred(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
+int blockFunction_OneInAHundred(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
   int r = rand() % 100;
   if(r == 0){
     return 1;
@@ -53,51 +131,51 @@ int blockFunction_OneInAHundred(BlockFunctionArgs *arguments, ProgrammableWorker
   return 2;
 }
 
-int blockFunction_CoinFlip(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
+int blockFunction_CoinFlip(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
   int r = (rand() % 2) + 1;
   return r;
 }
 
-int blockFunction_Void(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
+int blockFunction_Void(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
 	return(1);
 }
 
-int blockFunction_IfIdle(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
+int blockFunction_IfIdle(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
 	if(programmableWorker->status == IDLE){
 		return 1;
 	}
 	return 2;
 }
 
-int blockFunction_IfReturning(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
+int blockFunction_IfReturning(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
 	if(programmableWorker->status == RETURNING){
 		return 1;
 	}
 	return 2;
 }
 
-int blockFunction_IfHasCargo(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
+int blockFunction_IfHasCargo(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
 	if(programmableWorker->cargo > 0){
 		return 1;
 	}
 	return 2;
 }
 
-int blockFunction_IfCargoGreaterThan(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
+int blockFunction_IfCargoGreaterThan(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
   if(programmableWorker->cargo > arguments->integers[0]){
     return(1);
   }
   return(2);
 }
 
-int blockFunction_IfStatusEqual(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
+int blockFunction_IfStatusEqual(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
   if(programmableWorker->status == arguments->integers[0]){
     return(1);
   }
   return(2);
 }
 
-int blockFunction_IfOutsideOfBounds(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
+int blockFunction_IfOutsideOfBounds(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
 
   if(programmableWorker->rect.x >= (X_SIZE_OF_WORLD - programmableWorker->rect.w) || programmableWorker->rect.x <= 0 ||
      programmableWorker->rect.y >= (Y_SIZE_OF_WORLD - programmableWorker->rect.h) || programmableWorker->rect.y <= 0){
@@ -106,7 +184,7 @@ int blockFunction_IfOutsideOfBounds(BlockFunctionArgs *arguments, ProgrammableWo
     return(2);
 }
 
-int blockFunction_IfWithinDistanceOfHive(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
+int blockFunction_IfWithinDistanceOfHive(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
 	double d2 = getDistance2BetweenRects(programmableWorker->rect,gameObjectData->hive.rect);
   if(d2 <= (double)(arguments->floats[0])){
     return(1);
@@ -114,7 +192,7 @@ int blockFunction_IfWithinDistanceOfHive(BlockFunctionArgs *arguments, Programma
   return(2);
 }
 
-int blockFunction_IfNearHive(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
+int blockFunction_IfNearHive(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
 	double d2 = getDistance2BetweenRects(programmableWorker->rect,gameObjectData->hive.rect);
   if(d2 <= 50.0){
     return(1);
@@ -123,20 +201,20 @@ int blockFunction_IfNearHive(BlockFunctionArgs *arguments, ProgrammableWorker *p
 
 }
 
-int blockFunction_SetHeadingRandomly(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
+int blockFunction_SetHeadingRandomly(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
   programmableWorker->heading = (double)(randPi() * 2);
   programmableWorker->status = LEAVING;
   return(1);
 }
 
 
-int blockFunction_ReturnToHive(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
+int blockFunction_ReturnToHive(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
   programmableWorker->heading = getAngleBetweenRects(&gameObjectData->hive.rect,&programmableWorker->rect);
   programmableWorker->status = RETURNING;
   return(1);
 }
 
-int blockFunction_IfNumOfFlowersInRadius(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
+int blockFunction_IfNumOfFlowersInRadius(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
   int count = 0;
   int i = 0;
   int j = 0;
@@ -158,14 +236,14 @@ int blockFunction_IfNumOfFlowersInRadius(BlockFunctionArgs *arguments, Programma
   return 2;
 }
 
-int blockFunction_RememberCurrentLocation(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
+int blockFunction_RememberCurrentLocation(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
   programmableWorker->brain.remembered_point.x = programmableWorker->rect.x;
   programmableWorker->brain.remembered_point.y = programmableWorker->rect.y;
   programmableWorker->brain.is_point_remembered = 1;
   return 1;
 }
 
-int blockFunction_GoToStoredLocation(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
+int blockFunction_GoToStoredLocation(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
     SDL_Point p = getCenterOfRect(programmableWorker->rect);
     if(!programmableWorker->brain.is_point_remembered){
       return 2;
@@ -176,7 +254,7 @@ int blockFunction_GoToStoredLocation(BlockFunctionArgs *arguments, ProgrammableW
     return 1;
 }
 
-int blockFunction_IfWithinDistanceOfStoredLocation(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
+int blockFunction_IfWithinDistanceOfStoredLocation(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
   double d2;
   if(!programmableWorker->brain.is_point_remembered){
     return 2;
@@ -189,12 +267,12 @@ int blockFunction_IfWithinDistanceOfStoredLocation(BlockFunctionArgs *arguments,
   return 2;
 }
 
-int blockFunction_ForgetStoredLocation(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
+int blockFunction_ForgetStoredLocation(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
   programmableWorker->brain.is_point_remembered = 0;
   return 1;
 }
 
-int blockFunction_RandomShiftStoredLocation(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
+int blockFunction_RandomShiftStoredLocation(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
   int x_shift = rand() % arguments->integers[0];
   int y_shift = rand() % arguments->integers[0];
 
@@ -205,14 +283,14 @@ int blockFunction_RandomShiftStoredLocation(BlockFunctionArgs *arguments, Progra
   return 1;
 }
 
-int blockFunction_IfNodeFound(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
+int blockFunction_IfNodeFound(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
   if(programmableWorker->brain.foundNode != NULL){
     return 1;
   }
   return 2;
 }
 
-int blockFunction_HeadToFoundNode(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
+int blockFunction_HeadToFoundNode(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
   if(programmableWorker->brain.foundNode != NULL){
     programmableWorker->heading = getAngleBetweenRects(&programmableWorker->brain.foundNode->rect,&programmableWorker->rect);
     programmableWorker->status = LEAVING;
@@ -220,7 +298,7 @@ int blockFunction_HeadToFoundNode(BlockFunctionArgs *arguments, ProgrammableWork
   return 1;
 }
 
-int blockFunction_HasStoredLocation(BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
+int blockFunction_HasStoredLocation(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
   if(programmableWorker->brain.is_point_remembered){
     return 1;
   }
@@ -229,12 +307,13 @@ int blockFunction_HasStoredLocation(BlockFunctionArgs *arguments, ProgrammableWo
 
 void runBlockFunctionRootOverWorker(BlockFunctionRoot *blockFunctionRoot, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
   int i;
+  resetBlockFunctionGlobals(&blockFunctionRoot->globals);
   BlockFunction *blockFunction = &(blockFunctionRoot->blockFunctions[programmableWorker->brain.aiStartPoint]);
   if(blockFunctionRoot->numOfBlockFunctions == 0){
 	  return;
   }
   while(1){
-    i = runBlockFunctionOverWorker(blockFunction, programmableWorker,gameObjectData, ticks);
+    i = runBlockFunctionOverWorker(blockFunction, &blockFunctionRoot->globals, programmableWorker,gameObjectData, ticks);
     if(i == 1 && blockFunction->primary != NULL){
       blockFunction = blockFunction->primary;
     }
@@ -247,9 +326,10 @@ void runBlockFunctionRootOverWorker(BlockFunctionRoot *blockFunctionRoot, Progra
   }
 }
 
-int runBlockFunctionOverWorker(BlockFunction *blockFunction, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
+int runBlockFunctionOverWorker(BlockFunction *blockFunction, BlockFunctionGlobals *globals, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
   int i;
-  i = blockFunction->wrapped_function(&(blockFunction->arguments),
+  i = blockFunction->wrapped_function(globals,
+                                     &(blockFunction->arguments),
                                      programmableWorker,
                                      gameObjectData,
                                      ticks);
@@ -325,6 +405,39 @@ blockFunction_WrappedFunction getBlockFunctionByName(char *blockFunctionName){
   }
   if(strcmp(blockFunctionName,"CoinFlip") == 0){
     return &blockFunction_CoinFlip;
+  }
+  if(strcmp(blockFunctionName,"Sleep") == 0){
+    return &blockFunction_Sleep;
+  }
+  if(strcmp(blockFunctionName,"CountNearWorkers") == 0){
+    return &blockFunction_CountNearWorkers;
+  }
+  if(strcmp(blockFunctionName,"IfCountZero") == 0){
+    return &blockFunction_IfCountZero;
+  }
+  if(strcmp(blockFunctionName,"LoadCount") == 0){
+    return &blockFunction_LoadCount;
+  }
+  if(strcmp(blockFunctionName,"SaveCount") == 0){
+    return &blockFunction_SaveCount;
+  }
+  if(strcmp(blockFunctionName,"LoadCountFromOther") == 0){
+    return &blockFunction_LoadCountFromOther;
+  }
+  if(strcmp(blockFunctionName,"SaveCountFromOther") == 0){
+    return &blockFunction_SaveCountFromOther;
+  }
+  if(strcmp(blockFunctionName,"PickNearbyWorker") == 0){
+    return &blockFunction_PickNearbyWorker;
+  }
+  if(strcmp(blockFunctionName,"IfGreaterThanSaved") == 0){
+    return &blockFunction_IfGreaterThanSaved;
+  }
+  if(strcmp(blockFunctionName,"CopyPointFromSelected") == 0){
+    return &blockFunction_CopyPointFromSelected;
+  }
+  if(strcmp(blockFunctionName,"CountNearFlowers") == 0){
+    return &blockFunction_CountNearFlowers;
   }
   printf("ERROR: Unrecognised function name: \"%s\".\n Substituting a VOID function.\n",blockFunctionName);
   return &blockFunction_Void;
@@ -637,6 +750,22 @@ AIData initAIData(void){
   makeAIBlockTemplate(&aiData,"IfNearOtherWorker",2,arguments);
   makeAIBlockTemplate(&aiData,"CoinFlip",2,arguments);
   makeAIBlockTemplate(&aiData,"OneInAHundred",2,arguments);
+  makeAIBlockTemplate(&aiData,"Sleep",1,arguments);
+  makeAIBlockTemplate(&aiData,"CountNearWorkers",1,arguments);
+  makeAIBlockTemplate(&aiData,"IfCountZero",2,arguments);
+  makeAIBlockTemplate(&aiData,"LoadCount",1,arguments);
+  makeAIBlockTemplate(&aiData,"SaveCount",1,arguments);
+  makeAIBlockTemplate(&aiData,"LoadCountFromOther",1,arguments);
+  makeAIBlockTemplate(&aiData,"SaveCountFromOther",1,arguments);
+  makeAIBlockTemplate(&aiData,"PickNearbyWorker",2,arguments);
+  makeAIBlockTemplate(&aiData,"IfGreaterThanSaved",2,arguments);
+  makeAIBlockTemplate(&aiData,"CopyPointFromSelected",1,arguments);
+  makeAIBlockTemplate(&aiData,"CountNearFlowers",1,arguments);
 
 	return aiData;
+}
+
+static void resetBlockFunctionGlobals(BlockFunctionGlobals *globals){
+  globals->count = 0;
+  globals->selectedWorker = NULL;
 }
