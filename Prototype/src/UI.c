@@ -552,6 +552,27 @@ void UIConfigure_GetGameOverString(UI_Element *element, UI_Action *action, UI_Ac
 	action->displayStringAction = placeToPut;
 }
 
+int UIAction_GetFinalScoreString(UI_Action *action, UIData *uiData){
+		GameOverData* gameOverData;
+		va_list vargs;
+		gameOverData = uiData->gameOverData;
+		if(action->status != 0){
+			action->displayStringAction->companionChangeDisplayString = realloc(action->displayStringAction->companionChangeDisplayString,
+				                                                                  strlen(gameOverData->finalScoreString)+1);
+			strcpy(action->displayStringAction->companionChangeDisplayString, gameOverData->finalScoreString);
+		}
+		return 0;
+}
+
+void UIConfigure_GetFinalScoreString(UI_Element *element, UI_Action *action, UI_Action *placeToPut){
+	UIAction_Init(element,action);
+	action->response = UPDATE;
+	action->function = UIAction_GetFinalScoreString;
+	action->companions = calloc(1,sizeof(void*));
+	action->num_of_companions = 1;
+	action->displayStringAction = placeToPut;
+}
+
 #undef companionChangeDisplayString
 #undef displayStringAction
 

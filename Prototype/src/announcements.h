@@ -5,6 +5,7 @@ typedef struct GameOverData GameOverData;
 
 struct GameOverData{
 	char gameOverString[256];
+	char finalScoreString[256];
 	int timer;
 };
 
@@ -24,3 +25,7 @@ void announce_update(AnnouncementsData *announcementsData, int ticks);
 void gameOverInfo_init(GameOverData *gameOverData);
 void setGameOverInfo(GameOverData *gameOverData, char* string);
 void gameOverInfo_clear(GameOverData *gameOverData);
+
+
+void setFinalScore(GameOverData *gameOverData, char* string);
+

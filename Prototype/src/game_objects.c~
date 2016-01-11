@@ -833,6 +833,7 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 	int i, j;
 	ProgrammableWorker *programmableWorker;
 		char GOCause[256];
+		char finalScore[256];
 
 
 	if(gameObjectData->pause_status){
@@ -881,11 +882,18 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 				}
 
 
-				if(gameObjectData->hive.flowers_collected <= 0 && gameObjectData->hive.bee_taking_shelter){
+				if(gameObjectData->hive.flowers_collected <= 0 && gameObjectData->hive.bees_taking_shelter){
 					gameObjectData->gameOver = 1;
 					gameObjectData->gameOverCause = STARVATION;
+					gameObjectData->hive.years_survived++;
 					sprintf(GOCause,"Your bees ran out of food over winter and died!");
+					sprintf(finalScore,"YEARS SURVIVED = %d    FINAL SCORE: (%d + (%d / %d)) = %d", gameObjectData->hive.years_survived,
+					gameObjectData->hive.years_survived,
+					gameObjectData->hive.flowers_collected, gameObjectData->hive.years_survived,
+					gameObjectData->hive.years_survived + (gameObjectData->hive.flowers_collected / gameObjectData->hive.years_survived));
+
 					setGameOverInfo(&announcementsData->gameOverData, GOCause);
+				    setFinalScore(&announcementsData->gameOverData, finalScore);
 					printf("gameover by starvation\n");
 					killAllBees(&gameObjectData->first_programmable_worker);
 					return;
@@ -924,23 +932,6 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 
 
 
-
-	if(gameObjectData->hive.displayInfo){
-		SDL_Point point = getCenterOfRect(gameObjectData->hive.rect);
-		renderFillRadius(graphicsData, &point, 40, 255,255,255, 80);
-	}
-
-
-	/* First, we need to draw the Hive in at the correct position. */
-	blitGameObject(gameObjectData->hive.rect,
-				 graphicsData,
-				 graphicsData->hiveTexture,
-				 0,
-				 NULL,
-				 SDL_FLIP_NONE);
-
-
-
 	i = 0;
 	/* Second, we loop through all the ResourceNodeSpawners */
 	while(i < gameObjectData->resourceNodeSpawnerCount){
@@ -970,6 +961,22 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 	}
 	i++;
 	}
+
+
+
+	if(gameObjectData->hive.displayInfo){
+		SDL_Point point = getCenterOfRect(gameObjectData->hive.rect);
+		renderFillRadius(graphicsData, &point, 40, 255,255,255, 80);
+	}
+
+
+	/* First, we need to draw the Hive in at the correct position. */
+	blitGameObject(gameObjectData->hive.rect,
+				 graphicsData,
+				 graphicsData->hiveTexture,
+				 0,
+				 NULL,
+				 SDL_FLIP_NONE);
 
 
 	if(!gameObjectData->gameOver){ /*start of if not game over*/
@@ -1024,8 +1031,14 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 			}else{
 				gameObjectData->gameOver = 1;
 				gameObjectData->gameOverCause = COLD;
+				gameObjectData->hive.years_survived++;
 				sprintf(GOCause,"None of your bees took shelter in the hive over winter!");
+				sprintf(finalScore,"YEARS SURVIVED = %d    FINAL SCORE:(%d+(%d/%d)) = %d", gameObjectData->hive.years_survived,
+				gameObjectData->hive.years_survived,
+				gameObjectData->hive.flowers_collected, gameObjectData->hive.years_survived,
+				gameObjectData->hive.years_survived + (gameObjectData->hive.flowers_collected / gameObjectData->hive.years_survived));
 				setGameOverInfo(&announcementsData->gameOverData, GOCause);
+				setFinalScore(&announcementsData->gameOverData, finalScore);
 				printf("gameOver, all bees die from the cold\n");
 				free(gameObjectData->first_programmable_worker);
 				gameObjectData->first_programmable_worker = NULL;

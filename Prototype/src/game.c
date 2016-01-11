@@ -259,7 +259,29 @@ static void createGameUI(GameData *gameData){
   UIConfigure_GetGameOverString(element, &element->actions[6], &element->actions[3]);
   UIElement_Reparent(element,gameData->uiData.root);
   
-
+  element = UIElement_Create(0,0,200,25,7);
+  UIConfigure_Auto(element, &element->actions[0], GAME_OVER);
+    UITrigger_Bind(&element->actions[0],&element->actions[0],-1,0);
+    UITrigger_Bind(&element->actions[0],&element->actions[1],0,2);
+    UITrigger_Bind(&element->actions[0],&element->actions[2],-1,0);
+    UITrigger_Bind(&element->actions[0],&element->actions[3],-1,0);
+	  quickSetStatus(&element->actions[0],0);
+  UIConfigure_Auto(element, &element->actions[1], GAME_OVER);
+    UITrigger_Bind(&element->actions[1],&element->actions[0],0,2);
+    UITrigger_Bind(&element->actions[1],&element->actions[1],1,0);
+    UITrigger_Bind(&element->actions[1],&element->actions[2],0,1);
+    UITrigger_Bind(&element->actions[1],&element->actions[3],0,1);
+  	quickSetStatus(&element->actions[1],1);
+  UIConfigure_FillAndBorderRect(element,&element->actions[2],255,255,255,255,255,255);
+	  quickSetStatus(&element->actions[2],0);
+  UIConfigure_DisplayString(element, &element->actions[3]," ",0, UISTRING_ALIGN_CENTER);
+	  quickSetStatus(&element->actions[3],0);
+  UIConfigure_Auto(element,&element->actions[4],UPDATE);
+  	UITrigger_Bind(&element->actions[4],&element->actions[0],2,1);
+  	UITrigger_Bind(&element->actions[4],&element->actions[1],2,1);
+   UIConfigure_PercPosition(element, &element->actions[5],0.5,1.0,-100,-415,0);
+  UIConfigure_GetFinalScoreString(element, &element->actions[6], &element->actions[3]);
+  UIElement_Reparent(element,gameData->uiData.root);
   
   
     /*gameOverInformation*/
