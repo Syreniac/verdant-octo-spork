@@ -124,6 +124,8 @@ each call to updateProgrammableWorker*/
 #define SUN_LASTS_LONGER_FACTOR 5
 #define FRAME_TIME 15
 
+#define LENGTH_OF_STATUS_STRING 32
+
 #define WINTER_COUNTDOWN_SPEED 0.01
 
 #define MAX_DAYS_TO_WINTER 301

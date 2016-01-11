@@ -77,6 +77,10 @@ struct ProgrammableWorker{
   int stunned_after_sting;
 
   int flapTimer;
+  
+  char *beeStatus;
+  
+  int insideHive;
 
 
   int cargo;
