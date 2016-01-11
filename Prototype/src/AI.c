@@ -610,7 +610,6 @@ AIData initAIData(void){
   aiData.blockFunctionRoots = calloc(1,sizeof(BlockFunctionRoot));
   if(file != NULL){
   	aiData.blockFunctionRoots[0] = makeBlockFunctionRootFromFile(file);
-      aiData.templates = NULL;
   	fclose(file);
   	erroneousBlockFunction = testBlockFunctionRootForLoops(&aiData.blockFunctionRoots[0].blockFunctions[0],NULL,0);
   	if(erroneousBlockFunction != NULL){
@@ -620,6 +619,7 @@ AIData initAIData(void){
   		nullifyBlockFunctionRoot(&aiData.blockFunctionRoots[0],NULL);
   	}
   }
+  aiData.templates = NULL;
 	makeAIBlockTemplate(&aiData,"Void",1,arguments);
 	makeAIBlockTemplate(&aiData,"IfIdle",2,arguments);
 	makeAIBlockTemplate(&aiData,"IfReturning",2,arguments);

@@ -348,7 +348,7 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
 		case LEAVING:
 			programmableWorker->beeStatus = "Leaving hive";
 			if(programmableWorker->displayInfo){
-				char tempString[16];
+				char tempString[255];
 				sprintf(tempString," Status: %s", programmableWorker
 				->beeStatus);
 				setObjectInfoDisplay(&announcementsData->objectInfoDisplay, tempString, STATUS);
@@ -357,7 +357,7 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
 		case RETURNING:
 			programmableWorker->beeStatus = "Returning to hive";
 			if(programmableWorker->displayInfo){
-				char tempString[16];
+				char tempString[255];
 				sprintf(tempString," Status: %s", programmableWorker
 				->beeStatus);
 				setObjectInfoDisplay(&announcementsData->objectInfoDisplay, tempString, STATUS);
@@ -366,7 +366,7 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
 		case WANTING_TO_RETURN:
 			programmableWorker->beeStatus = "Wants to return";
 			if(programmableWorker->displayInfo){
-				char tempString[16];
+				char tempString[255];
 				sprintf(tempString," Status: %s", programmableWorker
 				->beeStatus);
 				setObjectInfoDisplay(&announcementsData->objectInfoDisplay, tempString, STATUS);
@@ -375,7 +375,7 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
 		case NODE_FOUND:
 			programmableWorker->beeStatus = "Found resource";
 			if(programmableWorker->displayInfo){
-				char tempString[16];
+				char tempString[255];
 				sprintf(tempString," Status: %s", programmableWorker
 				->beeStatus);
 				setObjectInfoDisplay(&announcementsData->objectInfoDisplay, tempString, STATUS);
@@ -384,7 +384,7 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
 		case IDLE:
 			programmableWorker->beeStatus = "Idle";
 			if(programmableWorker->displayInfo){
-				char tempString[16];
+				char tempString[255];
 				sprintf(tempString," Status: %s", programmableWorker
 				->beeStatus);
 				setObjectInfoDisplay(&announcementsData->objectInfoDisplay, tempString, STATUS);
@@ -393,7 +393,7 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
 		case BLANK:
 			programmableWorker->beeStatus = "Blank";
 			if(programmableWorker->displayInfo){
-				char tempString[16];
+				char tempString[255];
 				sprintf(tempString," Status: %s", programmableWorker
 				->beeStatus);
 				setObjectInfoDisplay(&announcementsData->objectInfoDisplay, tempString, STATUS);
@@ -409,7 +409,7 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
 			programmableWorker->cold_and_about_to_die++;
 			programmableWorker->beeStatus = "Freezing / dieing";
 			if(programmableWorker->displayInfo){
-				char tempString[16];
+				char tempString[255];
 				sprintf(tempString," Status: %s", programmableWorker
 				->beeStatus);
 				setObjectInfoDisplay(&announcementsData->objectInfoDisplay, tempString, STATUS);
@@ -422,7 +422,7 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
 			programmableWorker->insideHive = 1;
 			programmableWorker->beeStatus = "Inside hive";
 			if(programmableWorker->displayInfo){
-				char tempString[16];
+				char tempString[255];
 				sprintf(tempString," Status: %s", programmableWorker
 				->beeStatus);
 				setObjectInfoDisplay(&announcementsData->objectInfoDisplay, tempString, STATUS);
@@ -451,7 +451,7 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
 					programmableWorker->beeStatus = "Sheltered / under tree";
 					
 					if(programmableWorker->displayInfo){
-						char tempString[16];
+						char tempString[255];
 						sprintf(tempString," Status: %s", programmableWorker
 						->beeStatus);
 						setObjectInfoDisplay(&announcementsData->objectInfoDisplay, tempString, STATUS);
@@ -469,7 +469,7 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
 				programmableWorker->beeStatus = "Stunned after sting";
 					
 				if(programmableWorker->displayInfo){
-					char tempString[16];
+					char tempString[255];
 					sprintf(tempString," Status: %s", programmableWorker
 					->beeStatus);
 					setObjectInfoDisplay(&announcementsData->objectInfoDisplay, tempString, STATUS);
@@ -570,7 +570,7 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
   		int flapChance;
   		programmableWorker->beeStatus = "Wet, can't fly";
   		if(programmableWorker->displayInfo){
-				char tempString[16];
+				char tempString[255];
 				sprintf(tempString," Status: %s", programmableWorker
 				->beeStatus);
 				setObjectInfoDisplay(&announcementsData->objectInfoDisplay, tempString, STATUS);
@@ -1378,7 +1378,7 @@ void objectInfoDisplay(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 	int displayInfoAlreadySet = 0, i;
 	point.x = mbEvent->x - graphicsData->navigationOffset.x;
 	point.y = mbEvent->y - graphicsData->navigationOffset.y;
-	char displayString[10];
+	char displayString[255];
 
 	graphicsData->trackingMode = 0;
 
