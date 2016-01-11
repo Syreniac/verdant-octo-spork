@@ -9,6 +9,9 @@ void setGameOverInfo(GameOverData *gameOverData, char* string){
 		strcpy(gameOverData->gameOverString, string);
 }
 
+void setFinalScore(GameOverData *gameOverData, char* string){
+		strcpy(gameOverData->finalScoreString, string);
+}
 
 void announce_clear(AnnouncementsData *announcementsData){
 		announcementsData->announcement[0] = '\0';
@@ -16,7 +19,9 @@ void announce_clear(AnnouncementsData *announcementsData){
 
 void gameOverInfo_clear(GameOverData *gameOverData){
 		gameOverData->gameOverString[0] = '\0';
+		gameOverData->finalScoreString[0] = '\0';
 }
+
 
 void announce_init(AnnouncementsData *announcementsData){
 		memset(announcementsData->announcement,'\0', 256);
@@ -25,7 +30,9 @@ void announce_init(AnnouncementsData *announcementsData){
 
 void gameOverInfo_init(GameOverData *gameOverData){
 		memset(gameOverData->gameOverString,'\0', 256);
+		memset(gameOverData->finalScoreString,'\0', 256);
 }
+
 
 void announce_update(AnnouncementsData *announcementsData, int ticks){
   if(announcementsData->timer > 0){

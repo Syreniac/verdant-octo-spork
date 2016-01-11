@@ -275,7 +275,6 @@ UI_Element *UIElement_Create(int x, int y, int w, int h, int num_of_actions){
 	 implement the click-and-drag scrolling of the Minimap */
 
 int UIAction_MinimapMouseMove(UI_Action *action, UIData *uiData){
-	va_list vargs;
 	GraphicsData *graphicsData;
 	SDL_Point p;
 	int x,y;
@@ -322,13 +321,10 @@ static void sUIAction_Minimap_DrawGameObject(UI_Action *action, GraphicsData *gr
 }
 
 int UIAction_Minimap(UI_Action *action, UIData *uiData){
-	va_list vargs;
 	GameObjectData *gameObjectData;
 	GraphicsData *graphicsData;
-	SDL_Point point;
 	SDL_Rect rect;
 	int i = 0,j = 0;
-	double relx, rely;
 	ProgrammableWorker *p;
 	if(action->status != 0){
 		gameObjectData = uiData->gameObjectData;
@@ -400,7 +396,6 @@ void UIConfigure_Minimap(UI_Element *element, UI_Action *action){
 #define companionYPosition integers[1]
 
 int UIAction_SlideWithMouseWheel(UI_Action *action, UIData *uiData){
-	va_list vargs;
 	int i = 0;
 	int x,y;
 	SDL_Event *event;
@@ -441,8 +436,8 @@ int UIAction_SlideWithMouseWheel(UI_Action *action, UIData *uiData){
 }
 
 void UIConfigure_SlideWithMouseWheel(UI_Element *element, UI_Action *action, int x, int y, int num_of_companions,...){
-	va_list vargs;
 	int i = 0;
+	va_list vargs;
 	va_start(vargs,num_of_companions);
 	UIAction_Init(element,action);
 	action->response = MOUSEWHEEL;
@@ -473,7 +468,6 @@ void UIConfigure_SlideWithMouseWheel(UI_Element *element, UI_Action *action, int
 	 needs to have companions specified (otherwise it's kind of useless) */
 
 int UIAction_PassThrough(UI_Action *action, UIData *uiData){
-	va_list vargs;
 	int i = 0;
 	if(action->status != 0){
 		while(i < action->num_of_companions){
@@ -486,8 +480,8 @@ int UIAction_PassThrough(UI_Action *action, UIData *uiData){
 }
 
 void UIConfigure_PassThrough(UI_Element *element, UI_Action *action, enum Response response, int num_of_companions, ...){
-	va_list vargs;
 	int i = 0;
+	va_list vargs;
 	va_start(vargs,num_of_companions);
 	UIAction_Init(element,action);
 	action->response = response;
@@ -512,7 +506,6 @@ void UIConfigure_PassThrough(UI_Element *element, UI_Action *action, enum Respon
 
 int UIAction_GetAnnouncement(UI_Action *action, UIData *uiData){
 		AnnouncementsData* announcementsData;
-		va_list vargs;
 		announcementsData = uiData->announcementsData;
 		if(action->status != 0){
 			action->displayStringAction->companionChangeDisplayString = realloc(action->displayStringAction->companionChangeDisplayString,
@@ -533,7 +526,6 @@ void UIConfigure_GetAnnouncement(UI_Element *element, UI_Action *action, UI_Acti
 
 int UIAction_GetGameOverString(UI_Action *action, UIData *uiData){
 		GameOverData* gameOverData;
-		va_list vargs;
 		gameOverData = uiData->gameOverData;
 		if(action->status != 0){
 			action->displayStringAction->companionChangeDisplayString = realloc(action->displayStringAction->companionChangeDisplayString,
@@ -547,6 +539,26 @@ void UIConfigure_GetGameOverString(UI_Element *element, UI_Action *action, UI_Ac
 	UIAction_Init(element,action);
 	action->response = UPDATE;
 	action->function = UIAction_GetGameOverString;
+	action->companions = calloc(1,sizeof(void*));
+	action->num_of_companions = 1;
+	action->displayStringAction = placeToPut;
+}
+
+int UIAction_GetFinalScoreString(UI_Action *action, UIData *uiData){
+		GameOverData* gameOverData;
+		gameOverData = uiData->gameOverData;
+		if(action->status != 0){
+			action->displayStringAction->companionChangeDisplayString = realloc(action->displayStringAction->companionChangeDisplayString,
+				                                                                  strlen(gameOverData->finalScoreString)+1);
+			strcpy(action->displayStringAction->companionChangeDisplayString, gameOverData->finalScoreString);
+		}
+		return 0;
+}
+
+void UIConfigure_GetFinalScoreString(UI_Element *element, UI_Action *action, UI_Action *placeToPut){
+	UIAction_Init(element,action);
+	action->response = UPDATE;
+	action->function = UIAction_GetFinalScoreString;
 	action->companions = calloc(1,sizeof(void*));
 	action->num_of_companions = 1;
 	action->displayStringAction = placeToPut;
@@ -566,7 +578,6 @@ void UIConfigure_GetGameOverString(UI_Element *element, UI_Action *action, UI_Ac
 #define targetInt extra
 
 int UIAction_ToggleInteger(UI_Action *action, UIData *uiData){
-	va_list vargs;
 	int *p;
 	if(action->status == 1){
 		p = action->targetInt;
@@ -617,7 +628,6 @@ void UIConfigure_ToggleInteger(UI_Element *element, UI_Action *action, int *targ
 #define companionH integers[3]
 
 int UIAction_PercOffsetRect(UI_Action *action, UIData *uiData){
-		va_list vargs;
 		SDL_Point point;
 		SDL_Point point2;
 		int i = 0;
@@ -707,7 +717,6 @@ void UIConfigure_PercOffsetRect(UI_Element *element, UI_Action *action, float xP
 #define companionY integers[1]
 
 int UIAction_PercPosition(UI_Action *action, UIData *uiData){
-		va_list vargs;
 		SDL_Point point;
 		int i = 0;
 		if(action->status == 1){
@@ -886,9 +895,8 @@ void UIConfigure_ShrinkFitToParentWithYShift(UI_Element *element, UI_Action *act
 #define childYOffset integers[1]
 
 int UIAction_GetDifferenceInChildYOffset(UI_Action *action, UIData *uiData){
-	va_list vargs;
 	GraphicsData *graphicsData;
-	int y,i=0,win_x,win_y,base_offset;
+	int i=0,win_x,win_y,base_offset;
 	if(action->status == 1 && action->external != NULL){
 		graphicsData = uiData->graphicsData;
 		SDL_GetWindowSize(graphicsData->window,&win_x,&win_y);
@@ -957,8 +965,7 @@ void UIConfigure_GetDifferenceInChildYOffset(UI_Element *element, UI_Action *act
 
 int UIAction_DraggableVerticalOverride(UI_Action *action, UIData *uiData){
 	SDL_Event *event;
-	int x,y,i=0;
-	va_list vargs;
+	int y,i=0;
 	event = uiData->event;
 
 	if(action->status == 1){
@@ -1011,7 +1018,6 @@ void UIConfigure_DraggableVerticalOverride(UI_Element *element, UI_Action *actio
 	 line */
 
 int UIAction_NullifyAI(UI_Action *action, UIData *uiData){
-	va_list vargs;
 	AIData *aiData;
 	if(action->status == 1){
 		aiData = uiData->aiData;
@@ -1039,8 +1045,6 @@ void UIConfigure_NullifyAI(UI_Element *element, UI_Action *action){
 	 then you will probably have some of them do something else as the AI still commands them */
 
 int UIAction_RecallWorkers(UI_Action *action, UIData *uiData){
-	va_list vargs;
-	int i = 0;
 	GameObjectData *gameObjectData;
 	ProgrammableWorker *programmableWorker;
 	if(action->status == 1){
@@ -1081,7 +1085,6 @@ void UIConfigure_RecallWorkers(UI_Element *element, UI_Action *action){
 int UIAction_ReadAiBlocks(UI_Action *action, UIData *uiData){
 	char *workingSpace;
 	char *childElementExposedString;
-	va_list vargs;
 	AIData *aiData;
 	BlockFunctionRoot blockFunctionRoot;
 	BlockFunction *erroneousBlockFunction;
@@ -1159,10 +1162,8 @@ void UIConfigure_ReadAiBlocks(UI_Element *element, UI_Action *action, UI_Action 
 	 I'm not going to do a full documentation for this because I'm thinking I'm going to change it */
 
 int UIAction_SetUpAiBlock(UI_Action *action, UIData *uiData){
-	int i = 0;
 	int stringLength = 1;
 	char workingSpace[30] = {0};
-	char *exposedDataString;
 	if(action->status == 1){
 		UIElement_RemoveExposedData(action->element);
 
@@ -1258,11 +1259,7 @@ void UIConfigure_DeleteKeyFlagDestroy(UI_Element *element, UI_Action *action){
 #define linkedTemplate extra
 
 int UIAction_AddAiBlock(UI_Action *action, UIData *uiData){
-	va_list vargs;
-	UI_Element *element2;
 	BlockFunctionTemplate *template;
-	char c = 0;
-	char aiString[30];
 	if(action->status == 1){
 		template = action->linkedTemplate;
 		makeAIBlock(action->external->rect.x,action->external->rect.y,template->name,action->external);
@@ -1292,7 +1289,6 @@ void UIConfigure_AddAiBlock(UI_Element *element, UI_Action *action, BlockFunctio
    Simply takes an image, and renders inside the UI_Element's rect */
 
 int UIAction_DisplayImage(UI_Action *action, UIData *uiData){
-	va_list vargs;
 	GraphicsData *graphicsData;
 	graphicsData = uiData->graphicsData;
 
@@ -1424,7 +1420,6 @@ static void sUIAction_DisplayNumber_EditNumber(UI_Action *action, int editNumber
 }
 
 int UIAction_DisplayNumber(UI_Action *action, UIData *uiData){
-	va_list vargs;
 	GraphicsData *graphicsData;
 	SDL_Color colour;
 	SDL_Surface *temp;
@@ -1509,7 +1504,6 @@ static void sUIAction_DisplayString_EditString(UI_Action *action, char *editStri
 }
 
 int UIAction_DisplayString(UI_Action *action, UIData *uiData){
-	va_list vargs;
 	GraphicsData *graphicsData;
 	SDL_Color colour;
 	SDL_Surface *temp;
@@ -1589,7 +1583,6 @@ void UIConfigure_DisplayString(UI_Element *element, UI_Action *action, char *str
 	 replaced with something else */
 
 int UIAction_ResourceCounter(UI_Action *action, UIData *uiData){
-	va_list vargs;
 	int i = 0;
 	GameObjectData *gameObjectData;
 	gameObjectData = uiData->gameObjectData;
@@ -1633,7 +1626,6 @@ void UIConfigure_ResourceCounter(UI_Element *element, UI_Action *action, int num
 #define dayCount integers[0]
 
 int UIAction_DaysCounter(UI_Action *action, UIData *uiData){
-	va_list vargs;
 	int i = 0;
 	GameObjectData *gameObjectData;
 	gameObjectData = uiData->gameObjectData;
@@ -1679,7 +1671,6 @@ void UIConfigure_DaysCounter(UI_Element *element, UI_Action *action, int num_of_
 #define yearCount integers[0]
 
 int UIAction_YearsCounter(UI_Action *action, UIData *uiData){
-	va_list vargs;
 	int i = 0;
 	GameObjectData *gameObjectData;
 	gameObjectData = uiData->gameObjectData;
@@ -1766,7 +1757,6 @@ void UIConfigure_Counter(UI_Element *element, UI_Action *action, enum Response r
 int UIAction_RenderLine(UI_Action *action, UIData *uiData){
 	int bx,by;
 	GraphicsData *graphicsData;
-	va_list vargs;
 	graphicsData = uiData->graphicsData;
 	if(!UIElement_isVisible(action->element) || (action->external != NULL && !UIElement_isVisible(action->external))){
 		return 0;
@@ -1959,14 +1949,7 @@ int UIAction_CalculateSibling(UI_Action *action, UIData *uiData){
 						break;
 					 }
 			}
-			printf("checked element, no luck :(\n");
 			element = element->sibling;
-		}
-		if(element!=NULL){
-			printf("FOUND ELEMENT %p\n",element);
-		}
-		else{
-			printf("can't find element\n");
 		}
 
 		while(i < action->num_of_companions){
@@ -2023,7 +2006,6 @@ void UIConfigure_CalculateSibling(UI_Element *element, UI_Action *action, int nu
 int UIAction_StoreMousePosition(UI_Action *action, UIData *uiData){
 	SDL_Event *event;
 	int i = 0;
-	va_list vargs;
 	event = uiData->event;
 	if(action->status == 1){
 		action->mousePosX = event->motion.x;
@@ -2078,7 +2060,6 @@ int UIAction_FillRect(UI_Action *action, UIData *uiData){
 	/* This should be given the necessary rendering information, in this case,
 	   a pointer to the SDL_Window */
 	GraphicsData *graphicsData;
-	va_list vargs;
 	graphicsData = uiData->graphicsData;
 	if(action->status == 1){
 		SDL_SetRenderDrawColor(graphicsData->renderer,
@@ -2126,7 +2107,6 @@ int UIAction_FillAndBorderRect(UI_Action *action, UIData *uiData){
 	/* This should be given the necessary rendering information, in this case,
 	   a pointer to the SDL_Window */
 	GraphicsData *graphicsData;
-	va_list vargs;
 	graphicsData = uiData->graphicsData;
 	if(action->status == 1 && UIElement_isVisible(action->element)){
 		SDL_SetRenderDrawColor(graphicsData->renderer,
@@ -2176,7 +2156,6 @@ void UIConfigure_FillAndBorderRect(UI_Element *element, UI_Action *action, int f
 int UIAction_ClickRect(UI_Action *action, UIData *uiData){
 	/* This should get a SDL_Event pointer */
 	SDL_Event *event;
-	va_list vargs;
 	event = uiData->event;
 
 	if(action->status == 0){return 0;}
@@ -2219,7 +2198,6 @@ void UIConfigure_RightClickRect(UI_Element *element, UI_Action *action){
 int UIAction_DraggableRectOverride(UI_Action *action, UIData *uiData){
 	SDL_Event *event;
 	int x,y,i=0;
-	va_list vargs;
 	event = uiData->event;
 
 	/* UIACTION_INTS is the status, 0 = rooted, 1 = grabbed */
@@ -2293,7 +2271,6 @@ void UIConfigure_DraggableRectOverride(UI_Element *element, UI_Action *action, i
 int UIAction_TwoRectOverride(UI_Action *action, UIData *uiData){
 	int dt;
 	float transition_multiplier;
-	va_list vargs;
 	dt = *uiData->ticks;
 
 	if(action->status == 0){
@@ -2417,7 +2394,6 @@ void UIConfigure_TwoRectOverride(UI_Element *element, UI_Action *action, int sx,
 #define companionBigH integers[7]
 
 int UIAction_UpdateTwoRectOverrideOnWindowResize(UI_Action *action, UIData *uiData){
-		va_list vargs;
 		SDL_Point point;
 		if(action->status == 1){
 			point = getPointFromPerc(uiData->graphicsData->window,
@@ -2529,7 +2505,6 @@ static void UITrigger_Execute(UI_Action *action){
 void UIElement_Free(UI_Element *element){
 	int i = 0;
 	UI_Element *root = element;
-	UI_Element *sibling = element->parent;
 	while(root->parent != NULL){
 		root = root->parent;
 	}
@@ -2546,8 +2521,6 @@ void UIElement_Free(UI_Element *element){
 }
 
 static void UIAction_Free(UI_Action *action){
-	UI_Trigger *movingPointer2;
-	UI_Trigger *movingPointer = action->triggers;
 	int i = 0;
 
 	while(action->triggers!=NULL){
@@ -2728,7 +2701,6 @@ void UITrigger_Bind(UI_Action *action, UI_Action *target, int status_from, int s
 
 void UIRoot_Execute(UIData *uiData, enum Response response, int stopAtFirst){
 	int shouldStop;
-	va_list vargs;
 	UI_Element *queue[255] = {NULL};
 	UI_Element *queue_element;
 	UI_Element *queue_element_child;
@@ -2755,7 +2727,6 @@ void UIRoot_Execute(UIData *uiData, enum Response response, int stopAtFirst){
    the top layer) */
 void UIRoot_ExecuteUpwards(UIData *uiData, enum Response response, int stopAtFirst){
 	static int guesstimated_queue_length = 2;
-	va_list vargs;
 	UI_Element **queue = calloc(guesstimated_queue_length,sizeof(UI_Element*));
 	UI_Element *queue_element;
 	UI_Element *queue_element_child;
