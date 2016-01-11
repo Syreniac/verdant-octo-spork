@@ -314,8 +314,8 @@ static void sUIAction_Minimap_DrawGameObject(UI_Action *action, GraphicsData *gr
 		rely = (double)rect->y / Y_SIZE_OF_WORLD;
 		rect2.x = relx*action->element->rect.w+action->element->rect.x;
 		rect2.y = rely*action->element->rect.h+action->element->rect.y;
-		rect2.w = ((double)rect->w / X_SIZE_OF_WORLD) * action->element->rect.w;
-		rect2.h = ((double)rect->h / Y_SIZE_OF_WORLD) * action->element->rect.h;
+		rect2.w = ((double)rect->w*3 / X_SIZE_OF_WORLD) * action->element->rect.w;
+		rect2.h = ((double)rect->h*3 / Y_SIZE_OF_WORLD) * action->element->rect.h;
 		shrinkRectToFit(&rect2,&action->element->rect);
 		SDL_RenderFillRect(graphicsData->renderer,&rect2);
 }

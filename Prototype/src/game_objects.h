@@ -179,7 +179,7 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
 void updateIceCreamPerson(GameObjectData *gameObjectData, int ticks);
 
 Hive createHive(void);
-Tree createTree(void);
+Tree createTree(Hive *hive, int forceX, int forceY);
 Weather createWeatherLayer(void);
 
 /* I think that it will be better to do static respawning objects through
