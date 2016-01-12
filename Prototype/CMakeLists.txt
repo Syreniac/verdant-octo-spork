@@ -51,12 +51,14 @@ set(COMMON_FILES
         src/UI.c
         src/UI.h
         src/world_generation.c
-        src/world_generation.h)
+        src/world_generation.h
+        src/announcements.c
+        src/announcements.h)
 set(SOURCE_FILES
     src/main.c
     src/main.h
     ${COMMON_FILES})
-set(TEST_SOURCE_FILES tests/main.test.c)
+set(TEST_SOURCE_FILES src/all.test.c src/all.test.h ${COMMON_FILES})
 
 set(ASSETS_DIR assets)
 set(AI_DIR ${ASSETS_DIR})

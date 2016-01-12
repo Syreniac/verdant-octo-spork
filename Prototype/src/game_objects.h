@@ -1,4 +1,4 @@
-#include "audio.h"
+#include "announcements.h"
 
 enum ProgrammableWorkerStatus {LEAVING = 1,
                                RETURNING = 2,
@@ -18,6 +18,7 @@ typedef struct RoamingSpider RoamingSpider;
 typedef struct Weather Weather;
 typedef struct GameObjectData GameObjectData;
 typedef struct DroppedIceCream DroppedIceCream;
+typedef struct HiveCell HiveCell;
 
 /* I'm calling them resource nodes rather than flowers because it makes the
    game more easily adaptable to other themes if we want. Otherwise they are
@@ -60,6 +61,9 @@ struct ProgrammableWorkerBrain{
   ResourceNode *foundNode;
   int is_point_remembered;
   ProgrammableWorker *followTarget;
+  int aiStartPoint;
+  int waitTime;
+  int storedCount;
 };
 
 struct ProgrammableWorker{
@@ -70,14 +74,22 @@ struct ProgrammableWorker{
 
   double heading;
   float speed;
-  
+
   int currentGraphicIndex;
-  
+
   int wet_and_cant_fly;
+  int cold_and_about_to_die;
+  int stunned_after_sting;
+
+  int flapTimer;
+
+  char *beeStatus;
+
+  int insideHive;
 
 
   int cargo;
-  
+
   int displayInfo;
   int xRenderPosWhenSelected;
   int yRenderPosWhenSelected;
@@ -88,12 +100,23 @@ struct ProgrammableWorker{
   ProgrammableWorkerBrain brain;
 };
 
+struct HiveCell{
+  int timer;
+};
+
 struct Hive{
   float xPosition;
   float yPosition;
   SDL_Rect rect;
   int displayInfo;
   int flowers_collected;
+  int bees_taking_shelter;
+  int scoreBeforeWinter;
+  int delayBeforeSummer;
+  int winterCountdown;
+  float winterCountdownFloat;
+  int years_survived;
+  HiveCell hiveCells[NUMBER_OF_CELLS_IN_HIVE];
 };
 
 struct Tree{
@@ -103,6 +126,7 @@ struct Tree{
   SDL_Rect stumpRect;
   int bees_taking_shelter;
   int displayInfo;
+  int currentGraphicIndex;
 };
 
 struct DroppedIceCream{
@@ -158,6 +182,8 @@ struct Weather{
   int tickCount;
 };
 
+typedef enum {STARVATION, COLD} gameOverCause;
+
 struct GameObjectData{
   Weather weather;
   Hive hive;
@@ -170,16 +196,25 @@ struct GameObjectData{
   ProgrammableWorker *first_programmable_worker;
   int programmableWorkerCount;
   int pause_status;
-  
+  char announcement[256];
+  char gameOverString[256];
+  int gameOver;
+  int gameOverBoxVisible;
+  gameOverCause gameOverCause;
+  Uint32 gameOverEventNum;
+  Uint32 objectDisplayEventNum;
+  int gameRestart;
   AudioData audioData;
 };
 
+void killAllBees(ProgrammableWorker **programmableWorker);
+void killProgrammableWorker(GameObjectData *gameObjectData, ProgrammableWorker **programmableWorker);
 ProgrammableWorker *createProgrammableWorker(GameObjectData *gameObjectData);
-void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks);
+void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, AnnouncementsData *announcementsData, int ticks);
 void updateIceCreamPerson(GameObjectData *gameObjectData, int ticks);
 
 Hive createHive(void);
-Tree createTree(void);
+Tree createTree(Hive *hive, int forceX, int forceY);
 Weather createWeatherLayer(void);
 
 /* I think that it will be better to do static respawning objects through
@@ -200,9 +235,14 @@ DroppedIceCream *createDroppedIceCream(void);
 RoamingSpider *createRoamingSpider(void);
 void reInitialiseIceCreamPerson(IceCreamPerson *iceCreamPerson);
 void reInitialiseRoamingSpider(RoamingSpider *roamingSpider);
-void updateGameObjects(GameObjectData *gameObjectData, AudioData *audioData, GraphicsData *graphicsData, int ticks);
+void updateGameObjects(GameObjectData *gameObjectData, AudioData *audioData, GraphicsData *graphicsData, AnnouncementsData *announcementsData, int ticks);
 int countProgrammableWorkersInRange(GameObjectData *gameObjectData, SDL_Point center, double radius);
 int isPointInRangeOf(SDL_Point point, SDL_Point center, double radius);
 
 void initAudio(GameObjectData *gameObjectData, AudioData audioData);
-void objectInfoDisplay(GameObjectData *gameObjectData, GraphicsData *graphicsData, SDL_MouseButtonEvent *mbEvent);
+void centerViewOnHive(GraphicsData *graphicsData, GameObjectData *gameObjectData);
+void objectInfoDisplay(GameObjectData *gameObjectData, GraphicsData *graphicsData, AnnouncementsData *announcementsData,
+SDL_MouseButtonEvent *mbEvent);
+
+void nullifyLocalAIInformation(GameObjectData *gameObjectData);
+int countResourceNodesInRadius(GameObjectData *gameObjectData, int x, int y, double radius);

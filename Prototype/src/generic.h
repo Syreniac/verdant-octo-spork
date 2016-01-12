@@ -24,12 +24,19 @@ FILE *DEBUGGING_FILE_FREE;
 #endif
 #define VERBOSE 1
 
+#define NUMBER_OF_CELLS_IN_HIVE 6
+#define HIVE_CELL_SPAWN_DELAY 5000
+
+#define HONEY_REQUIRED_FOR_WINTER 100
+#define REQUIREMENT_YEAR_INCREASE_PERCENTAGE 10
+#define DELAY_BEFORE_SUMMER 10
+
 #define PROGRAM_NAME "Prototype"
 #define X_SIZE_OF_SCREEN 960
 #define Y_SIZE_OF_SCREEN 720
 
-#define X_SIZE_OF_WORLD 2100
-#define Y_SIZE_OF_WORLD 1700
+#define X_SIZE_OF_WORLD 21000
+#define Y_SIZE_OF_WORLD 17000
 
 #define X_INITIAL_SCREEN_OFFSET -(X_SIZE_OF_WORLD/2)+(X_SIZE_OF_SCREEN/2)
 #define Y_INITIAL_SCREEN_OFFSET -(Y_SIZE_OF_WORLD/2)+(Y_SIZE_OF_SCREEN/2)
@@ -44,7 +51,7 @@ FILE *DEBUGGING_FILE_FREE;
 #define RAIN_TILE_HEIGHT 9
 #define RAIN_FRAME_DELAY 4
 
-#define NUMBER_OF_WORKERS 10
+#define INITIAL_NUMBER_OF_WORKERS 1
 
 /*lower values result in a higher chance of bees regaining flight when wet, with
 each call to updateProgrammableWorker*/
@@ -82,8 +89,8 @@ each call to updateProgrammableWorker*/
 
 #define SIZE_OF_TREE 200
 #define SIZE_OF_TREESTUMP 70
-#define NUMBER_OF_TREES 25
-#define NUMBER_OF_FLOWER_PATCHES 5
+#define NUMBER_OF_TREES 500
+#define NUMBER_OF_FLOWER_PATCHES 50
 
 #define SIZE_OF_FLOWER 20
 
@@ -91,24 +98,52 @@ each call to updateProgrammableWorker*/
 
 #define CARRYING_FLOWER_INDEX_OFFSET 2
 #define CARRYING_ICECREAM_INDEX_OFFSET 4
+#define MS_BETWEEN_FLAPPING 45
 
+
+#define BENCHMARK_TEST 0
 
 #define X_SIZE_OF_WORKER 40
 #define Y_SIZE_OF_WORKER 40
 #define WORKER_SPEED 0.3
 
 #define WORKER_PERCEPTION_RADIUS 250
+#define COLD_DEATH_THRESHOLD 200
+#define STUNNED_AFTER_STING_DURATION (MELT_TIME_THRESHOLD + 200)
+
 
 #define X_SIZE_OF_HIVE 64
 #define Y_SIZE_OF_HIVE 80
 
+#define HIVE_SHELTER_RADIUS (X_SIZE_OF_HIVE/2)
+
 
 #define DEFAULT_RESOURCEUNITS 100
-#define DEFAULT_SPAWNDELAY 1000*10
+#define DEFAULT_SPAWNDELAY 1000
 #define DEFAULT_SPAWNRADIUS 100.0
-#define DEFAULT_MAXNODECOUNT 10
-#define TICKSPERWEATHER 3000
-#define FRAME_TIME 20
+#define RANDOMISE_SPAWNRADIUS 2500
+#define DEFAULT_MAXNODECOUNT 50
+#define TICKSPERWEATHER 30000000
+#define SUN_LASTS_LONGER_FACTOR 5
+#define FRAME_TIME 15
+
+#define LENGTH_OF_STATUS_STRING 32
+
+#define WINTER_COUNTDOWN_SPEED 0.01
+
+#define MAX_DAYS_TO_WINTER 301
+#define AUTUMN_THRESHOLD (MAX_DAYS_TO_WINTER / 3)
+#define WINTER_THRESHOLD 1
+
+#define DAYS_LABEL_WIDTH 155
+#define DAYS_COUNTER_WIDTH 40
+
+#define TOP_BAR_HEIGHT 30
+#define SCORE_COUNTER_WIDTH 40
+#define SCORE_LABEL_WIDTH 75
+
+#define YEARS_COUNTER_WIDTH 40
+#define YEARS_LABEL_WIDTH 145
 
 #define NUM_OF_KEYS 30
 #define PANSPEEDMULTI 0.5
@@ -116,6 +151,12 @@ each call to updateProgrammableWorker*/
 #define PI 3.14159
 #define DEGREESINCIRCLE 360.0
 #define RADIANSTODEGREES 57.2958
+
+#define SUMMER_INDEX 0
+#define AUTUMN_INDEX 1
+#define WINTER_INDEX 2
+
+#define WORKER_SENSE_RANGE 500.0
 
 #define FILE_TO_STRING_STEP_SIZE 10
 
@@ -149,3 +190,4 @@ SDL_Rect getRectFromPercRect(SDL_Window *window, float from_left, float from_rig
 char *fileToString(FILE *file);
 SDL_Point getPointFromInvPoint(SDL_Window *window, int x, int y);
 SDL_Point getPointFromPerc(SDL_Window *window, float x, float y);
+void shrinkRectToFit(SDL_Rect *toShrink, SDL_Rect *fitTo);

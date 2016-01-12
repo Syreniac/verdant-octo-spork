@@ -1,6 +1,6 @@
 # Please run the clean command detailed at the bottom, before running: make -f makefile_lab
 
-CFLAGS = -pedantic -Wall -Wextra -std=c99 -Wno-unused-parameter
+CFLAGS = -pedantic -Wall -Wextra -std=c99 -Wno-unused-parameter -O3 -g
 TTF_FLAGS = -Ilibraries_Lab/SDL_ttf/include -Llibraries_Lab/SDL_ttf/lib
 TEST_FLAGS = -I/usr/include -L/usr/lib64 -Wl,-rpath,/usr/lib64
 IMAGE_FLAGS = -Ilibraries_Lab/SDL_image/include -Llibraries_Lab/SDL_image/lib
@@ -11,137 +11,42 @@ DELETE_RECURSIVE = rm -r
 
 # List all the files here
 #Add a /. after assets to copy only the contents inside, rather than the folder too.
-ASSETS_CONTENTS = assets/.
-COMMON_FILES = init.o game.o world_generation.o game_objects.o AI.o UI.o generic.o controls.o graphics.o audio.o
+ASSETS_CONTENTS = assets/*
+COMMON_FILES = init.o game.o world_generation.o game_objects.o AI.o UI.o generic.o controls.o graphics.o audio.o announcements.o
 SOURCE_FILES = main.o $(COMMON_FILES)
-TEST_FILES = main.test.o $(COMMON_FILES)
+ALLTEST_FILES = all.test.o $(COMMON_FILES)
 BIN = bin
-TESTBIN = testbin
 PROG = $(BIN)/Prototype
-TEST = $(BIN)/Test
+ALLTEST = $(BIN)/Test
 CXX = gcc
 
-# top-level rule to create the program.
-all: $(PROG)
-
-# compiling other source files.
-%.o: src/%.c src/%.h
-	$(CXX) $(CFLAGS) $(LFLAGS) -c -s $<
-
-# linking the program. | $(BIN) makes the bin/ directory if it does not yet exist.
-$(PROG): $(SOURCE_FILES) | $(BIN)
-	$(CXX) $(SOURCE_FILES) -o $(PROG) $(LFLAGS)
-
-# makes the bin/ directory and copies assets to bin/ so we don't have to drag them in manually.
-# $@ is merely a variable provided by makefile which effectively substitutes in the rule "$(BIN)".
-$(BIN):
-	mkdir $@
-	cp -R $(ASSETS_CONTENTS) $@
-
-# cleans everything that can be automatically recreated with "make".
-# To do this, run the following command in verdant-octo-spork/Prototype: make -f makefile_lab clean
-clean:
-	$(DELETE) *.o
-	$(DELETE_RECURSIVE) $(BIN)
-
-
-
 
 #==========
-########### A quick-and-dirty makefile for Test. Shouldn't interfere with Prototype.
-#==========
-
-# rule to make test.
-test: $(TEST)
-
-# compiling other source files.
-%.o: src/%.c src/%.h
-	$(CXX) $(CFLAGS) $(LFLAGS) -c -s $<
-main.test.o: tests/main.test.c src/main.h
-	$(CXX) $(CFLAGS) $(LFLAGS) -c -s $<
-
-# make complained last time I shared two programs in the same bin, but we can try to make test in the same place.
-$(TEST): $(TEST_FILES) | $(TESTBIN)
-	$(CXX) $(TEST_FILES) -o $(TEST) $(LFLAGS) $(TEST_FLAGS) -lcheck
-
-# makes the bin/ directory and copies assets to bin/ so we don't have to drag them in manually.
-# $@ is merely a variable provided by makefile which effectively substitutes in the rule "$(BIN)".
-$(TESTBIN):
-	mkdir $@
-	cp -R $(ASSETS_CONTENTS) $@
-
-# cleans everything that can be automatically recreated with "make -f makefile_lab test".
-# To do this, run the following command in verdant-octo-spork/Prototype: make -f makefile_lab cleantest
-cleantest:
-	$(DELETE) *.o
-	$(DELETE_RECURSIVE) $(TESTBIN)
-
-
-
-
-#==========
-########### A hypothetical makefile for making both simultaneously, albeit in separate bins.
+########### Makes both executables simultaneously, in the same bin.
 #==========
 
 # Dictates which executables need to be made.
-separate: $(PROG) $(TEST)
+all: $(PROG) $(ALLTEST)
 
 # Compiles all object files needed to make each executable.
 %.o: src/%.c src/%.h
 	$(CXX) $(CFLAGS) $(LFLAGS) -c -s $<
-main.test.o: tests/main.test.c src/main.h
-	$(CXX) $(CFLAGS) $(LFLAGS) -c -s $<
-
-# Gives rules for making both.
-$(PROG): $(SOURCE_FILES) | $(BIN)
-	$(CXX) $(SOURCE_FILES) -o $(PROG) $(LFLAGS)
-$(TEST): $(TEST_FILES) | $(TESTBIN)
-	$(CXX) $(TEST_FILES) -o $(TEST) $(LFLAGS) $(TEST_FLAGS) -lcheck
-
-# makes two bins separately.
-$(BIN):
-	mkdir $@
-	cp -R $(ASSETS_CONTENTS) $@
-$(TESTBIN):
-	mkdir $@
-	cp -R $(ASSETS_CONTENTS) $@
-
-# cleans everything that can be automatically recreated with "make -f makefile_lab test".
-# To do this, run the following command in verdant-octo-spork/Prototype: make -f makefile_lab cleantest
-cleantest:
-	$(DELETE) *.o
-	$(DELETE_RECURSIVE) $(BIN)
-	$(DELETE_RECURSIVE) $(TESTBIN)
-
-
-
-
-#==========
-########### A hypothetical makefile for making both simultaneously, in the same bin.
-#==========
-
-# Dictates which executables need to be made.
-together: $(PROG) $(TEST)
-
-# Compiles all object files needed to make each executable.
-%.o: src/%.c src/%.h
-	$(CXX) $(CFLAGS) $(LFLAGS) -c -s $<
-main.test.o: tests/main.test.c src/main.h
+all.test.o: src/all.test.c src/all.test.h
 	$(CXX) $(CFLAGS) $(LFLAGS) -c -s $<
 
 # Gives rules for making both executables.
 $(PROG): $(SOURCE_FILES) | $(BIN)
 	$(CXX) $(SOURCE_FILES) -o $(PROG) $(LFLAGS)
-$(TEST): $(TEST_FILES) | $(BIN)
-	$(CXX) $(TEST_FILES) -o $(TEST) $(LFLAGS) $(TEST_FLAGS) -lcheck
+$(ALLTEST): $(ALLTEST_FILES) | $(BIN)
+	$(CXX) $(ALLTEST_FILES) -o $(ALLTEST) $(LFLAGS) $(TEST_FLAGS) -lcheck
 
 # makes one unified bin.
 $(BIN):
 	mkdir $@
 	cp -R $(ASSETS_CONTENTS) $@
 
-# cleans everything that can be automatically recreated with "make -f makefile_lab test".
-# To do this, run the following command in verdant-octo-spork/Prototype: make -f makefile_lab cleantest
-cleantogether:
+# cleans everything that can be automatically recreated with "make -f makefile_lab".
+# To do this, run the following command in verdant-octo-spork/Prototype: make -f makefile_lab clean
+clean:
 	$(DELETE) *.o
 	$(DELETE_RECURSIVE) $(BIN)

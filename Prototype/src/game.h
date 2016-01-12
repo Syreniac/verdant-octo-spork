@@ -7,6 +7,7 @@ struct GameData{
   Uint32 gameStartTime;
   int gameRunTime;
   int running;
+  int delta;
   UI_Element *element;
 
   AIData aiData;
@@ -15,6 +16,7 @@ struct GameData{
   UIData uiData;
   ControlsData controlsData;
   AudioData audioData;
+  AnnouncementsData announcementsData;
 };
 
 int gameStart(GraphicsData graphicsData, AudioData audioData);

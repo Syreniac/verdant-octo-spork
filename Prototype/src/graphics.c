@@ -5,7 +5,7 @@ void paintWeatherLayer(GraphicsData *graphicsData, enum WeatherStatus present_we
 	/* This function creates a Weather struct and fills in the default
      values. Many of these are defined in generic.h */
 	Uint8 o_r = 0,o_g = 0,o_b = 0;
-	Uint8 o_a = 155;
+	Uint8 o_a = 80;
 
 
 
@@ -42,7 +42,9 @@ void paintWeatherLayer(GraphicsData *graphicsData, enum WeatherStatus present_we
 
 	/* SDL_GetRenderDrawColor(graphicsData->renderer,&o_r,&o_g,&o_b,&o_a); */
 	SDL_SetRenderDrawColor(graphicsData->renderer,o_r,o_g,o_b,o_a);
+
 	SDL_SetRenderDrawBlendMode(graphicsData->renderer, SDL_BLENDMODE_BLEND);
+
 	SDL_RenderFillRect(graphicsData->renderer, NULL);
 	/* SDL_SetRenderDrawColor(graphicsData->renderer,o_r,o_g,o_b,o_a); */
 }
@@ -59,27 +61,30 @@ void blitGameObject(SDL_Rect objectRect, GraphicsData *graphicsData, SDL_Texture
 
 void blitRainRandomly(GraphicsData *graphicsData){
 
-	SDL_Rect dstRect;
+	SDL_Rect srcRect;
+	SDL_Rect winRect = {0,0,0,0};
 	int i;
 
-	dstRect.w = RAIN_TILE_WIDTH;
-	dstRect.h = RAIN_TILE_HEIGHT;
+  	SDL_GetWindowSize(graphicsData->window,&winRect.w, &winRect.h);
 
-	for(i = 0; i < 20; i++){
+	srcRect.w = RAIN_TILE_WIDTH;
+	srcRect.h = RAIN_TILE_HEIGHT;
 
-	   dstRect.x = (rand()% X_SIZE_OF_SCREEN);
-	   dstRect.y = (rand()% Y_SIZE_OF_SCREEN);
+	for(i = 0; i < 50; i++){
+
+	   srcRect.x = (rand()% winRect.w);
+	   srcRect.y = (rand()% winRect.h);
 
 	   if(rand()%30){
 	      SDL_RenderCopy(graphicsData->renderer,
 						 graphicsData->rainy->graphic[rand()%4],
 						 NULL,
-						 &dstRect);
+						 &srcRect);
 	   }else{
 	      SDL_RenderCopy(graphicsData->renderer,
 						 graphicsData->rainy->graphic[(rand()%2)+3],
-						 NULL,
-						 &dstRect);
+					         NULL,
+						 &srcRect);
 	   }
 	}
 
@@ -111,10 +116,12 @@ void blitParallaxTreeTops(SDL_Rect objectRect, GraphicsData *graphicsData, SDL_T
 
 void blitTiledBackground(GraphicsData *graphicsData, SDL_Texture *texture){
 	int i, j, xbgShifter, ybgShifter;
+	SDL_Rect rect;
 
 	int window_x, window_y;
 
 	SDL_GetWindowSize(graphicsData->window,&window_x,&window_y);
+
 
 	xbgShifter = (graphicsData->navigationOffset.x - X_INITIAL_SCREEN_OFFSET) % GRASS_TILE_WIDTH;
 	ybgShifter = (graphicsData->navigationOffset.y - Y_INITIAL_SCREEN_OFFSET) % GRASS_TILE_HEIGHT;
@@ -135,6 +142,28 @@ void blitTiledBackground(GraphicsData *graphicsData, SDL_Texture *texture){
 
 		}
 	}
+
+	rect.x = window_x;
+
+	if((window_x - graphicsData->navigationOffset.x) > X_SIZE_OF_WORLD){
+		rect.y = 0;
+		rect.w = (window_x - graphicsData->navigationOffset.x) - X_SIZE_OF_WORLD;
+		rect.x = window_x - rect.w;
+		rect.h = window_y;
+		SDL_SetRenderDrawColor(graphicsData->renderer, 0, 0, 0, 100);
+		SDL_RenderFillRect(graphicsData->renderer, &rect);
+		graphicsData->navigationOffset.x+= ceil((float)rect.w/10.0);
+	}
+
+	if((window_y - graphicsData->navigationOffset.y) > Y_SIZE_OF_WORLD){
+		rect.w = rect.x;
+		rect.x = 0;
+		rect.h = (window_y - graphicsData->navigationOffset.y) - Y_SIZE_OF_WORLD;
+		rect.y = window_y - rect.h;
+		SDL_SetRenderDrawColor(graphicsData->renderer, 0, 0, 0, 100);
+		SDL_RenderFillRect(graphicsData->renderer, &rect);
+		graphicsData->navigationOffset.y+= ceil((float)rect.h/10.0);
+	}
 }
 
 
@@ -142,10 +171,10 @@ SDL_Texture *loadTextureFromFile(char *file_name, GraphicsData *graphicsData, ch
 	SDL_Surface *image;
 	SDL_Texture *texture;
 
-	printf("loading texture file %s\n",file_name);
 	image = SDL_LoadBMP(file_name);
 	if(image == NULL){
-		printf("Image loading has failed: %s\n", SDL_GetError());
+		fprintf(stderr,"Image loading has failed: %s\n", SDL_GetError());
+		fflush(stderr);
 		assert(image != NULL);
 	}
 	if(toggleAlpha == 1){
@@ -153,7 +182,8 @@ SDL_Texture *loadTextureFromFile(char *file_name, GraphicsData *graphicsData, ch
 	}
 	texture = SDL_CreateTextureFromSurface(graphicsData->renderer, image);
 	if(texture == NULL){
-		printf("Texture conversion has failed: %s\n", SDL_GetError());
+		fprintf(stderr,"Texture conversion has failed: %s\n", SDL_GetError());
+		fflush(stderr);
 		assert(texture != NULL);
 	}
 	SDL_FreeSurface(image);
@@ -187,7 +217,7 @@ void renderRadius(GraphicsData *graphicsData, SDL_Point *point, double radius, U
 	point->y += graphicsData->navigationOffset.y;
 
 	SDL_SetRenderDrawColor(graphicsData->renderer, r,g,b, a);
-			   
+
     for (currOffsetY = 1; currOffsetY <= radius; currOffsetY ++) {
          currOffsetX = floor(sqrt((2.0 * radius * currOffsetY) - (pow(currOffsetY, 2))));
          SDL_RenderDrawPoint(graphicsData->renderer, point->x - currOffsetX, point->y + radius - currOffsetY);
@@ -205,7 +235,7 @@ void renderFillRadius(GraphicsData *graphicsData, SDL_Point *point, double radiu
 	point->y += graphicsData->navigationOffset.y;
 
 	SDL_SetRenderDrawColor(graphicsData->renderer, r,g,b, a);
-			   
+
     for (currOffsetY = 1; currOffsetY <= radius; currOffsetY ++) {
          currOffsetX = floor(sqrt((2.0 * radius * currOffsetY) - (pow(currOffsetY, 2))));
          SDL_RenderDrawLine(graphicsData->renderer,
@@ -225,4 +255,25 @@ void renderFillRadius(GraphicsData *graphicsData, SDL_Point *point, double radiu
 
 }
 
+void setNavigationOffset(GraphicsData *graphicsData, int x, int y){
+	int sx,sy;
+	SDL_GetWindowSize(graphicsData->window,&sx,&sy);
+	if(x + sx > X_SIZE_OF_WORLD){
+		x = X_SIZE_OF_WORLD - sx;
+	}
+	else if(x < 0){
+		x = 0;
+	}
+	if(y + sy > Y_SIZE_OF_WORLD){
+		y = Y_SIZE_OF_WORLD - sy;
+	}
+	else if(y < 0){
+		y = 0;
+	}
 
+	x = -x;
+	y = -y;
+
+	graphicsData->navigationOffset.x = x;
+	graphicsData->navigationOffset.y = y;
+}

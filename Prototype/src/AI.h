@@ -14,12 +14,13 @@ typedef struct BlockFunction BlockFunction;
 typedef struct BlockFunctionRoot BlockFunctionRoot;
 typedef struct AIData AIData;
 typedef struct BlockFunctionTemplate BlockFunctionTemplate;
+typedef struct BlockFunctionGlobals BlockFunctionGlobals;
 typedef enum BlockFunctionArgumentType BlockFunctionArgumentType;
 
-
-typedef int(*blockFunction_WrappedFunction)(BlockFunctionArgs *arguments,
+typedef int(*blockFunction_WrappedFunction)(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments,
                                             ProgrammableWorker *programmableWorker,
-                                            GameObjectData *gameObjectData);
+                                            GameObjectData *gameObjectData,
+                                            int ticks);
 
 struct BlockFunctionArgs{
   char *characters;
@@ -28,6 +29,7 @@ struct BlockFunctionArgs{
   int numOfInts;
   float *floats;
   int numOfFloats;
+  int blockFunctionIndex;
 };
 
 struct BlockFunction{
@@ -36,18 +38,28 @@ struct BlockFunction{
   BlockFunction *primary;
   BlockFunction *secondary;
   BlockFunctionArgs arguments;
+  /* A terminal block is one is allowed
+     to loop backwards, because execution
+     pauses and the AI stops */
+  int terminal;
 };
 
+struct BlockFunctionGlobals{
+  int count;
+  ProgrammableWorker *selectedWorker;
+};
 
 struct BlockFunctionRoot{
   BlockFunction *blockFunctions;
   int numOfBlockFunctions;
+  BlockFunctionGlobals globals;
 };
 
 struct BlockFunctionTemplate{
   BlockFunctionTemplate *next;
   char name[50];
   int numOfArguments;
+  int terminal;
   BlockFunctionArgumentType *arguments;
 };
 
@@ -58,95 +70,121 @@ struct AIData{
 
 FILE *fopenAndVerify(char *file_name, char *permission);
 
-int blockFunction_Void(BlockFunctionArgs *arguments,
+int blockFunction_Void(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments,
                        ProgrammableWorker *programmableWorker,
-                       GameObjectData *gameObjectData);
+                       GameObjectData *gameObjectData,
+                       int ticks);
 
-int blockFunction_IfWorkerIdle(BlockFunctionArgs *arguments,
+int blockFunction_IfWorkerIdle(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments,
                                ProgrammableWorker *programmableWorker,
-                               GameObjectData *gameObjectData);
+                               GameObjectData *gameObjectData,
+                               int ticks);
 
-int blockFunction_IfWorkerReturning(BlockFunctionArgs *arguments,
+int blockFunction_IfWorkerReturning(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments,
                                     ProgrammableWorker *programmableWorker,
-                                    GameObjectData *gameObjectData);
+                                    GameObjectData *gameObjectData,
+                                    int ticks);
 
-int blockFunction_IfWorkerHasCargo(BlockFunctionArgs *arguments,
+int blockFunction_IfWorkerHasCargo(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments,
                                    ProgrammableWorker *programmableWorker,
-                                   GameObjectData *gameObjectData);
+                                   GameObjectData *gameObjectData,
+                                   int ticks);
 
-int blockFunction_Print(BlockFunctionArgs *arguments,
-                        ProgrammableWorker *programmableWorker,
-                        GameObjectData *gameObjectData);
-
-int blockFunction_IfWorkerCargoGreaterThan(BlockFunctionArgs *arguments,
+int blockFunction_IfWorkerCargoGreaterThan(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments,
                                            ProgrammableWorker *programmableWorker,
-                                           GameObjectData *gameObjectData);
+                                           GameObjectData *gameObjectData,
+                                           int ticks);
 
-int blockFunction_IfWorkerStatusEqual(BlockFunctionArgs *arguments,
+int blockFunction_IfWorkerStatusEqual(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments,
                                       ProgrammableWorker *programmableWorker,
-                                      GameObjectData *gameObjectData);
+                                      GameObjectData *gameObjectData,
+                                      int ticks);
 
-int blockFunction_IfWorkerOutsideOfBounds(BlockFunctionArgs *arguments,
+int blockFunction_IfWorkerOutsideOfBounds(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments,
                                           ProgrammableWorker *programmableWorker,
-                                          GameObjectData *gameObjectData);
+                                          GameObjectData *gameObjectData,
+                                          int ticks);
 
-int blockFunction_IfWorkerNearHive(BlockFunctionArgs *arguments,
+int blockFunction_IfWorkerNearHive(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments,
                                    ProgrammableWorker *programmableWorker,
-                                   GameObjectData *gameObjectData);
+                                   GameObjectData *gameObjectData,
+                                   int ticks);
 
-int blockFunction_SetWorkerHeadingRandomly(BlockFunctionArgs *arguments,
+int blockFunction_SetWorkerHeadingRandomly(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments,
                                            ProgrammableWorker *programmableWorker,
-                                           GameObjectData *gameObjectData);
+                                           GameObjectData *gameObjectData,
+                                           int ticks);
 
-int blockFunction_WorkerReturnToHive(BlockFunctionArgs *arguments,
+int blockFunction_WorkerReturnToHive(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments,
                                      ProgrammableWorker *programmableWorker,
-                                     GameObjectData *gameObjectData);
+                                     GameObjectData *gameObjectData,
+                                     int ticks);
 
-int blockFunction_IfNumOfFlowersInRadius(BlockFunctionArgs *arguments,
+int blockFunction_IfNumOfFlowersInRadius(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments,
                                      ProgrammableWorker *programmableWorker,
-                                     GameObjectData *gameObjectData);
+                                     GameObjectData *gameObjectData,
+                                     int ticks);
 
-int blockFunction_RememberCurrentLocation(BlockFunctionArgs *arguments,
+int blockFunction_RememberCurrentLocation(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments,
                                           ProgrammableWorker *programmableWorker,
-                                          GameObjectData *gameObjectData);
+                                          GameObjectData *gameObjectData,
+                                          int ticks);
 
-int blockFunction_GoToRememberedLocation(BlockFunctionArgs *arguments,
+int blockFunction_GoToRememberedLocation(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments,
                                          ProgrammableWorker *programmableWorker,
-                                         GameObjectData *gameObjectData);
+                                         GameObjectData *gameObjectData,
+                                         int ticks);
 
-int blockFunction_ForgetRememberedLocation(BlockFunctionArgs *arguments,
+int blockFunction_ForgetRememberedLocation(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments,
                                            ProgrammableWorker *programmableWorker,
-                                           GameObjectData *gameObjectData);
+                                           GameObjectData *gameObjectData,
+                                           int ticks);
 
-int blockFunction_RandomShiftRememberedLocation(BlockFunctionArgs *arguments,
+int blockFunction_RandomShiftRememberedLocation(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments,
                                                 ProgrammableWorker *programmableWorker,
-                                                GameObjectData *gameObjectData);
+                                                GameObjectData *gameObjectData,
+                                                int ticks);
 
-int blockFunction_IfNodeFound(BlockFunctionArgs *arguments,
+int blockFunction_IfNodeFound(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments,
                               ProgrammableWorker *programmableWorker,
-                              GameObjectData *gameObjectData);
+                              GameObjectData *gameObjectData,
+                              int ticks);
 
-int blockFunction_HeadToFoundNode(BlockFunctionArgs *arguments,
+int blockFunction_HeadToFoundNode(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments,
                                   ProgrammableWorker *programmableWorker,
-                                  GameObjectData *gameObjectData);
+                                  GameObjectData *gameObjectData,
+                                  int ticks);
 
-int blockFunction_HasRememberedLocation(BlockFunctionArgs *arguments,
+int blockFunction_HasRememberedLocation(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments,
                                         ProgrammableWorker *programmableWorker,
-                                        GameObjectData *gameObjectData);
+                                        GameObjectData *gameObjectData,
+                                        int ticks);
+
+int blockFunction_CoinFlip(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments,
+                           ProgrammableWorker *programmableWorker,
+                           GameObjectData *gameObjectData,
+                           int ticks);
+
+int blockFuntion_LoadCount(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks);
+
+int blockFunction_SaveCount(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks);
 
 void runBlockFunctionRootOverWorker(BlockFunctionRoot *blockFunctionRoot,
                                    ProgrammableWorker *programmableWorker,
-                                   GameObjectData *gameObjectData);
+                                   GameObjectData *gameObjectData,
+                                   int ticks);
 
 int runBlockFunctionOverWorker(BlockFunction *blockFunction,
+                               BlockFunctionGlobals *globals,
                                ProgrammableWorker *programmableWorker,
-                               GameObjectData *gameObjectData);
+                               GameObjectData *gameObjectData,
+                               int ticks);
 
 int getNumberOfTextStoredBlocks(FILE *file, int *maxDescLength);
 
 int countCharsInString(char *string, char countChar);
 
-void runAI(AIData *aiData, GameObjectData *gameObjectData);
+void runAI(AIData *aiData, GameObjectData *gameObjectData, int ticks);
 
 AIData initAIData(void);
 
@@ -155,4 +193,6 @@ BlockFunction createAIBlockFunctionFromTokens(BlockFunctionRoot *blockFunctionRo
 BlockFunctionRoot makeBlockFunctionRootFromString(char *str, int numOfBlocks);
 
 blockFunction_WrappedFunction getBlockFunctionByName(char *blockFunctionName);
-void nullifyBlockFunctionRoot(BlockFunctionRoot *root);
+void nullifyBlockFunctionRoot(BlockFunctionRoot *root, GameObjectData *gameObjectData);
+BlockFunction *testBlockFunctionRootForLoops(BlockFunction *toTest, BlockFunction **testAgainst, int countToTestAgainst);
+int testBlockFunctionRootForStart(BlockFunctionRoot *root);
