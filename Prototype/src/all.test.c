@@ -13,11 +13,9 @@ START_TEST(core_isPointInRect){
     rect.x = rect.y = 20;
     rect.h = rect.w = 40;
 /* Returns '1' if the point is inside the rectangle. */
-    fail_unless(isPointInRect(10,10,rect) == 0, "isPointInRect function test failed!");
-    fail_unless(isPointInRect(10,21,rect) == 0, "isPointInRect function test failed!");
-    fail_unless(isPointInRect(21,10,rect) == 0, "isPointInRect function test failed!");
-    fail_unless(isPointInRect(21,61,rect) == 0, "isPointInRect function test failed!");
-    fail_unless(isPointInRect(61,21,rect) == 0, "isPointInRect function test failed!");
+    fail_unless(isPointInRect(21,21,rect) == 1, "isPointInRect function test failed!");
+    fail_unless(isPointInRect(21,59,rect) == 1, "isPointInRect function test failed!");
+    fail_unless(isPointInRect(59,21,rect) == 1, "isPointInRect function test failed!");
   }
 END_TEST
 
@@ -29,9 +27,11 @@ START_TEST(limits_isPointInRect){
     rect.x = rect.y = 20;
     rect.h = rect.w = 40;
 /* Returns '0' if the point isn't inside the rectangle. */
-    fail_unless(isPointInRect(21,21,rect) == 1, "isPointInRect function test failed!");
-    fail_unless(isPointInRect(21,59,rect) == 1, "isPointInRect function test failed!");
-    fail_unless(isPointInRect(59,21,rect) == 1, "isPointInRect function test failed!");
+    fail_unless(isPointInRect(10,10,rect) == 0, "isPointInRect function test failed!");
+    fail_unless(isPointInRect(10,21,rect) == 0, "isPointInRect function test failed!");
+    fail_unless(isPointInRect(21,10,rect) == 0, "isPointInRect function test failed!");
+    fail_unless(isPointInRect(21,61,rect) == 0, "isPointInRect function test failed!");
+    fail_unless(isPointInRect(61,21,rect) == 0, "isPointInRect function test failed!");
   }
 END_TEST
 
