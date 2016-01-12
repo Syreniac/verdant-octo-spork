@@ -107,7 +107,7 @@ UI_Element *makeAITemplateScrollList(int x_offset, int y_offset, AIData *aiData,
 	/* Set up the slider bar */
 		element2 = UIElement_Create(x_offset+200,y_offset,21,20,7);
 		printf("scroll bar slider @ %p\n",element2);
-		UIConfigure_FillAndBorderRect(element2,&element2->actions[0],249,252,124,0,0,0,FILLRECT);
+		UIConfigure_FillAndBorderRect(element2,&element2->actions[0],249,252,124,0,0,0,SCROLLHANDLE);
 		UIConfigure_ShrinkFitToParent(element2,&element2->actions[1]);
 		UIConfigure_DraggableVerticalOverride(element2,&element2->actions[2],1,&element2->actions[1]);
 		UIConfigure_LeftClickRect(element2,&element2->actions[3]);
@@ -2169,7 +2169,29 @@ int UIAction_FillAndBorderRect(UI_Action *action, UIData *uiData){
 													 255);
 		SDL_RenderDrawRect(graphicsData->renderer,&action->element->rect);
 
-//		SDL_RenderCopy(graphicsData->renderer, imageFont[glyphToBeDrawn], &srcRect, &action->element->rect);
+
+		return 1;
+	}
+	return 0;
+}
+
+int UIAction_DrawScrollhandle(UI_Action *action, UIData *uiData){
+	/* This should be given the necessary rendering information, in this case,
+	   a pointer to the SDL_Window */
+	GraphicsData *graphicsData;
+	graphicsData = uiData->graphicsData;
+	if(action->status == 1 && UIElement_isVisible(action->element)){
+		SDL_SetRenderDrawColor(graphicsData->renderer,
+													 action->fillRed,
+													 action->fillGreen,
+													 action->fillBlue,
+													 255);
+		SDL_RenderFillRect(graphicsData->renderer,&action->element->rect);
+		/* A border is already drawn into my scrollhandle graphic, so the code for drawing a border in UIAction_FillAndBorderRect() is removed. */
+		/* SDL_SetTextureBlendMode() blends the overlaying colours of the FillRect down onto those of the greyscale image I provide. */
+		SDL_SetTextureBlendMode(graphicsData->uiEle->graphic[SCROLLHANDLE_GRAPHIC],
+														SDL_BLENDMODE_MOD);
+		SDL_RenderCopy(graphicsData->renderer, graphicsData->uiEle->graphic[SCROLLHANDLE_GRAPHIC], NULL, &action->element->rect);
 
 		return 1;
 	}
@@ -2184,6 +2206,7 @@ void UIConfigure_FillAndBorderRect(UI_Element *element, UI_Action *action, int f
 		case CROSSBOX:
 			break;
 		case SCROLLHANDLE:
+			action->function = UIAction_DrawScrollhandle;
 			break;
 		default:
 			action->function = UIAction_FillAndBorderRect;

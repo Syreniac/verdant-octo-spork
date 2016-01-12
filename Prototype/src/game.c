@@ -157,6 +157,15 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
   gameData.graphicsData.hiveTexture = loadTextureFromFile("images/beehive.bmp",
 														  &gameData.graphicsData, 1);
 
+  gameData.graphicsData.uiEle = (UIEle*) malloc(sizeof(UIEle));
+//  gameData.graphicsData.ui->graphic[SCROLLHANDLE_GRAPHIC] = loadTextureFromFile("images/UI/scrollhandle.bmp",
+//														  &gameData.graphicsData, 1);
+
+  gameData.graphicsData.uiEle->graphic[SCROLLHANDLE_GRAPHIC] = loadTextureFromFile("images/UI/scrollhandle.bmp",
+                                                                                  &gameData.graphicsData, 1);
+//  gameData.graphicsData.ui->graphic[CROSSBOX_GRAPHIC] = loadTextureFromFile("images/UI/?.bmp",
+//														  &gameData.graphicsData, 1);
+
   gameData.aiData = initAIData();
 
   initUIData(&gameData.uiData);
