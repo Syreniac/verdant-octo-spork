@@ -165,12 +165,15 @@ printf("bottom of kill all bees function\n");
 }
 
 void killProgrammableWorker(GameObjectData *gameObjectData, ProgrammableWorker **programmableWorker){
+
+	ProgrammableWorker *p = NULL;
+
 printf("top of kill programmable worker function\n");
 	if(*programmableWorker == NULL){
 		printf("programmable worker == NULL, this shouldn't be\n");
 	}
 	if((*programmableWorker)->next == NULL){
-		ProgrammableWorker *p = *programmableWorker;
+		p = *programmableWorker;
 		printf("here\n");
 	    for(*programmableWorker = gameObjectData->first_programmable_worker;
 	    (*programmableWorker)->next != p ;
@@ -182,12 +185,12 @@ printf("top of kill programmable worker function\n");
 		*programmableWorker = NULL;
 	}else if(*programmableWorker == gameObjectData->first_programmable_worker){
 		printf("hhhhhhere\n");
-		ProgrammableWorker *p = *programmableWorker;
+		p = *programmableWorker;
 		gameObjectData->first_programmable_worker = gameObjectData->first_programmable_worker->next;
 		*programmableWorker = gameObjectData->first_programmable_worker;
 		free(p);
 	}else{
-		ProgrammableWorker *p = *programmableWorker;
+		p = *programmableWorker;
     	printf("here0000\n");
 	    for(*programmableWorker = gameObjectData->first_programmable_worker;
 	    (*programmableWorker)->next != p ;

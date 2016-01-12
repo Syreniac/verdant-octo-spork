@@ -171,7 +171,6 @@ void muteSoundEffects(AudioData *audioData) {
 	
 	int weatherChannel = 3; /*channel 3 is the weather channel*/
 	
-	printf("DEBUG START OF MUTE FUNCTION: weatherSoundActive = %d\n", audioData->weatherSoundActive);
 	if (audioData->soundEffect_mute == 0) {
 		Mix_Volume(2, 0); /*channel 2 is the sound effects channel*/
 		Mix_Volume(weatherChannel, 0);
