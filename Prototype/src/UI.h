@@ -98,6 +98,9 @@ enum UIString_Align{
 };
 
 enum UIElement_Variety{
+  BLOCK,
+  STOPBOX,
+  COMPILEBOX,
 	CROSSBOX,
 	SCROLLHANDLE,
 	FILLRECT

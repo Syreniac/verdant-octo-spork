@@ -166,6 +166,12 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
 
   gameData.graphicsData.uiEle->graphic[CROSSBOX_GRAPHIC] = loadTextureFromFile("images/UI/crossbox.bmp",
                                                                                   &gameData.graphicsData, 1);
+  gameData.graphicsData.uiEle->graphic[COMPILEBOX_GRAPHIC] = loadTextureFromFile("images/UI/compilebox.bmp",
+                                                                                  &gameData.graphicsData, 1);
+  gameData.graphicsData.uiEle->graphic[STOP_GRAPHIC] = loadTextureFromFile("images/UI/stop.bmp",
+                                                                                  &gameData.graphicsData, 1);
+  gameData.graphicsData.uiEle->graphic[BLOCK_GRAPHIC] = loadTextureFromFile("images/UI/block.bmp",
+                                                                                  &gameData.graphicsData, 1);
 
   gameData.aiData = initAIData();
 
@@ -581,7 +587,7 @@ static void createGameUI(GameData *gameData){
   /* Calculate AI button */
   element = UIElement_Create(0, 0, 50, 50, 5);
   printf("compile button is %p\n",element);
-  UIConfigure_FillAndBorderRect(element, &element->actions[0],249,252,124,0,0,0,FILLRECT);
+  UIConfigure_FillAndBorderRect(element, &element->actions[0],249,252,124,0,0,0,COMPILEBOX);
   UIConfigure_ShrinkFitToParent(element, &element->actions[1]);
   UIConfigure_LeftClickRect(element, &element->actions[2]);
 	UITrigger_Bind(&element->actions[2],&element->actions[3],0,1);
