@@ -85,7 +85,7 @@ void audioSystem(AudioData *AudioSettings){
 
 }
 
-void game_welcome_page(GraphicsData graphicsData, AudioData audioData){
+int game_welcome_page(GraphicsData graphicsData, AudioData audioData){
 
    InitData initData;
 

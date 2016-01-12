@@ -47,7 +47,7 @@ int UIAction_ToggleInteger(UI_Action *action, UIData *uiData);
 UI_Element *makeHiveCellBlock(int x_offset, int y_offset, UI_Element *parent, HiveCell *hiveCell){
 	UI_Element *element = UIElement_Create(x_offset, y_offset, 50,50,6);
 
-	UIConfigure_FillAndBorderRect(element,&element->actions[0], 150,150,150,0,0,0,FILLRECT);
+	UIConfigure_FillAndBorderRect(element,&element->actions[0], 150,150,150,0,0,0,HIVECELL);
 	UIConfigure_ShrinkFitToParent(element,&element->actions[1]);
 	UIConfigure_GetPercentCellDone(element,&element->actions[2],hiveCell,HIVE_CELL_SPAWN_DELAY,1,&element->actions[3]);
 	UIConfigure_PercentageFillRect(element,&element->actions[3],0.0,255,0,0);
@@ -98,7 +98,7 @@ UI_Element *makeAIResetButton(int x_offset, int y_offset, UI_Element *parent){
 	UI_Element *element;
 	printf("AI reset button @ %p\n",element);
 	element = UIElement_Create(x_offset,y_offset,200,50,6);
-	UIConfigure_FillAndBorderRect(element,&element->actions[0],74,74,74,0,0,0,FILLRECT);
+	UIConfigure_FillAndBorderRect(element,&element->actions[0],74,74,74,0,0,0,STOPBOX);
 	UIConfigure_ShrinkFitToParent(element,&element->actions[1]);
 	UIConfigure_LeftClickRect(element,&element->actions[2]);
 		UITrigger_Bind(&element->actions[2],&element->actions[3],0,1);
@@ -143,7 +143,7 @@ UI_Element *makeAITemplateScrollList(int x_offset, int y_offset, AIData *aiData,
 	while(template!=NULL){
 		element2 = UIElement_Create(x_offset, y_offset + y_offset2, 200,50,6);
 		printf("block template @ %p\n",element2);
-		UIConfigure_FillAndBorderRect(element2,&element2->actions[0],248,221,35,0,0,0,FILLRECT);
+		UIConfigure_FillAndBorderRect(element2,&element2->actions[0],248,221,35,0,0,0,BLOCK);
 		UIConfigure_ShrinkFitToParentWithYShift(element2,&element2->actions[1],&element->actions[3]);
 		UIConfigure_DisplayString(element2,&element2->actions[2],template->name,0,UISTRING_ALIGN_CENTER);
 		UIConfigure_LeftClickRect(element2,&element2->actions[3]);
@@ -164,7 +164,7 @@ UI_Element *makeAIBlock(int x_offset, int y_offset, char *aiString, UI_Element *
 	UI_Element *element2;
 	element2 = UIElement_Create(x_offset,y_offset,200,50,19);
 	printf("AI block made @ %p\n",element2);
-	UIConfigure_FillAndBorderRect(element2,&element2->actions[0],248,221,35,0,0,0,FILLRECT);
+	UIConfigure_FillAndBorderRect(element2,&element2->actions[0],248,221,35,0,0,0,BLOCK);
 	UIConfigure_ShrinkFitToParent(element2,&element2->actions[1]);
 	UIConfigure_RightClickRect(element2, &element2->actions[2]);
 		UITrigger_Bind(&element2->actions[2],&element2->actions[3],0,1);
@@ -377,15 +377,18 @@ void UIConfigure_GetPercentCellDone(UI_Element *element, UI_Action *action, Hive
 #define fillBlue integers[2]
 
 int UIAction_PercentageFillRect(UI_Action *action, UIData *uiData){
-	SDL_Rect rect;
+  GraphicsData *graphicsData;
+  graphicsData = uiData->graphicsData;
+  SDL_Rect rect;
 	if(action->status != 0){
 		rect.x = action->element->rect.x;
 		rect.w = action->element->rect.w;
 		rect.h = (int)(action->percentage *(double)action->element->rect.h);
 		rect.y = action->element->rect.y + (int)((1.0 - action->percentage) * (double)action->element->rect.h);
 		printf("rect.h: %d rect.y: %d\n",rect.h,rect.y);
-		SDL_SetRenderDrawColor(uiData->graphicsData->renderer,action->fillRed,action->fillGreen,action->fillBlue,255);
+		SDL_SetRenderDrawColor(uiData->graphicsData->renderer,action->fillRed,action->fillGreen,action->fillBlue,100);
 		SDL_RenderFillRect(uiData->graphicsData->renderer,&rect);
+    SDL_RenderCopy(graphicsData->renderer, graphicsData->uiEle->graphic[HIVECELLMASK_GRAPHIC], NULL, &action->element->rect);
 		return 1;
 	}
 	return 0;
@@ -2398,12 +2401,126 @@ int UIAction_DrawCrossbox(UI_Action *action, UIData *uiData){
 	return 0;
 }
 
+int UIAction_DrawCompilebox(UI_Action *action, UIData *uiData){
+	/* This should be given the necessary rendering information, in this case,
+	   a pointer to the SDL_Window */
+	GraphicsData *graphicsData;
+	graphicsData = uiData->graphicsData;
+	if(action->status == 1 && UIElement_isVisible(action->element)){
+		SDL_SetRenderDrawColor(graphicsData->renderer,
+													 action->fillRed,
+													 action->fillGreen,
+													 action->fillBlue,
+													 255);
+		SDL_RenderFillRect(graphicsData->renderer,&action->element->rect);
+		SDL_SetRenderDrawColor(graphicsData->renderer,
+													 action->borderRed,
+													 action->borderGreen,
+													 action->borderBlue,
+													 255);
+		SDL_RenderDrawRect(graphicsData->renderer,&action->element->rect);
+
+		/* SDL_SetTextureBlendMode() blends the overlaying colours of the FillRect down onto those of the greyscale image I provide. */
+		SDL_SetTextureBlendMode(graphicsData->uiEle->graphic[COMPILEBOX_GRAPHIC],
+														SDL_BLENDMODE_MOD);
+		SDL_RenderCopy(graphicsData->renderer, graphicsData->uiEle->graphic[COMPILEBOX_GRAPHIC], NULL, &action->element->rect);
+
+		return 1;
+	}
+	return 0;
+}
+
+int UIAction_DrawStopbox(UI_Action *action, UIData *uiData){
+	/* This should be given the necessary rendering information, in this case,
+	   a pointer to the SDL_Window */
+	GraphicsData *graphicsData;
+	graphicsData = uiData->graphicsData;
+	if(action->status == 1 && UIElement_isVisible(action->element)){
+		SDL_SetRenderDrawColor(graphicsData->renderer,
+													 action->fillRed,
+													 action->fillGreen,
+													 action->fillBlue,
+													 255);
+		SDL_RenderFillRect(graphicsData->renderer,&action->element->rect);
+		SDL_SetRenderDrawColor(graphicsData->renderer,
+													 action->borderRed,
+													 action->borderGreen,
+													 action->borderBlue,
+													 255);
+		SDL_RenderDrawRect(graphicsData->renderer,&action->element->rect);
+
+		/* SDL_SetTextureBlendMode() blends the overlaying colours of the FillRect down onto those of the greyscale image I provide. */
+		SDL_SetTextureBlendMode(graphicsData->uiEle->graphic[STOP_GRAPHIC],
+														SDL_BLENDMODE_MOD);
+		SDL_RenderCopy(graphicsData->renderer, graphicsData->uiEle->graphic[STOP_GRAPHIC], NULL, &action->element->rect);
+
+		return 1;
+	}
+	return 0;
+}
+
+int UIAction_DrawBlock(UI_Action *action, UIData *uiData){
+	/* This should be given the necessary rendering information, in this case,
+	   a pointer to the SDL_Window */
+	GraphicsData *graphicsData;
+	graphicsData = uiData->graphicsData;
+	if(action->status == 1 && UIElement_isVisible(action->element)){
+		SDL_SetRenderDrawColor(graphicsData->renderer,
+													 action->fillRed,
+													 action->fillGreen,
+													 action->fillBlue,
+													 255);
+		SDL_RenderFillRect(graphicsData->renderer,&action->element->rect);
+		SDL_SetRenderDrawColor(graphicsData->renderer,
+													 action->borderRed,
+													 action->borderGreen,
+													 action->borderBlue,
+													 255);
+		SDL_RenderDrawRect(graphicsData->renderer,&action->element->rect);
+
+		/* SDL_SetTextureBlendMode() blends the overlaying colours of the FillRect down onto those of the greyscale image I provide. */
+		SDL_SetTextureBlendMode(graphicsData->uiEle->graphic[BLOCK_GRAPHIC],
+														SDL_BLENDMODE_MOD);
+		SDL_RenderCopy(graphicsData->renderer, graphicsData->uiEle->graphic[BLOCK_GRAPHIC], NULL, &action->element->rect);
+
+		return 1;
+	}
+	return 0;
+}
+
+int UIAction_DrawHivecell(UI_Action *action, UIData *uiData){
+	/* This should be given the necessary rendering information, in this case,
+	   a pointer to the SDL_Window */
+	GraphicsData *graphicsData;
+	graphicsData = uiData->graphicsData;
+	if(action->status == 1 && UIElement_isVisible(action->element)){
+//    SDL_SetTextureBlendMode(graphicsData->uiEle->graphic[HIVECELL_GRAPHIC], SDL_BLENDMODE_MOD);
+		SDL_RenderCopy(graphicsData->renderer, graphicsData->uiEle->graphic[HIVECELL_GRAPHIC], NULL, &action->element->rect);
+//		SDL_RenderCopy(graphicsData->renderer, graphicsData->uiEle->graphic[HIVECELLMASK_GRAPHIC], NULL, &action->element->rect);
+
+		return 1;
+	}
+	return 0;
+}
+
 void UIConfigure_FillAndBorderRect(UI_Element *element, UI_Action *action, int fr, int fg, int fb, int br, int bg, int bb, UIElement_Variety variety){
 	UIAction_Init(element,action);
 	action->response = UPDATE;
 	/* Here is where UIAction_FillAndBorderRect is called. */
 	switch(variety){
-		case CROSSBOX:
+		case HIVECELL:
+      action->function = UIAction_DrawHivecell;
+      break;
+		case BLOCK:
+      action->function = UIAction_DrawBlock;
+      break;
+    case STOPBOX:
+      action->function = UIAction_DrawStopbox;
+      break;
+		case COMPILEBOX:
+			action->function = UIAction_DrawCompilebox;
+			break;
+    case CROSSBOX:
 			action->function = UIAction_DrawCrossbox;
 			break;
 		case SCROLLHANDLE:
@@ -2710,8 +2827,7 @@ int UIAction_UpdateTwoRectOverrideOnWindowResize(UI_Action *action, UIData *uiDa
 /* These argument names are horrible, but they stand for Big/Small X/Y Int/Float Point/Dimension */
 void UIConfigure_UpdateTwoRectOverrideOnWindowResize(UI_Element *element, UI_Action *action,
 UI_Action *twoRectOverride, int bxip, int byip, float bxfp, float byfp, int bxid, int byid, float bxfd, float byfd,
-int sxip, int syip, float sxfp, float syfp,
-																																																											  int sxid, int syid, float sxfd, float syfd){
+int sxip, int syip, float sxfp, float syfp, int sxid, int syid, float sxfd, float syfd){
 	UIAction_Init(element,action);
 	action->response = WINDOW_RESIZE;
 	action->function = UIAction_UpdateTwoRectOverrideOnWindowResize;

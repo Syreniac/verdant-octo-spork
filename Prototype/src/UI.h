@@ -99,6 +99,10 @@ enum UIString_Align{
 };
 
 enum UIElement_Variety{
+  HIVECELL,
+  BLOCK,
+  STOPBOX,
+  COMPILEBOX,
 	CROSSBOX,
 	SCROLLHANDLE,
 	FILLRECT
@@ -169,6 +173,7 @@ void UIConfigure_SlideWithMouseWheel(UI_Element *element, UI_Action *action, int
 void UIConfigure_Minimap(UI_Element *element, UI_Action *action);
 void UIConfigure_MinimapMouseMove(UI_Element *element, UI_Action *action);
 void UIConfigure_PercentageFillRect(UI_Element *element, UI_Action *action, double percentage_filled, int r, int g, int b);
+void UIConfigure_SetCellToSpawn(UI_Element *element, UI_Action *action, HiveCell *cell);
 void UIConfigure_GetPercentCellDone(UI_Element *element, UI_Action *action, HiveCell *hiveCell, int maximumTime, int num_of_companions, ...);
 void UIConfigure_SetCellToSpawn(UI_Element *element, UI_Action *action, HiveCell *cell);
 
