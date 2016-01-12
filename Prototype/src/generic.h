@@ -24,6 +24,9 @@ FILE *DEBUGGING_FILE_FREE;
 #endif
 #define VERBOSE 1
 
+#define NUMBER_OF_CELLS_IN_HIVE 6
+#define HIVE_CELL_SPAWN_DELAY 5000
+
 #define HONEY_REQUIRED_FOR_WINTER 100
 #define REQUIREMENT_YEAR_INCREASE_PERCENTAGE 10
 #define DELAY_BEFORE_SUMMER 10
@@ -48,7 +51,7 @@ FILE *DEBUGGING_FILE_FREE;
 #define RAIN_TILE_HEIGHT 9
 #define RAIN_FRAME_DELAY 4
 
-#define INITIAL_NUMBER_OF_WORKERS 50
+#define INITIAL_NUMBER_OF_WORKERS 1
 
 /*lower values result in a higher chance of bees regaining flight when wet, with
 each call to updateProgrammableWorker*/

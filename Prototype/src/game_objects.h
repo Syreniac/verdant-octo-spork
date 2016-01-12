@@ -17,6 +17,7 @@ typedef struct IceCreamPerson IceCreamPerson;
 typedef struct Weather Weather;
 typedef struct GameObjectData GameObjectData;
 typedef struct DroppedIceCream DroppedIceCream;
+typedef struct HiveCell HiveCell;
 
 /* I'm calling them resource nodes rather than flowers because it makes the
    game more easily adaptable to other themes if we want. Otherwise they are
@@ -98,6 +99,10 @@ struct ProgrammableWorker{
   ProgrammableWorkerBrain brain;
 };
 
+struct HiveCell{
+  int timer;
+};
+
 struct Hive{
   float xPosition;
   float yPosition;
@@ -110,6 +115,7 @@ struct Hive{
   int winterCountdown;
   float winterCountdownFloat;
   int years_survived;
+  HiveCell hiveCells[NUMBER_OF_CELLS_IN_HIVE];
 };
 
 struct Tree{

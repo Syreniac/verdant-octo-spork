@@ -307,6 +307,7 @@ Hive createHive(void){
 	/* This function creates a Hive struct and fills in the default
 	 values. Many of these are defined in generic.h */
 	Hive hive;
+	int i = 0;
 	hive.rect.w = X_SIZE_OF_HIVE;
 	hive.rect.h = Y_SIZE_OF_HIVE;
 	hive.rect.x = (X_SIZE_OF_WORLD/2 - hive.rect.w/2);
@@ -318,6 +319,10 @@ Hive createHive(void){
 	hive.years_survived = 0;
 	hive.delayBeforeSummer = DELAY_BEFORE_SUMMER;
 	hive.winterCountdownFloat = MAX_DAYS_TO_WINTER;
+	while(i < NUMBER_OF_CELLS_IN_HIVE){
+		hive.hiveCells[i].timer = 15000;
+		i++;
+	}
 	return(hive);
 }
 
@@ -596,28 +601,27 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
     		   programmableWorker->currentGraphicIndex = (programmableWorker->currentGraphicIndex + 1) % 2;
     		}
   		}
+		}
+		  /* Sensory Perception */
+		if(programmableWorker->brain.foundNode != NULL &&
+		(getDistance2BetweenRects(programmableWorker->rect,programmableWorker->brain.foundNode->rect) >= WORKER_SENSE_RANGE * WORKER_SENSE_RANGE ||
+		!programmableWorker->brain.foundNode->alive)){
+		   programmableWorker->brain.foundNode = NULL;
+		}
+		if(programmableWorker->brain.foundNode == NULL && resourceNodeSpawner != NULL){
+			 resourceNode = chooseNodeRandomly(resourceNodeSpawner);
+			 if(resourceNode != NULL && getDistance2BetweenRects(programmableWorker->rect,resourceNode->rect) < WORKER_SENSE_RANGE * WORKER_SENSE_RANGE){
+			   programmableWorker->brain.foundNode = resourceNode;
+			 }
+		}
 	}
-	  /* Sensory Perception */
-	if(programmableWorker->brain.foundNode != NULL &&
-	(getDistance2BetweenRects(programmableWorker->rect,programmableWorker->brain.foundNode->rect) >= WORKER_SENSE_RANGE * WORKER_SENSE_RANGE ||
-	!programmableWorker->brain.foundNode->alive)){
-	   programmableWorker->brain.foundNode = NULL;
-	}
-	if(programmableWorker->brain.foundNode == NULL && resourceNodeSpawner != NULL){
-		 resourceNode = chooseNodeRandomly(resourceNodeSpawner);
-		 if(resourceNode != NULL && getDistance2BetweenRects(programmableWorker->rect,resourceNode->rect) < WORKER_SENSE_RANGE * WORKER_SENSE_RANGE){
-		   programmableWorker->brain.foundNode = resourceNode;
-		 }
-	}
-}
 
-if(programmableWorker->cargo != 0){
-
-  		if(programmableWorker->displayInfo){
+	if(programmableWorker->cargo != 0){
+  	if(programmableWorker->displayInfo){
 				sprintf(tempString,"%s %s",programmableWorker->beeStatus , "& has cargo");
 				setObjectInfoDisplay(&announcementsData->objectInfoDisplay, tempString, STATUS);
 		}
-}
+	}
 
 }
 
@@ -969,7 +973,23 @@ ResourceNode createResourceNode(ResourceNodeSpawner *parentSpawner, int resource
 	return resourceNode;
 }
 
+void updateHiveCell(GameObjectData *gameObjectData, HiveCell *hiveCell, int ticks){
+	if(hiveCell->timer >= 0){
+		hiveCell->timer -= ticks;
+		if(hiveCell->timer <= 0){
+			createProgrammableWorker(gameObjectData);
+			hiveCell->timer = -1;
+		}
+	}
+}
 
+void updateHive(GameObjectData *gameObjectData, int ticks){
+	int i = 0;
+	while(i < NUMBER_OF_CELLS_IN_HIVE){
+		updateHiveCell(gameObjectData,&gameObjectData->hive.hiveCells[i],ticks);
+		i++;
+	}
+}
 
 void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsData, AnnouncementsData *announcementsData, int ticks){
 
@@ -998,7 +1018,6 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 	}else{
 		paa = 0;
 	}
-
 
 	if(!gameObjectData->gameOver){/*start of it not game over*/
 
@@ -1371,6 +1390,10 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 	/*finally render a layer or rain splatter if its raining*/
 	if(gameObjectData->weather.present_weather == Rain){
 		blitRainRandomly(graphicsData);
+	}
+
+	if(!gameObjectData->pause_status){
+		updateHive(gameObjectData,ticks);
 	}
 
 	updateWeather(gameObjectData, &gameObjectData->weather, ticks);
