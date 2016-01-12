@@ -339,7 +339,7 @@ Hive createHive(void){
 	hive.delayBeforeSummer = DELAY_BEFORE_SUMMER;
 	hive.winterCountdownFloat = MAX_DAYS_TO_WINTER;
 	while(i < NUMBER_OF_CELLS_IN_HIVE){
-		hive.hiveCells[i].timer = 15000;
+		hive.hiveCells[i].timer = HIVE_CELL_SPAWN_DELAY;
 		i++;
 	}
 	return(hive);

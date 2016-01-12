@@ -7,7 +7,7 @@ enum Response {NONE = 0,										/* 2 */
 		           RIGHT_CLICK,										/* 4 */
 			         LEFT_RELEASE,									/* 5 */
 			         RIGHT_RELEASE,									/* 6 */
-               MOTION,						
+               MOTION,
                UPDATE,									/* 11 */
 			         RESPONSE_PAUSE,
 			         WINDOW_RESIZE,
@@ -79,7 +79,7 @@ struct UI_Action{
   int num_of_strings;
   int *integers;
   UI_Trigger *triggers;
-  float *floats;
+  double *floats;
   char **strings;
   UI_Action **companions;
 	void *extra;
@@ -99,6 +99,9 @@ enum UIString_Align{
 };
 
 enum UIElement_Variety{
+  BLOCK,
+  STOPBOX,
+  COMPILEBOX,
 	CROSSBOX,
 	SCROLLHANDLE,
 	FILLRECT
@@ -145,7 +148,7 @@ void UIConfigure_UpdateTwoRectOverrideOnWindowResize(UI_Element *element, UI_Act
 
 	                                                                                                                      int bxid, int byid, float bxfd, float byfd,
                                                                                                                         int sxip, int syip, float sxfp, float syfp,
-																																																											  int sxid, int syid, float sxfd, float syfd);	
+																																																											  int sxid, int syid, float sxfd, float syfd);
 
 void UIConfigure_MuteSound(UI_Element *element, UI_Action *action);
 void UIConfigure_MuteSoundFX(UI_Element *element, UI_Action *action);
@@ -168,6 +171,10 @@ void UIConfigure_PassThrough(UI_Element *element, UI_Action *action, enum Respon
 void UIConfigure_SlideWithMouseWheel(UI_Element *element, UI_Action *action, int x, int y, int num_of_companions,...);
 void UIConfigure_Minimap(UI_Element *element, UI_Action *action);
 void UIConfigure_MinimapMouseMove(UI_Element *element, UI_Action *action);
+void UIConfigure_PercentageFillRect(UI_Element *element, UI_Action *action, double percentage_filled, int r, int g, int b);
+void UIConfigure_SetCellToSpawn(UI_Element *element, UI_Action *action, HiveCell *cell);
+void UIConfigure_GetPercentCellDone(UI_Element *element, UI_Action *action, HiveCell *hiveCell, int maximumTime, int num_of_companions, ...);
+
 
 void UITrigger_Bind(UI_Action *action, UI_Action *target, int state_from, int state_to);
 

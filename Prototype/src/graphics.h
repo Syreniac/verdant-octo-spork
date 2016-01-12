@@ -25,6 +25,9 @@ enum WeatherStatus {/*Should belong in game_objects.h, but graphics.c needs to a
 #define BEE_FLAP_GRAPHIC_2 1
 #define SCROLLHANDLE_GRAPHIC 0
 #define CROSSBOX_GRAPHIC 1
+#define COMPILEBOX_GRAPHIC 2
+#define STOP_GRAPHIC 3
+#define BLOCK_GRAPHIC 4
 
 
 struct GraphicsData{
@@ -70,7 +73,7 @@ struct Rainy{
 
 struct UIEle{
 	/* Need as many array slots as are defined by UIElement_Variety in UI.h, minus the FILLRECT variety. */
-	SDL_Texture *graphic[2];
+	SDL_Texture *graphic[10];
 };
 
 
