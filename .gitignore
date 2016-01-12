@@ -4,3 +4,4 @@
 *.h~
 *.txt~
 bin
+makefile_win64

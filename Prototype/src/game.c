@@ -82,6 +82,8 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
   generateIceCreamPerson(&gameData.gameObjectData);
   generateDroppedIceCream(&gameData.gameObjectData);
 
+  generateRoamingSpider(&gameData.gameObjectData);
+
   memset(&gameData.gameObjectData.droppedIceCream->rect.x,256,sizeof(int));
   memset(&gameData.gameObjectData.droppedIceCream->rect.y,256,sizeof(int));
 
@@ -127,6 +129,11 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
   gameData.graphicsData.droppedIceCreamTexture = loadTextureFromFile("images/person/droppedIceCream.bmp", &gameData.graphicsData, 1);
   gameData.graphicsData.meltedIceCreamTexture = loadTextureFromFile("images/person/meltedIceCream.bmp", &gameData.graphicsData, 1);
 
+  gameData.graphicsData.roamingArachnid = (RoamingArachnid*) malloc(sizeof(RoamingArachnid));
+  
+  gameData.graphicsData.roamingArachnid->graphic[SPIDER] = 
+  loadTextureFromFile("images/spider.bmp", &gameData.graphicsData, 1);
+  
   gameData.graphicsData.rainy = (Rainy*) malloc(sizeof(Rainy));
 
   gameData.graphicsData.rainy->graphic[0] = loadTextureFromFile("images/rain/rain1.bmp", &gameData.graphicsData, 1);
@@ -183,6 +190,7 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
   gameData.uiData.gameOverData = &gameData.announcementsData.gameOverData;
   gameData.uiData.objectInfoDisplay = &gameData.announcementsData.objectInfoDisplay;
   gameData.uiData.ticks = &gameData.delta;
+  gameData.uiData.audioData = &gameData.audioData;
   createGameUI(&gameData);
 
   /* Then run the gameLoop until it returns 0 or exits */
@@ -261,6 +269,20 @@ static void createGameUI(GameData *gameData){
   	UITrigger_Bind(&element->actions[4],&element->actions[1],2,1);
   UIConfigure_PercOffsetRect(element, &element->actions[5], 0.25, 0.25, 0.75,0.75, 0,0,0,0,0);
   UIElement_Reparent(element,gameData->uiData.root);
+
+  
+  /* Mute button */
+      element = UIElement_Create((win_x - 30), win_y - 30, 30, 30, 6);
+    UIConfigure_FillRect(element, &element->actions[0],228,240,3);	
+	UIConfigure_PercPosition(element, &element->actions[1],1.0,1.0,-30,-30,0);	
+	UIConfigure_LeftClickRect(element, &element->actions[2]);
+		UITrigger_Bind(&element->actions[2],&element->actions[3],0,1);
+	UIConfigure_MuteSound(element,&element->actions[3]);
+	UIConfigure_RightClickRect(element, &element->actions[4]);
+		UITrigger_Bind(&element->actions[4],&element->actions[5],0,1);
+	UIConfigure_MuteSoundFX(element,&element->actions[5]);
+    UIElement_Reparent(element,gameData->uiData.root);
+	UIRoot_Pack(&gameData->uiData,&gameData->graphicsData);
 
 
 
@@ -604,7 +626,7 @@ static void createGameUI(GameData *gameData){
 
   makeAITemplateScrollList(270,230,&gameData->aiData,element2,element3);
 
-  element4 = makeStartBlock(topX,topY,element3);
+  element4 = makeStartBlock(60,60,element3);
   UIRoot_Pack(&gameData->uiData,&gameData->graphicsData);
 }
 
@@ -657,12 +679,18 @@ int gameLoop(GameData *gameData){
 
   paintBackground(&gameData->graphicsData,0,200,100);
 
-  updateGameObjects(&gameData->gameObjectData, &gameData->graphicsData, &gameData->announcementsData, gameData->delta);
-  UIRoot_Execute(&gameData->uiData,UPDATE,0);
-  runAI(&gameData->aiData,&gameData->gameObjectData,gameData->delta);
+  updateGameObjects(&gameData->gameObjectData, &gameData->audioData, &gameData->graphicsData, &gameData->announcementsData, gameData->delta);
+ 
 
-  SDL_RenderPresent(gameData->graphicsData.renderer);
-  announce_update(&gameData->announcementsData, gameData->delta);
+	  UIRoot_Execute(&gameData->uiData,UPDATE,0);
+	  runAI(&gameData->aiData,&gameData->gameObjectData,gameData->delta);
+
+	  SDL_RenderPresent(gameData->graphicsData.renderer);
+	  announce_update(&gameData->announcementsData, gameData->delta);
+	while (SDL_PollEvent(&event))
+	{
+		handleEvent(&event,&gameData->gameObjectData,&gameData->uiData,&gameData->controlsData, &gameData->graphicsData);
+	}
   if (Mix_Playing(1) == 0) {
  	  playMusic(&gameData->audioData,1);
   }
