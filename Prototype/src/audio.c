@@ -3,6 +3,7 @@
 void loadMusic(char *music, int season, AudioData *audioData) {
 	BackgroundMusic *pointer = audioData->music;
 	BackgroundMusic *newMusic = calloc(1,sizeof(BackgroundMusic));
+	audioData->music_mute = 0;
 
 	newMusic->music = Mix_LoadWAV(music);
 	newMusic->season = season;
@@ -34,7 +35,7 @@ void playMusic(AudioData *audioData, int season) {
 		exit(1);
 	}
 
-	while (active != NULL) {
+	while (active != NULL && audioData->music_mute == 0) {
 		if(active->season == season){
 			i--;
 		}
@@ -48,13 +49,13 @@ void playMusic(AudioData *audioData, int season) {
 		active = active->next;
 	}
 
-	fprintf(stderr,"No music for season %d\n",season);
+	/*fprintf(stderr,"No music for season %d\n",season);*/
 
 }
 
-void stopMusic(AudioData *audioData, int season) {
+void stopSound(AudioData *audioData, int channel) {
 
-	Mix_HaltChannel(-1);
+	Mix_HaltChannel(channel);
 }
 
 void fadeOutMusic(AudioData *audioData) {
@@ -66,6 +67,8 @@ void loadSoundEffect(char *sound, char *name, AudioData *audioData) {
 
 	SoundEffect *pointer = audioData->soundEffect;
 	SoundEffect *newSoundEffect = (SoundEffect*) calloc(1, sizeof(SoundEffect));
+	audioData->soundEffect_mute = 0;
+	audioData->weatherSoundActive = 0;
 
 	if(newSoundEffect == NULL) {
 		fprintf(stderr, "Calloc failed allocate space for SoundEffect newSoundEffect\n");
@@ -105,7 +108,7 @@ void playSoundEffect(int channel, AudioData *audioData, char* name) {
 		exit(1);
 	}
 
-	while (active != NULL) {
+	while (active != NULL  && audioData->soundEffect_mute == 0) {
 		if(strcmp(active->name, name) == 0){
 			audioData->channel = Mix_PlayChannel(channel, active->sound, 0);
 			if(audioData->channel == -1) {
@@ -116,7 +119,7 @@ void playSoundEffect(int channel, AudioData *audioData, char* name) {
 		active = active->next;
 	}
 
-	fprintf(stderr,"No sound effect with the name %s\n",name);
+	/*fprintf(stderr,"No sound effect with the name %s\n",name);*/
 
 }
 
@@ -128,6 +131,7 @@ void fadeOutChannel(int channel, AudioData *audioData) {
 void fadeInChannel(int channel, AudioData *audioData, char* name) {
 
 	SoundEffect *active = audioData->soundEffect;
+	int weatherChannel = 3;
 
 	if (active == NULL){
 		exit(1);
@@ -144,5 +148,45 @@ void fadeInChannel(int channel, AudioData *audioData, char* name) {
 		active = active->next;
 	}
 
+
+	
 	fprintf(stderr,"No sound effect with the name %s\n",name);
+}
+
+void muteMusic(AudioData *audioData) {
+	
+	if (audioData->music_mute == 0) {
+		Mix_Volume(1, 0);
+		printf("Music muted.\n");
+		audioData->music_mute = 1;
+	}
+	else {
+		Mix_Volume(1, 128);
+		printf("Music un-muted.\n");		
+		audioData->music_mute = 0;
+	}
+}
+
+void muteSoundEffects(AudioData *audioData) {
+	
+	int weatherChannel = 3; /*channel 3 is the weather channel*/
+	
+	if (audioData->soundEffect_mute == 0) {
+		Mix_Volume(2, 0); /*channel 2 is the sound effects channel*/
+		Mix_Volume(weatherChannel, 0);
+		stopSound(audioData, weatherChannel); /*stop weather effects*/
+		printf("Sound effects muted.\n");
+		audioData->soundEffect_mute = 1;
+	}
+	
+	else {		
+		Mix_Volume(weatherChannel, 128); 
+		if (audioData->weatherSoundActive != 0) {
+			fadeInChannel(weatherChannel, audioData, "thunder"); /*restart weather effects*/
+			printf("On un-mute: weatherSoundActive = %d\n FADING IN CHANNEL\n", audioData->weatherSoundActive);
+		}
+		Mix_Volume(2, 128); /*channel 2 is the sound effects channel*/
+		printf("Sound effects un-muted.\n");		
+		audioData->soundEffect_mute = 0;
+	}
 }

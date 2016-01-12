@@ -10,7 +10,7 @@ CFLAGS = -ggdb -pedantic -Wall -Wextra -Wno-unused-variable -Wno-unused-paramete
 
 # File structure variables
 ASSETS_CONTENTS = .\assets
-COMMON_FILES = init.o game.o world_generation.o game_objects.o AI.o UI.o generic.o controls.o graphics.o audio.o announcements.o
+COMMON_FILES = init.o game.o world_generation.o game_objects.o AI.o UI.o generic.o controls.o graphics.o audio.o announcements.o configuration.o
 BIN = bin
 PROG = $(BIN)\Prototype2
 SOURCE_FILES = main.o $(COMMON_FILES)
@@ -25,12 +25,11 @@ ifeq ($(PROCESSOR_ARCHITECTURE),x86)
 	DEPENDENCY_FOLDER = .\libraries_x86
 endif
 
-DLL_LOCATION = $(DEPENDENCY_FOLDER)\DLLs
-SDL_FLAGS = -I$(DEPENDENCY_FOLDER)\SDL2\include\SDL2 -I$(DEPENDENCY_FOLDER)\SDL2\include -L$(DEPENDENCY_FOLDER)\SDL2\lib
-IMAGE_FLAGS = -I$(DEPENDENCY_FOLDER)\SDL_image\include -L$(DEPENDENCY_FOLDER)\SDL_image\lib
-TTF_FLAGS = -I$(DEPENDENCY_FOLDER)\SDL_ttf\include -L$(DEPENDENCY_FOLDER)\SDL_ttf\lib
-MIXER_FLAGS = -I$(DEPENDENCY_FOLDER)\SDL_mixer\include -L$(DEPENDENCY_FOLDER)\SDL_mixer\lib
-# TEST_FLAGS = Need to install or build Check for Win64 to figure out how to link it.
+DLL_LOCATION = $(DEPENDENCY_FOLDER)/DLLs
+SDL_FLAGS = -I$(DEPENDENCY_FOLDER)/SDL2/include -L$(DEPENDENCY_FOLDER)/SDL2/lib
+IMAGE_FLAGS = -I$(DEPENDENCY_FOLDER)/SDL_image/include -L$(DEPENDENCY_FOLDER)/SDL_image/lib
+TTF_FLAGS = -I$(DEPENDENCY_FOLDER)/SDL_ttf/include -L$(DEPENDENCY_FOLDER)/SDL_ttf/lib
+MIXER_FLAGS = -I$(DEPENDENCY_FOLDER)/SDL_mixer/include -L$(DEPENDENCY_FOLDER)/SDL_mixer/lib
 
 LFLAGS =  $(SDL_FLAGS) $(IMAGE_FLAGS) $(TTF_FLAGS) $(MIXER_FLAGS) -lmingw32 -lSDL2main -lSDL2 -lSDL_image -lSDL_mixer -lSDL_ttf -lm
 DELETE = del

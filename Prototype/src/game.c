@@ -82,6 +82,8 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
   generateIceCreamPerson(&gameData.gameObjectData);
   generateDroppedIceCream(&gameData.gameObjectData);
 
+  generateRoamingSpider(&gameData.gameObjectData);
+
   memset(&gameData.gameObjectData.droppedIceCream->rect.x,256,sizeof(int));
   memset(&gameData.gameObjectData.droppedIceCream->rect.y,256,sizeof(int));
 
@@ -127,6 +129,11 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
   gameData.graphicsData.droppedIceCreamTexture = loadTextureFromFile("images/person/droppedIceCream.bmp", &gameData.graphicsData, 1);
   gameData.graphicsData.meltedIceCreamTexture = loadTextureFromFile("images/person/meltedIceCream.bmp", &gameData.graphicsData, 1);
 
+  gameData.graphicsData.roamingArachnid = (RoamingArachnid*) malloc(sizeof(RoamingArachnid));
+  
+  gameData.graphicsData.roamingArachnid->graphic[SPIDER] = 
+  loadTextureFromFile("images/spider.bmp", &gameData.graphicsData, 1);
+  
   gameData.graphicsData.rainy = (Rainy*) malloc(sizeof(Rainy));
 
   gameData.graphicsData.rainy->graphic[0] = loadTextureFromFile("images/rain/rain1.bmp", &gameData.graphicsData, 1);
@@ -166,6 +173,16 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
 
   gameData.graphicsData.uiEle->graphic[CROSSBOX_GRAPHIC] = loadTextureFromFile("images/UI/crossbox.bmp",
                                                                                   &gameData.graphicsData, 1);
+  gameData.graphicsData.uiEle->graphic[COMPILEBOX_GRAPHIC] = loadTextureFromFile("images/UI/compilebox.bmp",
+                                                                                  &gameData.graphicsData, 1);
+  gameData.graphicsData.uiEle->graphic[STOP_GRAPHIC] = loadTextureFromFile("images/UI/stop.bmp",
+                                                                                  &gameData.graphicsData, 1);
+  gameData.graphicsData.uiEle->graphic[BLOCK_GRAPHIC] = loadTextureFromFile("images/UI/block.bmp",
+                                                                                  &gameData.graphicsData, 1);
+  gameData.graphicsData.uiEle->graphic[HIVECELL_GRAPHIC] = loadTextureFromFile("images/UI/hivecell.bmp",
+                                                                                  &gameData.graphicsData, 1);
+  gameData.graphicsData.uiEle->graphic[HIVECELLMASK_GRAPHIC] = loadTextureFromFile("images/UI/hivecellmask.bmp",
+                                                                                  &gameData.graphicsData, 1);
 
   gameData.aiData = initAIData();
 
@@ -177,6 +194,7 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
   gameData.uiData.gameOverData = &gameData.announcementsData.gameOverData;
   gameData.uiData.objectInfoDisplay = &gameData.announcementsData.objectInfoDisplay;
   gameData.uiData.ticks = &gameData.delta;
+  gameData.uiData.audioData = &gameData.audioData;
   createGameUI(&gameData);
 
   /* Then run the gameLoop until it returns 0 or exits */
@@ -255,6 +273,20 @@ static void createGameUI(GameData *gameData){
   	UITrigger_Bind(&element->actions[4],&element->actions[1],2,1);
   UIConfigure_PercOffsetRect(element, &element->actions[5], 0.25, 0.25, 0.75,0.75, 0,0,0,0,0);
   UIElement_Reparent(element,gameData->uiData.root);
+
+  
+  /* Mute button */
+      element = UIElement_Create((win_x - 30), win_y - 30, 30, 30, 6);
+    UIConfigure_FillRect(element, &element->actions[0],228,240,3);	
+	UIConfigure_PercPosition(element, &element->actions[1],1.0,1.0,-30,-30,0);	
+	UIConfigure_LeftClickRect(element, &element->actions[2]);
+		UITrigger_Bind(&element->actions[2],&element->actions[3],0,1);
+	UIConfigure_MuteSound(element,&element->actions[3]);
+	UIConfigure_RightClickRect(element, &element->actions[4]);
+		UITrigger_Bind(&element->actions[4],&element->actions[5],0,1);
+	UIConfigure_MuteSoundFX(element,&element->actions[5]);
+    UIElement_Reparent(element,gameData->uiData.root);
+	UIRoot_Pack(&gameData->uiData,&gameData->graphicsData);
 
 
 
@@ -448,8 +480,8 @@ static void createGameUI(GameData *gameData){
   UIConfigure_UpdateTwoRectOverrideOnWindowResize(element, &element->actions[5],&element->actions[4],
                                                                                   50,50,0.0,0.0,
                                                                                   -100,-150,1.0,1.0,
-                                                                                  -99,-99,1.0,1.0,
-                                                                                  100,100,0.0,0.0);
+                                                                                  -1,-199,0.0,1.0,
+                                                                                  200,200,0.0,0.0);
   UIConfigure_ToggleInteger(element,&element->actions[6],&gameData->controlsData.objectSelection);
   UIConfigure_MinimapMouseMove(element,&element->actions[7]);
 	  quickSetStatus(&element->actions[7],0);
@@ -485,23 +517,23 @@ static void createGameUI(GameData *gameData){
 
 
 
-
+	/*hive button*/
   element2 = UIElement_Create(0, win_y - 100, 100,100,6);
   printf("Hive internals panel is %p\n",element2);
-	UIConfigure_FillAndBorderRect(element2,&element2->actions[0],255,255,255,0,0,0,FILLRECT);
+	UIConfigure_FillAndBorderRect(element2,&element2->actions[0],249,252,124,0,0,0,FILLRECT);
 	UIConfigure_LeftClickRect(element2,&element2->actions[1]);
 		UITrigger_Bind(&element2->actions[1],&element2->actions[2],0,1);
     UITrigger_Bind(&element2->actions[1],&element2->actions[2],3,2);
     UITrigger_Bind(&element2->actions[1],&element2->actions[4],0,1);
-    UIConfigure_DisplayString(element2, &element2->actions[5],"Hive panel",0, UISTRING_ALIGN_CENTER);
+    UIConfigure_DisplayString(element2, &element2->actions[5],"Hive",0, UISTRING_ALIGN_CENTER);
 	UIConfigure_TwoRectOverride(element2,&element2->actions[2],0,win_y - 100, 100, 100,
                                                                50, 50, win_x - 100, win_y - 200,
                                                                200);
   UIConfigure_UpdateTwoRectOverrideOnWindowResize(element2, &element2->actions[3],&element2->actions[2],
                                                                                   50,50,0.0,0.0,
                                                                                   -100,-150,1.0,1.0,
-                                                                                  -1,-199,0.0,1.0,
-                                                                                  100,100,0.0,0.0);
+                                                                                  49,-249,0.0,1.0,
+                                                                                  50,50,0.0,0.0);
   UIConfigure_ToggleInteger(element2,&element2->actions[4],&gameData->controlsData.objectSelection);
   UIElement_Reparent(element2,gameData->uiData.root);
 
@@ -513,6 +545,7 @@ static void createGameUI(GameData *gameData){
   }
 
 
+  /*b++ editor button*/
   element2 = UIElement_Create(0, win_y - 100, 100,100,6);
   printf("BPP editor panel is %p\n",element2);
 	UIConfigure_FillAndBorderRect(element2,&element2->actions[0],248,221,35,0,0,0,FILLRECT);
@@ -520,15 +553,15 @@ static void createGameUI(GameData *gameData){
 		UITrigger_Bind(&element2->actions[1],&element2->actions[2],0,1);
     UITrigger_Bind(&element2->actions[1],&element2->actions[1],1,0);
     UITrigger_Bind(&element2->actions[1],&element2->actions[4],0,1);
-    UIConfigure_DisplayString(element2, &element2->actions[5],"     B + +     ^",0, UISTRING_ALIGN_CENTER);
+    UIConfigure_DisplayString(element2, &element2->actions[5],"B + +",0, UISTRING_ALIGN_CENTER);
 	UIConfigure_TwoRectOverride(element2,&element2->actions[2],0,win_y - 100, 100, 100,
                                                                50, 50, win_x - 100, win_y - 200,
                                                                200);
   UIConfigure_UpdateTwoRectOverrideOnWindowResize(element2, &element2->actions[3],&element2->actions[2],
                                                                                   50,50,0.0,0.0,
                                                                                   -100,-150,1.0,1.0,
-                                                                                  -1,-99,0.0,1.0,
-                                                                                  100,100,0.0,0.0);
+                                                                                  -1,-249,0.0,1.0,
+                                                                                  50,50,0.0,0.0);
   UIConfigure_ToggleInteger(element2,&element2->actions[4],&gameData->controlsData.objectSelection);
   UIElement_Reparent(element2,gameData->uiData.root);
 
@@ -581,7 +614,7 @@ static void createGameUI(GameData *gameData){
   /* Calculate AI button */
   element = UIElement_Create(0, 0, 50, 50, 5);
   printf("compile button is %p\n",element);
-  UIConfigure_FillAndBorderRect(element, &element->actions[0],249,252,124,0,0,0,FILLRECT);
+  UIConfigure_FillAndBorderRect(element, &element->actions[0],249,252,124,0,0,0,COMPILEBOX);
   UIConfigure_ShrinkFitToParent(element, &element->actions[1]);
   UIConfigure_LeftClickRect(element, &element->actions[2]);
 	UITrigger_Bind(&element->actions[2],&element->actions[3],0,1);
@@ -598,7 +631,7 @@ static void createGameUI(GameData *gameData){
 
   makeAITemplateScrollList(270,230,&gameData->aiData,element2,element3);
 
-  element4 = makeStartBlock(topX,topY,element3);
+  element4 = makeStartBlock(60,60,element3);
   UIRoot_Pack(&gameData->uiData,&gameData->graphicsData);
 }
 
@@ -651,12 +684,18 @@ int gameLoop(GameData *gameData){
 
   paintBackground(&gameData->graphicsData,0,200,100);
 
-  updateGameObjects(&gameData->gameObjectData, &gameData->graphicsData, &gameData->announcementsData, gameData->delta);
-  UIRoot_Execute(&gameData->uiData,UPDATE,0);
-  runAI(&gameData->aiData,&gameData->gameObjectData,gameData->delta);
+  updateGameObjects(&gameData->gameObjectData, &gameData->audioData, &gameData->graphicsData, &gameData->announcementsData, gameData->delta);
+ 
 
-  SDL_RenderPresent(gameData->graphicsData.renderer);
-  announce_update(&gameData->announcementsData, gameData->delta);
+	  UIRoot_Execute(&gameData->uiData,UPDATE,0);
+	  runAI(&gameData->aiData,&gameData->gameObjectData,gameData->delta);
+
+	  SDL_RenderPresent(gameData->graphicsData.renderer);
+	  announce_update(&gameData->announcementsData, gameData->delta);
+	while (SDL_PollEvent(&event))
+	{
+		handleEvent(&event,&gameData->gameObjectData,&gameData->uiData,&gameData->controlsData, &gameData->graphicsData);
+	}
   if (Mix_Playing(1) == 0) {
  	  playMusic(&gameData->audioData,1);
   }

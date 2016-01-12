@@ -1,8 +1,9 @@
-#include "generic.h"
+#include "configuration.h"
 
 
 typedef struct GraphicsData GraphicsData;
 typedef struct Person Person;
+typedef struct RoamingArachnid RoamingArachnid;
 typedef struct Rainy Rainy;
 typedef struct Bee Bee;
 typedef struct Shelter shelter;
@@ -22,8 +23,14 @@ enum WeatherStatus {/*Should belong in game_objects.h, but graphics.c needs to a
 
 #define BEE_FLAP_GRAPHIC_1 0
 #define BEE_FLAP_GRAPHIC_2 1
+
 #define SCROLLHANDLE_GRAPHIC 0
 #define CROSSBOX_GRAPHIC 1
+#define COMPILEBOX_GRAPHIC 2
+#define STOP_GRAPHIC 3
+#define BLOCK_GRAPHIC 4
+#define HIVECELL_GRAPHIC 5
+#define HIVECELLMASK_GRAPHIC 6
 
 
 struct GraphicsData{
@@ -42,6 +49,7 @@ struct GraphicsData{
   struct Bee *bee;
   struct Rainy *rainy;
   struct Person *person;
+  struct RoamingArachnid *roamingArachnid;
   struct UIEle *uiEle;
   SDL_Texture *mainMenuImage;
 };
@@ -58,13 +66,17 @@ struct Person{
 	SDL_Texture *graphic[4];
 };
 
+struct RoamingArachnid{
+	SDL_Texture *graphic[1];
+};
+
 struct Rainy{
 	SDL_Texture *graphic[6];
 };
 
 struct UIEle{
 	/* Need as many array slots as are defined by UIElement_Variety in UI.h, minus the FILLRECT variety. */
-	SDL_Texture *graphic[2];
+	SDL_Texture *graphic[10];
 };
 
 

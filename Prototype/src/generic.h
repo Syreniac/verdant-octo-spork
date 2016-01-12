@@ -129,7 +129,7 @@ each call to updateProgrammableWorker*/
 
 #define LENGTH_OF_STATUS_STRING 32
 
-#define WINTER_COUNTDOWN_SPEED 0.01
+#define WINTER_COUNTDOWN_SPEED 0.0
 
 #define MAX_DAYS_TO_WINTER 301
 #define AUTUMN_THRESHOLD (MAX_DAYS_TO_WINTER / 3)
@@ -162,6 +162,8 @@ each call to updateProgrammableWorker*/
 
 typedef enum personGraphic {WITH_ICE_CREAM_STRIDE1, WITH_ICE_CREAM_STRIDE2} personGraphic;
 #define NO_ICECREAM_INDEX_OFFSET 2
+
+#define SPIDER 0
 
 
 #if DEBUGGING==1

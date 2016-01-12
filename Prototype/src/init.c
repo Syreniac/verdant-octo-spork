@@ -51,6 +51,7 @@ InitData initialise(void){
 	loadMusic("sound/music01.wav" , 0, &initData.audioData);
 	loadMusic("sound/music02.wav" , 1, &initData.audioData);
 	loadMusic("sound/music03.wav" , 1, &initData.audioData);
+	loadMusic("sound/music04.wav" , 1, &initData.audioData);
 	loadSoundEffect("sound/returnFlower.wav", "returnFlower", &initData.audioData);
 	loadSoundEffect("sound/thunder.wav", "thunder", &initData.audioData);
 
@@ -84,7 +85,7 @@ void audioSystem(AudioData *AudioSettings){
 
 }
 
-void game_welcome_page(GraphicsData graphicsData, AudioData audioData){
+int game_welcome_page(GraphicsData graphicsData, AudioData audioData){
 
    InitData initData;
 
@@ -130,11 +131,14 @@ void game_welcome_page(GraphicsData graphicsData, AudioData audioData){
     UIConfigure_FillRect(element,&element->actions[0],100,100,0);
     UIElement_Reparent(element,initData.uiData.root);*/
 
-    element2 = UIElement_Create((win_x - 30), win_y - 30, 30, 30, 2);
+    element2 = UIElement_Create((win_x - 30), win_y - 30, 30, 30, 4);
     UIConfigure_FillRect(element2, &element2->actions[0],228,240,3);
-	   UIConfigure_PercPosition(element2, &element2->actions[1],1.0,1.0,-30,-30,0);
+	UIConfigure_PercPosition(element2, &element2->actions[1],1.0,1.0,-30,-30,0);
+	UIConfigure_LeftClickRect(element2, &element2->actions[2]);
+		UITrigger_Bind(&element2->actions[2],&element2->actions[3],0,1);
+	UIConfigure_MuteSound(element2,&element2->actions[3]);
     UIElement_Reparent(element2,initData.uiData.root);
-	   UIRoot_Pack(&initData.uiData,&initData.graphicsData);
+	UIRoot_Pack(&initData.uiData,&initData.graphicsData);
 
    playMusic(&initData.audioData,0);
 
@@ -144,7 +148,6 @@ void game_welcome_page(GraphicsData graphicsData, AudioData audioData){
 
       paintBackground(&initData.graphicsData,0,200,100);
       UIRoot_Execute(&initData.uiData,UPDATE,0);
-
       SDL_RenderPresent(initData.graphicsData.renderer);
     	while (SDL_PollEvent(&event))
     	{
@@ -177,7 +180,9 @@ void game_welcome_page(GraphicsData graphicsData, AudioData audioData){
    UIRoot_Destroy(&initData.uiData);
 
    fadeOutMusic(&initData.audioData);
-   /*stopMusic(&initData.audioData, 0);*/
+
+   gameStart(graphicsData,audioData);
+   return 0;
 }
 
 /*

@@ -16,4 +16,6 @@ void generateIceCreamPerson(GameObjectData *gameObjectData);
 
 void generateDroppedIceCream(GameObjectData *gameObjectData);
 
+void generateRoamingSpider(GameObjectData *gameObjectData);
+
 void generateWeatherLayer(GameObjectData *gameObjectData);
