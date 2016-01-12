@@ -32,6 +32,7 @@ typedef struct UI_Trigger UI_Trigger;
 typedef struct UIData UIData;
 typedef int(UI_ActionFunction)(UI_Action *action, UIData *uiData);
 typedef enum UIDataTypes UIDataTypes;
+typedef enum UIElement_Variety UIElement_Variety;
 typedef struct UI_Hook *hooks;
 
 struct UIData{
@@ -96,6 +97,12 @@ enum UIString_Align{
 	UISTRING_ALIGN_RIGHT
 };
 
+enum UIElement_Variety{
+	CROSSBOX,
+	SCROLLHANDLE,
+	FILLRECT
+};
+
 void UIConfigure_FillRect(UI_Element *element, UI_Action *action, int r, int g, int b);
 void UIConfigure_LeftClickRect(UI_Element *element, UI_Action *action);
 void UIConfigure_RightClickRect(UI_Element *element, UI_Action *action);
@@ -150,7 +157,7 @@ void UIConfigure_GetGameOverString(UI_Element *element, UI_Action *action, UI_Ac
 void UIConfigure_GetFinalScoreString(UI_Element *element, UI_Action *action, UI_Action *placeToPut);
 void UIConfigure_GetInfoDisplayString(UI_Element *element, UI_Action *action, UI_Action *placeToPut);
 void UIConfigure_GetObjectStatusString(UI_Element *element, UI_Action *action, UI_Action *placeToPut);
-void UIConfigure_FillAndBorderRect(UI_Element *element, UI_Action *action, int fr, int fg, int fb, int br, int bg, int bb);
+void UIConfigure_FillAndBorderRect(UI_Element *element, UI_Action *action, int fr, int fg, int fb, int br, int bg, int bb, UIElement_Variety variety);
 void UIConfigure_PassThrough(UI_Element *element, UI_Action *action, enum Response response, int num_of_companions, ...);
 void UIConfigure_SlideWithMouseWheel(UI_Element *element, UI_Action *action, int x, int y, int num_of_companions,...);
 void UIConfigure_Minimap(UI_Element *element, UI_Action *action);

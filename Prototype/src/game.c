@@ -213,7 +213,7 @@ static void createGameUI(GameData *gameData){
   /* top information bar */
   element = UIElement_Create(0,0,dm.w,31,3);
   printf("top information bar is %p\n",element);
-  UIConfigure_FillAndBorderRect(element,&element->actions[0],248,221,35,0,0,0);
+  UIConfigure_FillAndBorderRect(element,&element->actions[0],248,221,35,0,0,0,FILLRECT);
 
   UIConfigure_DisplayString(element, &element->actions[1], " ",0,UISTRING_ALIGN_LEFT);
 
@@ -236,7 +236,7 @@ static void createGameUI(GameData *gameData){
     UITrigger_Bind(&element->actions[1],&element->actions[2],0,1);
     UITrigger_Bind(&element->actions[1],&element->actions[3],0,1);
   	quickSetStatus(&element->actions[1],1);
-  UIConfigure_FillAndBorderRect(element, &element->actions[2],255,255,255,0,0,0);
+  UIConfigure_FillAndBorderRect(element, &element->actions[2],255,255,255,0,0,0,FILLRECT);
 	  quickSetStatus(&element->actions[2],0);
   UIConfigure_DisplayString(element, &element->actions[3],"GAME OVER",0, UISTRING_ALIGN_CENTER);
 	  quickSetStatus(&element->actions[3],0);
@@ -264,7 +264,7 @@ static void createGameUI(GameData *gameData){
     UITrigger_Bind(&element->actions[1],&element->actions[2],0,1);
     UITrigger_Bind(&element->actions[1],&element->actions[3],0,1);
   	quickSetStatus(&element->actions[1],1);
-  UIConfigure_FillAndBorderRect(element,&element->actions[2],248,221,35,255,255,255);
+  UIConfigure_FillAndBorderRect(element,&element->actions[2],248,221,35,255,255,255,FILLRECT);
 	  quickSetStatus(&element->actions[2],0);
   UIConfigure_DisplayString(element, &element->actions[3]," ",0, UISTRING_ALIGN_CENTER);
 	  quickSetStatus(&element->actions[3],0);
@@ -288,7 +288,7 @@ static void createGameUI(GameData *gameData){
     UITrigger_Bind(&element->actions[1],&element->actions[2],0,1);
     UITrigger_Bind(&element->actions[1],&element->actions[3],0,1);
   	quickSetStatus(&element->actions[1],1);
-  UIConfigure_FillAndBorderRect(element,&element->actions[2],248,221,35,248,221,35);
+  UIConfigure_FillAndBorderRect(element,&element->actions[2],248,221,35,248,221,35,FILLRECT);
 	  quickSetStatus(&element->actions[2],0);
   UIConfigure_DisplayString(element, &element->actions[3]," ",0, UISTRING_ALIGN_LEFT);
 	  quickSetStatus(&element->actions[3],0);
@@ -314,7 +314,7 @@ static void createGameUI(GameData *gameData){
     UITrigger_Bind(&element->actions[1],&element->actions[2],0,1);
     UITrigger_Bind(&element->actions[1],&element->actions[3],0,1);
   	quickSetStatus(&element->actions[1],1);
-  UIConfigure_FillAndBorderRect(element,&element->actions[2],255,255,255,255,255,255);
+  UIConfigure_FillAndBorderRect(element,&element->actions[2],255,255,255,255,255,255,FILLRECT);
 	  quickSetStatus(&element->actions[2],0);
   UIConfigure_DisplayString(element, &element->actions[3]," ",0, UISTRING_ALIGN_CENTER);
 	  quickSetStatus(&element->actions[3],0);
@@ -327,7 +327,7 @@ static void createGameUI(GameData *gameData){
 
     /*gameOverInformation*/
  /* element = UIElement_Create(0,0,200,25,4);
-  UIConfigure_FillAndBorderRect(element,&element->actions[0],255,255,255,255,255,255);
+  UIConfigure_FillAndBorderRect(element,&element->actions[0],255,255,255,255,255,255,FILLRECT);
   UIConfigure_PercPosition(element, &element->actions[1],0.5,1.0,-100,-315,0);
   UIConfigure_DisplayString(element, &element->actions[2], "Hello",0,UISTRING_ALIGN_LEFT);
   UIConfigure_GetGameOverString(element, &element->actions[3], &element->actions[2]);
@@ -351,7 +351,7 @@ static void createGameUI(GameData *gameData){
     UITrigger_Bind(&element->actions[1],&element->actions[3],0,1);
 	  element->actions[1].status = 1;
 	  element->actions[1].new_status = 1;
-  UIConfigure_FillAndBorderRect(element, &element->actions[2],255,255,255,255,255,255);
+  UIConfigure_FillAndBorderRect(element, &element->actions[2],255,255,255,255,255,255,FILLRECT);
 	  element->actions[2].status = 0;
 	  element->actions[2].new_status = 0;
   UIConfigure_DisplayString(element, &element->actions[3],"PRESS < ENTER > TO PLAY AGAIN",0, UISTRING_ALIGN_CENTER);
@@ -426,7 +426,7 @@ static void createGameUI(GameData *gameData){
   /* Minimap */
   element = UIElement_Create(0,0,100,100,10);
   printf("minimap is %p\n",element);
-  UIConfigure_FillAndBorderRect(element,&element->actions[0],0x5F,0xB4,0x04,0,0,0);
+  UIConfigure_FillAndBorderRect(element,&element->actions[0],0x5F,0xB4,0x04,0,0,0,FILLRECT);
   UIConfigure_PercPosition(element,&element->actions[1],1.0,1.0,-99,-99,0);
   UIConfigure_Minimap(element,&element->actions[2]);
 	UIConfigure_LeftClickRect(element,&element->actions[3]);
@@ -463,7 +463,7 @@ static void createGameUI(GameData *gameData){
     UITrigger_Bind(&element->actions[1],&element->actions[1],1,0);
     UITrigger_Bind(&element->actions[1],&element->actions[2],0,1);
     UITrigger_Bind(&element->actions[1],&element->actions[3],0,1);
-  UIConfigure_FillAndBorderRect(element, &element->actions[2],255,0,0,0,0,0);
+  UIConfigure_FillAndBorderRect(element, &element->actions[2],255,0,0,0,0,0,FILLRECT);
 	  quickSetStatus(&element->actions[2],0);
   UIConfigure_DisplayString(element, &element->actions[3],"PAUSED",0, UISTRING_ALIGN_CENTER);
 	  quickSetStatus(&element->actions[3],0);
@@ -476,7 +476,7 @@ static void createGameUI(GameData *gameData){
 
   element2 = UIElement_Create(0, win_y - 100, 100,100,6);
   printf("BPP editor panel is %p\n",element2);
-	UIConfigure_FillAndBorderRect(element2,&element2->actions[0],248,221,35,0,0,0);
+	UIConfigure_FillAndBorderRect(element2,&element2->actions[0],248,221,35,0,0,0,FILLRECT);
 	UIConfigure_LeftClickRect(element2,&element2->actions[1]);
 		UITrigger_Bind(&element2->actions[1],&element2->actions[2],0,1);
     UITrigger_Bind(&element2->actions[1],&element2->actions[1],1,0);
@@ -496,7 +496,7 @@ static void createGameUI(GameData *gameData){
   /* Minimize button */
   element = UIElement_Create(50 + win_x - 150, 50, 50, 50,6);
   printf("minimise button is %p\n",element);
-  UIConfigure_FillAndBorderRect(element, &element->actions[0],185,122,87,0,0,0);
+  UIConfigure_FillAndBorderRect(element, &element->actions[0],185,122,87,0,0,0,FILLRECT);
   UIConfigure_ShrinkFitToParent(element, &element->actions[1]);
   UIConfigure_LeftClickRect(element, &element->actions[2]);
     UITrigger_Bind(&element->actions[2],&element->actions[3],0,1);
@@ -513,7 +513,7 @@ static void createGameUI(GameData *gameData){
   /* I'm making it a little bigger so the border doesn't doublepixel */
   element4 = UIElement_Create(0,0,0,0,4);
   printf("compiler output bar is %p\n",element4);
-  UIConfigure_FillAndBorderRect(element4,&element4->actions[0],222,0,0,0,0,0);
+  UIConfigure_FillAndBorderRect(element4,&element4->actions[0],222,0,0,0,0,0,FILLRECT);
   UIConfigure_ShrinkFitToParent(element4,&element4->actions[1]);
   UIConfigure_DisplayString(element4,&element4->actions[2],"                                                                                                                          ",0,UISTRING_ALIGN_LEFT);
 	UIConfigure_PercOffsetRect(element4,&element4->actions[3],0.0,1.0,1.0,1.0,50,-125,-269,-100,1,&element4->actions[1]);
@@ -524,7 +524,7 @@ static void createGameUI(GameData *gameData){
      when drawing the border */
   element3 = UIElement_Create(50,50,win_x - 270,win_y - 200,4);
   printf("block panel is %p\n",element3);
-  UIConfigure_FillAndBorderRect(element3, &element3->actions[0],249,252,124,0,0,0);
+  UIConfigure_FillAndBorderRect(element3, &element3->actions[0],249,252,124,0,0,0,FILLRECT);
   UIConfigure_ShrinkFitToParent(element3, &element3->actions[1]);
   UIConfigure_ReadAiBlocks(element3,&element3->actions[2],&element4->actions[2]);
   UIConfigure_PercOffsetRect(element3,&element3->actions[3],0.0,0.0,1.0,1.0,50,50,-269,-124,1,&element3->actions[1]);
@@ -542,7 +542,7 @@ static void createGameUI(GameData *gameData){
   /* Calculate AI button */
   element = UIElement_Create(0, 0, 50, 50, 5);
   printf("compile button is %p\n",element);
-  UIConfigure_FillAndBorderRect(element, &element->actions[0],249,252,124,0,0,0);
+  UIConfigure_FillAndBorderRect(element, &element->actions[0],249,252,124,0,0,0,FILLRECT);
   UIConfigure_ShrinkFitToParent(element, &element->actions[1]);
   UIConfigure_LeftClickRect(element, &element->actions[2]);
 	UITrigger_Bind(&element->actions[2],&element->actions[3],0,1);
