@@ -2207,12 +2207,42 @@ int UIAction_DrawScrollhandle(UI_Action *action, UIData *uiData){
 	return 0;
 }
 
+int UIAction_DrawCrossbox(UI_Action *action, UIData *uiData){
+	/* This should be given the necessary rendering information, in this case,
+	   a pointer to the SDL_Window */
+	GraphicsData *graphicsData;
+	graphicsData = uiData->graphicsData;
+	if(action->status == 1 && UIElement_isVisible(action->element)){
+		SDL_SetRenderDrawColor(graphicsData->renderer,
+													 action->fillRed,
+													 action->fillGreen,
+													 action->fillBlue,
+													 255);
+		SDL_RenderFillRect(graphicsData->renderer,&action->element->rect);
+		SDL_SetRenderDrawColor(graphicsData->renderer,
+													 action->borderRed,
+													 action->borderGreen,
+													 action->borderBlue,
+													 255);
+		SDL_RenderDrawRect(graphicsData->renderer,&action->element->rect);
+
+		/* SDL_SetTextureBlendMode() blends the overlaying colours of the FillRect down onto those of the greyscale image I provide. */
+		SDL_SetTextureBlendMode(graphicsData->uiEle->graphic[CROSSBOX_GRAPHIC],
+														SDL_BLENDMODE_MOD);
+		SDL_RenderCopy(graphicsData->renderer, graphicsData->uiEle->graphic[CROSSBOX_GRAPHIC], NULL, &action->element->rect);
+
+		return 1;
+	}
+	return 0;
+}
+
 void UIConfigure_FillAndBorderRect(UI_Element *element, UI_Action *action, int fr, int fg, int fb, int br, int bg, int bb, UIElement_Variety variety){
 	UIAction_Init(element,action);
 	action->response = UPDATE;
 	/* Here is where UIAction_FillAndBorderRect is called. */
 	switch(variety){
 		case CROSSBOX:
+			action->function = UIAction_DrawCrossbox;
 			break;
 		case SCROLLHANDLE:
 			action->function = UIAction_DrawScrollhandle;

@@ -163,8 +163,9 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
 
   gameData.graphicsData.uiEle->graphic[SCROLLHANDLE_GRAPHIC] = loadTextureFromFile("images/UI/scrollhandle.bmp",
                                                                                   &gameData.graphicsData, 1);
-//  gameData.graphicsData.ui->graphic[CROSSBOX_GRAPHIC] = loadTextureFromFile("images/UI/?.bmp",
-//														  &gameData.graphicsData, 1);
+
+  gameData.graphicsData.uiEle->graphic[CROSSBOX_GRAPHIC] = loadTextureFromFile("images/UI/crossbox.bmp",
+                                                                                  &gameData.graphicsData, 1);
 
   gameData.aiData = initAIData();
 
@@ -534,7 +535,7 @@ static void createGameUI(GameData *gameData){
   /* Minimize button */
   element = UIElement_Create(50 + win_x - 150, 50, 50, 50,6);
   printf("minimise button is %p\n",element);
-  UIConfigure_FillAndBorderRect(element, &element->actions[0],185,122,87,0,0,0,FILLRECT);
+  UIConfigure_FillAndBorderRect(element, &element->actions[0],185,122,87,0,0,0,CROSSBOX);
   UIConfigure_ShrinkFitToParent(element, &element->actions[1]);
   UIConfigure_LeftClickRect(element, &element->actions[2]);
     UITrigger_Bind(&element->actions[2],&element->actions[3],0,1);
