@@ -597,7 +597,7 @@ static void createGameUI(GameData *gameData){
 
   makeAITemplateScrollList(270,230,&gameData->aiData,element2,element3);
 
-  element4 = makeStartBlock(topX,topY,element3);
+  element4 = makeStartBlock(60,60,element3);
   UIRoot_Pack(&gameData->uiData,&gameData->graphicsData);
 }
 

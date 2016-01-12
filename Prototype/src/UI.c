@@ -18,6 +18,7 @@ static void sUIAction_Minimap_DrawGameObject(UI_Action *action, GraphicsData *gr
 static void sUIAction_DisplayNumber_EditNumber(UI_Action *action, int editNumber);
 static void sUIAction_DisplayString_EditString(UI_Action *action, char *editString);
 
+int UIAction_PercentageFillRect(UI_Action *action, UIData *uiData);
 int UIAction_External(UI_Action *action, UIData *uiData);
 int UIAction_DisplayNumber(UI_Action *action, UIData *uiData);
 int UIAction_DisplayString(UI_Action *action, UIData *uiData);
@@ -44,10 +45,16 @@ int UIAction_MinimapMouseMove(UI_Action *action, UIData *uiData);
 int UIAction_ToggleInteger(UI_Action *action, UIData *uiData);
 
 UI_Element *makeHiveCellBlock(int x_offset, int y_offset, UI_Element *parent, HiveCell *hiveCell){
-	UI_Element *element = UIElement_Create(x_offset, y_offset, 50,50,2);
+	UI_Element *element = UIElement_Create(x_offset, y_offset, 50,50,6);
 
 	UIConfigure_FillAndBorderRect(element,&element->actions[0], 150,150,150,0,0,0,FILLRECT);
 	UIConfigure_ShrinkFitToParent(element,&element->actions[1]);
+	UIConfigure_GetPercentCellDone(element,&element->actions[2],hiveCell,HIVE_CELL_SPAWN_DELAY,1,&element->actions[3]);
+	UIConfigure_PercentageFillRect(element,&element->actions[3],0.0,255,0,0);
+	UIConfigure_LeftClickRect(element,&element->actions[4]);
+		UITrigger_Bind(&element->actions[4],&element->actions[5],0,1);
+	UIConfigure_SetCellToSpawn(element,&element->actions[5],hiveCell);
+		quickSetStatus(&element->actions[5],0);
 	UIElement_Reparent(element,parent);
 	return element;
 }
@@ -282,6 +289,125 @@ UI_Element *UIElement_Create(int x, int y, int w, int h, int num_of_actions){
 	   element->exposed_data_count = 0;
 	   return element;
 }
+
+/* UIAction_SetCellToSpawn
+
+	 This makes a cell start counting down from the start to spawn a new bee */
+
+#define cell extra
+
+int UIAction_SetCellToSpawn(UI_Action *action, UIData *uiData){
+	if(action->status != 0){
+		if(uiData->gameObjectData->hive.flowers_collected >= 1 && ((HiveCell*)action->cell)->timer == -1){
+			uiData->gameObjectData->hive.flowers_collected -= 1;
+			((HiveCell*)action->cell)->timer = HIVE_CELL_SPAWN_DELAY;
+		}
+		action->new_status = 0;
+	}
+	return 0;
+}
+
+void UIConfigure_SetCellToSpawn(UI_Element *element, UI_Action *action, HiveCell *cell){
+	UIAction_Init(element,action);
+	action->response = UPDATE;
+	action->function = UIAction_SetCellToSpawn;
+	action->extra = cell;
+}
+
+#undef cell
+
+/* UIAction_GetCellPercentDone
+
+	This reads how far done a HiveCell is done as a percentage into it's companions
+	float[0] field */
+
+#define percentage floats[0]
+#define max_timer floats[1]
+#define cell extra
+
+int UIAction_GetCellPercentDone(UI_Action *action, UIData *uiData){
+	if(action->status != 0){
+		if(((HiveCell*)action->cell)->timer < 0){
+			action->percentage = 0.0;
+		}
+		else{
+			action->percentage = (double)((double)((HiveCell*)action->cell)->timer) / action->max_timer;
+		}
+		printf("%lf\n",action->percentage);
+		int i = 0;
+		while(i < action->num_of_companions){
+			action->companions[0]->percentage = action->percentage;
+			i++;
+		}
+		return 1;
+	}
+	return 0;
+}
+
+void UIConfigure_GetPercentCellDone(UI_Element *element, UI_Action *action, HiveCell *hiveCell, int maximumTime, int num_of_companions, ...){
+	va_list vargs;
+	int i = 0;
+	UIAction_Init(element,action);
+	va_start(vargs,num_of_companions);
+	action->response = UPDATE;
+	action->function = UIAction_GetCellPercentDone;
+	action->floats = calloc(2,sizeof(double));
+	action->floats[1] = (double) maximumTime;
+	action->companions = calloc(num_of_companions,sizeof(void*));
+	while(i < num_of_companions){
+		action->companions[i] = va_arg(vargs,UI_Action*);
+		i++;
+	}
+	action->num_of_companions = num_of_companions;
+	action->extra = hiveCell;
+	va_end(vargs);
+}
+
+#undef percentage
+#undef max_timer
+#undef cell
+
+/* UIAction_PercentageFillRect
+
+	 This UI_Action fills a percentage of the element's rectangle with a given color.
+	 Defaults to 0% filled.*/
+
+#define percentage floats[0]
+#define fillRed integers[0]
+#define fillGreen integers[1]
+#define fillBlue integers[2]
+
+int UIAction_PercentageFillRect(UI_Action *action, UIData *uiData){
+	SDL_Rect rect;
+	if(action->status != 0){
+		rect.x = action->element->rect.x;
+		rect.w = action->element->rect.w;
+		rect.h = (int)(action->percentage *(double)action->element->rect.h);
+		rect.y = action->element->rect.y + (int)((1.0 - action->percentage) * (double)action->element->rect.h);
+		printf("rect.h: %d rect.y: %d\n",rect.h,rect.y);
+		SDL_SetRenderDrawColor(uiData->graphicsData->renderer,action->fillRed,action->fillGreen,action->fillBlue,255);
+		SDL_RenderFillRect(uiData->graphicsData->renderer,&rect);
+	}
+	return 0;
+}
+
+void UIConfigure_PercentageFillRect(UI_Element *element, UI_Action *action, double percentage_filled, int r, int g, int b){
+	UIAction_Init(element,action);
+	action->response = UPDATE;
+	action->function = UIAction_PercentageFillRect;
+	action->floats = calloc(1,sizeof(double));
+	action->num_of_floats = 1;
+	action->integers = calloc(3,sizeof(int));
+	action->fillRed = r;
+	action->fillGreen = g;
+	action->fillBlue = b;
+	action->num_of_integers = 3;
+}
+
+#undef percentage
+#undef fillRed
+#undef fillGreen
+#undef fillBlue
 
 /* UIAction_MinimapMouseMove
 
@@ -723,7 +849,7 @@ void UIConfigure_PercOffsetRect(UI_Element *element, UI_Action *action, float xP
 		UIAction_Init(element,action);
 		action->response = WINDOW_RESIZE;
 		action->function = UIAction_PercOffsetRect;
-		action->floats = calloc(4,sizeof(float));
+		action->floats = calloc(4,sizeof(double));
 		action->xPercentageOfScreen = xPerc;
 		action->yPercentageOfScreen = yPerc;
 		action->wPercentageOfScreen = wPerc;
@@ -802,7 +928,7 @@ void UIConfigure_PercPosition(UI_Element *element, UI_Action *action, float xPer
 	UIAction_Init(element,action);
 	action->response = WINDOW_RESIZE;
 	action->function = UIAction_PercPosition;
-	action->floats = calloc(2,sizeof(float));
+	action->floats = calloc(2,sizeof(double));
 	action->xPercentageOfScreen = xPerc;
 	action->yPercentageOfScreen = yPerc;
 	action->num_of_floats = 2;
@@ -993,7 +1119,7 @@ void UIConfigure_GetDifferenceInChildYOffset(UI_Element *element, UI_Action *act
 		   going to stay 0 for very long */
 		action->childYOffset = 0;
 		action->num_of_integers = 2;
-		action->floats = malloc(sizeof(float));
+		action->floats = malloc(sizeof(double));
 		action->yPercentageOffset = yPercOffset;
 		action->num_of_floats = 1;
 		action->companions = calloc(num_of_companions, sizeof(UI_Action*));
@@ -2534,7 +2660,7 @@ int sxip, int syip, float sxfp, float syfp,
 	action->fixedSmallW = sxid;
 	action->fixedSmallH = syid;
 
-	action->floats = malloc(sizeof(float) * 8);
+	action->floats = malloc(sizeof(double) * 8);
 	action->num_of_floats = 8;
 	action->percBigX = bxfp;
 	action->percBigY = byfp;

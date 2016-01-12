@@ -78,7 +78,7 @@ struct UI_Action{
   int num_of_strings;
   int *integers;
   UI_Trigger *triggers;
-  float *floats;
+  double *floats;
   char **strings;
   UI_Action **companions;
 	void *extra;
@@ -163,6 +163,9 @@ void UIConfigure_PassThrough(UI_Element *element, UI_Action *action, enum Respon
 void UIConfigure_SlideWithMouseWheel(UI_Element *element, UI_Action *action, int x, int y, int num_of_companions,...);
 void UIConfigure_Minimap(UI_Element *element, UI_Action *action);
 void UIConfigure_MinimapMouseMove(UI_Element *element, UI_Action *action);
+void UIConfigure_PercentageFillRect(UI_Element *element, UI_Action *action, double percentage_filled, int r, int g, int b);
+void UIConfigure_GetPercentCellDone(UI_Element *element, UI_Action *action, HiveCell *hiveCell, int maximumTime, int num_of_companions, ...);
+
 
 void UITrigger_Bind(UI_Action *action, UI_Action *target, int state_from, int state_to);
 
