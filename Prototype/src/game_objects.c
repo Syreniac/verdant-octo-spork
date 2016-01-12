@@ -293,6 +293,25 @@ DroppedIceCream *createDroppedIceCream(void){
 	return droppedIceCream;
 }
 
+RoamingSpider *createRoamingSpider(void){
+	RoamingSpider *roamingSpider = (RoamingSpider*) malloc(sizeof(RoamingSpider));
+	roamingSpider->rect.w = PERSON_HEIGHT;
+	roamingSpider->rect.h = PERSON_WIDTH;
+	/*set initial location to ensure no interaction or existence inside world*/
+	/* (when the time is right for the person to appear, x y co-ordinates*/
+	/*can be reassigned values that exist inside the world boundaries)*/
+	roamingSpider->rect.x = X_SIZE_OF_WORLD * 2;
+	roamingSpider->rect.y = Y_SIZE_OF_WORLD * 2;
+	roamingSpider->currently_on_screen = 0;
+	roamingSpider->eating_bee = 0;
+	roamingSpider->speed = 0;
+	roamingSpider->stung = 0;
+	roamingSpider->displayInfo = 0;
+
+	return roamingSpider;
+
+}
+
 Weather createWeatherLayer(void){
 	/* This function creates a Weather struct and fills in the default
 	 values. Many of these are defined in generic.h */
@@ -768,6 +787,110 @@ void updateIceCreamPerson(GameObjectData *gameObjectData, int ticks){
 
 }
 
+void updateRoamingSpider(GameObjectData *gameObjectData, int ticks){
+
+	double newX,newY;
+	int distanceFromYBorder;
+	int distanceFromXBorder;
+
+	/*set roamingSpider->currently_on_screen to false if he has walked off screen*/
+	if(gameObjectData->roamingSpider->xPosition > X_SIZE_OF_WORLD ||
+	gameObjectData->roamingSpider->yPosition > Y_SIZE_OF_WORLD ||
+	gameObjectData->roamingSpider->xPosition < 0 - PERSON_WIDTH ||
+	gameObjectData->roamingSpider->yPosition < 0 - PERSON_HEIGHT){
+	gameObjectData->roamingSpider->currently_on_screen = 0;
+	}
+
+	/*decrement countDownToStride*/
+	gameObjectData->roamingSpider->countDownToStride--;
+
+	/*if countDownToStride equals zero, reset count, and change stride image*/
+	if(gameObjectData->roamingSpider->countDownToStride <= 0){
+		gameObjectData->roamingSpider->countDownToStride =
+		(double)STRIDE_FREQUENCY / gameObjectData->roamingSpider->speed;
+
+
+		switch(gameObjectData->roamingSpider->currentGraphicIndex){
+			case 0:
+				gameObjectData->roamingSpider->currentGraphicIndex = SPIDER;
+			break;
+			case 1:
+				gameObjectData->roamingSpider->currentGraphicIndex = SPIDER;
+			break;
+		}
+	}
+
+	/*use trig to find new locations based on heading angle (radians)*/
+	newX = sin(gameObjectData->roamingSpider->heading);
+	newY = cos(gameObjectData->roamingSpider->heading);
+	newX *= gameObjectData->roamingSpider->speed * ticks;
+	newY *= gameObjectData->roamingSpider->speed * ticks;
+
+	/*update new position*/
+	gameObjectData->roamingSpider->xPosition += newX;
+	gameObjectData->roamingSpider->yPosition += newY;
+	gameObjectData->roamingSpider->rect.x = (int)floor(gameObjectData->roamingSpider->xPosition);
+	gameObjectData->roamingSpider->rect.y = (int)floor(gameObjectData->roamingSpider->yPosition);
+	
+	/*if roamingSpider not yet stung, and bee is close enough to sting*/
+	/*STING_HIT_RADIUS can be made so small that this would never actually happen unless it's behaviour*/
+	/*that is explicitly programmed into the bees, or (as it currently is) but enough to happen on an occasional collision*/
+  	if(!gameObjectData->roamingSpider->stung && countProgrammableWorkersInRange(gameObjectData,
+  	getCenterOfRect(gameObjectData->roamingSpider->rect), STING_HIT_RADIUS) != 0){
+  	
+  		gameObjectData->roamingSpider->stung = 1;
+  		/*eat bee!*/
+  		gameObjectData->roamingSpider->eating_bee = 1;
+  
+  		/*run for your life!*/
+  		gameObjectData->roamingSpider->speed = 0.1;
+  		
+  	}
+
+	if(countProgrammableWorkersInRange(gameObjectData, getCenterOfRect(gameObjectData->roamingSpider->rect), 250.0) == 0 && !gameObjectData->roamingSpider->going_home){
+
+		if(gameObjectData->roamingSpider->xPosition >= X_SIZE_OF_WORLD - PERSON_WIDTH/2){
+			/*world border has been reached and sun is still out, change direction*/
+		gameObjectData->roamingSpider->heading = 1.571;
+
+		}else if(gameObjectData->roamingSpider->xPosition <= -PERSON_WIDTH/2){
+			/*world border has been reached and sun is still out, change direction*/
+		gameObjectData->roamingSpider->heading = 4.713;
+
+		}else if(gameObjectData->roamingSpider->yPosition >= Y_SIZE_OF_WORLD - PERSON_HEIGHT/2){
+			/*world border has been reached and sun is still out, change direction*/
+		gameObjectData->roamingSpider->heading = 3.142; 
+
+		}else if(gameObjectData->roamingSpider->yPosition <= -PERSON_HEIGHT/2){
+			/*world border has been reached and sun is still out, change direction*/
+		gameObjectData->roamingSpider->heading = 0;
+
+		}else if(rand() % 1000 == 0){
+			/*randomly change direction, just for the hell of it*/
+	 		gameObjectData->roamingSpider->heading += ((double)(rand() % 30) / (double)10) - 1.5;
+	 	}
+	 
+	}else{
+		distanceFromYBorder = gameObjectData->roamingSpider->yPosition - Y_SIZE_OF_WORLD/2;
+		distanceFromXBorder = gameObjectData->roamingSpider->xPosition - X_SIZE_OF_WORLD/2;
+		if(abs(distanceFromXBorder) > abs(distanceFromYBorder)){
+			if(distanceFromXBorder > 0){
+				gameObjectData->roamingSpider->heading = PI * 0.75 + 0.069813;
+			}else{
+				gameObjectData->roamingSpider->heading = PI * 0.25 + 0.069813;
+			}
+		}else{
+			if(distanceFromYBorder > 0){
+				gameObjectData->roamingSpider->heading = 0 + 0.069813;
+			}else{
+				gameObjectData->roamingSpider->heading = PI * 0.5 + 0.069813;
+			}
+		}
+	}
+
+
+}
+
 ResourceNodeSpawner createResourceNodeSpawner(int maximumNodeCount, float xPosition, float yPosition, float radius){
 	/* int maximumNodeCount = the maximum number of ResourceNodes for this spawner
 							to create
@@ -855,50 +978,39 @@ void updateResourceNodeSpawner(ResourceNodeSpawner *spawner, int ticks){
 	}
 }
 
-void updateWeather(GameObjectData *gameObjectData, Weather *weather, int ticks){
+void updateWeather(GameObjectData *gameObjectData, AudioData *audioData, Weather *weather, int ticks){
 	/* Advance weather every TICKSPERWEATHER ticks; this may be semi-random due to tick-skipping. */
 	int weatherChannel = 3;
 	int ticksPerWeather;
 
-	if(weather->present_weather != Sun){
-		ticksPerWeather = TICKSPERWEATHER / SUN_LASTS_LONGER_FACTOR;
-	}else{
-		ticksPerWeather = TICKSPERWEATHER;
-	}
+	weather->tickCount += ticks;
+	
+	if(weather->tickCount > TICKSPERWEATHER && !gameObjectData->pause_status){
+		weather->tickCount = 0;
 
-	if(!gameObjectData->pause_status){
-		weather->tickCount += ticks;
-	}
-	if(gameObjectData->hive.winterCountdown >= WINTER_THRESHOLD){
-		if(weather->tickCount > ticksPerWeather && !gameObjectData->pause_status){
-			weather->tickCount = 0;
-
-			switch (weather->present_weather)
-			{
-			/* Closing the Window will exit the program */
-			case Sun:
-					weather->present_weather = (rand() % CHANCE_OF_CLOUD == 0) ? Cloud : Sun;
-				break;
-			case Cloud:
-
-					weather->present_weather = (rand() % CHANCE_OF_RAIN == 0) ? Rain : Sun;
-					fadeInChannel(weatherChannel, &gameObjectData->audioData, "thunder");
-
-				break;
-			case Rain:
-
-					weather->present_weather = (rand() % CHANCE_OF_CLOUD == 0) ? Cloud : Sun;
-					fadeOutChannel(weatherChannel, &gameObjectData->audioData);
-
-				break;
-			case Snow:
-				/*honey stocks should be built up first. WINTER IS COMING.. (haha game of drones).*/
-				break;
-			default:
-				fprintf(stderr,"Weather wasn't recognised in updateWeather.\n");
-				fflush(stderr);
-				exit(1);
-			}
+		switch (weather->present_weather)
+		{
+		/* Closing the Window will exit the program */
+		case Sun:
+			weather->present_weather = (rand() % CHANCE_OF_CLOUD == 0) ? Cloud : Sun;
+			break;
+		case Cloud:
+			weather->present_weather = (rand() % CHANCE_OF_RAIN == 0) ? Rain : Sun;
+			fadeInChannel(weatherChannel, &gameObjectData->audioData, "thunder");
+			audioData->weatherSoundActive = 1;		
+			break;
+		case Rain:
+			weather->present_weather = (rand() % CHANCE_OF_CLOUD == 0) ? Cloud : Sun;
+			fadeOutChannel(weatherChannel, audioData);
+			audioData->weatherSoundActive = 0;		
+			break;
+		case Snow:
+			/*honey stocks should be built up first. WINTER IS COMING.. (haha game of drones).*/
+			break;
+		default:
+			fprintf(stderr,"Weather wasn't recognised in updateWeather.\n");
+			fflush(stderr);
+			exit(1);
 		}
 	}else{
 		weather->present_weather = Snow;
@@ -950,7 +1062,46 @@ void reInitialiseIceCreamPerson(IceCreamPerson *iceCreamPerson){
 
 }
 
+void reInitialiseRoamingSpider(RoamingSpider *roamingSpider){
+	roamingSpider->currently_on_screen = 1;
 
+
+
+	/*random chance of appearing at the edge of the world*/
+	if(rand()%2){
+		if(rand()%2){
+			roamingSpider->xPosition = X_SIZE_OF_WORLD - PERSON_WIDTH;
+			roamingSpider->heading = 1.571;
+		}else{
+			roamingSpider->xPosition = 0;
+			roamingSpider->heading = 4.713;
+		}
+		roamingSpider->yPosition = rand() % Y_SIZE_OF_WORLD;
+		
+	}else{
+		if(rand()%2){
+			roamingSpider->yPosition = Y_SIZE_OF_WORLD - PERSON_HEIGHT;
+			roamingSpider->heading = 3.142;
+		}else{
+			roamingSpider->yPosition = 0;
+			roamingSpider->heading = 0;
+		}
+		roamingSpider->xPosition = rand() % X_SIZE_OF_WORLD;
+	}
+	
+	roamingSpider->rect.x = roamingSpider->xPosition;
+	roamingSpider->rect.y = roamingSpider->yPosition;
+
+	roamingSpider->eating_bee = 0;
+	roamingSpider->going_home = 0;
+	roamingSpider->speed = 0.1; /*pixels per millisecond*/
+	roamingSpider->stung = 0;
+
+	roamingSpider->countDownToStride = (double)STRIDE_FREQUENCY / roamingSpider->speed;
+
+	roamingSpider->currentGraphicIndex = 0;
+
+}
 
 ResourceNode createResourceNode(ResourceNodeSpawner *parentSpawner, int resourceUnits){
 	/* ResourceNodeSpawner *parentSpawner = the spawner which this resource node
@@ -991,7 +1142,7 @@ void updateHive(GameObjectData *gameObjectData, int ticks){
 	}
 }
 
-void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsData, AnnouncementsData *announcementsData, int ticks){
+void updateGameObjects(GameObjectData *gameObjectData, AudioData *audioData, GraphicsData *graphicsData, AnnouncementsData *announcementsData, int ticks){
 
 	/* GameObjectData *gameObjectData = the pointer to the GameObjectData struct
 										that holds all the information about our
@@ -1306,6 +1457,32 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 		}
  	}
 
+	/*determine if roamingSpider is on screen and needs animating*/
+	if(gameObjectData->roamingSpider->currently_on_screen){
+	
+	 	if(!gameObjectData->pause_status){
+		 	updateRoamingSpider(gameObjectData, ticks);
+	 	}
+	 	
+	 	if(gameObjectData->roamingSpider->displayInfo){
+			SDL_Point point = getCenterOfRect(gameObjectData->roamingSpider->rect);
+			renderFillRadius(graphicsData, &point, PERSON_WIDTH/2, 255,255,255, 80);
+		}
+
+  	 	blitGameObject(gameObjectData->roamingSpider->rect,
+                  	graphicsData,
+                   	graphicsData->roamingArachnid->graphic[0],
+                   	DEGREESINCIRCLE-(gameObjectData->roamingSpider->heading * RADIANSTODEGREES),
+                   	NULL,
+                   	SDL_FLIP_NONE);
+
+	}else{ /*small probability of re-initialising iceCreamPerson and setting location to on-screen*/
+	 	if((rand() % ICE_CREAM_PERSON_PROB == 0)){
+
+	 		reInitialiseRoamingSpider(gameObjectData->roamingSpider);
+
+		}
+ 	}
 
 
 	/* Thirdly, we loop through all the ProgrammableWorkers and update them */
@@ -1396,7 +1573,7 @@ void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 		updateHive(gameObjectData,ticks);
 	}
 
-	updateWeather(gameObjectData, &gameObjectData->weather, ticks);
+	updateWeather(gameObjectData, audioData, &gameObjectData->weather, ticks);
 
 	paintWeatherLayer(graphicsData, gameObjectData->weather.present_weather);
 

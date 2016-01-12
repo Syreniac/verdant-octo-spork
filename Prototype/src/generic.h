@@ -163,6 +163,8 @@ each call to updateProgrammableWorker*/
 typedef enum personGraphic {WITH_ICE_CREAM_STRIDE1, WITH_ICE_CREAM_STRIDE2} personGraphic;
 #define NO_ICECREAM_INDEX_OFFSET 2
 
+#define SPIDER 0
+
 
 #if DEBUGGING==1
 void *debug_calloc(int line, char *filename, int itemCount, int itemSize);
