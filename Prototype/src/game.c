@@ -179,6 +179,10 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
                                                                                   &gameData.graphicsData, 1);
   gameData.graphicsData.uiEle->graphic[BLOCK_GRAPHIC] = loadTextureFromFile("images/UI/block.bmp",
                                                                                   &gameData.graphicsData, 1);
+  gameData.graphicsData.uiEle->graphic[HIVECELL_GRAPHIC] = loadTextureFromFile("images/UI/hivecell.bmp",
+                                                                                  &gameData.graphicsData, 1);
+  gameData.graphicsData.uiEle->graphic[HIVECELLMASK_GRAPHIC] = loadTextureFromFile("images/UI/hivecellmask.bmp",
+                                                                                  &gameData.graphicsData, 1);
 
   gameData.aiData = initAIData();
 
@@ -516,7 +520,7 @@ static void createGameUI(GameData *gameData){
 
   element2 = UIElement_Create(0, win_y - 100, 100,100,6);
   printf("Hive internals panel is %p\n",element2);
-	UIConfigure_FillAndBorderRect(element2,&element2->actions[0],255,255,255,0,0,0,FILLRECT);
+	UIConfigure_FillAndBorderRect(element2,&element2->actions[0],249,252,124,0,0,0,FILLRECT);
 	UIConfigure_LeftClickRect(element2,&element2->actions[1]);
 		UITrigger_Bind(&element2->actions[1],&element2->actions[2],0,1);
     UITrigger_Bind(&element2->actions[1],&element2->actions[2],3,2);

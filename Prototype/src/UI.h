@@ -99,6 +99,7 @@ enum UIString_Align{
 };
 
 enum UIElement_Variety{
+  HIVECELL,
   BLOCK,
   STOPBOX,
   COMPILEBOX,
