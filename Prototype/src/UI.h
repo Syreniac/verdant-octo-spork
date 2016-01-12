@@ -182,6 +182,7 @@ UI_Element *makeAIBlock(int x_offset, int y_offset, char *aiString, UI_Element *
 UI_Element *makeStartBlock(int x_offset, int y_offset, UI_Element *parent);
 UI_Element *makeAIResetButton(int x_offset, int y_offset, UI_Element *parent);
 UI_Element *makeAITemplateScrollList(int x_offset, int y_offset, AIData *aiData, UI_Element *parent, UI_Element *blockHolder);
+UI_Element *makeHiveCellBlock(int x_offset, int y_offset, UI_Element *parent, HiveCell *hiveCell);
 void initUIData(UIData *uiData);
 void quickSetStatus(UI_Action *action, int status);
 void UIElement_Debug(UI_Element *element);

@@ -483,6 +483,35 @@ static void createGameUI(GameData *gameData){
   UIElement_Reparent(element,gameData->uiData.root);
 
 
+
+
+  element2 = UIElement_Create(0, win_y - 100, 100,100,6);
+  printf("Hive internals panel is %p\n",element2);
+	UIConfigure_FillAndBorderRect(element2,&element2->actions[0],255,255,255,0,0,0,FILLRECT);
+	UIConfigure_LeftClickRect(element2,&element2->actions[1]);
+		UITrigger_Bind(&element2->actions[1],&element2->actions[2],0,1);
+    UITrigger_Bind(&element2->actions[1],&element2->actions[2],3,2);
+    UITrigger_Bind(&element2->actions[1],&element2->actions[4],0,1);
+    UIConfigure_DisplayString(element2, &element2->actions[5],"Hive panel",0, UISTRING_ALIGN_CENTER);
+	UIConfigure_TwoRectOverride(element2,&element2->actions[2],0,win_y - 100, 100, 100,
+                                                               50, 50, win_x - 100, win_y - 200,
+                                                               200);
+  UIConfigure_UpdateTwoRectOverrideOnWindowResize(element2, &element2->actions[3],&element2->actions[2],
+                                                                                  50,50,0.0,0.0,
+                                                                                  -100,-150,1.0,1.0,
+                                                                                  -1,-199,0.0,1.0,
+                                                                                  100,100,0.0,0.0);
+  UIConfigure_ToggleInteger(element2,&element2->actions[4],&gameData->controlsData.objectSelection);
+  UIElement_Reparent(element2,gameData->uiData.root);
+
+  i = 0;
+  while(i < NUMBER_OF_CELLS_IN_HIVE){
+    topX += 60;
+    makeHiveCellBlock(topX,topY,element2,&gameData->gameObjectData.hive.hiveCells[i]);
+    i++;
+  }
+
+
   element2 = UIElement_Create(0, win_y - 100, 100,100,6);
   printf("BPP editor panel is %p\n",element2);
 	UIConfigure_FillAndBorderRect(element2,&element2->actions[0],248,221,35,0,0,0,FILLRECT);
@@ -501,34 +530,6 @@ static void createGameUI(GameData *gameData){
                                                                                   100,100,0.0,0.0);
   UIConfigure_ToggleInteger(element2,&element2->actions[4],&gameData->controlsData.objectSelection);
   UIElement_Reparent(element2,gameData->uiData.root);
-
-
-
-
-  element2 = UIElement_Create(0, win_y - 100, 100,100,6);
-  printf("Hive internals panel is %p\n",element2);
-	UIConfigure_FillAndBorderRect(element2,&element2->actions[0],255,255,255,0,0,0,FILLRECT);
-	UIConfigure_LeftClickRect(element2,&element2->actions[1]);
-		UITrigger_Bind(&element2->actions[1],&element2->actions[2],0,1);
-    UITrigger_Bind(&element2->actions[1],&element2->actions[1],1,0);
-    UITrigger_Bind(&element2->actions[1],&element2->actions[4],0,1);
-    UIConfigure_DisplayString(element2, &element2->actions[5],"Hive panel",0, UISTRING_ALIGN_CENTER);
-	UIConfigure_TwoRectOverride(element2,&element2->actions[2],0,win_y - 100, 100, 100,
-                                                               50, 50, win_x - 100, win_y - 200,
-                                                               200);
-  UIConfigure_UpdateTwoRectOverrideOnWindowResize(element2, &element2->actions[3],&element2->actions[2],
-                                                                                  50,50,0.0,0.0,
-                                                                                  -100,-150,1.0,1.0,
-                                                                                  -1,-199,0.0,1.0,
-                                                                                  100,100,0.0,0.0);
-  UIConfigure_ToggleInteger(element2,&element2->actions[4],&gameData->controlsData.objectSelection);
-  UIElement_Reparent(element2,gameData->uiData.root);
-
-  i = 0;
-  while(i < NUMBER_OF_CELLS_IN_HIVE){
-    makeHiveCellBlock(topX,topY,element2,gameData->gameObjectData->hive.hiveCells[i]);
-    i++;
-  }
 
   /* Minimize button */
   element = UIElement_Create(50 + win_x - 150, 50, 50, 50,6);

@@ -43,10 +43,13 @@ int UIAction_Minimap(UI_Action *action, UIData *uiData);
 int UIAction_MinimapMouseMove(UI_Action *action, UIData *uiData);
 int UIAction_ToggleInteger(UI_Action *action, UIData *uiData);
 
-UI_Element *makeHiveCellBlock(int x_offset, int y_offset, UI_Element *parent){
-	UI_Element *element = UIElement_Create(x_offset, y_offset, 50,50,2)
+UI_Element *makeHiveCellBlock(int x_offset, int y_offset, UI_Element *parent, HiveCell *hiveCell){
+	UI_Element *element = UIElement_Create(x_offset, y_offset, 50,50,2);
 
 	UIConfigure_FillAndBorderRect(element,&element->actions[0], 150,150,150,0,0,0,FILLRECT);
+	UIConfigure_ShrinkFitToParent(element,&element->actions[1]);
+	UIElement_Reparent(element,parent);
+	return element;
 }
 
 UI_Element *makeStartBlock(int x_offset, int y_offset, UI_Element *parent){
