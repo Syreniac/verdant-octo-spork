@@ -73,7 +73,8 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
 
   generateIceCreamPerson(&gameData.gameObjectData);
   generateDroppedIceCream(&gameData.gameObjectData);
-
+  
+  generateRoamingSpider(&gameData.gameObjectData);
 
   gameData.graphicsData.grassTexture = loadTextureFromFile("images/grass/grass4.bmp",&gameData.graphicsData, 0);
   gameData.graphicsData.treeTexture = loadTextureFromFile("images/tree.bmp",&gameData.graphicsData, 1);
@@ -101,6 +102,11 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
 					  
   gameData.graphicsData.droppedIceCreamTexture = loadTextureFromFile("images/person/droppedIceCream.bmp", &gameData.graphicsData, 1);
   gameData.graphicsData.meltedIceCreamTexture = loadTextureFromFile("images/person/meltedIceCream.bmp", &gameData.graphicsData, 1);
+
+  gameData.graphicsData.roamingArachnid = (RoamingArachnid*) malloc(sizeof(RoamingArachnid));
+  
+  gameData.graphicsData.roamingArachnid->graphic[SPIDER] = 
+  loadTextureFromFile("images/spider.bmp", &gameData.graphicsData, 1);
   
   gameData.graphicsData.rainy = (Rainy*) malloc(sizeof(Rainy));
 
@@ -398,7 +404,7 @@ int gameLoop(GameData *gameData){
 	   printf("Error clearing renderer: %s\n", SDL_GetError());
   }
   paintBackground(&gameData->graphicsData,0,200,100);
-  updateGameObjects(&gameData->gameObjectData, &gameData->graphicsData, delta_t);
+  updateGameObjects(&gameData->gameObjectData, &gameData->audioData, &gameData->graphicsData, delta_t);
   UIRoot_Execute(&gameData->uiData,RENDER,0,&gameData->graphicsData);
   runAI(&gameData->aiData,&gameData->gameObjectData);
   /*This function is like the blit function, putting pixels to the screen.

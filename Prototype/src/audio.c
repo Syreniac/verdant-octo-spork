@@ -56,9 +56,9 @@ void playMusic(AudioData *audioData, int season) {
 
 }
 
-void stopMusic(AudioData *audioData, int season) {
+void stopSound(AudioData *audioData, int channel) {
 
-	Mix_HaltChannel(-1);
+	Mix_HaltChannel(channel);
 }
 
 void fadeOutMusic(AudioData *audioData) {
@@ -70,6 +70,8 @@ void loadSoundEffect(char *sound, char *name, AudioData *audioData) {
 
 	SoundEffect *pointer = audioData->soundEffect;
 	SoundEffect *newSoundEffect = (SoundEffect*) calloc(1, sizeof(SoundEffect));
+	audioData->soundEffect_mute = 0;
+	audioData->weatherSoundActive = 0;
 
 	if(newSoundEffect == NULL) {
 		fprintf(stderr, "Calloc failed allocate space for SoundEffect newSoundEffect\n");
@@ -135,6 +137,7 @@ void fadeOutChannel(int channel, AudioData *audioData) {
 void fadeInChannel(int channel, AudioData *audioData, char* name) {
 
 	SoundEffect *active = audioData->soundEffect;
+	int weatherChannel = 3;
 
 	if (active == NULL){
 		printf("No matching sound effect loaded\n");
@@ -152,6 +155,8 @@ void fadeInChannel(int channel, AudioData *audioData, char* name) {
 		active = active->next;
 	}
 
+
+	
 	fprintf(stderr,"No sound effect with the name %s\n",name);
 }
 
@@ -171,15 +176,24 @@ void muteMusic(AudioData *audioData) {
 
 void muteSoundEffects(AudioData *audioData) {
 	
+	int weatherChannel = 3; /*channel 3 is the weather channel*/
+	
+	printf("DEBUG START OF MUTE FUNCTION: weatherSoundActive = %d\n", audioData->weatherSoundActive);
 	if (audioData->soundEffect_mute == 0) {
 		Mix_Volume(2, 0); /*channel 2 is the sound effects channel*/
-		Mix_Volume(3, 0); /*channel 3 is the weather channel*/
+		Mix_Volume(weatherChannel, 0);
+		stopSound(audioData, weatherChannel); /*stop weather effects*/
 		printf("Sound effects muted.\n");
 		audioData->soundEffect_mute = 1;
 	}
-	else {
+	
+	else {		
+		Mix_Volume(weatherChannel, 128); 
+		if (audioData->weatherSoundActive != 0) {
+			fadeInChannel(weatherChannel, audioData, "thunder"); /*restart weather effects*/
+			printf("On un-mute: weatherSoundActive = %d\n FADING IN CHANNEL\n", audioData->weatherSoundActive);
+		}
 		Mix_Volume(2, 128); /*channel 2 is the sound effects channel*/
-		Mix_Volume(3, 128); /*channel 3 is the weather channel*/
 		printf("Sound effects un-muted.\n");		
 		audioData->soundEffect_mute = 0;
 	}

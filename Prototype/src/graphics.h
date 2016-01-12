@@ -3,6 +3,7 @@
 
 typedef struct GraphicsData GraphicsData;
 typedef struct Person Person;
+typedef struct RoamingArachnid RoamingArachnid;
 typedef struct Rainy Rainy;
 typedef struct Bee Bee;
 
@@ -38,6 +39,7 @@ struct GraphicsData{
   struct Bee *bee;
   struct Rainy *rainy;
   struct Person *person;
+  struct RoamingArachnid *roamingArachnid;
   SDL_Texture *mainMenuImage;
 };
 
@@ -47,6 +49,10 @@ struct Bee{
 
 struct Person{
 	SDL_Texture *graphic[4];
+};
+
+struct RoamingArachnid{
+	SDL_Texture *graphic[1];
 };
 
 struct Rainy{

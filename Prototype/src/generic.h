@@ -107,7 +107,7 @@ each call to updateProgrammableWorker*/
 #define DEFAULT_SPAWNDELAY 1000*10
 #define DEFAULT_SPAWNRADIUS 100.0
 #define DEFAULT_MAXNODECOUNT 10
-#define TICKSPERWEATHER 30000
+#define TICKSPERWEATHER 3000
 #define FRAME_TIME 20
 
 #define NUM_OF_KEYS 30
@@ -121,6 +121,8 @@ each call to updateProgrammableWorker*/
 
 typedef enum personGraphic {WITH_ICE_CREAM_STRIDE1, WITH_ICE_CREAM_STRIDE2} personGraphic;
 #define NO_ICECREAM_INDEX_OFFSET 2
+
+#define SPIDER 0
 
 
 #if DEBUGGING==1

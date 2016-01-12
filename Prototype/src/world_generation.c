@@ -38,6 +38,11 @@ void generateDroppedIceCream(GameObjectData *gameObjectData){
   gameObjectData->droppedIceCream = createDroppedIceCream();
 }
 
+void generateRoamingSpider(GameObjectData *gameObjectData){
+/*create roaming Spider at initial location outside of world boundaries*/
+  gameObjectData->roamingSpider = createRoamingSpider();
+}
+
 void generateHive(GameObjectData *gameObjectData){
   /* Create a Hive */
   gameObjectData->hive = createHive();

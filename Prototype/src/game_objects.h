@@ -14,6 +14,7 @@ typedef struct ProgrammableWorkerBrain ProgrammableWorkerBrain;
 typedef struct Hive Hive;
 typedef struct Tree Tree;
 typedef struct IceCreamPerson IceCreamPerson;
+typedef struct RoamingSpider RoamingSpider;
 typedef struct Weather Weather;
 typedef struct GameObjectData GameObjectData;
 typedef struct DroppedIceCream DroppedIceCream;
@@ -133,6 +134,25 @@ struct IceCreamPerson{
   int displayInfo;
 };
 
+struct RoamingSpider{
+  float xPosition;
+  float yPosition;
+  SDL_Rect rect;
+
+  double heading;
+  double speed;
+
+  int countDownToStride;
+  int currentGraphicIndex;
+
+  int going_home;
+
+  int eating_bee;
+  int currently_on_screen;
+  int stung;
+  int displayInfo;
+};
+
 struct Weather{
   enum WeatherStatus present_weather;
   int tickCount;
@@ -145,6 +165,7 @@ struct GameObjectData{
   ResourceNodeSpawner resourceNodeSpawners[NUMBER_OF_FLOWER_PATCHES];
   IceCreamPerson *iceCreamPerson;
   DroppedIceCream *droppedIceCream;
+  RoamingSpider *roamingSpider;
   int resourceNodeSpawnerCount;
   ProgrammableWorker *first_programmable_worker;
   int programmableWorkerCount;
@@ -170,14 +191,16 @@ Weather createWeatherLayer(void);
 int getFirstDeadResourceNode(ResourceNodeSpawner *resourceNodeSpawner);
 ResourceNodeSpawner createResourceNodeSpawner(int maximumNodeCount, float xPosition, float yPosition, float radius);
 void updateResourceNodeSpawner(ResourceNodeSpawner *spawner, int ticks);
-void updateWeather(GameObjectData *gameObjectData, Weather *weather, int ticks);
+void updateWeather(GameObjectData *gameObjectData, AudioData *audioData, Weather *weather, int ticks);
 
 void initResourceNode(ResourceNode *resourceNode);
 ResourceNode createResourceNode(ResourceNodeSpawner *parentSpawner, int resourceUnits);
 IceCreamPerson *createIceCreamPerson(void);
 DroppedIceCream *createDroppedIceCream(void);
+RoamingSpider *createRoamingSpider(void);
 void reInitialiseIceCreamPerson(IceCreamPerson *iceCreamPerson);
-void updateGameObjects(GameObjectData *gameObjectData, GraphicsData *graphicsData, int ticks);
+void reInitialiseRoamingSpider(RoamingSpider *roamingSpider);
+void updateGameObjects(GameObjectData *gameObjectData, AudioData *audioData, GraphicsData *graphicsData, int ticks);
 int countProgrammableWorkersInRange(GameObjectData *gameObjectData, SDL_Point center, double radius);
 int isPointInRangeOf(SDL_Point point, SDL_Point center, double radius);
 
