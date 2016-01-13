@@ -176,6 +176,9 @@ void UIConfigure_PercentageFillRect(UI_Element *element, UI_Action *action, doub
 void UIConfigure_SetCellToSpawn(UI_Element *element, UI_Action *action, HiveCell *cell);
 void UIConfigure_GetPercentCellDone(UI_Element *element, UI_Action *action, HiveCell *hiveCell, int maximumTime, int num_of_companions, ...);
 void UIConfigure_SetCellToSpawn(UI_Element *element, UI_Action *action, HiveCell *cell);
+void UIConfigure_FillSubrect(UI_Element *element, UI_Action *action, int x, int y, int w, int h, int red, int green, int blue);
+void UIConfigure_LeftClickSubrect(UI_Element *element, UI_Action *action, int x, int y, int w, int h);
+void UIConfigure_RightClickSubrect(UI_Element *element, UI_Action *action, int x, int y, int w, int h);
 
 void UITrigger_Bind(UI_Action *action, UI_Action *target, int state_from, int state_to);
 
