@@ -1,4 +1,4 @@
-#include "UI.h"
+#include "_UI_templates.h"
 
 /* I know that there are technically more than two, but we only need to know
    about two of them */
@@ -22,6 +22,8 @@ struct ControlsData{
   int objectSelection;
 	int keys[MAX_KEYS];
 	int mouseButtons[NUM_OF_MOUSE_BUTTONS];
+  /* Configured Constants */
+  double PANSPEEDMULTI;
 };
 typedef struct ControlsData ControlsData;
 

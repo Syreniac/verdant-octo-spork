@@ -164,39 +164,39 @@ void panScreen(GraphicsData *graphicsData, ControlsData *controlsData, int delta
   int window_x,window_y;
   SDL_GetWindowSize(graphicsData->window,&window_x,&window_y);
 
-  if(window_x > X_SIZE_OF_WORLD){
-    graphicsData->navigationOffset.x = -(X_SIZE_OF_WORLD - window_x)/2;
+  if(window_x > graphicsData->X_SIZE_OF_WORLD){
+    graphicsData->navigationOffset.x = -(graphicsData->X_SIZE_OF_WORLD - window_x)/2;
   }
   else{
 
     if(controlsData->keys[ARROW_RIGHT]){
-    	if(graphicsData->navigationOffset.x > -X_SIZE_OF_WORLD + window_x){
-    		graphicsData->navigationOffset.x -= floor(delta_t * PANSPEEDMULTI);
+    	if(graphicsData->navigationOffset.x > -graphicsData->X_SIZE_OF_WORLD + window_x){
+    		graphicsData->navigationOffset.x -= floor(delta_t * controlsData->PANSPEEDMULTI);
     	}
     }
 
     if(controlsData->keys[ARROW_LEFT]){
       if(graphicsData->navigationOffset.x < 0){
-         graphicsData->navigationOffset.x += floor(delta_t * PANSPEEDMULTI);
+         graphicsData->navigationOffset.x += floor(delta_t * controlsData->PANSPEEDMULTI);
       }
     }
 
   }
 
-  if(window_y > Y_SIZE_OF_WORLD){
-    graphicsData->navigationOffset.y = -(Y_SIZE_OF_WORLD - window_y)/2;
+  if(window_y > graphicsData->Y_SIZE_OF_WORLD){
+    graphicsData->navigationOffset.y = -(graphicsData->Y_SIZE_OF_WORLD - window_y)/2;
   }
   else{
 
     if(controlsData->keys[ARROW_DOWN]){
-    	if(graphicsData->navigationOffset.y > -Y_SIZE_OF_WORLD + window_y){
-    		graphicsData->navigationOffset.y -= floor(delta_t * PANSPEEDMULTI);
+    	if(graphicsData->navigationOffset.y > -graphicsData->Y_SIZE_OF_WORLD + window_y){
+    		graphicsData->navigationOffset.y -= floor(delta_t * controlsData->PANSPEEDMULTI);
     	}
     }
 
     if(controlsData->keys[ARROW_UP]){
       if(graphicsData->navigationOffset.y < 0){
-  		    graphicsData->navigationOffset.y += floor(delta_t * PANSPEEDMULTI);
+  		    graphicsData->navigationOffset.y += floor(delta_t * controlsData->PANSPEEDMULTI);
   	  }
     }
 

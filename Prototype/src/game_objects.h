@@ -27,8 +27,6 @@ typedef struct HiveCell HiveCell;
 struct ResourceNode{
   /* this is a 1/0 boolean to see whether the flower is alive or dead. */
   int alive;
-  /* How many resources (e.g. Honey) are in a node*/
-  int resourceUnits;
   /* standard positioning data - x,y coords */
   int displayInfo;
   SDL_Rect rect;
@@ -87,6 +85,7 @@ struct ProgrammableWorker{
 
   int insideHive;
 
+  double senseRange;
 
   int cargo;
 
@@ -116,7 +115,9 @@ struct Hive{
   int winterCountdown;
   float winterCountdownFloat;
   int years_survived;
-  HiveCell hiveCells[NUMBER_OF_CELLS_IN_HIVE];
+  HiveCell *hiveCells;
+  int hiveCellCount;
+  int hiveCellSpawnDelay;
 };
 
 struct Tree{
@@ -187,8 +188,8 @@ typedef enum {STARVATION, COLD} gameOverCause;
 struct GameObjectData{
   Weather weather;
   Hive hive;
-  Tree tree[NUMBER_OF_TREES];
-  ResourceNodeSpawner resourceNodeSpawners[NUMBER_OF_FLOWER_PATCHES];
+  Tree *tree;
+  ResourceNodeSpawner *resourceNodeSpawners;
   IceCreamPerson *iceCreamPerson;
   DroppedIceCream *droppedIceCream;
   RoamingSpider *roamingSpider;
@@ -205,6 +206,59 @@ struct GameObjectData{
   Uint32 objectDisplayEventNum;
   int gameRestart;
   AudioData audioData;
+  /* Grand tidy up, made these not defined */
+  int HONEY_REQUIRED_FOR_WINTER;
+  int REQUIREMENT_YEAR_INCREASE_PERCENTAGE;
+  int DELAY_BEFORE_SUMMER;
+  int NUMBER_OF_FLOWER_PATCHES;
+  int DEFAULT_MAXNODECOUNT;
+  int X_SIZE_OF_WORLD;
+  int Y_SIZE_OF_WORLD;
+  int DEFAULT_SPAWNRADIUS;
+  int INITIAL_NUMBER_OF_WORKERS;
+  int NUMBER_OF_TREES;
+  int SIZE_OF_TREE;
+  int X_SIZE_OF_HIVE;
+  int Y_SIZE_OF_HIVE;
+  int WORKER_SENSE_RANGE;
+  int X_SIZE_OF_WORKER;
+  int Y_SIZE_OF_WORKER;
+  int LENGTH_OF_STATUS_STRING;
+  double WORKER_SPEED;
+  int PERSON_HEIGHT;
+  int PERSON_WIDTH;
+  int MAX_DAYS_TO_WINTER;
+  int SIZE_OF_TREESTUMP;
+  int WINTER_THRESHOLD;
+  int HIVE_SHELTER_RADIUS;
+  int MS_BETWEEN_FLAPPING;
+  int STUNNED_AFTER_STING_DURATION;
+  int SUGAR_VALUE_OF_FLOWER;
+  int SUGAR_VALUE_OF_ICECREAM;
+  int ICECREAM_PICKUP_RADIUS;
+  int CHANCE_OF_REGAINING_FLIGHT;
+  int STRIDE_FREQUENCY;
+  int STING_HIT_RADIUS;
+  int DEFAULT_SPAWNDELAY;
+  int X_SIZE_OF_NODE;
+  int Y_SIZE_OF_NODE;
+  int TICKSPERWEATHER;
+  int CHANCE_OF_CLOUD;
+  int CHANCE_OF_RAIN;
+  int SIZE_OF_FLOWER;
+  double WINTER_COUNTDOWN_SPEED;
+  int AUTUMN_THRESHOLD;
+  int DROPPED_ICECREAM_WIDTH;
+  int DROPPED_ICECREAM_HEIGHT;
+  int RANDOMISE_SPAWNRADIUS;
+  int TREE_SHELTER_RADIUS;
+  int MELT_TIME_THRESHOLD;
+  int MAX_DROPPED_ICECREAM_WIDTH;
+  int COLD_DEATH_THRESHOLD;
+  int BEE_SHRINK_FACTOR_ON_GROUND;
+  int CARRYING_FLOWER_INDEX_OFFSET;
+  int CARRYING_ICECREAM_INDEX_OFFSET;
+  int ICE_CREAM_PERSON_PROB;
 };
 
 void killAllBees(ProgrammableWorker **programmableWorker);
@@ -213,8 +267,8 @@ ProgrammableWorker *createProgrammableWorker(GameObjectData *gameObjectData);
 void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, AnnouncementsData *announcementsData, int ticks);
 void updateIceCreamPerson(GameObjectData *gameObjectData, int ticks);
 
-Hive createHive(void);
-Tree createTree(Hive *hive, int forceX, int forceY);
+Hive initHive(GameObjectData *gameObjectData,ConfigurationData *configData);
+Tree createTree(GameObjectData *gameObjectData, int forceX, int forceY);
 Weather createWeatherLayer(void);
 
 /* I think that it will be better to do static respawning objects through
@@ -224,17 +278,17 @@ Weather createWeatherLayer(void);
    checking quickly and respawning resources will be easier */
 
 int getFirstDeadResourceNode(ResourceNodeSpawner *resourceNodeSpawner);
-ResourceNodeSpawner createResourceNodeSpawner(int maximumNodeCount, float xPosition, float yPosition, float radius);
-void updateResourceNodeSpawner(ResourceNodeSpawner *spawner, int ticks);
+ResourceNodeSpawner createResourceNodeSpawner(GameObjectData *gameObjectData, int maximumNodeCount, float xPosition, float yPosition, float radius);
+void updateResourceNodeSpawner(GameObjectData *gameObjectData, ResourceNodeSpawner *spawner, int ticks);
 void updateWeather(GameObjectData *gameObjectData, AudioData *audioData, Weather *weather, int ticks);
 
-void initResourceNode(ResourceNode *resourceNode);
-ResourceNode createResourceNode(ResourceNodeSpawner *parentSpawner, int resourceUnits);
-IceCreamPerson *createIceCreamPerson(void);
-DroppedIceCream *createDroppedIceCream(void);
-RoamingSpider *createRoamingSpider(void);
-void reInitialiseIceCreamPerson(IceCreamPerson *iceCreamPerson);
-void reInitialiseRoamingSpider(RoamingSpider *roamingSpider);
+void initResourceNode(GameObjectData *gameObjectData, ResourceNode *resourceNode);
+ResourceNode createResourceNode(GameObjectData *gameObjectData, ResourceNodeSpawner *parentSpawner);
+IceCreamPerson *createIceCreamPerson(GameObjectData *gameObjectData);
+DroppedIceCream *createDroppedIceCream(GameObjectData *gameObjectData);
+RoamingSpider *createRoamingSpider(GameObjectData *gameObjectData);
+void reInitialiseIceCreamPerson(GameObjectData *gameObjectData);
+void reInitialiseRoamingSpider(GameObjectData *gameObjecData);
 void updateGameObjects(GameObjectData *gameObjectData, AudioData *audioData, GraphicsData *graphicsData, AnnouncementsData *announcementsData, int ticks);
 int countProgrammableWorkersInRange(GameObjectData *gameObjectData, SDL_Point center, double radius);
 int isPointInRangeOf(SDL_Point point, SDL_Point center, double radius);

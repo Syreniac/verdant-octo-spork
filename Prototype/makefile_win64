@@ -10,9 +10,9 @@ CFLAGS = -ggdb -pedantic -Wall -Wextra -Wno-unused-variable -Wno-unused-paramete
 
 # File structure variables
 ASSETS_CONTENTS = .\assets
-COMMON_FILES = init.o game.o world_generation.o game_objects.o AI.o UI.o generic.o controls.o graphics.o audio.o announcements.o configuration.o
+COMMON_FILES = init.o game.o world_generation.o game_objects.o AI.o UI.o generic.o controls.o graphics.o audio.o announcements.o _UI_templates.o configuration.o
 BIN = bin
-PROG = $(BIN)\Prototype2
+PROG = $(BIN)\Prototype
 SOURCE_FILES = main.o $(COMMON_FILES)
 # ALLTEST_FILES = all.test.o $(COMMON_FILES)
 # ALLTEST = $(BIN)\Test

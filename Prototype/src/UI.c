@@ -14,7 +14,7 @@ static void UIElement_DeExternalise(UI_Element *root, UI_Element *external);
 static void UITrigger_Destroy(UI_Action *action, UI_Trigger *trigger);
 static void UIElement_RemoveExposedData(UI_Element *element);
 
-static void sUIAction_Minimap_DrawGameObject(UI_Action *action, GraphicsData *graphicsData, SDL_Rect *rect);
+static void sUIAction_Minimap_DrawGameObject(UI_Action *action, UIData *uiData, SDL_Rect *rect);
 static void sUIAction_DisplayNumber_EditNumber(UI_Action *action, int editNumber);
 static void sUIAction_DisplayString_EditString(UI_Action *action, char *editString);
 
@@ -43,206 +43,6 @@ int UIAction_SlideWithMouseWheel(UI_Action *action, UIData *uiData);
 int UIAction_Minimap(UI_Action *action, UIData *uiData);
 int UIAction_MinimapMouseMove(UI_Action *action, UIData *uiData);
 int UIAction_ToggleInteger(UI_Action *action, UIData *uiData);
-
-UI_Element *makeHiveCellBlock(int x_offset, int y_offset, UI_Element *parent, HiveCell *hiveCell){
-	UI_Element *element = UIElement_Create(x_offset, y_offset, 50,50,6);
-
-	UIConfigure_FillAndBorderRect(element,&element->actions[0], 150,150,150,0,0,0,HIVECELL);
-	UIConfigure_ShrinkFitToParent(element,&element->actions[1]);
-	UIConfigure_GetPercentCellDone(element,&element->actions[2],hiveCell,HIVE_CELL_SPAWN_DELAY,1,&element->actions[3]);
-	UIConfigure_PercentageFillRect(element,&element->actions[3],0.0,255,0,0);
-	UIConfigure_LeftClickRect(element,&element->actions[4]);
-		UITrigger_Bind(&element->actions[4],&element->actions[5],0,1);
-	UIConfigure_SetCellToSpawn(element,&element->actions[5],hiveCell);
-		quickSetStatus(&element->actions[5],0);
-	UIElement_Reparent(element,parent);
-	return element;
-}
-
-UI_Element *makeStartBlock(int x_offset, int y_offset, UI_Element *parent){
-	UI_Element *element;
-	element = UIElement_Create(x_offset,y_offset,200,50,9);
-	printf("start block @ %p\n",element);
-	UIConfigure_FillAndBorderRect(element,&element->actions[0],248,221,35,0,0,0,FILLRECT);
-	UIConfigure_ShrinkFitToParent(element, &element->actions[1]);
-	UIConfigure_DisplayString(element, &element->actions[2],"START",0,UISTRING_ALIGN_CENTER);
-	UIConfigure_RenderLine(element, &element->actions[7],BR_CORNER,NULL);
-
-	UIConfigure_LeftClickRect(element, &element->actions[4]);
-		UITrigger_Bind(&element->actions[4],&element->actions[7],-1,1);
-		UITrigger_Bind(&element->actions[4],&element->actions[4],1,0);
-		UITrigger_Bind(&element->actions[4],&element->actions[5],0,1);
-		UITrigger_Bind(&element->actions[4],&element->actions[6],0,1);
-
-	UIConfigure_LeftReleaseAnywhere(element, &element->actions[5]);
-		element->actions[5].status = 0;
-		element->actions[5].new_status = 0;
-		UITrigger_Bind(&element->actions[5],&element->actions[7],1,2);
-		UITrigger_Bind(&element->actions[5],&element->actions[4],0,1);
-		UITrigger_Bind(&element->actions[5],&element->actions[3],-1,1);
-		UITrigger_Bind(&element->actions[5],&element->actions[6],1,0);
-		UITrigger_Bind(&element->actions[5],&element->actions[5],1,0);
-
-	UIConfigure_StoreMousePosition(element, &element->actions[6],2,&element->actions[7],&element->actions[3]);
-		element->actions[6].status = 0;
-		element->actions[6].new_status = 0;
-	UIConfigure_CalculateSibling(element, &element->actions[3],1,&element->actions[7]);
-		element->actions[3].status = 0;
-		element->actions[3].new_status = 0;
-	UIConfigure_SetUpAiBlock(element,&element->actions[8],2,&element->actions[2],&element->actions[7]);
-	UIElement_Reparent(element,parent);
-	return element;
-}
-
-UI_Element *makeAIResetButton(int x_offset, int y_offset, UI_Element *parent){
-	UI_Element *element;
-	printf("AI reset button @ %p\n",element);
-	element = UIElement_Create(x_offset,y_offset,200,50,6);
-	UIConfigure_FillAndBorderRect(element,&element->actions[0],74,74,74,0,0,0,STOPBOX);
-	UIConfigure_ShrinkFitToParent(element,&element->actions[1]);
-	UIConfigure_LeftClickRect(element,&element->actions[2]);
-		UITrigger_Bind(&element->actions[2],&element->actions[3],0,1);
-		UITrigger_Bind(&element->actions[2],&element->actions[4],0,1);
-	UIConfigure_NullifyAI(element,&element->actions[3]);
-	UIConfigure_RecallWorkers(element,&element->actions[4]);
-	UIConfigure_PercPosition(element,&element->actions[5],1.0,0.0,x_offset,y_offset,1,&element->actions[1]);
-	UIElement_Reparent(element,parent);
-	return element;
-}
-
-UI_Element *makeAITemplateScrollList(int x_offset, int y_offset, AIData *aiData, UI_Element *parent, UI_Element *blockHolder){
-	UI_Element *element;
-	UI_Element *element2;
-	BlockFunctionTemplate *template = aiData->templates;
-	int y_offset2 = 0;
-	/* Set up the main panel */
-	element = UIElement_Create(x_offset, y_offset, 220, 360,6);
-	printf("scroll bar panel @ %p\n",element);
-	UIConfigure_FillAndBorderRect(element,&element->actions[0],185,122,87,0,0,0,FILLRECT);
-	UIConfigure_ShrinkFitToParent(element,&element->actions[1]);
-	/* Set up the slider bar */
-		element2 = UIElement_Create(x_offset+200,y_offset,21,20,7);
-		printf("scroll bar slider @ %p\n",element2);
-		UIConfigure_FillAndBorderRect(element2,&element2->actions[0],249,252,124,0,0,0,SCROLLHANDLE);
-		UIConfigure_ShrinkFitToParent(element2,&element2->actions[1]);
-		UIConfigure_DraggableVerticalOverride(element2,&element2->actions[2],1,&element2->actions[1]);
-		UIConfigure_LeftClickRect(element2,&element2->actions[3]);
-			UITrigger_Bind(&element2->actions[3],&element2->actions[2],0,1);
-			UITrigger_Bind(&element2->actions[3],&element2->actions[4],0,1);
-		UIConfigure_LeftReleaseAnywhere(element2,&element2->actions[4]);
-			UITrigger_Bind(&element2->actions[4],&element2->actions[2],1,0);
-			UITrigger_Bind(&element2->actions[4],&element2->actions[4],1,0);
-			UIElement_Reparent(element2,element);
-		UIConfigure_PercPosition(element2,&element2->actions[5],1.0,0.0,-x_offset+199,y_offset,1,&element2->actions[1]);
-		UIConfigure_SlideWithMouseWheel(element2,&element2->actions[6],0,15,1,&element2->actions[1]);
-			element2->actions[6].response = NONE;
-		/* Set up the main panel again */
-	UIConfigure_GetDifferenceInChildYOffset(element,&element->actions[2],0.0,y_offset,element2,1,&element->actions[3]);
-	UIConfigure_PassThrough(element,&element->actions[5],MOUSEWHEEL,1,&element2->actions[6]);
-	/* Set up the options */
-	while(template!=NULL){
-		element2 = UIElement_Create(x_offset, y_offset + y_offset2, 200,50,6);
-		printf("block template @ %p\n",element2);
-		UIConfigure_FillAndBorderRect(element2,&element2->actions[0],248,221,35,0,0,0,BLOCK);
-		UIConfigure_ShrinkFitToParentWithYShift(element2,&element2->actions[1],&element->actions[3]);
-		UIConfigure_DisplayString(element2,&element2->actions[2],template->name,0,UISTRING_ALIGN_CENTER);
-		UIConfigure_LeftClickRect(element2,&element2->actions[3]);
-			UITrigger_Bind(&element2->actions[3],&element2->actions[4],-1,1);
-		UIConfigure_AddAiBlock(element2,&element2->actions[4],template,blockHolder);
-		UIConfigure_PercPosition(element2,&element2->actions[5],1.0,0.0,-x_offset,y_offset+y_offset2,1,&element2->actions[1]);
-		UIElement_Reparent(element2,element);
-		template = template->next;
-		y_offset2 += 60;
-	}
-	UIConfigure_CalculateScrollListOffset(element,&element->actions[3],y_offset2+60);
-	UIConfigure_PercOffsetRect(element,&element->actions[4],1.0,0.0,1.0,1.0,-x_offset,y_offset,-50,-50,1,&element->actions[1]);
-	UIElement_Reparent(element,parent);
-	return element;
-}
-
-UI_Element *makeAIBlock(int x_offset, int y_offset, char *aiString, UI_Element *parent){
-	UI_Element *element2;
-	element2 = UIElement_Create(x_offset,y_offset,200,50,19);
-	printf("AI block made @ %p\n",element2);
-	UIConfigure_FillAndBorderRect(element2,&element2->actions[0],248,221,35,0,0,0,BLOCK);
-	UIConfigure_ShrinkFitToParent(element2,&element2->actions[1]);
-	UIConfigure_RightClickRect(element2, &element2->actions[2]);
-		UITrigger_Bind(&element2->actions[2],&element2->actions[3],0,1);
-		UITrigger_Bind(&element2->actions[2],&element2->actions[4],0,1);
-		UITrigger_Bind(&element2->actions[2],&element2->actions[2],1,0);
-	UIConfigure_RightReleaseAnywhere(element2, &element2->actions[3]);
-		UITrigger_Bind(&element2->actions[3],&element2->actions[3],1,0);
-		UITrigger_Bind(&element2->actions[3],&element2->actions[4],1,0);
-		UITrigger_Bind(&element2->actions[3],&element2->actions[2],0,1);
-	UIConfigure_DraggableRectOverride(element2, &element2->actions[4],1,&element2->actions[1]);
-	UIConfigure_DisplayString(element2, &element2->actions[5],aiString,0,UISTRING_ALIGN_CENTER);
-
-	/* Line 1 */
-	UIConfigure_RenderLine(element2, &element2->actions[9],BL_CORNER,NULL);
-	UIConfigure_LeftClickRect(element2, &element2->actions[7]);
-		element2->actions[7].status = 1;
-		element2->actions[7].new_status = 1;
-		UITrigger_Bind(&element2->actions[7],&element2->actions[9],-1,1);
-		UITrigger_Bind(&element2->actions[7],&element2->actions[7],1,0);
-		UITrigger_Bind(&element2->actions[7],&element2->actions[6],0,1);
-		UITrigger_Bind(&element2->actions[7],&element2->actions[10],0,1);
-	UIConfigure_StoreMousePosition(element2, &element2->actions[6],2,&element2->actions[9],&element2->actions[8]);
-		element2->actions[6].status = 0;
-		element2->actions[6].new_status = 0;
-	UIConfigure_CalculateSibling(element2, &element2->actions[8],1,&element2->actions[9]);
-		element2->actions[8].status = 0;
-		element2->actions[8].new_status = 0;
-	UIConfigure_LeftReleaseAnywhere(element2, &element2->actions[10]);
-		element2->actions[10].status = 0;
-		element2->actions[10].new_status = 0;
-		UITrigger_Bind(&element2->actions[10],&element2->actions[9],1,2);
-		UITrigger_Bind(&element2->actions[10],&element2->actions[12],0,1);
-		UITrigger_Bind(&element2->actions[10],&element2->actions[6],1,0);
-		UITrigger_Bind(&element2->actions[10],&element2->actions[8],0,1);
-		UITrigger_Bind(&element2->actions[10],&element2->actions[10],1,0);
-		UITrigger_Bind(&element2->actions[10],&element2->actions[18],0,1);
-
-	/* Line 2 */
-	UIConfigure_RenderLine(element2, &element2->actions[14],BR_CORNER,NULL);
-	UIConfigure_LeftClickRect(element2, &element2->actions[12]);
-		element2->actions[12].status = 0;
-		element2->actions[12].new_status = 0;
-		UITrigger_Bind(&element2->actions[12],&element2->actions[14],-1,1);
-		UITrigger_Bind(&element2->actions[12],&element2->actions[12],1,0);
-		UITrigger_Bind(&element2->actions[12],&element2->actions[11],0,1);
-		UITrigger_Bind(&element2->actions[12],&element2->actions[15],0,1);
-	UIConfigure_StoreMousePosition(element2, &element2->actions[11],2,&element2->actions[14],&element2->actions[13]);
-		element2->actions[11].status = 0;
-		element2->actions[11].new_status = 0;
-	UIConfigure_CalculateSibling(element2, &element2->actions[13],1,&element2->actions[14]);
-		element2->actions[13].status = 0;
-		element2->actions[13].new_status = 0;
-	UIConfigure_LeftReleaseAnywhere(element2, &element2->actions[15]);
-		element2->actions[15].status = 0;
-		element2->actions[15].new_status = 0;
-		UITrigger_Bind(&element2->actions[15],&element2->actions[14],1,2);
-		UITrigger_Bind(&element2->actions[15],&element2->actions[16],0,1);
-		UITrigger_Bind(&element2->actions[15],&element2->actions[11],1,0);
-		UITrigger_Bind(&element2->actions[15],&element2->actions[13],0,1);
-		UITrigger_Bind(&element2->actions[15],&element2->actions[15],1,0);
-		UITrigger_Bind(&element2->actions[15],&element2->actions[18],0,1);
-
-	/* Lines Clear */
-	UIConfigure_LeftClickRect(element2, &element2->actions[16]);
-		element2->actions[16].status = 0;
-		element2->actions[16].new_status = 0;
-		UITrigger_Bind(&element2->actions[16],&element2->actions[9],-1,4);
-		UITrigger_Bind(&element2->actions[16],&element2->actions[14],-1,4);
-		UITrigger_Bind(&element2->actions[16],&element2->actions[7],0,1);
-		UITrigger_Bind(&element2->actions[16],&element2->actions[16],1,0);
-		UITrigger_Bind(&element2->actions[16],&element2->actions[18],0,1);
-
-	UIConfigure_DeleteKeyFlagDestroy(element2, &element2->actions[17]);
-	UIConfigure_SetUpAiBlock(element2,&element2->actions[18],3,&element2->actions[5],&element2->actions[9],&element2->actions[14]);
-
-	UIElement_Reparent(element2,parent);
-	return element2;
-}
 
 UI_Element *UIElement_CreateByPercentage(float rx, float ry, float rw, float rh, int x, int y, int num_of_actions){
 	   UI_Element *element;
@@ -299,7 +99,7 @@ int UIAction_SetCellToSpawn(UI_Action *action, UIData *uiData){
 	if(action->status != 0){
 		if(uiData->gameObjectData->hive.flowers_collected >= 1 && ((HiveCell*)action->cell)->timer == -1){
 			uiData->gameObjectData->hive.flowers_collected -= 1;
-			((HiveCell*)action->cell)->timer = HIVE_CELL_SPAWN_DELAY;
+			((HiveCell*)action->cell)->timer = uiData->gameObjectData->hive.hiveCellSpawnDelay;
 		}
 		action->new_status = 0;
 	}
@@ -325,15 +125,14 @@ void UIConfigure_SetCellToSpawn(UI_Element *element, UI_Action *action, HiveCell
 #define cell extra
 
 int UIAction_GetCellPercentDone(UI_Action *action, UIData *uiData){
+	int i = 0;
 	if(action->status != 0){
 		if(((HiveCell*)action->cell)->timer < 0){
 			action->percentage = 0.0;
 		}
 		else{
-			action->percentage = (double)((double)((HiveCell*)action->cell)->timer) / action->max_timer;
+			action->percentage = (double)((double)((HiveCell*)action->cell)->timer) / (double)uiData->gameObjectData->hive.hiveCellSpawnDelay;
 		}
-		printf("%lf\n",action->percentage);
-		int i = 0;
 		while(i < action->num_of_companions){
 			action->companions[0]->percentage = action->percentage;
 			i++;
@@ -343,15 +142,14 @@ int UIAction_GetCellPercentDone(UI_Action *action, UIData *uiData){
 	return 0;
 }
 
-void UIConfigure_GetPercentCellDone(UI_Element *element, UI_Action *action, HiveCell *hiveCell, int maximumTime, int num_of_companions, ...){
+void UIConfigure_GetPercentCellDone(UI_Element *element, UI_Action *action, HiveCell *hiveCell, int num_of_companions, ...){
 	va_list vargs;
 	int i = 0;
 	UIAction_Init(element,action);
 	va_start(vargs,num_of_companions);
 	action->response = UPDATE;
 	action->function = UIAction_GetCellPercentDone;
-	action->floats = calloc(2,sizeof(double));
-	action->floats[1] = (double) maximumTime;
+	action->floats = calloc(1,sizeof(double));
 	action->companions = calloc(num_of_companions,sizeof(void*));
 	while(i < num_of_companions){
 		action->companions[i] = va_arg(vargs,UI_Action*);
@@ -377,18 +175,14 @@ void UIConfigure_GetPercentCellDone(UI_Element *element, UI_Action *action, Hive
 #define fillBlue integers[2]
 
 int UIAction_PercentageFillRect(UI_Action *action, UIData *uiData){
-  GraphicsData *graphicsData;
-  graphicsData = uiData->graphicsData;
   SDL_Rect rect;
 	if(action->status != 0){
 		rect.x = action->element->rect.x;
 		rect.w = action->element->rect.w;
 		rect.h = (int)(action->percentage *(double)action->element->rect.h);
 		rect.y = action->element->rect.y + (int)((1.0 - action->percentage) * (double)action->element->rect.h);
-		printf("rect.h: %d rect.y: %d\n",rect.h,rect.y);
 		SDL_SetRenderDrawColor(uiData->graphicsData->renderer,action->fillRed,action->fillGreen,action->fillBlue,100);
 		SDL_RenderFillRect(uiData->graphicsData->renderer,&rect);
-    SDL_RenderCopy(graphicsData->renderer, graphicsData->uiEle->graphic[HIVECELLMASK_GRAPHIC], NULL, &action->element->rect);
 		return 1;
 	}
 	return 0;
@@ -460,8 +254,8 @@ int UIAction_MinimapMouseMove(UI_Action *action, UIData *uiData){
 		graphicsData = uiData->graphicsData;
 		SDL_GetMouseState(&x,&y);
 		if(isPointInRect(x,y,action->element->rect)){
-			p.x = (double)(-action->element->rect.x + x) / (double)action->element->rect.w *(double)X_SIZE_OF_WORLD;
-			p.y = (double)(-action->element->rect.y + y) / (double)action->element->rect.h *(double)Y_SIZE_OF_WORLD;
+			p.x = (double)(-action->element->rect.x + x) / (double)action->element->rect.w *(double)uiData->graphicsData->X_SIZE_OF_WORLD;
+			p.y = (double)(-action->element->rect.y + y) / (double)action->element->rect.h *(double)uiData->graphicsData->Y_SIZE_OF_WORLD;
 			SDL_GetWindowSize(graphicsData->window,&x,&y);
 			setNavigationOffset(graphicsData,p.x - x/2,p.y - y/2);
 		}
@@ -485,17 +279,17 @@ void UIConfigure_MinimapMouseMove(UI_Element *element, UI_Action *action){
 	 GameObject and draws it onto the screen - I think it will be optimised out of
 	 existence when compiled, so it's here to make the code shorter and more readable*/
 
-static void sUIAction_Minimap_DrawGameObject(UI_Action *action, GraphicsData *graphicsData, SDL_Rect *rect){
+static void sUIAction_Minimap_DrawGameObject(UI_Action *action, UIData *uiData, SDL_Rect *rect){
 		SDL_Rect rect2;
 		double relx,rely;
-		relx = (double)rect->x / X_SIZE_OF_WORLD;
-		rely = (double)rect->y / Y_SIZE_OF_WORLD;
+		relx = (double)rect->x / uiData->graphicsData->X_SIZE_OF_WORLD;
+		rely = (double)rect->y / uiData->graphicsData->Y_SIZE_OF_WORLD;
 		rect2.x = relx*action->element->rect.w+action->element->rect.x;
 		rect2.y = rely*action->element->rect.h+action->element->rect.y;
-		rect2.w = ((double)rect->w*3 / X_SIZE_OF_WORLD) * action->element->rect.w;
-		rect2.h = ((double)rect->h*3 / Y_SIZE_OF_WORLD) * action->element->rect.h;
+		rect2.w = ((double)rect->w*3 / uiData->graphicsData->X_SIZE_OF_WORLD) * action->element->rect.w;
+		rect2.h = ((double)rect->h*3 / uiData->graphicsData->Y_SIZE_OF_WORLD) * action->element->rect.h;
 		shrinkRectToFit(&rect2,&action->element->rect);
-		SDL_RenderFillRect(graphicsData->renderer,&rect2);
+		SDL_RenderFillRect(uiData->graphicsData->renderer,&rect2);
 }
 
 int UIAction_Minimap(UI_Action *action, UIData *uiData){
@@ -516,7 +310,7 @@ int UIAction_Minimap(UI_Action *action, UIData *uiData){
 			while(j < gameObjectData->resourceNodeSpawners[i].maximumNodeCount){
 				if(gameObjectData->resourceNodeSpawners[i].resourceNodes[j].alive){
 					sUIAction_Minimap_DrawGameObject(action,
-					                                 graphicsData,
+					                                 uiData,
 																				   &gameObjectData->resourceNodeSpawners[i].resourceNodes[j].rect);
 				}
 				j++;
@@ -526,30 +320,30 @@ int UIAction_Minimap(UI_Action *action, UIData *uiData){
 		/* This is for drawing on the trees */
 		SDL_SetRenderDrawColor(graphicsData->renderer,0x0B,0x61,0x0B,255);
 		i = 0;
-		while(i < NUMBER_OF_TREES){
+		while(i < gameObjectData->NUMBER_OF_TREES){
 			sUIAction_Minimap_DrawGameObject(action,
-			                                 graphicsData,
+			                                 uiData,
 																		   &gameObjectData->tree[i].stumpRect);
 			i++;
 		}
 		/* This is for drawing the hive */
 		SDL_SetRenderDrawColor(graphicsData->renderer,0x8A,0x4B,0x08,0xFF);
-		sUIAction_Minimap_DrawGameObject(action,graphicsData,&gameObjectData->hive.rect);
+		sUIAction_Minimap_DrawGameObject(action,uiData,&gameObjectData->hive.rect);
 		/* This is for drawing the workers */
 		SDL_SetRenderDrawColor(graphicsData->renderer,0xDB,0xA9,0x01,0xFF);
 		p = gameObjectData->first_programmable_worker;
 		while(p != NULL){
-			sUIAction_Minimap_DrawGameObject(action,graphicsData,&p->rect);
+			sUIAction_Minimap_DrawGameObject(action,uiData,&p->rect);
 			p = p->next;
 		}
 		SDL_SetRenderDrawColor(graphicsData->renderer,255,255,255,255);
-		sUIAction_Minimap_DrawGameObject(action,graphicsData,&gameObjectData->roamingSpider->rect);
+		sUIAction_Minimap_DrawGameObject(action,uiData,&gameObjectData->roamingSpider->rect);
 		SDL_SetRenderDrawColor(graphicsData->renderer,255,255,255,255);
-		rect.x = (double)-graphicsData->navigationOffset.x / X_SIZE_OF_WORLD * action->element->rect.w + action->element->rect.x;
-		rect.y = (double)-graphicsData->navigationOffset.y / Y_SIZE_OF_WORLD * action->element->rect.h + action->element->rect.y;
+		rect.x = (double)-graphicsData->navigationOffset.x / graphicsData->X_SIZE_OF_WORLD * action->element->rect.w + action->element->rect.x;
+		rect.y = (double)-graphicsData->navigationOffset.y / graphicsData->Y_SIZE_OF_WORLD * action->element->rect.h + action->element->rect.y;
 		SDL_GetWindowSize(graphicsData->window,&rect.w,&rect.h);
-		rect.w = (double)rect.w / X_SIZE_OF_WORLD * action->element->rect.w;
-		rect.h = (double)rect.h / Y_SIZE_OF_WORLD * action->element->rect.h;
+		rect.w = (double)rect.w / graphicsData->X_SIZE_OF_WORLD * action->element->rect.w;
+		rect.h = (double)rect.h / graphicsData->Y_SIZE_OF_WORLD * action->element->rect.h;
 		SDL_RenderDrawRect(graphicsData->renderer,&rect);
 	}
 	return 0;
@@ -2363,9 +2157,9 @@ int UIAction_DrawScrollhandle(UI_Action *action, UIData *uiData){
 		SDL_RenderFillRect(graphicsData->renderer,&action->element->rect);
 		/* A border is already drawn into my scrollhandle graphic, so the code for drawing a border in UIAction_FillAndBorderRect() is removed. */
 		/* SDL_SetTextureBlendMode() blends the overlaying colours of the FillRect down onto those of the greyscale image I provide. */
-		SDL_SetTextureBlendMode(graphicsData->uiEle->graphic[SCROLLHANDLE_GRAPHIC],
+		SDL_SetTextureBlendMode(graphicsData->uiEle->graphic[uiData->SCROLLHANDLE_GRAPHIC],
 														SDL_BLENDMODE_MOD);
-		SDL_RenderCopy(graphicsData->renderer, graphicsData->uiEle->graphic[SCROLLHANDLE_GRAPHIC], NULL, &action->element->rect);
+		SDL_RenderCopy(graphicsData->renderer, graphicsData->uiEle->graphic[uiData->SCROLLHANDLE_GRAPHIC], NULL, &action->element->rect);
 
 		return 1;
 	}
@@ -2392,9 +2186,9 @@ int UIAction_DrawCrossbox(UI_Action *action, UIData *uiData){
 		SDL_RenderDrawRect(graphicsData->renderer,&action->element->rect);
 
 		/* SDL_SetTextureBlendMode() blends the overlaying colours of the FillRect down onto those of the greyscale image I provide. */
-		SDL_SetTextureBlendMode(graphicsData->uiEle->graphic[CROSSBOX_GRAPHIC],
+		SDL_SetTextureBlendMode(graphicsData->uiEle->graphic[uiData->CROSSBOX_GRAPHIC],
 														SDL_BLENDMODE_MOD);
-		SDL_RenderCopy(graphicsData->renderer, graphicsData->uiEle->graphic[CROSSBOX_GRAPHIC], NULL, &action->element->rect);
+		SDL_RenderCopy(graphicsData->renderer, graphicsData->uiEle->graphic[uiData->CROSSBOX_GRAPHIC], NULL, &action->element->rect);
 
 		return 1;
 	}
@@ -2421,9 +2215,9 @@ int UIAction_DrawCompilebox(UI_Action *action, UIData *uiData){
 		SDL_RenderDrawRect(graphicsData->renderer,&action->element->rect);
 
 		/* SDL_SetTextureBlendMode() blends the overlaying colours of the FillRect down onto those of the greyscale image I provide. */
-		SDL_SetTextureBlendMode(graphicsData->uiEle->graphic[COMPILEBOX_GRAPHIC],
+		SDL_SetTextureBlendMode(graphicsData->uiEle->graphic[uiData->COMPILEBOX_GRAPHIC],
 														SDL_BLENDMODE_MOD);
-		SDL_RenderCopy(graphicsData->renderer, graphicsData->uiEle->graphic[COMPILEBOX_GRAPHIC], NULL, &action->element->rect);
+		SDL_RenderCopy(graphicsData->renderer, graphicsData->uiEle->graphic[uiData->COMPILEBOX_GRAPHIC], NULL, &action->element->rect);
 
 		return 1;
 	}
@@ -2450,9 +2244,9 @@ int UIAction_DrawStopbox(UI_Action *action, UIData *uiData){
 		SDL_RenderDrawRect(graphicsData->renderer,&action->element->rect);
 
 		/* SDL_SetTextureBlendMode() blends the overlaying colours of the FillRect down onto those of the greyscale image I provide. */
-		SDL_SetTextureBlendMode(graphicsData->uiEle->graphic[STOP_GRAPHIC],
+		SDL_SetTextureBlendMode(graphicsData->uiEle->graphic[uiData->STOP_GRAPHIC],
 														SDL_BLENDMODE_MOD);
-		SDL_RenderCopy(graphicsData->renderer, graphicsData->uiEle->graphic[STOP_GRAPHIC], NULL, &action->element->rect);
+		SDL_RenderCopy(graphicsData->renderer, graphicsData->uiEle->graphic[uiData->STOP_GRAPHIC], NULL, &action->element->rect);
 
 		return 1;
 	}
@@ -2479,9 +2273,9 @@ int UIAction_DrawBlock(UI_Action *action, UIData *uiData){
 		SDL_RenderDrawRect(graphicsData->renderer,&action->element->rect);
 
 		/* SDL_SetTextureBlendMode() blends the overlaying colours of the FillRect down onto those of the greyscale image I provide. */
-		SDL_SetTextureBlendMode(graphicsData->uiEle->graphic[BLOCK_GRAPHIC],
+		SDL_SetTextureBlendMode(graphicsData->uiEle->graphic[uiData->BLOCK_GRAPHIC],
 														SDL_BLENDMODE_MOD);
-		SDL_RenderCopy(graphicsData->renderer, graphicsData->uiEle->graphic[BLOCK_GRAPHIC], NULL, &action->element->rect);
+		SDL_RenderCopy(graphicsData->renderer, graphicsData->uiEle->graphic[uiData->BLOCK_GRAPHIC], NULL, &action->element->rect);
 
 		return 1;
 	}
@@ -2495,7 +2289,7 @@ int UIAction_DrawHivecell(UI_Action *action, UIData *uiData){
 	graphicsData = uiData->graphicsData;
 	if(action->status == 1 && UIElement_isVisible(action->element)){
 //    SDL_SetTextureBlendMode(graphicsData->uiEle->graphic[HIVECELL_GRAPHIC], SDL_BLENDMODE_MOD);
-		SDL_RenderCopy(graphicsData->renderer, graphicsData->uiEle->graphic[HIVECELL_GRAPHIC], NULL, &action->element->rect);
+		SDL_RenderCopy(graphicsData->renderer, graphicsData->uiEle->graphic[uiData->HIVECELL_GRAPHIC], NULL, &action->element->rect);
 //		SDL_RenderCopy(graphicsData->renderer, graphicsData->uiEle->graphic[HIVECELLMASK_GRAPHIC], NULL, &action->element->rect);
 
 		return 1;
@@ -2913,16 +2707,13 @@ void UIElement_Free(UI_Element *element){
 	  UIAction_Free(&element->actions[i]);
 	  i++;
 	}
-	printf("remove exposed data because we want to free the element...\n");
 	UIElement_RemoveExposedData(element);
-	printf("done\n");
 	free(element->actions);
 	free(element);
 }
 
 static void UIAction_Free(UI_Action *action){
 	int i = 0;
-	printf("freeing action %p\n",action);
 	while(action->triggers!=NULL){
 		UITrigger_Destroy(action,action->triggers);
 	}
@@ -3165,7 +2956,6 @@ void UIRoot_ExecuteUpwards(UIData *uiData, enum Response response, int stopAtFir
 		/* We have to do our disposal here because doing it in a top down traversal
 		   of the tree would break things */
 		if(response == FREED){
-			printf("freeing element %p\n",queue_element);
 			UIElement_Free(queue_element);
 		}
 		if(response == DISPOSAL && queue_element->destroy){
@@ -3261,4 +3051,87 @@ void UIElement_Debug(UI_Element *element){
 		assert(element->actions[i].function != NULL);
 		i++;
 	}
+}
+
+UI_Element *makeAIBlock(int x_offset, int y_offset, char *aiString, UI_Element *parent){
+	UI_Element *element2;
+	element2 = UIElement_Create(x_offset,y_offset,200,50,19);
+	UIConfigure_FillAndBorderRect(element2,&element2->actions[0],248,221,35,0,0,0,BLOCK);
+	UIConfigure_ShrinkFitToParent(element2,&element2->actions[1]);
+	UIConfigure_RightClickRect(element2, &element2->actions[2]);
+		UITrigger_Bind(&element2->actions[2],&element2->actions[3],0,1);
+		UITrigger_Bind(&element2->actions[2],&element2->actions[4],0,1);
+		UITrigger_Bind(&element2->actions[2],&element2->actions[2],1,0);
+	UIConfigure_RightReleaseAnywhere(element2, &element2->actions[3]);
+		UITrigger_Bind(&element2->actions[3],&element2->actions[3],1,0);
+		UITrigger_Bind(&element2->actions[3],&element2->actions[4],1,0);
+		UITrigger_Bind(&element2->actions[3],&element2->actions[2],0,1);
+	UIConfigure_DraggableRectOverride(element2, &element2->actions[4],1,&element2->actions[1]);
+	UIConfigure_DisplayString(element2, &element2->actions[5],aiString,0,UISTRING_ALIGN_CENTER);
+
+	/* Line 1 */
+	UIConfigure_RenderLine(element2, &element2->actions[9],BL_CORNER,NULL);
+	UIConfigure_LeftClickRect(element2, &element2->actions[7]);
+		element2->actions[7].status = 1;
+		element2->actions[7].new_status = 1;
+		UITrigger_Bind(&element2->actions[7],&element2->actions[9],-1,1);
+		UITrigger_Bind(&element2->actions[7],&element2->actions[7],1,0);
+		UITrigger_Bind(&element2->actions[7],&element2->actions[6],0,1);
+		UITrigger_Bind(&element2->actions[7],&element2->actions[10],0,1);
+	UIConfigure_StoreMousePosition(element2, &element2->actions[6],2,&element2->actions[9],&element2->actions[8]);
+		element2->actions[6].status = 0;
+		element2->actions[6].new_status = 0;
+	UIConfigure_CalculateSibling(element2, &element2->actions[8],1,&element2->actions[9]);
+		element2->actions[8].status = 0;
+		element2->actions[8].new_status = 0;
+	UIConfigure_LeftReleaseAnywhere(element2, &element2->actions[10]);
+		element2->actions[10].status = 0;
+		element2->actions[10].new_status = 0;
+		UITrigger_Bind(&element2->actions[10],&element2->actions[9],1,2);
+		UITrigger_Bind(&element2->actions[10],&element2->actions[12],0,1);
+		UITrigger_Bind(&element2->actions[10],&element2->actions[6],1,0);
+		UITrigger_Bind(&element2->actions[10],&element2->actions[8],0,1);
+		UITrigger_Bind(&element2->actions[10],&element2->actions[10],1,0);
+		UITrigger_Bind(&element2->actions[10],&element2->actions[18],0,1);
+
+	/* Line 2 */
+	UIConfigure_RenderLine(element2, &element2->actions[14],BR_CORNER,NULL);
+	UIConfigure_LeftClickRect(element2, &element2->actions[12]);
+		element2->actions[12].status = 0;
+		element2->actions[12].new_status = 0;
+		UITrigger_Bind(&element2->actions[12],&element2->actions[14],-1,1);
+		UITrigger_Bind(&element2->actions[12],&element2->actions[12],1,0);
+		UITrigger_Bind(&element2->actions[12],&element2->actions[11],0,1);
+		UITrigger_Bind(&element2->actions[12],&element2->actions[15],0,1);
+	UIConfigure_StoreMousePosition(element2, &element2->actions[11],2,&element2->actions[14],&element2->actions[13]);
+		element2->actions[11].status = 0;
+		element2->actions[11].new_status = 0;
+	UIConfigure_CalculateSibling(element2, &element2->actions[13],1,&element2->actions[14]);
+		element2->actions[13].status = 0;
+		element2->actions[13].new_status = 0;
+	UIConfigure_LeftReleaseAnywhere(element2, &element2->actions[15]);
+		element2->actions[15].status = 0;
+		element2->actions[15].new_status = 0;
+		UITrigger_Bind(&element2->actions[15],&element2->actions[14],1,2);
+		UITrigger_Bind(&element2->actions[15],&element2->actions[16],0,1);
+		UITrigger_Bind(&element2->actions[15],&element2->actions[11],1,0);
+		UITrigger_Bind(&element2->actions[15],&element2->actions[13],0,1);
+		UITrigger_Bind(&element2->actions[15],&element2->actions[15],1,0);
+		UITrigger_Bind(&element2->actions[15],&element2->actions[18],0,1);
+
+	/* Lines Clear */
+	UIConfigure_LeftClickRect(element2, &element2->actions[16]);
+		element2->actions[16].status = 0;
+		element2->actions[16].new_status = 0;
+		UITrigger_Bind(&element2->actions[16],&element2->actions[9],-1,4);
+		UITrigger_Bind(&element2->actions[16],&element2->actions[14],-1,4);
+		UITrigger_Bind(&element2->actions[16],&element2->actions[7],0,1);
+		UITrigger_Bind(&element2->actions[16],&element2->actions[16],1,0);
+		UITrigger_Bind(&element2->actions[16],&element2->actions[18],0,1);
+
+	UIConfigure_DeleteKeyFlagDestroy(element2, &element2->actions[17]);
+	UIConfigure_SetUpAiBlock(element2,&element2->actions[18],3,&element2->actions[5],&element2->actions[9],&element2->actions[14]);
+
+	UIElement_Reparent(element2,parent);
+	return element2;
 }

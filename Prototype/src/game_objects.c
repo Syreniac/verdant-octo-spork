@@ -2,6 +2,355 @@
 
 static ResourceNode *chooseNodeRandomly(ResourceNodeSpawner *resourceNodeSpawner);
 static void nullifyProgrammableWorkerBrain(ProgrammableWorkerBrain *brain);
+static int getHoneyRequiredForWinter(GameObjectData *gameObjectData);
+static void fitRectToWorld(GameObjectData *gameObjectData, SDL_Rect *rect);
+static void updateResourceNodeSpawners(GameObjectData *gameObjectData, GraphicsData *graphicsData, int ticks);
+static int updateAndRenderProgrammableWorkers(GameObjectData *gameObjectData,
+																							GraphicsData *graphicsData,
+																							AnnouncementsData *announcementsData,
+																						  int ticks);
+static void updateIceCream(GameObjectData *gameObjectData, GraphicsData *graphicsData);
+static void renderDisabledWorkers(GameObjectData *gameObjectData, GraphicsData *graphicsData);
+static int updateProgrammableWorkers(GameObjectData *gameObjectData,
+	                                   GraphicsData *graphicsData,
+																		 AnnouncementsData *announcementsData,
+																		 int ticks);
+static void updateTrees(GameObjectData *gameObjectData, GraphicsData *graphicsData);
+static void updateEnvironment(GameObjectData *gameObjectData, GraphicsData *graphicsData, AnnouncementsData *announcementsData);
+
+static void updateEnvironment(GameObjectData *gameObjectData, GraphicsData *graphicsData, AnnouncementsData *announcementsData){
+	char GOCause[256];
+	char finalScore[256];
+	if(gameObjectData->hive.winterCountdown >= gameObjectData->WINTER_THRESHOLD && !gameObjectData->pause_status){
+		if(!gameObjectData->pause_status){
+			gameObjectData->hive.winterCountdownFloat-= gameObjectData->WINTER_COUNTDOWN_SPEED;
+			gameObjectData->hive.winterCountdown = (int) gameObjectData->hive.winterCountdownFloat;
+		}
+  }
+
+	if(gameObjectData->hive.winterCountdown <= gameObjectData->WINTER_THRESHOLD){
+		gameObjectData->tree->currentGraphicIndex = WINTER_INDEX;
+		if(gameObjectData->hive.winterCountdown < gameObjectData->WINTER_THRESHOLD){
+			SDL_SetRenderTarget(graphicsData->renderer, NULL);
+
+			SDL_SetRenderDrawColor(graphicsData->renderer, 230, 230, 230, 255);
+			SDL_RenderFillRect(graphicsData->renderer, NULL);
+
+			/*check if scorebeforewinter has already been recorded, if not then record*/
+			if(!gameObjectData->hive.scoreBeforeWinter){
+				gameObjectData->hive.scoreBeforeWinter = gameObjectData->hive.flowers_collected;
+			}
+		}
+			/* Grand tidy up - moved the calculation for how much honey needed for winter to a static function
+			   to tidy this up a little */
+		if(gameObjectData->hive.flowers_collected > gameObjectData->hive.scoreBeforeWinter - getHoneyRequiredForWinter(gameObjectData)){
+
+			/*but only if there is at least one bee in the hive*/
+			if(gameObjectData->hive.bees_taking_shelter > 0 && !gameObjectData->pause_status){
+				gameObjectData->hive.flowers_collected -= (rand()%10) ? 0 : 1;
+			}
+
+
+			if(gameObjectData->hive.flowers_collected <= 0 && gameObjectData->hive.bees_taking_shelter){
+				gameObjectData->gameOver = 1;
+				gameObjectData->gameOverCause = STARVATION;
+				gameObjectData->hive.years_survived++;
+				sprintf(GOCause,"Your bees ran out of food over winter and died!");
+				sprintf(finalScore,"YEARS SURVIVED = %d    SUGAR: %d", gameObjectData->hive.years_survived,
+					      gameObjectData->hive.flowers_collected);
+
+				setGameOverInfo(&announcementsData->gameOverData, GOCause);
+			  setFinalScore(&announcementsData->gameOverData, finalScore);
+				printf("gameover by starvation\n");
+				killAllBees(&gameObjectData->first_programmable_worker);
+				return;
+			}
+		}
+		else{
+			blitTiledBackground(graphicsData, graphicsData->grassTexture);
+			gameObjectData->weather.present_weather = Cloud;
+			/*AFTER A SHORT DELAY SET TREES BACK TO SUMMER TREES AND OTHER SUMMER STUFF*/
+			printf("%d\n", gameObjectData->hive.delayBeforeSummer);
+			if(!(gameObjectData->hive.delayBeforeSummer--)){
+				gameObjectData->hive.delayBeforeSummer = gameObjectData->DELAY_BEFORE_SUMMER;
+				gameObjectData->tree->currentGraphicIndex = SUMMER_INDEX;
+				gameObjectData->hive.winterCountdownFloat = gameObjectData->MAX_DAYS_TO_WINTER;
+				gameObjectData->hive.winterCountdown = (int) gameObjectData->hive.winterCountdownFloat;
+				gameObjectData->hive.years_survived++;
+			}
+		}
+	}
+  else if(gameObjectData->hive.winterCountdown < gameObjectData->AUTUMN_THRESHOLD){
+		gameObjectData->hive.scoreBeforeWinter = 0;
+		gameObjectData->tree->currentGraphicIndex = AUTUMN_INDEX;
+		blitTiledBackground(graphicsData, graphicsData->grassTexture);
+	}
+	else{
+		gameObjectData->hive.scoreBeforeWinter = 0;
+		gameObjectData->tree->currentGraphicIndex = SUMMER_INDEX;
+		blitTiledBackground(graphicsData, graphicsData->grassTexture);
+	}
+}
+
+static void updateTrees(GameObjectData *gameObjectData, GraphicsData *graphicsData){
+	int i = 0;
+	for(i = 0; i < gameObjectData->NUMBER_OF_TREES; i++){
+
+		if(gameObjectData->tree[i].displayInfo){
+			SDL_Point point = getCenterOfRect(gameObjectData->tree[i].rect);
+			renderFillRadius(graphicsData, &point, gameObjectData->TREE_SHELTER_RADIUS, 0,0,0, 40);
+		}
+
+		blitGameObject(gameObjectData->tree[i].stumpRect,
+					 	graphicsData,
+					 	graphicsData->treeStumpTexture,
+					 	0,
+					 	NULL,
+					 	SDL_FLIP_NONE);
+
+	 	blitParallaxTreeTops(gameObjectData->tree[i].rect,
+						graphicsData,
+						graphicsData->shelter->graphic[gameObjectData->tree->currentGraphicIndex]);
+	}
+}
+
+static void updateIceCream(GameObjectData *gameObjectData, GraphicsData *graphicsData){
+	/*if icecream is on the ground*/
+	if(gameObjectData->droppedIceCream->dropped){
+		/*but not yet melted*/
+		if(gameObjectData->droppedIceCream->droppedTimer < gameObjectData->MELT_TIME_THRESHOLD){
+			if(!gameObjectData->pause_status){
+				gameObjectData->droppedIceCream->droppedTimer++;
+			}
+
+			if(gameObjectData->droppedIceCream->rect.w >= gameObjectData->MAX_DROPPED_ICECREAM_WIDTH){
+				gameObjectData->droppedIceCream->sizeOscillator = -1;
+			}
+			else if(gameObjectData->droppedIceCream->rect.w <= gameObjectData->DROPPED_ICECREAM_WIDTH){
+				gameObjectData->droppedIceCream->sizeOscillator = 1;
+			}
+			gameObjectData->droppedIceCream->rect.w += gameObjectData->droppedIceCream->sizeOscillator;
+			gameObjectData->droppedIceCream->xPosition -= ((float)gameObjectData->droppedIceCream->sizeOscillator)/2.0;
+			gameObjectData->droppedIceCream->rect.x = gameObjectData->droppedIceCream->xPosition;
+
+			gameObjectData->droppedIceCream->rect.h += gameObjectData->droppedIceCream->sizeOscillator;
+			gameObjectData->droppedIceCream->yPosition -= ((float)gameObjectData->droppedIceCream->sizeOscillator)/2.0;
+			gameObjectData->droppedIceCream->rect.y = gameObjectData->droppedIceCream->yPosition;
+
+			if(gameObjectData->droppedIceCream->displayInfo){
+				SDL_Point point = getCenterOfRect(gameObjectData->droppedIceCream->rect);
+				renderFillRadius(graphicsData, &point, gameObjectData->droppedIceCream->rect.w/2, 255,255,255, 80);
+			}
+
+			blitGameObject(gameObjectData->droppedIceCream->rect,
+										 graphicsData,
+										 graphicsData->droppedIceCreamTexture,
+										 0,
+										 NULL,
+										 SDL_FLIP_NONE);
+		}
+		else{
+			gameObjectData->droppedIceCream->droppedTimer++;
+			if(gameObjectData->droppedIceCream->droppedTimer < gameObjectData->MELT_TIME_THRESHOLD + 40){
+				/*allow a bit of time to display the melted icecream (hence +40)*/
+				if(gameObjectData->droppedIceCream->displayInfo){
+					SDL_Point point = getCenterOfRect(gameObjectData->droppedIceCream->rect);
+					renderFillRadius(graphicsData, &point, gameObjectData->droppedIceCream->rect.w/2, 255,255,255, 80);
+				}
+				blitGameObject(gameObjectData->droppedIceCream->rect,
+											 graphicsData,
+											 graphicsData->meltedIceCreamTexture,
+											 0,
+											 NULL,
+											 SDL_FLIP_NONE);
+			}
+			else{/*now get rid of icecream*/
+				gameObjectData->droppedIceCream->dropped = 0;
+				gameObjectData->droppedIceCream->droppedTimer = 0;
+			}
+		}
+	}
+}
+
+static int updateProgrammableWorkers(GameObjectData *gameObjectData, GraphicsData *graphicsData, AnnouncementsData *announcementsData, int ticks){
+	ProgrammableWorker *programmableWorker;
+	char GOCause[255];
+	char finalScore[255];
+	for(programmableWorker = gameObjectData->first_programmable_worker; programmableWorker != NULL ;){
+
+		if(programmableWorker->wet_and_cant_fly || programmableWorker->cold_and_about_to_die){
+			if(!gameObjectData->pause_status){
+				updateProgrammableWorker(programmableWorker,gameObjectData,announcementsData,ticks);
+			}
+		}
+		if(programmableWorker->cold_and_about_to_die > gameObjectData->COLD_DEATH_THRESHOLD){
+			if(!(programmableWorker == gameObjectData->first_programmable_worker && programmableWorker->next == NULL)){
+				killProgrammableWorker(gameObjectData, &programmableWorker);
+			}
+			else{
+				gameObjectData->gameOver = 1;
+				gameObjectData->gameOverCause = COLD;
+				gameObjectData->hive.years_survived++;
+				sprintf(GOCause,"None of your bees took shelter in the hive over winter!");
+				sprintf(finalScore,"YEARS SURVIVED = %d    SUGAR: %d", gameObjectData->hive.years_survived,
+				gameObjectData->hive.flowers_collected);
+
+				setGameOverInfo(&announcementsData->gameOverData, GOCause);
+				setFinalScore(&announcementsData->gameOverData, finalScore);
+				printf("gameOver, all bees die from the cold\n");
+				free(gameObjectData->first_programmable_worker);
+				gameObjectData->first_programmable_worker = NULL;
+				return 0;
+			}
+		}
+		programmableWorker = programmableWorker->next;
+	}
+	return 1;
+}
+
+static void renderDisabledWorkers(GameObjectData *gameObjectData, GraphicsData *graphicsData){
+	ProgrammableWorker *programmableWorker;
+	SDL_Rect smallerBeeRect;
+	int window_x,window_y, tempXOffset, tempYOffset;
+	/* Then we render the ones wet and or cold */
+	for(programmableWorker = gameObjectData->first_programmable_worker; programmableWorker != NULL ;){
+		if(programmableWorker->wet_and_cant_fly || programmableWorker->cold_and_about_to_die){
+			if(programmableWorker->displayInfo && graphicsData->trackingMode){
+				SDL_Point point = getCenterOfRect(programmableWorker->rect);
+
+				smallerBeeRect.w = (int)((float)programmableWorker->rect.w/gameObjectData->BEE_SHRINK_FACTOR_ON_GROUND);
+				smallerBeeRect.h = (int)((float)programmableWorker->rect.h/gameObjectData->BEE_SHRINK_FACTOR_ON_GROUND);
+				smallerBeeRect.y = programmableWorker->rect.y;
+				smallerBeeRect.x = programmableWorker->rect.x;
+
+				renderRadius(graphicsData, &point, programmableWorker->senseRange, 255,255,255, 180);
+				SDL_GetWindowSize(graphicsData->window,&window_x,&window_y);
+				/* I'm internally debating whether to center the screen or not here */
+				tempXOffset = -programmableWorker->rawX + (programmableWorker->xRenderPosWhenSelected);
+				tempYOffset = -programmableWorker->rawY  + (programmableWorker->yRenderPosWhenSelected);
+
+				if(tempXOffset > -gameObjectData->X_SIZE_OF_WORLD + window_x && tempXOffset < 0){
+					graphicsData->navigationOffset.x = tempXOffset;
+				}
+
+				if(tempYOffset > -gameObjectData->Y_SIZE_OF_WORLD + window_y && tempYOffset < 0){
+					graphicsData->navigationOffset.y = tempYOffset;
+				}
+			}
+			else if(programmableWorker->displayInfo){
+				SDL_Point point = getCenterOfRect(programmableWorker->rect);
+				point.x -= 5;
+				point.y -= 5;
+				renderRadius(graphicsData, &point, programmableWorker->senseRange, 255,255,255, 255);
+			}
+			blitGameObject(smallerBeeRect,
+										 graphicsData,
+										 graphicsData->bee->graphic[programmableWorker->currentGraphicIndex],
+										 DEGREESINCIRCLE-(programmableWorker->heading * RADIANSTODEGREES),
+										 NULL,
+										 SDL_FLIP_NONE);
+		}
+	}
+}
+
+static void renderHealthyWorkers(GameObjectData *gameObjectData, GraphicsData *graphicsData){
+	ProgrammableWorker *programmableWorker;
+	int window_x,window_y, tempXOffset, tempYOffset;
+	int graphicIndex;
+	for(programmableWorker = gameObjectData->first_programmable_worker; programmableWorker != NULL ;){
+		if(!programmableWorker->wet_and_cant_fly && !programmableWorker->cold_and_about_to_die){
+			/* This needs to have some changes to adjust the rawX and rawY values too */
+			//fitRectToWorld(&programmableWorker->rect);
+			/*render if now currently just above (in) hive*/
+
+			if(!isPointInRangeOf(getCenterOfRect(programmableWorker->rect),
+													 getCenterOfRect(gameObjectData->hive.rect),
+													 gameObjectData->HIVE_SHELTER_RADIUS)){
+				graphicIndex = programmableWorker->currentGraphicIndex;
+				graphicIndex += ((programmableWorker->cargo == gameObjectData->SUGAR_VALUE_OF_FLOWER) ? gameObjectData->CARRYING_FLOWER_INDEX_OFFSET : ((programmableWorker->cargo == gameObjectData->SUGAR_VALUE_OF_ICECREAM) ? gameObjectData->CARRYING_ICECREAM_INDEX_OFFSET : 0));
+				blitGameObject(programmableWorker->rect,
+								graphicsData,
+								graphicsData->bee->graphic[graphicIndex],
+								DEGREESINCIRCLE-(programmableWorker->heading * RADIANSTODEGREES),
+								NULL,
+								SDL_FLIP_NONE);
+			}
+			else{
+				gameObjectData->hive.bees_taking_shelter++;
+			}
+		}
+	}
+}
+
+static int updateAndRenderProgrammableWorkers(GameObjectData *gameObjectData, GraphicsData *graphicsData, AnnouncementsData *announcementsData, int ticks){
+/*BEES ON GROUND NEED RENDERING BEFORE PERSON*/
+	ProgrammableWorker *progWork;
+	int window_x,window_y, tempXOffset, tempYOffset;
+	int graphicIndex;
+
+  gameObjectData->hive.bees_taking_shelter = 0;
+
+	if(!gameObjectData->pause_status){
+		if(updateProgrammableWorkers(gameObjectData,graphicsData,announcementsData,ticks) == 0){
+			return 0;
+		}
+	}
+	renderDisabledWorkers(gameObjectData,graphicsData);
+	renderHealthyWorkers(gameObjectData,graphicsData);
+	return 1;
+}
+
+static void updateResourceNodeSpawners(GameObjectData *gameObjectData, GraphicsData *graphicsData, int ticks){
+  int i = 0,j;
+	/* Second, we loop through all the ResourceNodeSpawners */
+	while(i < gameObjectData->resourceNodeSpawnerCount){
+		j = 0;
+
+		if(!gameObjectData->pause_status){
+			 /* Update each one to reflect respawning nodes and so on. */
+			 updateResourceNodeSpawner(gameObjectData,&gameObjectData->resourceNodeSpawners[i],ticks);
+		}
+		/* Then we need to loop through the attached ResourceNodes and draw them */
+	  while(j < gameObjectData->resourceNodeSpawners[i].maximumNodeCount){
+			if(gameObjectData->resourceNodeSpawners[i].resourceNodes[j].alive){
+				if(gameObjectData->resourceNodeSpawners[i].resourceNodes[j].displayInfo){
+					SDL_Point point = getCenterOfRect(gameObjectData->resourceNodeSpawners[i].resourceNodes[j].rect);
+					renderFillRadius(graphicsData, &point, gameObjectData->SIZE_OF_FLOWER, 255,255,255, 80);
+				}
+			blitGameObject(gameObjectData->resourceNodeSpawners[i].resourceNodes[j].rect,
+							       graphicsData,
+							       graphicsData->nodeTexture,
+							       0,
+							       NULL,
+							       SDL_FLIP_NONE);
+			}
+			j++;
+		}
+		i++;
+	}
+}
+
+static int getHoneyRequiredForWinter(GameObjectData *gameObjectData){
+	int honeyRequired = gameObjectData->HONEY_REQUIRED_FOR_WINTER-1;
+	double multiFromYears = ((double)gameObjectData->hive.years_survived / (double)gameObjectData->REQUIREMENT_YEAR_INCREASE_PERCENTAGE);
+	honeyRequired *= 1 + multiFromYears;
+	return honeyRequired;
+}
+
+static void fitRectToWorld(GameObjectData *gameObjectData, SDL_Rect *rect){
+  if(rect->x + rect->w > gameObjectData->X_SIZE_OF_WORLD){
+	rect->x = gameObjectData->X_SIZE_OF_WORLD - rect->w;
+  }
+  else if(rect->x < 0){
+	rect->x = 0;
+  }
+  if(rect->y + rect->h > gameObjectData->Y_SIZE_OF_WORLD){
+	rect->y = gameObjectData->Y_SIZE_OF_WORLD - rect->h;
+  }
+  else if(rect->y < 0){
+	rect->y = 0;
+  }
+}
 
 void initAudio(GameObjectData *gameObjectData, AudioData audioData){
 	gameObjectData->audioData = audioData;
@@ -78,7 +427,7 @@ ResourceNode *checkResourceNodeCollision(ResourceNodeSpawner **resourceNodeSpawn
 											 					 worker_p.y,
 											 				   (int)gameObjectData->resourceNodeSpawners[i].xPosition,
 											 				   (int)gameObjectData->resourceNodeSpawners[i].yPosition);
-		if(d2 <= (WORKER_SENSE_RANGE + gameObjectData->resourceNodeSpawners[i].spawnRadius) * (WORKER_SENSE_RANGE + gameObjectData->resourceNodeSpawners[i].spawnRadius)){
+		if(d2 <= (programmableWorker->senseRange + gameObjectData->resourceNodeSpawners[i].spawnRadius) * (programmableWorker->senseRange + gameObjectData->resourceNodeSpawners[i].spawnRadius)){
 			/* Reset j every time */
 			j = 0;
 			/* Loop through the ResourceNodes on the resourceNodeSpawner and check
@@ -223,16 +572,16 @@ ProgrammableWorker *createProgrammableWorker(GameObjectData *gameObjectData){
 	/* Because we're using trigonometry to move things around, if work purely with
 	 integers then Bad Things happen. Instead, we work first in doubles then
 	 copy the information to the integers in the rectangle. */
-	programmableWorker->rawX = X_SIZE_OF_WORLD/2;
-	programmableWorker->rawY = Y_SIZE_OF_WORLD/2;
+	programmableWorker->rawX = gameObjectData->X_SIZE_OF_WORLD/2;
+	programmableWorker->rawY = gameObjectData->Y_SIZE_OF_WORLD/2;
 	programmableWorker->rect.x = 100;
 	programmableWorker->rect.y = 100;
-	programmableWorker->rect.w = X_SIZE_OF_WORKER;
-	programmableWorker->rect.h = Y_SIZE_OF_WORKER;
+	programmableWorker->rect.w = gameObjectData->X_SIZE_OF_WORKER;
+	programmableWorker->rect.h = gameObjectData->Y_SIZE_OF_WORKER;
 
-	programmableWorker->beeStatus = (char*) calloc(LENGTH_OF_STATUS_STRING, sizeof(char));
+	programmableWorker->beeStatus = (char*) calloc(gameObjectData->LENGTH_OF_STATUS_STRING, sizeof(char));
 
-
+	programmableWorker->senseRange = gameObjectData->WORKER_SENSE_RANGE;
 
 	programmableWorker->wet_and_cant_fly = 0;
 	programmableWorker->cold_and_about_to_die = 0;
@@ -243,11 +592,11 @@ ProgrammableWorker *createProgrammableWorker(GameObjectData *gameObjectData){
 
 
 
-	programmableWorker->currentGraphicIndex = BEE_FLAP_GRAPHIC_1;
+	programmableWorker->currentGraphicIndex = 0;
 	/* heading is measured in radians because maths in C all take radians */
 	programmableWorker->heading = 0.0;
 	/* This is basically pixels/milliseconds */
-	programmableWorker->speed = WORKER_SPEED;
+	programmableWorker->speed = gameObjectData->WORKER_SPEED;
 	/* I don't think this is used yet... */
 	programmableWorker->type = 1;
 	programmableWorker->cargo = 0;
@@ -263,15 +612,15 @@ ProgrammableWorker *createProgrammableWorker(GameObjectData *gameObjectData){
 	return(programmableWorker);
 }
 
-IceCreamPerson *createIceCreamPerson(void){
+IceCreamPerson *createIceCreamPerson(GameObjectData *gameObjectData){
 	IceCreamPerson *iceCreamPerson = (IceCreamPerson*) malloc(sizeof(IceCreamPerson));
-	iceCreamPerson->rect.w = PERSON_HEIGHT;
-	iceCreamPerson->rect.h = PERSON_WIDTH;
+	iceCreamPerson->rect.w = gameObjectData->PERSON_HEIGHT;
+	iceCreamPerson->rect.h = gameObjectData->PERSON_WIDTH;
 	/*set initial location to ensure no interaction or existence inside world*/
 	/* (when the time is right for the person to appear, x y co-ordinates*/
 	/*can be reassigned values that exist inside the world boundaries)*/
-	iceCreamPerson->rect.x = X_SIZE_OF_WORLD * 2;
-	iceCreamPerson->rect.y = Y_SIZE_OF_WORLD * 2;
+	iceCreamPerson->rect.x = gameObjectData->X_SIZE_OF_WORLD * 2;
+	iceCreamPerson->rect.y = gameObjectData->Y_SIZE_OF_WORLD * 2;
 	iceCreamPerson->currently_on_screen = 0;
 	iceCreamPerson->has_ice_cream = 0;
 	iceCreamPerson->speed = 0;
@@ -282,10 +631,10 @@ IceCreamPerson *createIceCreamPerson(void){
 
 }
 
-DroppedIceCream *createDroppedIceCream(void){
+DroppedIceCream *createDroppedIceCream(GameObjectData *gameObjectData){
 	DroppedIceCream *droppedIceCream = (DroppedIceCream*) malloc(sizeof(DroppedIceCream));
-	droppedIceCream->rect.w = DROPPED_ICECREAM_HEIGHT;
-	droppedIceCream->rect.h = DROPPED_ICECREAM_WIDTH;
+	droppedIceCream->rect.w = gameObjectData->DROPPED_ICECREAM_HEIGHT;
+	droppedIceCream->rect.h = gameObjectData->DROPPED_ICECREAM_WIDTH;
 	/*set initial location to ensure no interaction or existence inside world*/
 	/* (when the time is right for the person to appear, x y co-ordinates*/
 	/*can be reassigned values that exist inside the world boundaries)*/
@@ -296,15 +645,15 @@ DroppedIceCream *createDroppedIceCream(void){
 	return droppedIceCream;
 }
 
-RoamingSpider *createRoamingSpider(void){
+RoamingSpider *createRoamingSpider(GameObjectData *gameObjectData){
 	RoamingSpider *roamingSpider = (RoamingSpider*) malloc(sizeof(RoamingSpider));
-	roamingSpider->rect.w = PERSON_HEIGHT;
-	roamingSpider->rect.h = PERSON_WIDTH;
+	roamingSpider->rect.w = gameObjectData->PERSON_HEIGHT;
+	roamingSpider->rect.h = gameObjectData->PERSON_WIDTH;
 	/*set initial location to ensure no interaction or existence inside world*/
 	/* (when the time is right for the person to appear, x y co-ordinates*/
 	/*can be reassigned values that exist inside the world boundaries)*/
-	roamingSpider->rect.x = X_SIZE_OF_WORLD * 2;
-	roamingSpider->rect.y = Y_SIZE_OF_WORLD * 2;
+	roamingSpider->rect.x = gameObjectData->X_SIZE_OF_WORLD * 2;
+	roamingSpider->rect.y = gameObjectData->Y_SIZE_OF_WORLD * 2;
 	roamingSpider->currently_on_screen = 0;
 	roamingSpider->eating_bee = 0;
 	roamingSpider->speed = 0;
@@ -325,55 +674,58 @@ Weather createWeatherLayer(void){
 }
 
 
-Hive createHive(void){
+Hive initHive(GameObjectData *gameObjectData, ConfigurationData *configData){
 	/* This function creates a Hive struct and fills in the default
 	 values. Many of these are defined in generic.h */
 	Hive hive;
 	int i = 0;
-	hive.rect.w = X_SIZE_OF_HIVE;
-	hive.rect.h = Y_SIZE_OF_HIVE;
-	hive.rect.x = (X_SIZE_OF_WORLD/2 - hive.rect.w/2);
-	hive.rect.y = (Y_SIZE_OF_WORLD/2 - hive.rect.h/2);
+	hive.rect.w = gameObjectData->X_SIZE_OF_HIVE;
+	hive.rect.h = gameObjectData->Y_SIZE_OF_HIVE;
+	hive.rect.x = (gameObjectData->X_SIZE_OF_WORLD/2 - hive.rect.w/2);
+	hive.rect.y = (gameObjectData->Y_SIZE_OF_WORLD/2 - hive.rect.h/2);
 	hive.displayInfo = 0;
 	hive.flowers_collected = 0;
-	hive.winterCountdown = MAX_DAYS_TO_WINTER;
+	hive.winterCountdown = gameObjectData->MAX_DAYS_TO_WINTER;
 	hive.scoreBeforeWinter = 0;
 	hive.years_survived = 0;
-	hive.delayBeforeSummer = DELAY_BEFORE_SUMMER;
-	hive.winterCountdownFloat = MAX_DAYS_TO_WINTER;
-	while(i < NUMBER_OF_CELLS_IN_HIVE){
-		hive.hiveCells[i].timer = HIVE_CELL_SPAWN_DELAY;
+	hive.delayBeforeSummer = gameObjectData->DELAY_BEFORE_SUMMER;
+	hive.winterCountdownFloat = gameObjectData->MAX_DAYS_TO_WINTER;
+	hive.hiveCellCount = getConfiguredInt(configData,"HIVE_CELL_COUNT");
+	hive.hiveCells = calloc(hive.hiveCellCount,sizeof(HiveCell));
+	hive.hiveCellSpawnDelay = getConfiguredInt(configData,"HIVE_CELL_SPAWN_DELAY");
+	while(i < hive.hiveCellCount){
+		hive.hiveCells[i].timer = hive.hiveCellSpawnDelay;
 		i++;
 	}
 	return(hive);
 }
 
-Tree createTree(Hive *hive, int forceX, int forceY){
+Tree createTree(GameObjectData *gameObjectData, int forceX, int forceY){
 	Tree tree;
 
-	tree.rect.w = SIZE_OF_TREE;
-	tree.rect.h = SIZE_OF_TREE;
-	tree.stumpRect.w = SIZE_OF_TREESTUMP;
-	tree.stumpRect.h = SIZE_OF_TREESTUMP;
+	tree.rect.w = gameObjectData->SIZE_OF_TREE;
+	tree.rect.h = gameObjectData->SIZE_OF_TREE;
+	tree.stumpRect.w = gameObjectData->SIZE_OF_TREESTUMP;
+	tree.stumpRect.h = gameObjectData->SIZE_OF_TREESTUMP;
 	tree.rect.x = forceX;
 	tree.rect.y = forceY;
 	/*if tree is too close to hive, rellocate*/
-	while(isPointInRangeOf(getCenterOfRect(tree.rect), getCenterOfRect(hive->rect), 100)){
+	while(isPointInRangeOf(getCenterOfRect(tree.rect), getCenterOfRect(gameObjectData->hive.rect), 100)){
 
 		if(rand()%2){
-			tree.rect.x += SIZE_OF_TREE;
+			tree.rect.x += gameObjectData->SIZE_OF_TREE;
 		}else{
-			tree.rect.x -= SIZE_OF_TREE;
+			tree.rect.x -= gameObjectData->SIZE_OF_TREE;
 		}
 
 		if(rand()%2){
-			tree.rect.y += SIZE_OF_TREE;
+			tree.rect.y += gameObjectData->SIZE_OF_TREE;
 		}else{
-			tree.rect.y -= SIZE_OF_TREE;
+			tree.rect.y -= gameObjectData->SIZE_OF_TREE;
 		}
 	}
-	tree.stumpRect.x = tree.rect.x + (SIZE_OF_TREE / 2) - (SIZE_OF_TREESTUMP / 2);
-	tree.stumpRect.y = tree.rect.y + (SIZE_OF_TREE / 2) - (SIZE_OF_TREESTUMP / 2);
+	tree.stumpRect.x = tree.rect.x + (gameObjectData->SIZE_OF_TREE / 2) - (gameObjectData->SIZE_OF_TREESTUMP / 2);
+	tree.stumpRect.y = tree.rect.y + (gameObjectData->SIZE_OF_TREE / 2) - (gameObjectData->SIZE_OF_TREESTUMP / 2);
 	tree.bees_taking_shelter = 0;
 	tree.displayInfo = 0;
 	tree.currentGraphicIndex = 0;
@@ -447,9 +799,10 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
 	}
 
 
-	if(gameObjectData->hive.winterCountdown < WINTER_THRESHOLD){
-		if(!isPointInRangeOf(getCenterOfRect(programmableWorker->rect), getCenterOfRect(gameObjectData->hive.rect),
-		HIVE_SHELTER_RADIUS)){
+	if(gameObjectData->hive.winterCountdown < gameObjectData->WINTER_THRESHOLD){
+		if(!isPointInRangeOf(getCenterOfRect(programmableWorker->rect),
+												 getCenterOfRect(gameObjectData->hive.rect),
+		                     gameObjectData->HIVE_SHELTER_RADIUS)){
 
 			programmableWorker->cold_and_about_to_die++;
 			programmableWorker->beeStatus = "Freezing / dieing";
@@ -461,7 +814,9 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
 		}
 	}
 	else{
-		if(isPointInRangeOf(getCenterOfRect(programmableWorker->rect), getCenterOfRect(gameObjectData->hive.rect),HIVE_SHELTER_RADIUS)){
+		if(isPointInRangeOf(getCenterOfRect(programmableWorker->rect),
+									      getCenterOfRect(gameObjectData->hive.rect),
+												gameObjectData->HIVE_SHELTER_RADIUS)){
 			programmableWorker->insideHive = 1;
 			programmableWorker->beeStatus = "Inside hive";
 			if(programmableWorker->displayInfo){
@@ -477,19 +832,19 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
 
 		if(!programmableWorker->wet_and_cant_fly){ /*programmable worker has not been caught in rain recently*/
 			programmableWorker->flapTimer += ticks;
-			if(programmableWorker->flapTimer > MS_BETWEEN_FLAPPING){
-				programmableWorker->flapTimer -= MS_BETWEEN_FLAPPING;
+			if(programmableWorker->flapTimer > gameObjectData->MS_BETWEEN_FLAPPING){
+				programmableWorker->flapTimer -= gameObjectData->MS_BETWEEN_FLAPPING;
 				programmableWorker->currentGraphicIndex = (programmableWorker->currentGraphicIndex + 1) % 2;
 			}
 
 			if(gameObjectData->weather.present_weather == Rain){
 				int i, j = 0;
-				for(i = 0; i < NUMBER_OF_TREES; i++){
+				for(i = 0; i < gameObjectData->NUMBER_OF_TREES; i++){
 					if(!testRectIntersection(programmableWorker->rect, gameObjectData->tree[i].rect)){
 						j++;
 					}
 				}
-				if(j == NUMBER_OF_TREES){
+				if(j == gameObjectData->NUMBER_OF_TREES){
 					programmableWorker->beeStatus = "Sheltered / under tree";
 
 					if(programmableWorker->displayInfo){
@@ -501,7 +856,7 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
 				if(programmableWorker->insideHive){
 					j++;
 				}
-				if(j == NUMBER_OF_TREES + 1 /* + 1 includes the hive as shelter*/){
+				if(j == gameObjectData->NUMBER_OF_TREES + 1 /* + 1 includes the hive as shelter*/){
 					programmableWorker->wet_and_cant_fly = 1; /*true*/
 				}
 			}
@@ -517,7 +872,7 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
 
 				programmableWorker->heading += (rand()%3)-1;
 
-				if(programmableWorker->stunned_after_sting++ > STUNNED_AFTER_STING_DURATION){
+				if(programmableWorker->stunned_after_sting++ > gameObjectData->STUNNED_AFTER_STING_DURATION){
 					programmableWorker->stunned_after_sting = 0;
 
 				}
@@ -554,18 +909,18 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
 			}
 			else if(getDistance2BetweenRects(programmableWorker->rect,gameObjectData->hive.rect) < 50.0 && programmableWorker->status
 			== RETURNING){
-				if(programmableWorker->cargo >= SUGAR_VALUE_OF_FLOWER){
+				if(programmableWorker->cargo >= gameObjectData->SUGAR_VALUE_OF_FLOWER){
 					programmableWorker->cargo = 0;
-					gameObjectData->hive.flowers_collected += SUGAR_VALUE_OF_FLOWER;
+					gameObjectData->hive.flowers_collected += gameObjectData->SUGAR_VALUE_OF_FLOWER;
 					if(gameObjectData->hive.flowers_collected % 2 == 0){
 						playSoundEffect(2, &gameObjectData->audioData, "returnFlower");
 						sprintf(announcement,"Congratulations you have collected %d flowers!",gameObjectData->hive.flowers_collected);
 						announce(announcementsData, announcement);
 					}
-				}else if(programmableWorker->cargo == SUGAR_VALUE_OF_ICECREAM){
+				}else if(programmableWorker->cargo == gameObjectData->SUGAR_VALUE_OF_ICECREAM){
 					programmableWorker->cargo = 0;
-					gameObjectData->hive.flowers_collected += SUGAR_VALUE_OF_ICECREAM;
-					if(gameObjectData->hive.flowers_collected % 50 < SUGAR_VALUE_OF_ICECREAM){
+					gameObjectData->hive.flowers_collected += gameObjectData->SUGAR_VALUE_OF_ICECREAM;
+					if(gameObjectData->hive.flowers_collected % 50 < gameObjectData->SUGAR_VALUE_OF_ICECREAM){
 						playSoundEffect(2, &gameObjectData->audioData, "returnFlower");
 					}
 				}
@@ -581,9 +936,9 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
 
 					if(isPointInRangeOf(getCenterOfRect(programmableWorker->rect),
 					getCenterOfRect(gameObjectData->droppedIceCream->rect),
-					(double)ICECREAM_PICKUP_RADIUS) && gameObjectData->droppedIceCream->dropped){
+					(double)gameObjectData->ICECREAM_PICKUP_RADIUS) && gameObjectData->droppedIceCream->dropped){
 
-						programmableWorker->cargo += SUGAR_VALUE_OF_ICECREAM;
+						programmableWorker->cargo += gameObjectData->SUGAR_VALUE_OF_ICECREAM;
 						gameObjectData->droppedIceCream->dropped = 0;
 						gameObjectData->droppedIceCream->droppedTimer = 0;
 
@@ -614,7 +969,7 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
 				->beeStatus);
 				setObjectInfoDisplay(&announcementsData->objectInfoDisplay, tempString, STATUS);
 		}
-  		if(!(rand() % CHANCE_OF_REGAINING_FLIGHT)){
+  		if(!(rand() % gameObjectData->CHANCE_OF_REGAINING_FLIGHT)){
   			programmableWorker->wet_and_cant_fly = 0;
 
   		}
@@ -626,13 +981,13 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
 		}
 		  /* Sensory Perception */
 		if(programmableWorker->brain.foundNode != NULL &&
-		(getDistance2BetweenRects(programmableWorker->rect,programmableWorker->brain.foundNode->rect) >= WORKER_SENSE_RANGE * WORKER_SENSE_RANGE ||
+		(getDistance2BetweenRects(programmableWorker->rect,programmableWorker->brain.foundNode->rect) >= programmableWorker->senseRange * programmableWorker->senseRange ||
 		!programmableWorker->brain.foundNode->alive)){
 		   programmableWorker->brain.foundNode = NULL;
 		}
 		if(programmableWorker->brain.foundNode == NULL && resourceNodeSpawner != NULL){
 			 resourceNode = chooseNodeRandomly(resourceNodeSpawner);
-			 if(resourceNode != NULL && getDistance2BetweenRects(programmableWorker->rect,resourceNode->rect) < WORKER_SENSE_RANGE * WORKER_SENSE_RANGE){
+			 if(resourceNode != NULL && getDistance2BetweenRects(programmableWorker->rect,resourceNode->rect) < programmableWorker->senseRange * programmableWorker->senseRange){
 			   programmableWorker->brain.foundNode = resourceNode;
 			 }
 		}
@@ -680,10 +1035,10 @@ void updateIceCreamPerson(GameObjectData *gameObjectData, int ticks){
 	}
 
 	/*set iceCreamPerson->currently_on_screen to false if he has walked off screen*/
-	if(gameObjectData->iceCreamPerson->xPosition > (X_SIZE_OF_WORLD + PERSON_WIDTH) ||
-	gameObjectData->iceCreamPerson->yPosition > (Y_SIZE_OF_WORLD + PERSON_HEIGHT) ||
-	gameObjectData->iceCreamPerson->xPosition < 0 - (PERSON_WIDTH*2) ||
-	gameObjectData->iceCreamPerson->yPosition < 0 - (PERSON_HEIGHT*2)){
+	if(gameObjectData->iceCreamPerson->xPosition > (gameObjectData->X_SIZE_OF_WORLD + gameObjectData->PERSON_WIDTH) ||
+	gameObjectData->iceCreamPerson->yPosition > (gameObjectData->Y_SIZE_OF_WORLD + gameObjectData->PERSON_HEIGHT) ||
+	gameObjectData->iceCreamPerson->xPosition < 0 - (gameObjectData->PERSON_WIDTH*2) ||
+	gameObjectData->iceCreamPerson->yPosition < 0 - (gameObjectData->PERSON_HEIGHT*2)){
 	gameObjectData->iceCreamPerson->currently_on_screen = 0;
 	}
 
@@ -693,7 +1048,7 @@ void updateIceCreamPerson(GameObjectData *gameObjectData, int ticks){
 	/*if countDownToStride equals zero, reset count, and change stride image*/
 	if(gameObjectData->iceCreamPerson->countDownToStride <= 0){
 		gameObjectData->iceCreamPerson->countDownToStride =
-		(double)STRIDE_FREQUENCY / gameObjectData->iceCreamPerson->speed;
+		(double)gameObjectData->STRIDE_FREQUENCY / gameObjectData->iceCreamPerson->speed;
 
 
 		switch(gameObjectData->iceCreamPerson->currentGraphicIndex){
@@ -725,7 +1080,7 @@ void updateIceCreamPerson(GameObjectData *gameObjectData, int ticks){
 	programmableWorker = programmableWorker->next){
 
   		if(isPointInRangeOf(getCenterOfRect(programmableWorker->rect),
-  		getCenterOfRect(gameObjectData->iceCreamPerson->rect), STING_HIT_RADIUS) != 0){
+  		getCenterOfRect(gameObjectData->iceCreamPerson->rect), gameObjectData->STING_HIT_RADIUS) != 0){
 
 	  		gameObjectData->iceCreamPerson->stung = 1;
 	  		/*drop iceCream!*/
@@ -748,19 +1103,19 @@ void updateIceCreamPerson(GameObjectData *gameObjectData, int ticks){
 
 	if(countProgrammableWorkersInRange(gameObjectData, getCenterOfRect(gameObjectData->iceCreamPerson->rect), 250.0) == 0 && !gameObjectData->iceCreamPerson->going_home){
 
-		if(gameObjectData->iceCreamPerson->xPosition >= X_SIZE_OF_WORLD - PERSON_WIDTH/2){
+		if(gameObjectData->iceCreamPerson->xPosition >= gameObjectData->X_SIZE_OF_WORLD - gameObjectData->PERSON_WIDTH/2){
 			/*world border has been reached and sun is still out, change direction*/
 		gameObjectData->iceCreamPerson->heading = 1.571;
 
-		}else if(gameObjectData->iceCreamPerson->xPosition <= -PERSON_WIDTH/2){
+		}else if(gameObjectData->iceCreamPerson->xPosition <= -gameObjectData->PERSON_WIDTH/2){
 			/*world border has been reached and sun is still out, change direction*/
 		gameObjectData->iceCreamPerson->heading = 4.713;
 
-		}else if(gameObjectData->iceCreamPerson->yPosition >= Y_SIZE_OF_WORLD - PERSON_HEIGHT/2){
+	}else if(gameObjectData->iceCreamPerson->yPosition >= gameObjectData->Y_SIZE_OF_WORLD - gameObjectData->PERSON_HEIGHT/2){
 			/*world border has been reached and sun is still out, change direction*/
 		gameObjectData->iceCreamPerson->heading = 3.142;
 
-		}else if(gameObjectData->iceCreamPerson->yPosition <= -PERSON_HEIGHT/2){
+		}else if(gameObjectData->iceCreamPerson->yPosition <= -gameObjectData->PERSON_HEIGHT/2){
 			/*world border has been reached and sun is still out, change direction*/
 		gameObjectData->iceCreamPerson->heading = 0;
 
@@ -770,8 +1125,8 @@ void updateIceCreamPerson(GameObjectData *gameObjectData, int ticks){
 	 	}
 
 	}else{
-		distanceFromYBorder = gameObjectData->iceCreamPerson->yPosition - Y_SIZE_OF_WORLD/2;
-		distanceFromXBorder = gameObjectData->iceCreamPerson->xPosition - X_SIZE_OF_WORLD/2;
+		distanceFromYBorder = gameObjectData->iceCreamPerson->yPosition - gameObjectData->Y_SIZE_OF_WORLD/2;
+		distanceFromXBorder = gameObjectData->iceCreamPerson->xPosition - gameObjectData->X_SIZE_OF_WORLD/2;
 		if(abs(distanceFromXBorder) > abs(distanceFromYBorder)){
 			if(distanceFromXBorder > 0){
 				gameObjectData->iceCreamPerson->heading = PI * 0.75 + 0.069813;
@@ -797,11 +1152,11 @@ void updateRoamingSpider(GameObjectData *gameObjectData, int ticks){
 	int distanceFromXBorder;
 
 	/*set roamingSpider->currently_on_screen to false if he has walked off screen*/
-	if(gameObjectData->roamingSpider->xPosition > X_SIZE_OF_WORLD ||
-	gameObjectData->roamingSpider->yPosition > Y_SIZE_OF_WORLD ||
-	gameObjectData->roamingSpider->xPosition < 0 - PERSON_WIDTH ||
-	gameObjectData->roamingSpider->yPosition < 0 - PERSON_HEIGHT){
-	gameObjectData->roamingSpider->currently_on_screen = 0;
+	if(gameObjectData->roamingSpider->xPosition > gameObjectData->X_SIZE_OF_WORLD ||
+	gameObjectData->roamingSpider->yPosition > gameObjectData->Y_SIZE_OF_WORLD ||
+	gameObjectData->roamingSpider->xPosition < 0 - gameObjectData->PERSON_WIDTH ||
+	gameObjectData->roamingSpider->yPosition < 0 - gameObjectData->PERSON_HEIGHT){
+		gameObjectData->roamingSpider->currently_on_screen = 0;
 	}
 
 	/*decrement countDownToStride*/
@@ -809,18 +1164,8 @@ void updateRoamingSpider(GameObjectData *gameObjectData, int ticks){
 
 	/*if countDownToStride equals zero, reset count, and change stride image*/
 	if(gameObjectData->roamingSpider->countDownToStride <= 0){
-		gameObjectData->roamingSpider->countDownToStride =
-		(double)STRIDE_FREQUENCY / gameObjectData->roamingSpider->speed;
-
-
-		switch(gameObjectData->roamingSpider->currentGraphicIndex){
-			case 0:
-				gameObjectData->roamingSpider->currentGraphicIndex = SPIDER;
-			break;
-			case 1:
-				gameObjectData->roamingSpider->currentGraphicIndex = SPIDER;
-			break;
-		}
+		gameObjectData->roamingSpider->countDownToStride = (double)gameObjectData->STRIDE_FREQUENCY / gameObjectData->roamingSpider->speed;
+		gameObjectData->roamingSpider->currentGraphicIndex = 0;
 	}
 
 	/*use trig to find new locations based on heading angle (radians)*/
@@ -834,37 +1179,37 @@ void updateRoamingSpider(GameObjectData *gameObjectData, int ticks){
 	gameObjectData->roamingSpider->yPosition += newY;
 	gameObjectData->roamingSpider->rect.x = (int)floor(gameObjectData->roamingSpider->xPosition);
 	gameObjectData->roamingSpider->rect.y = (int)floor(gameObjectData->roamingSpider->yPosition);
-	
+
 	/*if roamingSpider not yet stung, and bee is close enough to sting*/
 	/*STING_HIT_RADIUS can be made so small that this would never actually happen unless it's behaviour*/
 	/*that is explicitly programmed into the bees, or (as it currently is) but enough to happen on an occasional collision*/
   	if(!gameObjectData->roamingSpider->stung && countProgrammableWorkersInRange(gameObjectData,
-  	getCenterOfRect(gameObjectData->roamingSpider->rect), STING_HIT_RADIUS) != 0){
-  	
+  	getCenterOfRect(gameObjectData->roamingSpider->rect), gameObjectData->STING_HIT_RADIUS) != 0){
+
   		gameObjectData->roamingSpider->stung = 1;
   		/*eat bee!*/
   		gameObjectData->roamingSpider->eating_bee = 1;
-  
+
   		/*run for your life!*/
   		gameObjectData->roamingSpider->speed = 0.1;
-  		
+
   	}
 
 	if(countProgrammableWorkersInRange(gameObjectData, getCenterOfRect(gameObjectData->roamingSpider->rect), 250.0) == 0 && !gameObjectData->roamingSpider->going_home){
 
-		if(gameObjectData->roamingSpider->xPosition >= X_SIZE_OF_WORLD - PERSON_WIDTH/2){
+		if(gameObjectData->roamingSpider->xPosition >= gameObjectData->X_SIZE_OF_WORLD - gameObjectData->PERSON_WIDTH/2){
 			/*world border has been reached and sun is still out, change direction*/
 		gameObjectData->roamingSpider->heading = 1.571;
 
-		}else if(gameObjectData->roamingSpider->xPosition <= -PERSON_WIDTH/2){
+		}else if(gameObjectData->roamingSpider->xPosition <= -gameObjectData->PERSON_WIDTH/2){
 			/*world border has been reached and sun is still out, change direction*/
 		gameObjectData->roamingSpider->heading = 4.713;
 
-		}else if(gameObjectData->roamingSpider->yPosition >= Y_SIZE_OF_WORLD - PERSON_HEIGHT/2){
+	}else if(gameObjectData->roamingSpider->yPosition >= gameObjectData->Y_SIZE_OF_WORLD - gameObjectData->PERSON_HEIGHT/2){
 			/*world border has been reached and sun is still out, change direction*/
-		gameObjectData->roamingSpider->heading = 3.142; 
+		gameObjectData->roamingSpider->heading = 3.142;
 
-		}else if(gameObjectData->roamingSpider->yPosition <= -PERSON_HEIGHT/2){
+		}else if(gameObjectData->roamingSpider->yPosition <= -gameObjectData->PERSON_HEIGHT/2){
 			/*world border has been reached and sun is still out, change direction*/
 		gameObjectData->roamingSpider->heading = 0;
 
@@ -872,10 +1217,10 @@ void updateRoamingSpider(GameObjectData *gameObjectData, int ticks){
 			/*randomly change direction, just for the hell of it*/
 	 		gameObjectData->roamingSpider->heading += ((double)(rand() % 30) / (double)10) - 1.5;
 	 	}
-	 
+
 	}else{
-		distanceFromYBorder = gameObjectData->roamingSpider->yPosition - Y_SIZE_OF_WORLD/2;
-		distanceFromXBorder = gameObjectData->roamingSpider->xPosition - X_SIZE_OF_WORLD/2;
+		distanceFromYBorder = gameObjectData->roamingSpider->yPosition - gameObjectData->Y_SIZE_OF_WORLD/2;
+		distanceFromXBorder = gameObjectData->roamingSpider->xPosition - gameObjectData->X_SIZE_OF_WORLD/2;
 		if(abs(distanceFromXBorder) > abs(distanceFromYBorder)){
 			if(distanceFromXBorder > 0){
 				gameObjectData->roamingSpider->heading = PI * 0.75 + 0.069813;
@@ -894,7 +1239,7 @@ void updateRoamingSpider(GameObjectData *gameObjectData, int ticks){
 
 }
 
-ResourceNodeSpawner createResourceNodeSpawner(int maximumNodeCount, float xPosition, float yPosition, float radius){
+ResourceNodeSpawner createResourceNodeSpawner(GameObjectData *gameObjectData, int maximumNodeCount, float xPosition, float yPosition, float radius){
 	/* int maximumNodeCount = the maximum number of ResourceNodes for this spawner
 							to create
 	 float xPosition		= the x coordinates that the spawner will be created
@@ -917,9 +1262,9 @@ ResourceNodeSpawner createResourceNodeSpawner(int maximumNodeCount, float xPosit
 	resourceNodeSpawner.yPosition = yPosition;
 
 	/* Set the ticksSinceSpawn to 0 because we haven't spawned anything yet */
-	resourceNodeSpawner.spawnDelay = DEFAULT_SPAWNDELAY;
+	resourceNodeSpawner.spawnDelay = gameObjectData->DEFAULT_SPAWNDELAY;
 	resourceNodeSpawner.ticksSinceSpawn = rand() % resourceNodeSpawner.spawnDelay;
-	resourceNodeSpawner.spawnRadius = radius + rand() % RANDOMISE_SPAWNRADIUS;
+	resourceNodeSpawner.spawnRadius = radius + rand() % gameObjectData->RANDOMISE_SPAWNRADIUS;
 	resourceNodeSpawner.collisionRect.x = (int)floor(xPosition - radius/2);
 	resourceNodeSpawner.collisionRect.y = (int)floor(yPosition - radius/2);
 	resourceNodeSpawner.collisionRect.w = (int)floor(radius);
@@ -929,13 +1274,13 @@ ResourceNodeSpawner createResourceNodeSpawner(int maximumNodeCount, float xPosit
 	resourceNodeSpawner.resourceNodes = calloc((size_t)maximumNodeCount, sizeof(ResourceNode));
 	while(i<maximumNodeCount){
 	/* run through it and init the resourceNodes */
-	 initResourceNode(&resourceNodeSpawner.resourceNodes[i]);
+	 initResourceNode(gameObjectData, &resourceNodeSpawner.resourceNodes[i]);
 	i++;
 	}
 	return(resourceNodeSpawner);
 }
 
-void initResourceNode(ResourceNode *resourceNode){
+void initResourceNode(GameObjectData *gameObjectData, ResourceNode *resourceNode){
 	/* ResourceNodeSpawner *node = the pointer to the node we are initialising
 
 	 Initialising resourceNodes makes sure that we can be sure of what the
@@ -943,14 +1288,13 @@ void initResourceNode(ResourceNode *resourceNode){
 	 created. There was a weird bug where it would crash testing whether things
 	 are alive without this.*/
 	resourceNode->alive = 0;
-	resourceNode->resourceUnits = 0;
 	resourceNode->rect.x = 0;
 	resourceNode->rect.y = 0;
-	resourceNode->rect.w = X_SIZE_OF_NODE;
-	resourceNode->rect.h = Y_SIZE_OF_NODE;
+	resourceNode->rect.w = gameObjectData->X_SIZE_OF_NODE;
+	resourceNode->rect.h = gameObjectData->Y_SIZE_OF_NODE;
 }
 
-void updateResourceNodeSpawner(ResourceNodeSpawner *spawner, int ticks){
+void updateResourceNodeSpawner(GameObjectData *gameObjectData, ResourceNodeSpawner *spawner, int ticks){
 	/* ResourceNodeSpawner *spawner = the spawner that we are updating
 	 float ticks = the number of ticks we are updating over.
 
@@ -970,7 +1314,7 @@ void updateResourceNodeSpawner(ResourceNodeSpawner *spawner, int ticks){
 		/* get the index we're replacing */
 		i = getFirstDeadResourceNode(spawner);
 		/* create the new ResourceNode */
-		resNode = createResourceNode(spawner,DEFAULT_RESOURCEUNITS);
+		resNode = createResourceNode(gameObjectData,spawner);
 		/* attach it to the spawner by inserting it into the resourceNodes array */
 		spawner->resourceNodes[i] = resNode;
 		/* Set the timer back to 0 */
@@ -987,25 +1331,25 @@ void updateWeather(GameObjectData *gameObjectData, AudioData *audioData, Weather
 	int ticksPerWeather;
 
 	weather->tickCount += ticks;
-	
-	if(weather->tickCount > TICKSPERWEATHER && !gameObjectData->pause_status){
+
+	if(weather->tickCount > gameObjectData->TICKSPERWEATHER && !gameObjectData->pause_status){
 		weather->tickCount = 0;
 
 		switch (weather->present_weather)
 		{
 		/* Closing the Window will exit the program */
 		case Sun:
-			weather->present_weather = (rand() % CHANCE_OF_CLOUD == 0) ? Cloud : Sun;
+			weather->present_weather = (rand() % gameObjectData->CHANCE_OF_CLOUD == 0) ? Cloud : Sun;
 			break;
 		case Cloud:
-			weather->present_weather = (rand() % CHANCE_OF_RAIN == 0) ? Rain : Sun;
+			weather->present_weather = (rand() % gameObjectData->CHANCE_OF_RAIN == 0) ? Rain : Sun;
 			fadeInChannel(weatherChannel, &gameObjectData->audioData, "thunder");
-			audioData->weatherSoundActive = 1;		
+			audioData->weatherSoundActive = 1;
 			break;
 		case Rain:
-			weather->present_weather = (rand() % CHANCE_OF_CLOUD == 0) ? Cloud : Sun;
+			weather->present_weather = (rand() % gameObjectData->CHANCE_OF_CLOUD == 0) ? Cloud : Sun;
 			fadeOutChannel(weatherChannel, audioData);
-			audioData->weatherSoundActive = 0;		
+			audioData->weatherSoundActive = 0;
 			break;
 		case Snow:
 			/*honey stocks should be built up first. WINTER IS COMING.. (haha game of drones).*/
@@ -1020,7 +1364,8 @@ void updateWeather(GameObjectData *gameObjectData, AudioData *audioData, Weather
 	}
 }
 
-void reInitialiseIceCreamPerson(IceCreamPerson *iceCreamPerson){
+void reInitialiseIceCreamPerson(GameObjectData *gameObjectData){
+	IceCreamPerson *iceCreamPerson = gameObjectData->iceCreamPerson;
 	iceCreamPerson->currently_on_screen = 1;
 
 
@@ -1028,23 +1373,23 @@ void reInitialiseIceCreamPerson(IceCreamPerson *iceCreamPerson){
 	/*random chance of appearing at the edge of the world*/
 	if(rand()%2){
 		if(rand()%2){
-			iceCreamPerson->xPosition = X_SIZE_OF_WORLD - (PERSON_WIDTH*2);
+			iceCreamPerson->xPosition = gameObjectData->X_SIZE_OF_WORLD - (gameObjectData->PERSON_WIDTH*2);
 			iceCreamPerson->heading = 1.571;
 		}else{
-			iceCreamPerson->xPosition = 0 - PERSON_WIDTH;
+			iceCreamPerson->xPosition = 0 - gameObjectData->PERSON_WIDTH;
 			iceCreamPerson->heading = 4.713;
 		}
-		iceCreamPerson->yPosition = rand() % Y_SIZE_OF_WORLD;
+		iceCreamPerson->yPosition = rand() % gameObjectData->Y_SIZE_OF_WORLD;
 
 	}else{
 		if(rand()%2){
-			iceCreamPerson->yPosition = Y_SIZE_OF_WORLD - (PERSON_HEIGHT*2);
+			iceCreamPerson->yPosition = gameObjectData->Y_SIZE_OF_WORLD - (gameObjectData->PERSON_HEIGHT*2);
 			iceCreamPerson->heading = 3.142;
 		}else{
-			iceCreamPerson->yPosition = 0 - PERSON_HEIGHT;
+			iceCreamPerson->yPosition = 0 - gameObjectData->PERSON_HEIGHT;
 			iceCreamPerson->heading = 0;
 		}
-		iceCreamPerson->xPosition = rand() % X_SIZE_OF_WORLD;
+		iceCreamPerson->xPosition = rand() % gameObjectData->X_SIZE_OF_WORLD;
 	}
 
 	iceCreamPerson->rect.x = iceCreamPerson->xPosition;
@@ -1055,7 +1400,7 @@ void reInitialiseIceCreamPerson(IceCreamPerson *iceCreamPerson){
 	iceCreamPerson->speed = 0.05; /*pixels per millisecond*/
 	iceCreamPerson->stung = 0;
 
-	iceCreamPerson->countDownToStride = (double)STRIDE_FREQUENCY / iceCreamPerson->speed;
+	iceCreamPerson->countDownToStride = (double)gameObjectData->STRIDE_FREQUENCY / iceCreamPerson->speed;
 
 	iceCreamPerson->currentGraphicIndex = 0;
 
@@ -1065,7 +1410,8 @@ void reInitialiseIceCreamPerson(IceCreamPerson *iceCreamPerson){
 
 }
 
-void reInitialiseRoamingSpider(RoamingSpider *roamingSpider){
+void reInitialiseRoamingSpider(GameObjectData *gameObjectData){
+	RoamingSpider *roamingSpider = gameObjectData->roamingSpider;
 	roamingSpider->currently_on_screen = 1;
 
 
@@ -1073,25 +1419,25 @@ void reInitialiseRoamingSpider(RoamingSpider *roamingSpider){
 	/*random chance of appearing at the edge of the world*/
 	if(rand()%2){
 		if(rand()%2){
-			roamingSpider->xPosition = X_SIZE_OF_WORLD - PERSON_WIDTH;
+			roamingSpider->xPosition = gameObjectData->X_SIZE_OF_WORLD - gameObjectData->PERSON_WIDTH;
 			roamingSpider->heading = 1.571;
 		}else{
 			roamingSpider->xPosition = 0;
 			roamingSpider->heading = 4.713;
 		}
-		roamingSpider->yPosition = rand() % Y_SIZE_OF_WORLD;
-		
+		roamingSpider->yPosition = rand() % gameObjectData->Y_SIZE_OF_WORLD;
+
 	}else{
 		if(rand()%2){
-			roamingSpider->yPosition = Y_SIZE_OF_WORLD - PERSON_HEIGHT;
+			roamingSpider->yPosition = gameObjectData->Y_SIZE_OF_WORLD - gameObjectData->PERSON_HEIGHT;
 			roamingSpider->heading = 3.142;
 		}else{
 			roamingSpider->yPosition = 0;
 			roamingSpider->heading = 0;
 		}
-		roamingSpider->xPosition = rand() % X_SIZE_OF_WORLD;
+		roamingSpider->xPosition = rand() % gameObjectData->X_SIZE_OF_WORLD;
 	}
-	
+
 	roamingSpider->rect.x = roamingSpider->xPosition;
 	roamingSpider->rect.y = roamingSpider->yPosition;
 
@@ -1100,13 +1446,13 @@ void reInitialiseRoamingSpider(RoamingSpider *roamingSpider){
 	roamingSpider->speed = 0.1; /*pixels per millisecond*/
 	roamingSpider->stung = 0;
 
-	roamingSpider->countDownToStride = (double)STRIDE_FREQUENCY / roamingSpider->speed;
+	roamingSpider->countDownToStride = (double)gameObjectData->STRIDE_FREQUENCY / roamingSpider->speed;
 
 	roamingSpider->currentGraphicIndex = 0;
 
 }
 
-ResourceNode createResourceNode(ResourceNodeSpawner *parentSpawner, int resourceUnits){
+ResourceNode createResourceNode(GameObjectData *gameObjectData, ResourceNodeSpawner *parentSpawner){
 	/* ResourceNodeSpawner *parentSpawner = the spawner which this resource node
 											is attached to
 	 int resourceUnits = the amount of resources to put into this node
@@ -1115,15 +1461,14 @@ ResourceNode createResourceNode(ResourceNodeSpawner *parentSpawner, int resource
 	ResourceNode resourceNode;
 	resourceNode.alive = 1;
 	/* The amout of resources (honey, etc...) the node holds */
-	resourceNode.resourceUnits = resourceUnits;
 	/* We use a randomly generated offset value for now to distribute the
 	 ResourceNode around the ResourceNodeSpawner. This can be improved. */
-	resourceNode.rect.x = (int)floor(parentSpawner->xPosition + generateRandomCoordOffset(parentSpawner->spawnRadius) - X_SIZE_OF_NODE/2);
-	resourceNode.rect.y = (int)floor(parentSpawner->yPosition + generateRandomCoordOffset(parentSpawner->spawnRadius) - Y_SIZE_OF_NODE/2);
-	resourceNode.rect.w = SIZE_OF_FLOWER;
-	resourceNode.rect.h = SIZE_OF_FLOWER;
+	resourceNode.rect.x = (int)floor(parentSpawner->xPosition + generateRandomCoordOffset(parentSpawner->spawnRadius) - gameObjectData->X_SIZE_OF_NODE/2);
+	resourceNode.rect.y = (int)floor(parentSpawner->yPosition + generateRandomCoordOffset(parentSpawner->spawnRadius) - gameObjectData->Y_SIZE_OF_NODE/2);
+	resourceNode.rect.w = gameObjectData->SIZE_OF_FLOWER;
+	resourceNode.rect.h = gameObjectData->SIZE_OF_FLOWER;
 	resourceNode.displayInfo = 0;
-	fitRectToWorld(&resourceNode.rect);
+	fitRectToWorld(gameObjectData,&resourceNode.rect);
 	return resourceNode;
 }
 
@@ -1139,7 +1484,7 @@ void updateHiveCell(GameObjectData *gameObjectData, HiveCell *hiveCell, int tick
 
 void updateHive(GameObjectData *gameObjectData, int ticks){
 	int i = 0;
-	while(i < NUMBER_OF_CELLS_IN_HIVE){
+	while(i < gameObjectData->hive.hiveCellCount){
 		updateHiveCell(gameObjectData,&gameObjectData->hive.hiveCells[i],ticks);
 		i++;
 	}
@@ -1159,136 +1504,13 @@ void updateGameObjects(GameObjectData *gameObjectData, AudioData *audioData, Gra
 	 This function makes all the GameObjects move around on the screen and show
 	 up graphically. It gets called every frame from the main gameLoop function
 	 in game.c.*/
-	 static int paa = 0;
 	int i, j;
 	ProgrammableWorker *programmableWorker;
-		char GOCause[256];
-		char finalScore[256];
 
 
-	if(gameObjectData->pause_status){
-		if(paa++ == 0)
-		printf("bees taking shelter in hive = %d\n", gameObjectData->hive.bees_taking_shelter);
-	}else{
-		paa = 0;
-	}
+	updateEnvironment(gameObjectData,graphicsData,announcementsData);
 
-	if(!gameObjectData->gameOver){/*start of it not game over*/
-
-
-	if(gameObjectData->hive.winterCountdown >= WINTER_THRESHOLD && !gameObjectData->pause_status){
-  		if(!gameObjectData->pause_status){
-  			gameObjectData->hive.winterCountdownFloat-= WINTER_COUNTDOWN_SPEED;
-  			gameObjectData->hive.winterCountdown = (int) gameObjectData->hive.winterCountdownFloat;
-  		}
-
-  	}
-
-
-
-	if(gameObjectData->hive.winterCountdown <= WINTER_THRESHOLD){
-		gameObjectData->tree->currentGraphicIndex = WINTER_INDEX;
-		if(gameObjectData->hive.winterCountdown < WINTER_THRESHOLD){
-			SDL_SetRenderTarget(graphicsData->renderer, NULL);
-
-			SDL_SetRenderDrawColor(graphicsData->renderer, 230, 230, 230, 255);
-			SDL_RenderFillRect(graphicsData->renderer, NULL);
-
-			/*check if scorebeforewinter has already been recorded, if not then record*/
-			if(!gameObjectData->hive.scoreBeforeWinter){
-				gameObjectData->hive.scoreBeforeWinter = gameObjectData->hive.flowers_collected;
-			}
-
-			if(gameObjectData->hive.flowers_collected > (gameObjectData->hive.scoreBeforeWinter -
-			(HONEY_REQUIRED_FOR_WINTER-1 +
-			((float)HONEY_REQUIRED_FOR_WINTER *
-			((float)gameObjectData->hive.years_survived / (float)REQUIREMENT_YEAR_INCREASE_PERCENTAGE))))){
-				/*decrease score over winter (as bees are eating honey), decremented by HONEY_REQUIRED_FOR_WINTER-1*/
-
-				/*but only if there is at least one bee in the hive*/
-				if(gameObjectData->hive.bees_taking_shelter > 0 && !gameObjectData->pause_status){
-					gameObjectData->hive.flowers_collected -= (rand()%10) ? 0 : 1;
-				}
-
-
-				if(gameObjectData->hive.flowers_collected <= 0 && gameObjectData->hive.bees_taking_shelter){
-					gameObjectData->gameOver = 1;
-					gameObjectData->gameOverCause = STARVATION;
-					gameObjectData->hive.years_survived++;
-					sprintf(GOCause,"Your bees ran out of food over winter and died!");
-					sprintf(finalScore,"YEARS SURVIVED = %d    SUGAR: %d", gameObjectData->hive.years_survived,
-					gameObjectData->hive.flowers_collected);
-
-					setGameOverInfo(&announcementsData->gameOverData, GOCause);
-				    setFinalScore(&announcementsData->gameOverData, finalScore);
-					printf("gameover by starvation\n");
-					killAllBees(&gameObjectData->first_programmable_worker);
-					return;
-				}
-			}else{
-				blitTiledBackground(graphicsData, graphicsData->grassTexture);
-				gameObjectData->weather.present_weather = Cloud;
-				/*AFTER A SHORT DELAY SET TREES BACK TO SUMMER TREES AND OTHER SUMMER STUFF*/
-				printf("%d\n", gameObjectData->hive.delayBeforeSummer);
-				if(!(gameObjectData->hive.delayBeforeSummer--)){
-					gameObjectData->hive.delayBeforeSummer = DELAY_BEFORE_SUMMER;
-					gameObjectData->tree->currentGraphicIndex = SUMMER_INDEX;
-					gameObjectData->hive.winterCountdownFloat = MAX_DAYS_TO_WINTER;
-					gameObjectData->hive.winterCountdown = (int) gameObjectData->hive.winterCountdownFloat;
-					gameObjectData->hive.years_survived++;
-				}
-			}
-
-		}else{
-			blitTiledBackground(graphicsData, graphicsData->grassTexture);
-		}
-	}else if(gameObjectData->hive.winterCountdown < AUTUMN_THRESHOLD){
-		gameObjectData->hive.scoreBeforeWinter = 0;
-		gameObjectData->tree->currentGraphicIndex = AUTUMN_INDEX;
-		blitTiledBackground(graphicsData, graphicsData->grassTexture);
-	}else{
-		gameObjectData->hive.scoreBeforeWinter = 0;
-		gameObjectData->tree->currentGraphicIndex = SUMMER_INDEX;
-		blitTiledBackground(graphicsData, graphicsData->grassTexture);
-	}
-
-	}else{/*end of it not game over*/
-			SDL_SetRenderDrawColor(graphicsData->renderer, 230, 230, 230, 255);
-			SDL_RenderFillRect(graphicsData->renderer, NULL);
-	}
-
-
-
-	i = 0;
-	/* Second, we loop through all the ResourceNodeSpawners */
-	while(i < gameObjectData->resourceNodeSpawnerCount){
-	j = 0;
-
-	if(!gameObjectData->pause_status){
-		 /* Update each one to reflect respawning nodes and so on. */
-		 updateResourceNodeSpawner(&gameObjectData->resourceNodeSpawners[i],ticks);
-	}
-	/* Then we need to loop through the attached ResourceNodes and draw them */
-	 while(j < gameObjectData->resourceNodeSpawners[i].maximumNodeCount){
-		if(gameObjectData->resourceNodeSpawners[i].resourceNodes[j].alive){
-
-			if(gameObjectData->resourceNodeSpawners[i].resourceNodes[j].displayInfo){
-				SDL_Point point = getCenterOfRect(gameObjectData->resourceNodeSpawners[i].resourceNodes[j].rect);
-				renderFillRadius(graphicsData, &point, SIZE_OF_FLOWER, 255,255,255, 80);
-			}
-
-		blitGameObject(gameObjectData->resourceNodeSpawners[i].resourceNodes[j].rect,
-						 graphicsData,
-						 graphicsData->nodeTexture,
-						 0,
-						 NULL,
-						 SDL_FLIP_NONE);
-		}
-		j++;
-	}
-	i++;
-	}
-
+	updateResourceNodeSpawners(gameObjectData, graphicsData, ticks);
 
 
 	if(gameObjectData->hive.displayInfo){
@@ -1296,284 +1518,87 @@ void updateGameObjects(GameObjectData *gameObjectData, AudioData *audioData, Gra
 		renderFillRadius(graphicsData, &point, 40, 255,255,255, 80);
 	}
 
+	if(!gameObjectData->pause_status){
+		updateHive(gameObjectData,ticks);
+	}
 
 	/* First, we need to draw the Hive in at the correct position. */
 	blitGameObject(gameObjectData->hive.rect,
-				 graphicsData,
-				 graphicsData->hiveTexture,
-				 0,
-				 NULL,
-				 SDL_FLIP_NONE);
+				 				 graphicsData,
+				 			 	 graphicsData->hiveTexture,
+				 			   0,
+				 			 	 NULL,
+				 			 	 SDL_FLIP_NONE);
 
 
 	if(!gameObjectData->gameOver){ /*start of if not game over*/
-
-	/*BEES ON GROUND NEED RENDERING BEFORE PERSON*/
-	for(programmableWorker = gameObjectData->first_programmable_worker; programmableWorker != NULL ;){
-		ProgrammableWorker *progWork;
-		SDL_Rect smallerBeeRect;
-		smallerBeeRect.w = (int)((float)programmableWorker->rect.w/BEE_SHRINK_FACTOR_ON_GROUND);
-		smallerBeeRect.h = (int)((float)programmableWorker->rect.h/BEE_SHRINK_FACTOR_ON_GROUND);
-		smallerBeeRect.y = programmableWorker->rect.y;
-		smallerBeeRect.x = programmableWorker->rect.x;
-
-		if(programmableWorker->wet_and_cant_fly || programmableWorker->cold_and_about_to_die){
-
-			if(!gameObjectData->pause_status){
-				updateProgrammableWorker(programmableWorker,gameObjectData,announcementsData,ticks);
-			}
-
-
-			if(programmableWorker->displayInfo){
-				SDL_Point point = getCenterOfRect(programmableWorker->rect);
-				point.x -= 5;
-				point.y -= 5;
-				renderRadius(graphicsData, &point, WORKER_SENSE_RANGE, 255,255,255, 255);
-			}
-
-			blitGameObject(smallerBeeRect,
-					 	graphicsData,
-					 	graphicsData->bee->graphic[programmableWorker->currentGraphicIndex],
-					 	DEGREESINCIRCLE-(programmableWorker->heading * RADIANSTODEGREES),
-					 	NULL,
-					 	SDL_FLIP_NONE);
+		/* This returns 0 if there are no workers left - in which case it's game over! */
+		if(updateAndRenderProgrammableWorkers(gameObjectData, graphicsData, announcementsData, ticks) == 0){
+			return;
 		}
+		updateIceCream(gameObjectData, graphicsData);
 
-
-
-		if(programmableWorker->cold_and_about_to_die > COLD_DEATH_THRESHOLD){
-
-
-
-			if(!(programmableWorker == gameObjectData->first_programmable_worker && programmableWorker->next == NULL)){
-				ProgrammableWorker *worker;
-
-				int i = 0;
-
-				killProgrammableWorker(gameObjectData, &programmableWorker);
-				for(worker = gameObjectData->first_programmable_worker; worker != NULL; worker = worker->next){
-					printf("%d  ", i++);
-				}
-				printf("\n");
-			}else{
-				gameObjectData->gameOver = 1;
-				gameObjectData->gameOverCause = COLD;
-				gameObjectData->hive.years_survived++;
-				sprintf(GOCause,"None of your bees took shelter in the hive over winter!");
-				sprintf(finalScore,"YEARS SURVIVED = %d    SUGAR: %d", gameObjectData->hive.years_survived,
-				gameObjectData->hive.flowers_collected);
-
-				setGameOverInfo(&announcementsData->gameOverData, GOCause);
-				setFinalScore(&announcementsData->gameOverData, finalScore);
-				printf("gameOver, all bees die from the cold\n");
-				free(gameObjectData->first_programmable_worker);
-				gameObjectData->first_programmable_worker = NULL;
-				return;
-			}
-
-
-		}else{
-			programmableWorker = programmableWorker->next;
-		}
-	}
-
-	/*if icecream is on the ground*/
-	if(gameObjectData->droppedIceCream->dropped){
-		/*but not yet melted*/
-		if(gameObjectData->droppedIceCream->droppedTimer < MELT_TIME_THRESHOLD){
-
-			if(!gameObjectData->pause_status){
-				gameObjectData->droppedIceCream->droppedTimer++;
-	 		}
-
-			if(gameObjectData->droppedIceCream->rect.w >= MAX_DROPPED_ICECREAM_WIDTH){
-				gameObjectData->droppedIceCream->sizeOscillator = -1;
-			}else if(gameObjectData->droppedIceCream->rect.w <= DROPPED_ICECREAM_WIDTH){
-				gameObjectData->droppedIceCream->sizeOscillator = 1;
-			}
-			gameObjectData->droppedIceCream->rect.w += gameObjectData->droppedIceCream->sizeOscillator;
-			gameObjectData->droppedIceCream->xPosition -= ((float)gameObjectData->droppedIceCream->sizeOscillator)/2.0;
-			gameObjectData->droppedIceCream->rect.x = gameObjectData->droppedIceCream->xPosition;
-
-			gameObjectData->droppedIceCream->rect.h += gameObjectData->droppedIceCream->sizeOscillator;
-			gameObjectData->droppedIceCream->yPosition -= ((float)gameObjectData->droppedIceCream->sizeOscillator)/2.0;
-			gameObjectData->droppedIceCream->rect.y = gameObjectData->droppedIceCream->yPosition;
-
-			if(gameObjectData->droppedIceCream->displayInfo){
-				SDL_Point point = getCenterOfRect(gameObjectData->droppedIceCream->rect);
-				renderFillRadius(graphicsData, &point, gameObjectData->droppedIceCream->rect.w/2, 255,255,255, 80);
-			}
-
-  	 		blitGameObject(gameObjectData->droppedIceCream->rect,
-            	      	graphicsData,
-                	   	graphicsData->droppedIceCreamTexture,
-                	   	0,
-                	   	NULL,
-                	   	SDL_FLIP_NONE);
-        }else{
-        	gameObjectData->droppedIceCream->droppedTimer++;
-        	if(gameObjectData->droppedIceCream->droppedTimer < MELT_TIME_THRESHOLD + 40){
-        		/*allow a bit of time to display the melted icecream (hence +40)*/
-        		if(gameObjectData->droppedIceCream->displayInfo){
-					SDL_Point point = getCenterOfRect(gameObjectData->droppedIceCream->rect);
-					renderFillRadius(graphicsData, &point, gameObjectData->droppedIceCream->rect.w/2, 255,255,255, 80);
-				}
-        		blitGameObject(gameObjectData->droppedIceCream->rect,
-            	      	graphicsData,
-                	   	graphicsData->meltedIceCreamTexture,
-                	   	0,
-                	   	NULL,
-                	   	SDL_FLIP_NONE);
-        	}else{/*now get rid of icecream*/
-        		gameObjectData->droppedIceCream->dropped = 0;
-        		gameObjectData->droppedIceCream->droppedTimer = 0;
-        	}
-        }
-	}
 
 	 /*determine if iceCreamPerson is on screen and needs animating*/
-	if(gameObjectData->iceCreamPerson->currently_on_screen){
+		if(gameObjectData->iceCreamPerson->currently_on_screen){
 
-	 	if(!gameObjectData->pause_status){
-		 	updateIceCreamPerson(gameObjectData, ticks);
+		 	if(!gameObjectData->pause_status){
+			 	updateIceCreamPerson(gameObjectData, ticks);
+		 	}
+
+		 	if(gameObjectData->iceCreamPerson->displayInfo){
+				SDL_Point point = getCenterOfRect(gameObjectData->iceCreamPerson->rect);
+				renderFillRadius(graphicsData, &point, gameObjectData->PERSON_WIDTH/2, 255,255,255, 80);
+			}
+
+		 	blitGameObject(gameObjectData->iceCreamPerson->rect,
+	                	 graphicsData,
+	                 	 graphicsData->person->graphic[gameObjectData->iceCreamPerson->currentGraphicIndex +
+	                 	 ((gameObjectData->iceCreamPerson->has_ice_cream) ? 0 : NO_ICECREAM_INDEX_OFFSET)],
+	                 	 DEGREESINCIRCLE-(gameObjectData->iceCreamPerson->heading * RADIANSTODEGREES),
+	                   NULL,
+	                   SDL_FLIP_NONE);
+
+		}
+		else{ /*small probability of re-initialising iceCreamPerson and setting location to on-screen*/
+		 	if((gameObjectData->weather.present_weather == Sun) && gameObjectData->hive.winterCountdown >= gameObjectData->AUTUMN_THRESHOLD &&
+	 		(rand() % gameObjectData->ICE_CREAM_PERSON_PROB == 0) && !gameObjectData->droppedIceCream->dropped){
+
+		 		reInitialiseIceCreamPerson(gameObjectData);
+
+			}
 	 	}
 
-	 	if(gameObjectData->iceCreamPerson->displayInfo){
-			SDL_Point point = getCenterOfRect(gameObjectData->iceCreamPerson->rect);
-			renderFillRadius(graphicsData, &point, PERSON_WIDTH/2, 255,255,255, 80);
+		/*determine if roamingSpider is on screen and needs animating*/
+		if(gameObjectData->roamingSpider->currently_on_screen){
+		 	if(!gameObjectData->pause_status){
+			 	updateRoamingSpider(gameObjectData, ticks);
+		 	}
+		 	if(gameObjectData->roamingSpider->displayInfo){
+				SDL_Point point = getCenterOfRect(gameObjectData->roamingSpider->rect);
+				renderFillRadius(graphicsData, &point, gameObjectData->PERSON_WIDTH/2, 255,255,255, 80);
+			}
+		 	blitGameObject(gameObjectData->roamingSpider->rect,
+	                	graphicsData,
+	                 	graphicsData->roamingArachnid->graphic[0],
+	                 	DEGREESINCIRCLE-(gameObjectData->roamingSpider->heading * RADIANSTODEGREES),
+	                 	NULL,
+	                 	SDL_FLIP_NONE);
 		}
-
-  	 	blitGameObject(gameObjectData->iceCreamPerson->rect,
-                  	graphicsData,
-                   	graphicsData->person->graphic[gameObjectData->iceCreamPerson->currentGraphicIndex +
-                   	((gameObjectData->iceCreamPerson->has_ice_cream) ? 0 : NO_ICECREAM_INDEX_OFFSET)],
-                   	DEGREESINCIRCLE-(gameObjectData->iceCreamPerson->heading * RADIANSTODEGREES),
-                   	NULL,
-                   	SDL_FLIP_NONE);
-
-	}else{ /*small probability of re-initialising iceCreamPerson and setting location to on-screen*/
-	 	if((gameObjectData->weather.present_weather == Sun) && gameObjectData->hive.winterCountdown >= AUTUMN_THRESHOLD &&
- 		(rand() % ICE_CREAM_PERSON_PROB == 0) && !gameObjectData->droppedIceCream->dropped){
-
-	 		reInitialiseIceCreamPerson(gameObjectData->iceCreamPerson);
-
-		}
- 	}
-
-	/*determine if roamingSpider is on screen and needs animating*/
-	if(gameObjectData->roamingSpider->currently_on_screen){
-	
-	 	if(!gameObjectData->pause_status){
-		 	updateRoamingSpider(gameObjectData, ticks);
+		else{ /*small probability of re-initialising iceCreamPerson and setting location to on-screen*/
+		 	if((rand() % gameObjectData->ICE_CREAM_PERSON_PROB == 0)){
+		 		reInitialiseRoamingSpider(gameObjectData);
+			}
 	 	}
-	 	
-	 	if(gameObjectData->roamingSpider->displayInfo){
-			SDL_Point point = getCenterOfRect(gameObjectData->roamingSpider->rect);
-			renderFillRadius(graphicsData, &point, PERSON_WIDTH/2, 255,255,255, 80);
-		}
-
-  	 	blitGameObject(gameObjectData->roamingSpider->rect,
-                  	graphicsData,
-                   	graphicsData->roamingArachnid->graphic[0],
-                   	DEGREESINCIRCLE-(gameObjectData->roamingSpider->heading * RADIANSTODEGREES),
-                   	NULL,
-                   	SDL_FLIP_NONE);
-
-	}else{ /*small probability of re-initialising iceCreamPerson and setting location to on-screen*/
-	 	if((rand() % ICE_CREAM_PERSON_PROB == 0)){
-
-	 		reInitialiseRoamingSpider(gameObjectData->roamingSpider);
-
-		}
- 	}
-
-
-	/* Thirdly, we loop through all the ProgrammableWorkers and update them */
-	/* AI thinking has been moved to a seperate function to prevent some circular
-	 inheritance issues. */
-	/* Also, remember the important rule - AI should tell workers to do things rather
-	 than directly doing things itself! */
-			gameObjectData->hive.bees_taking_shelter = 0;
-	for(programmableWorker = gameObjectData->first_programmable_worker; programmableWorker != NULL ; programmableWorker = programmableWorker->next){
-		if(!(programmableWorker->wet_and_cant_fly || programmableWorker->cold_and_about_to_die)){
-			if(!gameObjectData->pause_status){
-				updateProgrammableWorker(programmableWorker,gameObjectData,announcementsData,ticks);
-			}
-
-			if(programmableWorker->displayInfo && graphicsData->trackingMode){
-			  	int window_x,window_y, tempXOffset, tempYOffset;
-				SDL_Point point = getCenterOfRect(programmableWorker->rect);
-
-				renderRadius(graphicsData, &point, WORKER_SENSE_RANGE, 255,255,255, 180);
- 					SDL_GetWindowSize(graphicsData->window,&window_x,&window_y);
-				/* I'm internally debating whether to center the screen or not here */
-				tempXOffset = -programmableWorker->rawX + (programmableWorker->xRenderPosWhenSelected);
-				tempYOffset = -programmableWorker->rawY  + (programmableWorker->yRenderPosWhenSelected);
-
-				if(tempXOffset > -X_SIZE_OF_WORLD + window_x && tempXOffset < 0){
-					graphicsData->navigationOffset.x = tempXOffset;
-				}
-
-				if(tempYOffset > -Y_SIZE_OF_WORLD + window_y && tempYOffset < 0){
-					graphicsData->navigationOffset.y = tempYOffset;
-				}
-			}
-
-
-			/* This needs to have some changes to adjust the rawX and rawY values too */
-			//fitRectToWorld(&programmableWorker->rect);
-			/*render if now currently just above (in) hive*/
-
-			if(!isPointInRangeOf(getCenterOfRect(programmableWorker->rect),
-			getCenterOfRect(gameObjectData->hive.rect), HIVE_SHELTER_RADIUS)){
-
-				blitGameObject(programmableWorker->rect,
-							 	graphicsData,
-							 	graphicsData->bee->graphic[programmableWorker->currentGraphicIndex +
-        	           			((programmableWorker->cargo == SUGAR_VALUE_OF_FLOWER) ? CARRYING_FLOWER_INDEX_OFFSET :
-        	           			((programmableWorker->cargo == SUGAR_VALUE_OF_ICECREAM) ? CARRYING_ICECREAM_INDEX_OFFSET : 0))],
-							 	DEGREESINCIRCLE-(programmableWorker->heading * RADIANSTODEGREES),
-							 	NULL,
-							 	SDL_FLIP_NONE);
-			}else{
-				gameObjectData->hive.bees_taking_shelter++;
-			}
-
-			i++;
-		}
 	}
-
-
-	}/*end of if not game over*/
 
 
 	/* render tree tops last, so that they appear above everything else*/
-	for(i = 0; i < NUMBER_OF_TREES; i++){
-
-		if(gameObjectData->tree[i].displayInfo){
-			SDL_Point point = getCenterOfRect(gameObjectData->tree[i].rect);
-			renderFillRadius(graphicsData, &point, TREE_SHELTER_RADIUS, 0,0,0, 40);
-		}
-
-		blitGameObject(gameObjectData->tree[i].stumpRect,
-					 	graphicsData,
-					 	graphicsData->treeStumpTexture,
-					 	0,
-					 	NULL,
-					 	SDL_FLIP_NONE);
-
-	 	blitParallaxTreeTops(gameObjectData->tree[i].rect,
-						graphicsData,
-						graphicsData->shelter->graphic[gameObjectData->tree->currentGraphicIndex]);
-	}
+	updateTrees(gameObjectData,graphicsData);
 
 	/*finally render a layer or rain splatter if its raining*/
 	if(gameObjectData->weather.present_weather == Rain){
 		blitRainRandomly(graphicsData);
-	}
-
-	if(!gameObjectData->pause_status){
-		updateHive(gameObjectData,ticks);
 	}
 
 	updateWeather(gameObjectData, audioData, &gameObjectData->weather, ticks);
@@ -1596,8 +1621,8 @@ void objectInfoDisplay(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 
 	graphicsData->trackingMode = 0;
 
-	for(i = 0; i < NUMBER_OF_TREES; i++){
-		if(isPointInRangeOf(getCenterOfRect(gameObjectData->tree[i].rect), point, SIZE_OF_TREE/2)){
+	for(i = 0; i < gameObjectData->NUMBER_OF_TREES; i++){
+		if(isPointInRangeOf(getCenterOfRect(gameObjectData->tree[i].rect), point, gameObjectData->SIZE_OF_TREE/2)){
 			if(!displayInfoAlreadySet){
 				gameObjectData->tree[i].displayInfo = 1;
 				displayInfoAlreadySet = 1;
@@ -1634,7 +1659,7 @@ void objectInfoDisplay(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 		}
 	}
 
-	if(isPointInRangeOf(getCenterOfRect(gameObjectData->iceCreamPerson->rect), point, PERSON_WIDTH/2)){
+	if(isPointInRangeOf(getCenterOfRect(gameObjectData->iceCreamPerson->rect), point, gameObjectData->PERSON_WIDTH/2)){
 		if(!displayInfoAlreadySet){
 			gameObjectData->iceCreamPerson->displayInfo = 1;
 			displayInfoAlreadySet = 1;
@@ -1649,7 +1674,7 @@ void objectInfoDisplay(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 		gameObjectData->iceCreamPerson->displayInfo = 0;
 	}
 
-	if(isPointInRangeOf(getCenterOfRect(gameObjectData->droppedIceCream->rect), point, DROPPED_ICECREAM_WIDTH/2)){
+	if(isPointInRangeOf(getCenterOfRect(gameObjectData->droppedIceCream->rect), point, gameObjectData->DROPPED_ICECREAM_WIDTH/2)){
 		if(!displayInfoAlreadySet){
 			gameObjectData->droppedIceCream->displayInfo = 1;
 			displayInfoAlreadySet = 1;
@@ -1670,7 +1695,7 @@ void objectInfoDisplay(GameObjectData *gameObjectData, GraphicsData *graphicsDat
 
 	 	while(j < gameObjectData->resourceNodeSpawners[i].maximumNodeCount){
 			if(gameObjectData->resourceNodeSpawners[i].resourceNodes[j].alive &&
-			isPointInRangeOf(getCenterOfRect(gameObjectData->resourceNodeSpawners[i].resourceNodes[j].rect), point, SIZE_OF_FLOWER/2)){
+			isPointInRangeOf(getCenterOfRect(gameObjectData->resourceNodeSpawners[i].resourceNodes[j].rect), point, gameObjectData->SIZE_OF_FLOWER/2)){
 				if(!displayInfoAlreadySet){
 					gameObjectData->resourceNodeSpawners[i].resourceNodes[j].displayInfo = 1;
 					displayInfoAlreadySet = 1;
@@ -1732,4 +1757,12 @@ void nullifyLocalAIInformation(GameObjectData *gameObjectData){
 		nullifyProgrammableWorkerBrain(&p->brain);
 		p = p->next;
 	}
+}
+
+void initGameObjectData(GameObjectData *gameObjectData, ConfigurationData *configData){
+	gameObjectData->HONEY_REQUIRED_FOR_WINTER = getConfiguredInt(configData,"HONEY_REQUIRED_FOR_WINTER");
+	gameObjectData->REQUIREMENT_YEAR_INCREASE_PERCENTAGE = getConfiguredInt(configData,"REQUIREMENT_YEAR_INCREASE_PERCENTAGE");
+
+	gameObjectData->tree = calloc(1,sizeof(Tree));
+	gameObjectData->resourceNodeSpawners = calloc(1,sizeof(ResourceNodeSpawner));
 }

@@ -1,9 +1,18 @@
 #include "init.h"
 
+#define SCROLLHANDLE_GRAPHIC 0
+#define CROSSBOX_GRAPHIC 1
+#define COMPILEBOX_GRAPHIC 2
+#define STOP_GRAPHIC 3
+#define BLOCK_GRAPHIC 4
+#define HIVECELL_GRAPHIC 5
+#define HIVECELLMASK_GRAPHIC 6
+
 InitData initialise(void){
   /* This function will initialise the SDL library and create a blank window.
      I'll line by line comment what I'm doing here. */
   InitData initData;
+  ConfigurationData configData;
 
   srand(time(NULL));
 
@@ -17,6 +26,8 @@ InitData initialise(void){
   	exit(1);
   }
 
+  initConfigurationData(&configData);
+
   /* Now that SDL has been initialised by call SDL_Init, we can make the window
      The arguments are:
         - The window's name
@@ -25,28 +36,12 @@ InitData initialise(void){
         - The X size of the window in pixels
         - The Y size like above
         - SDL configuration options which can be found online in the API documentation*/
-
-	initData.graphicsData.window = SDL_CreateWindow(PROGRAM_NAME,
-										   25,
-                                           25,
-                                           X_SIZE_OF_SCREEN, Y_SIZE_OF_SCREEN,
-                                           SDL_WINDOW_SHOWN|SDL_WINDOW_RESIZABLE);
-
-    initData.graphicsData.renderer = SDL_CreateRenderer(initData.graphicsData.window,
-                                               -1,
-                                               SDL_RENDERER_TARGETTEXTURE|SDL_RENDERER_PRESENTVSYNC|SDL_RENDERER_ACCELERATED);
-	assert(initData.graphicsData.renderer != NULL);
-  initData.graphicsData.navigationOffset.w = 0;
-  initData.graphicsData.navigationOffset.h = 0;
-
-  initData.graphicsData.mainMenuImage = loadTextureFromFile("images/mainMenuImage.bmp", &initData.graphicsData, 0);
+	initGraphicsData(&initData.graphicsData,&configData);
 
 	/*Audio needs to be initialized at the very start too.*/
 	audioSystem(&initData.audioData);
 
   TTF_Init();
-  initData.graphicsData.fonts[0] = TTF_OpenFont("font/Oxygen-Regular.ttf",16);
-  initData.graphicsData.fonts[1] = TTF_OpenFont("font/Oxygen-Regular.ttf",12);
 
 	loadMusic("sound/music01.wav" , 0, &initData.audioData);
 	loadMusic("sound/music02.wav" , 1, &initData.audioData);

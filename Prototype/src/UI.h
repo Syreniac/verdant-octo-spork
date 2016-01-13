@@ -26,6 +26,22 @@ enum UIDataTypes{UI_NULL,
 
 enum LineOrigins{CENTER,BL_CORNER,BR_CORNER,TL_CORNER,TR_CORNER};
 
+enum UIString_Align{
+	UISTRING_ALIGN_LEFT,
+	UISTRING_ALIGN_CENTER,
+	UISTRING_ALIGN_RIGHT
+};
+
+enum UIElement_Variety{
+  HIVECELL,
+  BLOCK,
+  STOPBOX,
+  COMPILEBOX,
+	CROSSBOX,
+	SCROLLHANDLE,
+	FILLRECT
+};
+
 typedef struct UI_Element UI_Element;
 typedef struct UI_Action UI_Action;
 typedef struct UI_Trigger UI_Trigger;
@@ -46,6 +62,20 @@ struct UIData{
 	SDL_Event *event;
 	int *ticks;
 	AudioData *audioData;
+  // Configured information loaded on initialisation
+  int YEARS_LABEL_WIDTH;
+  int TOP_BAR_HEIGHT;
+  int YEARS_COUNTER_WIDTH;
+  int SCORE_LABEL_WIDTH;
+  int SCORE_COUNTER_WIDTH;
+  int DAYS_LABEL_WIDTH;
+  int DAYS_COUNTER_WIDTH;
+  int SCROLLHANDLE_GRAPHIC;
+  int CROSSBOX_GRAPHIC;
+  int COMPILEBOX_GRAPHIC;
+  int STOP_GRAPHIC;
+  int BLOCK_GRAPHIC;
+  int HIVECELL_GRAPHIC;
 };
 
 struct UI_Element{
@@ -90,22 +120,6 @@ struct UI_Trigger{
   UI_Trigger *next;
   int status_from;
   int status_to;
-};
-
-enum UIString_Align{
-	UISTRING_ALIGN_LEFT,
-	UISTRING_ALIGN_CENTER,
-	UISTRING_ALIGN_RIGHT
-};
-
-enum UIElement_Variety{
-  HIVECELL,
-  BLOCK,
-  STOPBOX,
-  COMPILEBOX,
-	CROSSBOX,
-	SCROLLHANDLE,
-	FILLRECT
 };
 
 void UIConfigure_FillRect(UI_Element *element, UI_Action *action, int r, int g, int b);
@@ -174,7 +188,7 @@ void UIConfigure_Minimap(UI_Element *element, UI_Action *action);
 void UIConfigure_MinimapMouseMove(UI_Element *element, UI_Action *action);
 void UIConfigure_PercentageFillRect(UI_Element *element, UI_Action *action, double percentage_filled, int r, int g, int b);
 void UIConfigure_SetCellToSpawn(UI_Element *element, UI_Action *action, HiveCell *cell);
-void UIConfigure_GetPercentCellDone(UI_Element *element, UI_Action *action, HiveCell *hiveCell, int maximumTime, int num_of_companions, ...);
+void UIConfigure_GetPercentCellDone(UI_Element *element, UI_Action *action, HiveCell *hiveCell, int num_of_companions, ...);
 void UIConfigure_SetCellToSpawn(UI_Element *element, UI_Action *action, HiveCell *cell);
 
 void UITrigger_Bind(UI_Action *action, UI_Action *target, int state_from, int state_to);
@@ -191,11 +205,9 @@ void UIRoot_Destroy(UIData *uiData);
 void UIRoot_Pack(UIData *uiData, GraphicsData *graphicsData);
 void UIRoot_ExecuteUpwards(UIData *uiData, enum Response response, int stopAtFirst);
 
-UI_Element *makeAIBlock(int x_offset, int y_offset, char *aiString, UI_Element *parent);
-UI_Element *makeStartBlock(int x_offset, int y_offset, UI_Element *parent);
-UI_Element *makeAIResetButton(int x_offset, int y_offset, UI_Element *parent);
-UI_Element *makeAITemplateScrollList(int x_offset, int y_offset, AIData *aiData, UI_Element *parent, UI_Element *blockHolder);
-UI_Element *makeHiveCellBlock(int x_offset, int y_offset, UI_Element *parent, HiveCell *hiveCell);
 void initUIData(UIData *uiData);
 void quickSetStatus(UI_Action *action, int status);
 void UIElement_Debug(UI_Element *element);
+
+/* This is here because it needs to be used by a UIAction (AddAiBlock) */
+UI_Element *makeAIBlock(int x_offset, int y_offset, char *aiString, UI_Element *parent);

@@ -17,6 +17,8 @@ int main(int argc, char *argv[]){
   #endif
   ConfigurationData configData;
   initConfigurationData(&configData);
+  printf("WORKER SIZE IS: %d\n",getConfiguredInt(&configData,"WORKER_SIZE"));
+  printf("WORKER SPEED IS: %d\n",getConfiguredInt(&configData,"WORKER_SPEED"));
   initData  = initialise();
 	game_welcome_page(initData.graphicsData,initData.audioData);
   while(game_return == 2){

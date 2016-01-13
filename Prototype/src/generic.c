@@ -92,21 +92,6 @@ double getDistance2BetweenPoints(float p1X, float p1Y, float p2X, float p2Y){
   return (square(p1X - p2X) + square(p1Y - p2Y));
 }
 
-void fitRectToWorld(SDL_Rect *rect){
-  if(rect->x + rect->w > X_SIZE_OF_WORLD){
-	rect->x = X_SIZE_OF_WORLD - rect->w;
-  }
-  else if(rect->x < 0){
-	rect->x = 0;
-  }
-  if(rect->y + rect->h > Y_SIZE_OF_WORLD){
-	rect->y = Y_SIZE_OF_WORLD - rect->h;
-  }
-  else if(rect->y < 0){
-	rect->y = 0;
-  }
-}
-
 float generateRandomCoordOffset(float radius){
   /* float radius = the range to generate random numbers within
 
@@ -139,7 +124,7 @@ SDL_Point getCenterOfRect(SDL_Rect rect){
 }
 
 SDL_Rect getRectFromInvRect(SDL_Window *window, int from_left, int from_top, int from_right, int from_bot){
-	int win_x = X_SIZE_OF_SCREEN, win_y = Y_SIZE_OF_SCREEN;
+	int win_x = 0, win_y = 0;
 	SDL_Rect rect;
 	SDL_GetWindowSize(window, &win_x, &win_y);
 	if(from_left < 0){
@@ -158,7 +143,7 @@ SDL_Rect getRectFromInvRect(SDL_Window *window, int from_left, int from_top, int
 }
 
 SDL_Rect getRectFromPercRect(SDL_Window *window, float from_left, float from_top, float from_right, float from_bot){
-	int win_x = X_SIZE_OF_SCREEN, win_y = Y_SIZE_OF_SCREEN;
+	int win_x = 0, win_y = 0;
 	SDL_Rect rect;
 	SDL_GetWindowSize(window, &win_x, &win_y);
 	rect.x = (int)((float) win_x * from_left);

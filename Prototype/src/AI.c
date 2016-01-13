@@ -24,7 +24,7 @@ FILE *fopenAndVerify(char *file_name, char *permission){
 
 int blockFunction_CountNearFlowers(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
   SDL_Point p = getCenterOfRect(programmableWorker->rect);
-  globals->count = countResourceNodesInRadius(gameObjectData,p.x,p.y,WORKER_SENSE_RANGE);
+  globals->count = countResourceNodesInRadius(gameObjectData,p.x,p.y,programmableWorker->senseRange);
   return 1;
 }
 
@@ -45,7 +45,7 @@ int blockFunction_IfGreaterThanSaved(BlockFunctionGlobals *globals, BlockFunctio
 int blockFunction_PickNearbyWorker(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
   ProgrammableWorker *p = gameObjectData->first_programmable_worker;
   while(p != NULL){
-    if(p != programmableWorker && getDistance2BetweenRects(programmableWorker->rect,p->rect) < WORKER_SENSE_RANGE * WORKER_SENSE_RANGE){
+    if(p != programmableWorker && getDistance2BetweenRects(programmableWorker->rect,p->rect) < programmableWorker->senseRange * programmableWorker->senseRange){
       globals->selectedWorker = p;
       return 1;
     }
@@ -97,7 +97,7 @@ int blockFunction_CountNearWorkers(BlockFunctionGlobals *globals, BlockFunctionA
   ProgrammableWorker *p = gameObjectData->first_programmable_worker;
   globals->count = 0;
   while(p != NULL){
-    if(p != programmableWorker && getDistance2BetweenRects(programmableWorker->rect,p->rect) < WORKER_SENSE_RANGE * WORKER_SENSE_RANGE){
+    if(p != programmableWorker && getDistance2BetweenRects(programmableWorker->rect,p->rect) < programmableWorker->senseRange * programmableWorker->senseRange){
       globals->count++;
     }
     p = p->next;
@@ -115,7 +115,7 @@ int blockFunction_IfCountZero(BlockFunctionGlobals *globals, BlockFunctionArgs *
 int blockFunction_IfNearOtherWorker(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
   ProgrammableWorker *p = gameObjectData->first_programmable_worker;
   while(p != NULL){
-    if(p!=programmableWorker && getDistance2BetweenRects(programmableWorker->rect,p->rect) < WORKER_SENSE_RANGE * WORKER_SENSE_RANGE){
+    if(p!=programmableWorker && getDistance2BetweenRects(programmableWorker->rect,p->rect) < programmableWorker->senseRange * programmableWorker->senseRange){
       return 1;
     }
     p = p->next;
@@ -177,8 +177,8 @@ int blockFunction_IfStatusEqual(BlockFunctionGlobals *globals, BlockFunctionArgs
 
 int blockFunction_IfOutsideOfBounds(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
 
-  if(programmableWorker->rect.x >= (X_SIZE_OF_WORLD - programmableWorker->rect.w) || programmableWorker->rect.x <= 0 ||
-     programmableWorker->rect.y >= (Y_SIZE_OF_WORLD - programmableWorker->rect.h) || programmableWorker->rect.y <= 0){
+  if(programmableWorker->rect.x >= (gameObjectData->X_SIZE_OF_WORLD - programmableWorker->rect.w) || programmableWorker->rect.x <= 0 ||
+     programmableWorker->rect.y >= (gameObjectData->Y_SIZE_OF_WORLD - programmableWorker->rect.h) || programmableWorker->rect.y <= 0){
        return(1);
     }
     return(2);

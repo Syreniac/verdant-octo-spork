@@ -16,22 +16,6 @@ enum WeatherStatus {/*Should belong in game_objects.h, but graphics.c needs to a
   Snow = 3
 };
 
-/*1 means 100% chance of rain after cloud, 2 means 50% chance and so on*/
-#define CHANCE_OF_RAIN 1
-/*chance of sun turning to cloud after TICKSPERWEATHER*/
-#define CHANCE_OF_CLOUD 3
-
-#define BEE_FLAP_GRAPHIC_1 0
-#define BEE_FLAP_GRAPHIC_2 1
-
-#define SCROLLHANDLE_GRAPHIC 0
-#define CROSSBOX_GRAPHIC 1
-#define COMPILEBOX_GRAPHIC 2
-#define STOP_GRAPHIC 3
-#define BLOCK_GRAPHIC 4
-#define HIVECELL_GRAPHIC 5
-#define HIVECELLMASK_GRAPHIC 6
-
 
 struct GraphicsData{
   SDL_Window *window;
@@ -52,6 +36,29 @@ struct GraphicsData{
   struct RoamingArachnid *roamingArachnid;
   struct UIEle *uiEle;
   SDL_Texture *mainMenuImage;
+  /* Configured constants */
+  int X_SIZE_OF_WORLD;
+  int Y_SIZE_OF_WORLD;
+  int PARALLAX_INTENSITY;
+  int GRASS_TILE_WIDTH;
+  int GRASS_TILE_HEIGHT;
+  int RAIN_TILE_WIDTH;
+  int RAIN_TILE_HEIGHT;
+  char *PROGRAM_NAME;
+  int X_SIZE_OF_SCREEN;
+  int Y_SIZE_OF_SCREEN;
+  int BEE_FLAP_GRAPHIC_1;
+  int BEE_FLAP_GRAPHIC_2;
+  int CARRYING_ICECREAM_INDEX_OFFSET;
+  int CARRYING_FLOWER_INDEX_OFFSET;
+  int SCROLLHANDLE_GRAPHIC;
+  int CROSSBOX_GRAPHIC;
+  int STOP_GRAPHIC;
+  int BLOCK_GRAPHIC;
+  int HIVECELL_GRAPHIC;
+  int HIVECELLMASK_GRAPHIC;
+  int COMPILEBOX_GRAPHIC;
+
 };
 
 struct Shelter{
@@ -99,3 +106,5 @@ void paintBackground(GraphicsData *graphicsData, int r, int g, int b);
 void renderRadius(GraphicsData *graphicsData, SDL_Point *point, double radius, Uint8 r, Uint8 g, Uint8 b, Uint8 a);
 void renderFillRadius(GraphicsData *graphicsData, SDL_Point *point, double radius, Uint8 r, Uint8 g, Uint8 b, Uint8 a);
 void setNavigationOffset(GraphicsData *graphicsData, int x, int y);
+
+void initGraphicsData(GraphicsData *graphicsData, ConfigurationData *configData);

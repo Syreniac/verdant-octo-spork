@@ -67,8 +67,8 @@ void blitRainRandomly(GraphicsData *graphicsData){
 
   	SDL_GetWindowSize(graphicsData->window,&winRect.w, &winRect.h);
 
-	srcRect.w = RAIN_TILE_WIDTH;
-	srcRect.h = RAIN_TILE_HEIGHT;
+	srcRect.w = graphicsData->RAIN_TILE_WIDTH;
+	srcRect.h = graphicsData->RAIN_TILE_HEIGHT;
 
 	for(i = 0; i < 50; i++){
 
@@ -94,18 +94,21 @@ void blitRainRandomly(GraphicsData *graphicsData){
 void blitParallaxTreeTops(SDL_Rect objectRect, GraphicsData *graphicsData, SDL_Texture *texture){
   SDL_Rect tempRect;
   int xParallaxOffset = 0, yParallaxOffset = 0;
+	int win_x,win_y;
+
+	SDL_GetWindowSize(graphicsData->window,&win_x,&win_y);
 
   tempRect = objectRect;
   tempRect.x += graphicsData->navigationOffset.x;
   tempRect.y += graphicsData->navigationOffset.y;
 
-  xParallaxOffset -= X_SIZE_OF_SCREEN/2;
+  xParallaxOffset -= win_x/2;
   xParallaxOffset += tempRect.x;
-  xParallaxOffset /= PARALLAX_INTENSITY;
+  xParallaxOffset /= graphicsData->PARALLAX_INTENSITY;
 
-  yParallaxOffset -= Y_SIZE_OF_SCREEN/2;
+  yParallaxOffset -= win_y/2;
   yParallaxOffset += tempRect.y;
-  yParallaxOffset /= PARALLAX_INTENSITY;
+  yParallaxOffset /= graphicsData->PARALLAX_INTENSITY;
 
   tempRect.x += xParallaxOffset;
   tempRect.y += yParallaxOffset;
@@ -123,17 +126,18 @@ void blitTiledBackground(GraphicsData *graphicsData, SDL_Texture *texture){
 	SDL_GetWindowSize(graphicsData->window,&window_x,&window_y);
 
 
-	xbgShifter = (graphicsData->navigationOffset.x - X_INITIAL_SCREEN_OFFSET) % GRASS_TILE_WIDTH;
-	ybgShifter = (graphicsData->navigationOffset.y - Y_INITIAL_SCREEN_OFFSET) % GRASS_TILE_HEIGHT;
+	/* Removed the Y/X_INITIAL_SCREEN_OFFSETs here, I hope they don't break anything */
+	xbgShifter = (graphicsData->navigationOffset.x) % graphicsData->GRASS_TILE_WIDTH;
+	ybgShifter = (graphicsData->navigationOffset.y) % graphicsData->GRASS_TILE_HEIGHT;
 
-	for(i = -GRASS_TILE_WIDTH; i < window_x + GRASS_TILE_WIDTH; i+= GRASS_TILE_WIDTH){
-		for(j = -GRASS_TILE_HEIGHT; j < window_y + GRASS_TILE_HEIGHT; j+= GRASS_TILE_HEIGHT){
+	for(i = -graphicsData->GRASS_TILE_WIDTH; i < window_x + graphicsData->GRASS_TILE_WIDTH; i+= graphicsData->GRASS_TILE_WIDTH){
+		for(j = -graphicsData->GRASS_TILE_HEIGHT; j < window_y + graphicsData->GRASS_TILE_HEIGHT; j+= graphicsData->GRASS_TILE_HEIGHT){
 
 			SDL_Rect dstRect;
 			dstRect.x = i;
 			dstRect.y = j;
-			dstRect.w = GRASS_TILE_WIDTH;
-			dstRect.h = GRASS_TILE_HEIGHT;
+			dstRect.w = graphicsData->GRASS_TILE_WIDTH;
+			dstRect.h = graphicsData->GRASS_TILE_HEIGHT;
 
 			dstRect.x += xbgShifter;
 			dstRect.y += ybgShifter;
@@ -145,9 +149,9 @@ void blitTiledBackground(GraphicsData *graphicsData, SDL_Texture *texture){
 
 	rect.x = window_x;
 
-	if((window_x - graphicsData->navigationOffset.x) > X_SIZE_OF_WORLD){
+	if((window_x - graphicsData->navigationOffset.x) > graphicsData->X_SIZE_OF_WORLD){
 		rect.y = 0;
-		rect.w = (window_x - graphicsData->navigationOffset.x) - X_SIZE_OF_WORLD;
+		rect.w = (window_x - graphicsData->navigationOffset.x) - graphicsData->X_SIZE_OF_WORLD;
 		rect.x = window_x - rect.w;
 		rect.h = window_y;
 		SDL_SetRenderDrawColor(graphicsData->renderer, 0, 0, 0, 100);
@@ -155,10 +159,10 @@ void blitTiledBackground(GraphicsData *graphicsData, SDL_Texture *texture){
 		graphicsData->navigationOffset.x+= ceil((float)rect.w/10.0);
 	}
 
-	if((window_y - graphicsData->navigationOffset.y) > Y_SIZE_OF_WORLD){
+	if((window_y - graphicsData->navigationOffset.y) > graphicsData->Y_SIZE_OF_WORLD){
 		rect.w = rect.x;
 		rect.x = 0;
-		rect.h = (window_y - graphicsData->navigationOffset.y) - Y_SIZE_OF_WORLD;
+		rect.h = (window_y - graphicsData->navigationOffset.y) - graphicsData->Y_SIZE_OF_WORLD;
 		rect.y = window_y - rect.h;
 		SDL_SetRenderDrawColor(graphicsData->renderer, 0, 0, 0, 100);
 		SDL_RenderFillRect(graphicsData->renderer, &rect);
@@ -258,14 +262,14 @@ void renderFillRadius(GraphicsData *graphicsData, SDL_Point *point, double radiu
 void setNavigationOffset(GraphicsData *graphicsData, int x, int y){
 	int sx,sy;
 	SDL_GetWindowSize(graphicsData->window,&sx,&sy);
-	if(x + sx > X_SIZE_OF_WORLD){
-		x = X_SIZE_OF_WORLD - sx;
+	if(x + sx > graphicsData->X_SIZE_OF_WORLD){
+		x = graphicsData->X_SIZE_OF_WORLD - sx;
 	}
 	else if(x < 0){
 		x = 0;
 	}
-	if(y + sy > Y_SIZE_OF_WORLD){
-		y = Y_SIZE_OF_WORLD - sy;
+	if(y + sy > graphicsData->Y_SIZE_OF_WORLD){
+		y = graphicsData->Y_SIZE_OF_WORLD - sy;
 	}
 	else if(y < 0){
 		y = 0;
@@ -276,4 +280,101 @@ void setNavigationOffset(GraphicsData *graphicsData, int x, int y){
 
 	graphicsData->navigationOffset.x = x;
 	graphicsData->navigationOffset.y = y;
+}
+
+void initGraphicsData(GraphicsData *graphicsData, ConfigurationData *configData){
+	graphicsData->RAIN_TILE_WIDTH = getConfiguredInt(configData,"RAIN_TILE_WIDTH");
+	graphicsData->RAIN_TILE_HEIGHT = getConfiguredInt(configData,"RAIN_TILE_HEIGHT");
+	graphicsData->PROGRAM_NAME = getConfiguredString(configData,"PROGRAM_NAME");
+	graphicsData->X_SIZE_OF_SCREEN = getConfiguredInt(configData,"X_SIZE_OF_SCREEN");
+	graphicsData->Y_SIZE_OF_SCREEN = getConfiguredInt(configData,"Y_SIZE_OF_SCREEN");
+	graphicsData->X_SIZE_OF_WORLD = getConfiguredInt(configData,"X_SIZE_OF_WORLD");
+	graphicsData->Y_SIZE_OF_WORLD = getConfiguredInt(configData,"Y_SIZE_OF_WORLD");
+
+	graphicsData->window = SDL_CreateWindow(graphicsData->PROGRAM_NAME,
+										                       25,
+                                           25,
+                                           graphicsData->X_SIZE_OF_SCREEN,
+																					 graphicsData->Y_SIZE_OF_SCREEN,
+                                           SDL_WINDOW_SHOWN|SDL_WINDOW_RESIZABLE);
+
+   graphicsData->renderer = SDL_CreateRenderer(graphicsData->window,
+                                               -1,
+                                               SDL_RENDERER_TARGETTEXTURE|SDL_RENDERER_PRESENTVSYNC|SDL_RENDERER_ACCELERATED);
+	 graphicsData->navigationOffset.x = 0;
+	 graphicsData->navigationOffset.y = 0;
+	 graphicsData->navigationOffset.w = 0;
+   graphicsData->navigationOffset.h = 0;
+
+	 graphicsData->fonts[0] = TTF_OpenFont("font/Oxygen-Regular.ttf",16);
+	 graphicsData->fonts[1] = TTF_OpenFont("font/Oxygen-Regular.ttf",12);
+
+   graphicsData->mainMenuImage = loadTextureFromFile("images/mainMenuImage.bmp", graphicsData, 0);
+
+   graphicsData->grassTexture = loadTextureFromFile("images/grass/grass4.bmp",graphicsData, 0);
+   graphicsData->treeStumpTexture = loadTextureFromFile("images/stump.bmp",graphicsData, 1);
+   graphicsData->nodeTexture = loadTextureFromFile("images/blueFlower.bmp", graphicsData, 1);
+
+   graphicsData->shelter = malloc(sizeof(struct Shelter));
+
+   graphicsData->shelter->graphic[SUMMER_INDEX] = loadTextureFromFile("images/tree1.bmp", graphicsData, 1);
+
+   graphicsData->shelter->graphic[AUTUMN_INDEX] = loadTextureFromFile("images/treeAutumn1.bmp", graphicsData, 1);
+
+   graphicsData->shelter->graphic[WINTER_INDEX] = loadTextureFromFile("images/treeWinter.bmp", graphicsData, 1);
+
+
+
+   graphicsData->person = (Person*) malloc(sizeof(Person));
+
+   graphicsData->person->graphic[WITH_ICE_CREAM_STRIDE1] = loadTextureFromFile("images/person/withIceCream1.bmp", graphicsData, 1);
+
+   graphicsData->person->graphic[WITH_ICE_CREAM_STRIDE2] = loadTextureFromFile("images/person/withIceCream2.bmp", graphicsData, 1);
+
+   graphicsData->person->graphic[WITH_ICE_CREAM_STRIDE1 + NO_ICECREAM_INDEX_OFFSET] = loadTextureFromFile("images/person/withoutIceCream1.bmp",graphicsData, 1);
+
+   graphicsData->person->graphic[WITH_ICE_CREAM_STRIDE2 + NO_ICECREAM_INDEX_OFFSET] = loadTextureFromFile("images/person/withoutIceCream2.bmp",graphicsData, 1);
+
+   graphicsData->droppedIceCreamTexture = loadTextureFromFile("images/person/droppedIceCream.bmp", graphicsData, 1);
+   graphicsData->meltedIceCreamTexture = loadTextureFromFile("images/person/meltedIceCream.bmp", graphicsData, 1);
+
+   graphicsData->roamingArachnid = (RoamingArachnid*) malloc(sizeof(RoamingArachnid));
+
+   graphicsData->roamingArachnid->graphic[0] = loadTextureFromFile("images/spider.bmp", graphicsData, 1);
+
+   graphicsData->rainy = (Rainy*) malloc(sizeof(Rainy));
+
+   graphicsData->rainy->graphic[0] = loadTextureFromFile("images/rain/rain1.bmp", graphicsData, 1);
+   graphicsData->rainy->graphic[1] = loadTextureFromFile("images/rain/rain2.bmp", graphicsData, 1);
+   graphicsData->rainy->graphic[2] = loadTextureFromFile("images/rain/rain3.bmp", graphicsData, 1);
+   graphicsData->rainy->graphic[3] = loadTextureFromFile("images/rain/rain4.bmp", graphicsData, 1);
+   graphicsData->rainy->graphic[4] = loadTextureFromFile("images/rain/rain5.bmp", graphicsData, 1);
+   graphicsData->rainy->graphic[5] = loadTextureFromFile("images/rain/rain6.bmp", graphicsData, 1);
+
+   graphicsData->bee = (Bee*) malloc(sizeof(Bee));
+
+
+   graphicsData->bee->graphic[graphicsData->BEE_FLAP_GRAPHIC_1] = loadTextureFromFile("images/bee.bmp",graphicsData, 1);
+   graphicsData->bee->graphic[graphicsData->BEE_FLAP_GRAPHIC_2] = loadTextureFromFile("images/bee2.bmp",graphicsData, 1);
+
+   graphicsData->bee->graphic[graphicsData->BEE_FLAP_GRAPHIC_1 + graphicsData->CARRYING_FLOWER_INDEX_OFFSET] = loadTextureFromFile("images/beeWithFlower.bmp",graphicsData, 1);
+   graphicsData->bee->graphic[graphicsData->BEE_FLAP_GRAPHIC_2 + graphicsData->CARRYING_FLOWER_INDEX_OFFSET] = loadTextureFromFile("images/beeWithFlower2.bmp",graphicsData, 1);
+
+   graphicsData->bee->graphic[graphicsData->BEE_FLAP_GRAPHIC_1 + graphicsData->CARRYING_ICECREAM_INDEX_OFFSET] = loadTextureFromFile("images/beeWithIcecream.bmp", graphicsData, 1);
+   graphicsData->bee->graphic[graphicsData->BEE_FLAP_GRAPHIC_2 + graphicsData->CARRYING_ICECREAM_INDEX_OFFSET] = loadTextureFromFile("images/beeWithIcecream2.bmp",graphicsData, 1);
+
+   graphicsData->hiveTexture = loadTextureFromFile("images/beehive.bmp",graphicsData, 1);
+
+   graphicsData->uiEle = (UIEle*) malloc(sizeof(UIEle));
+ //  graphicsData->ui->graphic[SCROLLHANDLE_GRAPHIC] = loadTextureFromFile("images/UI/scrollhandle.bmp",
+ //														  graphicsData, 1);
+
+   graphicsData->uiEle->graphic[graphicsData->SCROLLHANDLE_GRAPHIC] = loadTextureFromFile("images/UI/scrollhandle.bmp",graphicsData, 1);
+   graphicsData->uiEle->graphic[graphicsData->CROSSBOX_GRAPHIC] = loadTextureFromFile("images/UI/crossbox.bmp",graphicsData, 1);
+   graphicsData->uiEle->graphic[graphicsData->COMPILEBOX_GRAPHIC] = loadTextureFromFile("images/UI/compilebox.bmp",graphicsData, 1);
+   graphicsData->uiEle->graphic[graphicsData->STOP_GRAPHIC] = loadTextureFromFile("images/UI/stop.bmp",graphicsData, 1);
+   graphicsData->uiEle->graphic[graphicsData->BLOCK_GRAPHIC] = loadTextureFromFile("images/UI/block.bmp",graphicsData, 1);
+   graphicsData->uiEle->graphic[graphicsData->HIVECELL_GRAPHIC] = loadTextureFromFile("images/UI/hivecell.bmp",graphicsData, 1);
+   graphicsData->uiEle->graphic[graphicsData->HIVECELLMASK_GRAPHIC] = loadTextureFromFile("images/UI/hivecellmask.bmp",graphicsData, 1);
+
 }

@@ -8,8 +8,6 @@ void generateResourceNodeSpawners(GameObjectData *gameObjectData);
 
 void generateProgrammableWorkers(GameObjectData *gameObjectData);
 
-void generateHive(GameObjectData *gameObjectData);
-
 void generateTrees(GameObjectData *gameObjectData);
 
 void generateIceCreamPerson(GameObjectData *gameObjectData);

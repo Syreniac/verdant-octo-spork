@@ -3,14 +3,16 @@
 int getConfiguredInt(ConfigurationData *configurationData, char *name){
   int i;
   ConfigurationFlag *flag = configurationData->flags;
+  printf("attempting to retrieve flag \'%s\'\n",name);
   while(flag != NULL){
-    if(strcmp(flag->name,name)){
+    printf("checking \'%s\' vs \'%s\' :: %d\n",flag->name,name,strcmp(flag->name,name));
+    if(strcmp(flag->name,name) == 0){
       if(flag->type == CFT_INT){
         sscanf(flag->data,"%d",&i);
         return i;
       }
       else{
-        assert(flag->type == CFT_INT);
+        assert(flag->type != CFT_INT);
       }
     }
     flag = flag->next;
@@ -68,7 +70,7 @@ void initConfigurationData(ConfigurationData *configurationData){
   FILE *f;
   char *f2s;
   int i,previousIndex,i2;
-  int previousPreviousIndex = 0;
+  ConfigurationFlag **targetPointer = &configurationData->flags;
   f = fopen("config.txt","r");
   assert(f!=NULL);
   f2s = fileToString(f);
@@ -87,7 +89,8 @@ void initConfigurationData(ConfigurationData *configurationData){
   i = 0;
   while(i <= i2){
       if(f2s[i] == '\0' || f2s[i] == EOF){
-        free(makeConfigurationFlag(&f2s[previousIndex]));
+        *targetPointer = makeConfigurationFlag(&f2s[previousIndex]);
+        targetPointer = &(*targetPointer)->next;
         previousIndex = i+1;
       }
       i++;

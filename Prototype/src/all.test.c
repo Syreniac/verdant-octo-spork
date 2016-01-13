@@ -156,7 +156,7 @@ START_TEST(core_getDistance2BetweenPoints){
 END_TEST
 
 /* Test passes! */
-START_TEST(core_fitRectToWorld){
+/*START_TEST(core_fitRectToWorld){
    SDL_Rect rectA;
    srand(time(NULL));
    rectA.x = rectA.y = rand()%RAND_MAX;
@@ -165,12 +165,12 @@ START_TEST(core_fitRectToWorld){
 
 
    fitRectToWorld(&rectA);
-   fail_unless(rectA.x + rectA.w <= X_SIZE_OF_WORLD, "fitRectToWorld function test failed!");
+   fail_unless(rectA.x + rectA.w <= old_X_SIZE_OF_WORLD, "fitRectToWorld function test failed!");
    fail_unless(rectA.x >= 0, "fitRectToWorld function test failed 2!");
-   fail_unless(rectA.y + rectA.h <= Y_SIZE_OF_WORLD, "fitRectToWorld function test failed!");
+   fail_unless(rectA.y + rectA.h <= old_Y_SIZE_OF_WORLD, "fitRectToWorld function test failed!");
    fail_unless(rectA.y >= 0, "fitRectToWorld function test failed 4!");
 }
-END_TEST
+END_TEST*/
 
 
 /* Test passes! */
