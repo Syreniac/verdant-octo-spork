@@ -130,10 +130,10 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
   gameData.graphicsData.meltedIceCreamTexture = loadTextureFromFile("images/person/meltedIceCream.bmp", &gameData.graphicsData, 1);
 
   gameData.graphicsData.roamingArachnid = (RoamingArachnid*) malloc(sizeof(RoamingArachnid));
-  
-  gameData.graphicsData.roamingArachnid->graphic[SPIDER] = 
+
+  gameData.graphicsData.roamingArachnid->graphic[SPIDER] =
   loadTextureFromFile("images/spider.bmp", &gameData.graphicsData, 1);
-  
+
   gameData.graphicsData.rainy = (Rainy*) malloc(sizeof(Rainy));
 
   gameData.graphicsData.rainy->graphic[0] = loadTextureFromFile("images/rain/rain1.bmp", &gameData.graphicsData, 1);
@@ -274,11 +274,11 @@ static void createGameUI(GameData *gameData){
   UIConfigure_PercOffsetRect(element, &element->actions[5], 0.25, 0.25, 0.75,0.75, 0,0,0,0,0);
   UIElement_Reparent(element,gameData->uiData.root);
 
-  
+
   /* Mute button */
       element = UIElement_Create((win_x - 30), win_y - 30, 30, 30, 6);
-    UIConfigure_FillRect(element, &element->actions[0],228,240,3);	
-	UIConfigure_PercPosition(element, &element->actions[1],1.0,1.0,-30,-30,0);	
+    UIConfigure_FillRect(element, &element->actions[0],228,240,3);
+	UIConfigure_PercPosition(element, &element->actions[1],1.0,1.0,-30,-30,0);
 	UIConfigure_LeftClickRect(element, &element->actions[2]);
 		UITrigger_Bind(&element->actions[2],&element->actions[3],0,1);
 	UIConfigure_MuteSound(element,&element->actions[3]);
@@ -685,17 +685,13 @@ int gameLoop(GameData *gameData){
   paintBackground(&gameData->graphicsData,0,200,100);
 
   updateGameObjects(&gameData->gameObjectData, &gameData->audioData, &gameData->graphicsData, &gameData->announcementsData, gameData->delta);
- 
+
 
 	  UIRoot_Execute(&gameData->uiData,UPDATE,0);
 	  runAI(&gameData->aiData,&gameData->gameObjectData,gameData->delta);
 
 	  SDL_RenderPresent(gameData->graphicsData.renderer);
 	  announce_update(&gameData->announcementsData, gameData->delta);
-	while (SDL_PollEvent(&event))
-	{
-		handleEvent(&event,&gameData->gameObjectData,&gameData->uiData,&gameData->controlsData, &gameData->graphicsData);
-	}
   if (Mix_Playing(1) == 0) {
  	  playMusic(&gameData->audioData,1);
   }
@@ -710,13 +706,6 @@ int gameLoop(GameData *gameData){
   	  	gameData->gameObjectData.gameOverBoxVisible = 1;
 	      SDL_PushEvent(&gameOverEvent);
   	  }
-   	  while (SDL_PollEvent(&event)){
-        continuing = handleEvent(&event,&gameData->gameObjectData,&gameData->uiData,&gameData->controlsData, &gameData->graphicsData);
-    	  if(continuing != 1){
-          printf("escape\n");
-          return continuing;
-        }
-      }
   }
   if (Mix_Playing(1) == 0) {
  	  playMusic(&gameData->audioData,1);
