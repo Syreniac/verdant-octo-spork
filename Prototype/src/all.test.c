@@ -459,6 +459,7 @@ START_TEST(test_panScreen){
     SDL_Init(SDL_INIT_VIDEO);
     /* see startGame in game.c */
 
+
     /*fail if cannot panScreen*/
     panScreen(&gameData.graphicsData, &gameData.controlsData, delta_t);
     SDL_Quit();
