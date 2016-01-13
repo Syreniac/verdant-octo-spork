@@ -51,7 +51,7 @@ FILE *DEBUGGING_FILE_FREE;
 #define RAIN_TILE_HEIGHT 9
 #define RAIN_FRAME_DELAY 4
 
-#define INITIAL_NUMBER_OF_WORKERS 150
+#define INITIAL_NUMBER_OF_WORKERS 15
 
 /*lower values result in a higher chance of bees regaining flight when wet, with
 each call to updateProgrammableWorker*/

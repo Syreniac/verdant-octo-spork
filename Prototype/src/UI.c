@@ -45,12 +45,34 @@ int UIAction_MinimapMouseMove(UI_Action *action, UIData *uiData);
 int UIAction_ToggleInteger(UI_Action *action, UIData *uiData);
 
 
+static UI_Action* makeAIBlockOperatorSelector(UI_Element *element, int *nextAvailableActionPointer, int x, int y){
+	int nextAvailableAction = *nextAvailableActionPointer;
+	UIConfigure_LeftClickSubrect(element, &element->actions[nextAvailableAction], x, y, 25, 25);
+		UITrigger_Bind(&element->actions[nextAvailableAction],&element->actions[nextAvailableAction+3],-1,UITRIGGER_PLUSONE);
+	UIConfigure_FillAndBorderSubrect(element, &element->actions[nextAvailableAction+1],x,y,25,25,255,255,255,0,0,0);
+	UIConfigure_DisplayStringSubrect(element, &element->actions[nextAvailableAction+2],"",1,x,y,25,25);
+	UIConfigure_StringCollection(element,&element->actions[nextAvailableAction+3],1,3,&element->actions[nextAvailableAction+2],"=","<",">");
+	*nextAvailableActionPointer = *nextAvailableActionPointer + 4;
+	return &element->actions[nextAvailableAction+2];
+}
+
+static UI_Action* makeAIBlockIntegerSelector(UI_Element *element, int *nextAvailableActionPointer, int x, int y){
+		int nextAvailableAction = *nextAvailableActionPointer;
+		UIConfigure_LeftClickSubrect(element, &element->actions[nextAvailableAction], x, y, 25, 25);
+			UITrigger_Bind(&element->actions[nextAvailableAction],&element->actions[nextAvailableAction+3],-1,UITRIGGER_PLUSONE);
+		UIConfigure_FillAndBorderSubrect(element, &element->actions[nextAvailableAction+1],x,y,25,25,255,255,255,0,0,0);
+		UIConfigure_DisplayNumberSubrect(element, &element->actions[nextAvailableAction+2],0,1,x,y,25,25);
+		UIConfigure_Counter(element,&element->actions[nextAvailableAction+3],99,1,&element->actions[nextAvailableAction+2]);
+		*nextAvailableActionPointer = *nextAvailableActionPointer + 4;
+		return &element->actions[nextAvailableAction+2];
+}
+
 static UI_Action* makeAIBlockLineLinker(UI_Element *element, int *nextAvailableActionPointer, int x, int y, char *label, enum LineOrigins lineorigin){
 	int nextAvailableAction = *nextAvailableActionPointer;
 	UIConfigure_StoreMousePosition(element, &element->actions[nextAvailableAction],2,&element->actions[nextAvailableAction+3],&element->actions[nextAvailableAction+2]);
 		element->actions[nextAvailableAction].status = 0;
 		element->actions[nextAvailableAction].new_status = 0;
-	UIConfigure_LeftClickSubrect(element, &element->actions[nextAvailableAction+1], x, y, 25, 25);
+	UIConfigure_LeftClickSubrect(element, &element->actions[nextAvailableAction+1], x, y, 35, 25);
 		element->actions[nextAvailableAction+1].status = 1;
 		element->actions[nextAvailableAction+1].new_status = 1;
 		UITrigger_Bind(&element->actions[nextAvailableAction+1],&element->actions[nextAvailableAction+3],-1,1);
@@ -69,10 +91,26 @@ static UI_Action* makeAIBlockLineLinker(UI_Element *element, int *nextAvailableA
 		UITrigger_Bind(&element->actions[nextAvailableAction+4],&element->actions[nextAvailableAction],1,0);
 		UITrigger_Bind(&element->actions[nextAvailableAction+4],&element->actions[nextAvailableAction+2],0,1);
 		UITrigger_Bind(&element->actions[nextAvailableAction+4],&element->actions[nextAvailableAction+4],1,0);
-	UIConfigure_FillAndBorderSubrect(element, &element->actions[nextAvailableAction+5],x,y,25,25,255,255,255,0,0,0);
-	UIConfigure_DisplayStringSubrect(element, &element->actions[nextAvailableAction+6],label,1,x,y,25,25);
+	UIConfigure_FillAndBorderSubrect(element, &element->actions[nextAvailableAction+5],x,y,35,25,255,255,255,0,0,0);
+	UIConfigure_DisplayStringSubrect(element, &element->actions[nextAvailableAction+6],label,1,x,y,35,25);
 	*nextAvailableActionPointer = *nextAvailableActionPointer + 7;
 	return &element->actions[nextAvailableAction+3];
+}
+
+static int countOptionsForAITemplate(BlockFunctionTemplate *template){
+	int i = 0;
+	int count = 0;
+	while(i < template->numOfArguments){
+		switch(template->arguments[i]){
+			case BF_COMPARISON:
+			case BF_CARGO_QUANTITY:
+			case BF_DISTANCE:
+				count += 1;
+				break;
+		}
+		i++;
+	}
+	return count;
 }
 
 static int countUIActionsNeededForAITemplate(BlockFunctionTemplate *template){
@@ -82,7 +120,15 @@ static int countUIActionsNeededForAITemplate(BlockFunctionTemplate *template){
 		switch(template->arguments[i]){
 			case BF_PRIMARY:
 			case BF_SECONDARY:
+			case BF_THEN:
+				printf("+1 required link\n");
 				count += 7;
+				break;
+			case BF_CARGO_QUANTITY:
+			case BF_DISTANCE:
+			case BF_COMPARISON:
+				printf("+1 required option\n");
+				count += 4;
 				break;
 		}
 		i++;
@@ -107,7 +153,7 @@ UI_Element *makeHiveCellBlock(int x_offset, int y_offset, UI_Element *parent, Hi
 
 UI_Element *makeStartBlock(int x_offset, int y_offset, UI_Element *parent){
 	UI_Element *element;
-	element = UIElement_Create(x_offset,y_offset,200,50,10);
+	element = UIElement_Create(x_offset,y_offset,200,50,11);
 	UIConfigure_FillAndBorderRect(element,&element->actions[0],248,221,35,0,0,0,FILLRECT);
 	UIConfigure_ShrinkFitToParent(element, &element->actions[1]);
 	UIConfigure_DisplayString(element, &element->actions[2],"START",0,UISTRING_ALIGN_CENTER);
@@ -118,6 +164,7 @@ UI_Element *makeStartBlock(int x_offset, int y_offset, UI_Element *parent){
 		UITrigger_Bind(&element->actions[4],&element->actions[4],1,0);
 		UITrigger_Bind(&element->actions[4],&element->actions[5],0,1);
 		UITrigger_Bind(&element->actions[4],&element->actions[6],0,1);
+		UITrigger_Bind(&element->actions[4],&element->actions[10],-1,UITRIGGER_PLUSONE);
 
 	UIConfigure_LeftReleaseAnywhere(element, &element->actions[5]);
 		element->actions[5].status = 0;
@@ -136,6 +183,7 @@ UI_Element *makeStartBlock(int x_offset, int y_offset, UI_Element *parent){
 		element->actions[3].new_status = 0;
 	UIConfigure_SetUpAiBlock(element,&element->actions[8],2,&element->actions[2],&element->actions[7]);
 	UIConfigure_FillSubrect(element, &element->actions[9], 175, 25, 24, 24, 255, 255, 255);
+	UIConfigure_StringCollection(element, &element->actions[10], 1, 3, &element->actions[2],"Start","Go","Begin");
 	UIElement_Reparent(element,parent);
 	return element;
 }
@@ -208,10 +256,15 @@ UI_Element *makeAIBlock(int x_offset, int y_offset, BlockFunctionTemplate *templ
 	char *aiString = template->name;
 	int nextAvailableAction = 0;
 	int i = 0;
+	int optionsPlaced = 0;
+	int x;
+	int optionsCount = countOptionsForAITemplate(template);
 	int count = 8 + countUIActionsNeededForAITemplate(template);
 	element2 = UIElement_Create(x_offset,y_offset,200,50,count);
 	UI_Action *primary = NULL;
 	UI_Action *secondary = NULL;
+	UI_Action *comparator = NULL;
+	UI_Action *integerArg = NULL;
 	/* Set it up */
 	printf("expecting %d elements\n",count);
 	UIConfigure_FillAndBorderRect(element2,
@@ -241,16 +294,39 @@ UI_Element *makeAIBlock(int x_offset, int y_offset, BlockFunctionTemplate *templ
 				printf("making primary\n");
 				primary = makeAIBlockLineLinker(element2, &nextAvailableAction, 0,25, "Yes", BL_CORNER);
 				break;
+			case BF_THEN:
+				printf("making primary\n");
+				primary = makeAIBlockLineLinker(element2, &nextAvailableAction, 0,25, "Then", BL_CORNER);
+				break;
 			case BF_SECONDARY:
 				printf("making secondary\n");
-				secondary = makeAIBlockLineLinker(element2, &nextAvailableAction, 175,25, "No", BR_CORNER);
+				secondary = makeAIBlockLineLinker(element2, &nextAvailableAction, 165,25, "No", BR_CORNER);
+				break;
+			case BF_COMPARISON:
+				printf("making comparator\n");
+				x = 130 / (optionsCount + 1);
+				x *= (1 + optionsPlaced);
+				x -= 25/2;
+				x += 35;
+				comparator = makeAIBlockOperatorSelector(element2, &nextAvailableAction, x, 25);
+				optionsPlaced++;
+				break;
+			case BF_DISTANCE:
+			case BF_CARGO_QUANTITY:
+				printf("making integrator\n");
+				x = 130 / (optionsCount + 1);
+				x *= (1 + optionsPlaced);
+				x -= 25/2;
+				x += 35;
+				integerArg = makeAIBlockIntegerSelector(element2, &nextAvailableAction, x, 25);
+				optionsPlaced++;
 				break;
 		}
 		i++;
 	}
 
 	UIConfigure_DeleteKeyFlagDestroy(element2, &element2->actions[nextAvailableAction]);
-	UIConfigure_SetUpAiBlock(element2,&element2->actions[nextAvailableAction+1],3,&element2->actions[5],primary,secondary);
+	UIConfigure_SetUpAiBlock(element2,&element2->actions[nextAvailableAction+1],5,&element2->actions[5],primary,secondary,comparator,integerArg);
 	printf("nextAvailableAction %d && element2->num_of_actions %d\n",nextAvailableAction,element2->num_of_actions);
 	assert(nextAvailableAction < element2->num_of_actions);
 
@@ -303,6 +379,145 @@ UI_Element *UIElement_Create(int x, int y, int w, int h, int num_of_actions){
 	   element->exposed_data_count = 0;
 	   return element;
 }
+
+/* UIAction_StringCollection
+
+	 This action holds a list of strings and writes it into it's companions buffers
+   The string selected is toggled by it's status, enabling it to be triggered using UITRIGGER_PLUSONE */
+
+int UIAction_StringCollection(UI_Action *action, UIData *uiData){
+	if(action->status != 0){
+		if(action->status > action->num_of_strings){
+			printf("resetting string collection\n");
+			action->status = 1;
+			action->new_status = 1;
+		}
+		int i = 0;
+		while(i < action->num_of_companions){
+			sUIAction_DisplayString_EditString(action->companions[i], action->strings[action->status-1]);
+			i++;
+		}
+		return 1;
+	}
+	return 0;
+}
+
+void UIConfigure_StringCollection(UI_Element *element, UI_Action *action, int num_of_companions, int num_of_strings, ...){
+	va_list vargs;
+	int i = 0;
+	char *str;
+	va_start(vargs,num_of_strings);
+	UIAction_Init(element,action);
+	action->response = UPDATE;
+	action->function = UIAction_StringCollection;
+	action->companions =  calloc(num_of_companions,sizeof(void*));
+	action->num_of_companions = num_of_companions;
+	while(i < num_of_companions){
+		action->companions[i] = va_arg(vargs,UI_Action*);
+		i++;
+	}
+	i = 0;
+	action->strings = calloc(num_of_strings,sizeof(void*));
+	while(i < num_of_strings){
+		char *str = va_arg(vargs,char*);
+		action->strings[i] = calloc(strlen(str)+1,sizeof(char));
+		strcpy(action->strings[i],str);
+		i++;
+	}
+	action->num_of_strings = num_of_strings;
+	va_end(vargs);
+}
+
+
+
+/* UIAction_DisplayNumber
+
+	 This UI_Action displays a number onto the screen. The number can be modified
+	 using sUIAction_DisplayNumber_EditNumber(). Alignment of the number can be
+	 specified when configuring it. Font is using a index to the array of fonts in
+	 GraphicsData */
+
+#define newNumber integers[0]
+#define currentNumber integers[1]
+#define fontID integers[2]
+#define alignStyle integers[3]
+#define alignOffset integers[4]
+#define numberAsString strings[0]
+#define rectX integers[5]
+#define rectY integers[6]
+#define rectW integers[7]
+#define rectH integers[8]
+
+int UIAction_DisplayNumberSubrect(UI_Action *action, UIData *uiData){
+	GraphicsData *graphicsData;
+	SDL_Color colour;
+	SDL_Surface *temp;
+	SDL_Rect temp_rect;
+	SDL_Rect temp_rect2;
+	int w,h;
+	colour.r = 0;
+	colour.g = 0;
+	colour.b = 0;
+	graphicsData = uiData->graphicsData;
+	if(action->newNumber != action->currentNumber){
+		action->currentNumber = action->newNumber;
+		sprintf(action->numberAsString,"%d",action->currentNumber);
+		SDL_DestroyTexture(action->texture);
+		temp = TTF_RenderText_Blended(graphicsData->fonts[action->fontID], action->numberAsString, colour);
+		action->texture = SDL_CreateTextureFromSurface(graphicsData->renderer,temp);
+		SDL_FreeSurface(temp);
+		TTF_SizeText(graphicsData->fonts[action->fontID],action->numberAsString,&w,&h);
+		action->alignOffset = w;
+
+	}
+	if(UIElement_isVisible(action->element) && action->element->rect.h > TTF_FontHeight(graphicsData->fonts[action->fontID]) && action->status != 0 && action->texture != NULL){
+		temp_rect2.w = action->rectW;
+		temp_rect2.h = action->rectH;
+		temp_rect2.x = action->rectX + action->element->rect.x;
+		temp_rect2.y = action->rectY + action->element->rect.y;
+		shrinkRectToFit(&temp_rect2, &action->element->rect);
+		TTF_SizeText(graphicsData->fonts[action->fontID], action->numberAsString, &temp_rect.w, &temp_rect.h);
+		temp_rect.x = temp_rect2.x + (temp_rect2.w - temp_rect.w)/2;
+		temp_rect.y = temp_rect2.y + (temp_rect2.h - temp_rect.h)/2;
+		SDL_RenderCopy(graphicsData->renderer,action->texture,NULL,&temp_rect);
+		return 1;
+	}
+	return 0;
+}
+
+void UIConfigure_DisplayNumberSubrect(UI_Element *element, UI_Action *action, int number, int font, int x, int y, int w, int h){
+	#if DEBUGGING==1
+	printf("UIConfigure_DisplayNumber\n");
+	#endif
+	UIAction_Init(element,action);
+	action->response = UPDATE;
+	action->status = 1;
+	action->new_status = 1;
+	action->function = UIAction_DisplayNumberSubrect;
+	action->integers = calloc(9, sizeof(int));
+	action->newNumber = number;
+	action->currentNumber = font;
+	action->rectX = x;
+	action->rectY = y;
+	action->rectW = w;
+	action->rectH = h;
+	action->num_of_integers = 9;
+	action->strings = malloc(sizeof(char*) * 1);
+	action->numberAsString = calloc(30,sizeof(char));
+	action->num_of_strings = 1;
+}
+
+#undef newNumber
+#undef currentNumber
+#undef fontID
+#undef alignStyle
+#undef alignOffset
+#undef numberAsString
+#undef rectX
+#undef rectY
+#undef rectW
+#undef rectH
+
 
 /* UIAction_DisplayStringSubrect
 
@@ -380,14 +595,17 @@ void UIConfigure_DisplayStringSubrect(UI_Element *element, UI_Action *action, ch
 	action->rectY = y;
 	action->rectW = w;
 	action->rectH = h;
-	action->num_of_integers = 4;
+	action->num_of_integers = 8;
 }
 
 #undef currentString
 #undef newString
 #undef fontID
-#undef alignStyle
 #undef alignOffset
+#undef rectX
+#undef rectY
+#undef rectW
+#undef rectH
 
 
 /* UIAction_ClickSubrect
@@ -469,7 +687,7 @@ void UIConfigure_RightClickSubrect(UI_Element *element, UI_Action *action, int x
 
 int UIAction_FillAndBorderSubrect(UI_Action *action, UIData *uiData){
 	SDL_Rect r;
-	if(action->status != 0){
+	if(action->status != 0 && UIElement_isVisible(action->element)){
 		r.x = action->rectX + action->element->rect.x;
 		r.y = action->rectY + action->element->rect.y;
 		r.w = action->rectW;
@@ -1603,6 +1821,7 @@ int UIAction_ReadAiBlocks(UI_Action *action, UIData *uiData){
 			strcat(workingSpace,childElementExposedString);
 			childElement = childElement->sibling;
 		}
+		printf("%s\n",workingSpace);
 		blockFunctionRoot = makeBlockFunctionRootFromString(workingSpace,childCount);
 	    erroneousBlockFunction = testBlockFunctionRootForLoops(&blockFunctionRoot.blockFunctions[0],NULL,0);
 	    if(erroneousBlockFunction != NULL){
@@ -1677,18 +1896,32 @@ int UIAction_SetUpAiBlock(UI_Action *action, UIData *uiData){
 		strcat(action->element->exposed_data[0],"\n");
 		/* This should be the action holding the primary link */
 		if(action->num_of_companions > 1 && action->companions[1] != NULL && action->companions[1]->external != NULL){
-			stringLength = stringLength + 16;
+			stringLength = stringLength + 17;
 			action->element->exposed_data[0] = realloc(action->element->exposed_data[0],
-													stringLength);
+																								 stringLength);
 			sprintf(workingSpace,"\tprimary = %d\n",action->companions[1]->external->sibling_position + 1);
 			strcat(action->element->exposed_data[0],workingSpace);
 		}
 		/* This should be the action holding the secondary link */
 		if(action->num_of_companions > 2 && action->companions[2] != NULL && action->companions[2]->external != NULL){
+			stringLength = stringLength + 19;
+			action->element->exposed_data[0] = realloc(action->element->exposed_data[0],
+																								 stringLength);
+			sprintf(workingSpace,"\tsecondary = %d\n",action->companions[2]->external->sibling_position + 1);
+			strcat(action->element->exposed_data[0],workingSpace);
+		}
+		if(action->num_of_companions > 3 && action->companions[3] != NULL){
 			stringLength = stringLength + 18;
 			action->element->exposed_data[0] = realloc(action->element->exposed_data[0],
-													stringLength);
-			sprintf(workingSpace,"\tsecondary = %d\n",action->companions[2]->external->sibling_position + 1);
+																								 stringLength);
+			sprintf(workingSpace,"\tchars = %c\n",action->companions[3]->strings[0][0]);
+			strcat(action->element->exposed_data[0],workingSpace);
+		}
+		if(action->num_of_companions > 4 && action->companions[4] != NULL){
+			stringLength = stringLength + 18;
+			action->element->exposed_data[0] = realloc(action->element->exposed_data[0],
+																								 stringLength);
+			sprintf(workingSpace,"\tintegers = %s\n",action->companions[4]->strings[0]);
 			strcat(action->element->exposed_data[0],workingSpace);
 		}
 		return 1;
@@ -1992,9 +2225,11 @@ void UIConfigure_DisplayNumber(UI_Element *element, UI_Action *action, int numbe
 #define alignOffset integers[3]
 
 static void sUIAction_DisplayString_EditString(UI_Action *action, char *editString){
-	assert(action->function == UIAction_DisplayString);
-	action->newString = realloc(action->newString,strlen(editString)+1);
-	strcpy(action->newString,editString);
+	assert(action->function == UIAction_DisplayString || action->function == UIAction_DisplayStringSubrect);
+	if(strcmp(action->newString,editString) != 0){
+		action->newString = realloc(action->newString,strlen(editString)+1);
+		strcpy(action->newString,editString);
+	}
 }
 
 int UIAction_DisplayString(UI_Action *action, UIData *uiData){
@@ -2208,19 +2443,39 @@ void UIConfigure_YearsCounter(UI_Element *element, UI_Action *action, int num_of
 	 If it gets used, the count will reset. To disable this, give it the NONE response */
 
 int UIAction_Counter(UI_Action *action, UIData *uiData){
-	action->new_status = 0;
+	int i = 0;
+	if(action->status > action->integers[0]){
+		action->status = 1;
+		action->new_status = 1;
+	}
+	while(i < action->num_of_companions){
+		action->companions[i]->integers[0] = action->status;
+		i++;
+	}
 	return 1;
 }
 
-void UIConfigure_Counter(UI_Element *element, UI_Action *action, enum Response response){
+void UIConfigure_Counter(UI_Element *element, UI_Action *action, int maximum, int num_of_companions, ...){
 	#if DEBUGGING==1
 	printf("UIConfigure_Counter\n");
 	#endif
+	int i = 0;
+	va_list vargs;
+	va_start(vargs,num_of_companions);
 	UIAction_Init(element,action);
-	action->response = response;
+	action->response = UPDATE;
 	action->function = UIAction_Counter;
 	action->status = 0;
 	action->new_status = 0;
+	action->integers = calloc(1,sizeof(int));
+	action->integers[0] = maximum;
+	action->companions = calloc(num_of_companions,sizeof(void*));
+	action->num_of_companions = num_of_companions;
+	while(i < num_of_companions){
+		action->companions[i] = va_arg(vargs,UI_Action*);
+		i++;
+	}
+	va_end(vargs);
 }
 
 /* UIAction_Renderline

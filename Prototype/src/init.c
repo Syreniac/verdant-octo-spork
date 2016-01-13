@@ -118,7 +118,7 @@ int game_welcome_page(GraphicsData graphicsData, AudioData audioData){
                                                                                      0,  0,  0,  0,  0);
 
    element = UIElement_Create(0,0,0,0,4);
-   UIConfigure_Counter(element,&element->actions[0],NONE);
+   UIConfigure_Counter(element,&element->actions[0],1,0);
    UIConfigure_LeftClickRect(element,&element->actions[1]);
        UITrigger_Bind(&element->actions[1],&element->actions[0],-1,UITRIGGER_PLUSONE);
    UIConfigure_PercOffsetRect(element,&element->actions[2],0.55, 0.69, 0.9, 0.82,
@@ -141,7 +141,7 @@ int game_welcome_page(GraphicsData graphicsData, AudioData audioData){
 	UIRoot_Pack(&initData.uiData,&initData.graphicsData);
 
 	initData.uiData.audioData = &initData.audioData;
-	
+
    playMusic(&initData.audioData,0);
 
    while(menuRunning){

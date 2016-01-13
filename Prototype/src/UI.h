@@ -122,7 +122,7 @@ void UIConfigure_LeftClickAnywhere(UI_Element *element, UI_Action *action);
 void UIConfigure_RightClickAnywhere(UI_Element *element, UI_Action *action);
 void UIConfigure_LeftReleaseAnywhere(UI_Element *element, UI_Action *action);
 void UIConfigure_RightReleaseAnywhere(UI_Element *element, UI_Action *action);
-void UIConfigure_Counter(UI_Element *element, UI_Action *action, enum Response response);
+void UIConfigure_Counter(UI_Element *element, UI_Action *action, int maximum, int num_of_companions, ...);
 void UIConfigure_ResourceCounter(UI_Element *element, UI_Action *action, int num_of_companions, ...);
 void UIConfigure_DaysCounter(UI_Element *element, UI_Action *action, int num_of_companions, ...);
 void UIConfigure_YearsCounter(UI_Element *element, UI_Action *action, int num_of_companions, ...);
@@ -182,6 +182,8 @@ void UIConfigure_RightClickSubrect(UI_Element *element, UI_Action *action, int x
 void UIConfigure_DisplayStringSubrect(UI_Element *element, UI_Action *action, char *string, int font, int x, int y, int w, int h);
 
 void UIConfigure_FillAndBorderSubrect(UI_Element *element, UI_Action *action, int x, int y, int w, int h, int red, int green, int blue,int bred, int bgreen, int bblue);
+void UIConfigure_StringCollection(UI_Element *element, UI_Action *action, int num_of_companions, int num_of_strings, ...);
+void UIConfigure_DisplayNumberSubrect(UI_Element *element, UI_Action *action, int number, int font, int x, int y, int w, int h);
 void UITrigger_Bind(UI_Action *action, UI_Action *target, int state_from, int state_to);
 
 void UIElement_Free(UI_Element *element);
