@@ -254,7 +254,7 @@ START_TEST(core_getRectFromInvRect){
    fail_unless(rect.w == (640-1), "getRectFromInvRect function test failed3 %d", rect.w);
    fail_unless(rect.h == (480-3), "getRectFromInvRect function test failed4 %d", rect.h);
 
-   SDL_DestroyWindow();
+   SDL_DestroyWindow(window);
 
 
   }
@@ -284,7 +284,7 @@ START_TEST(core_getRectFromPercRect){
    fail_unless(rect.w == 640*0.3, "getRectFromPercRect function test failed");
    fail_unless(rect.h == 480*0.5, "getRectFromPercRect function test failed");
 
-   SDL_DestroyWindow();
+   SDL_DestroyWindow(window);
 
   }
 END_TEST
@@ -329,7 +329,7 @@ START_TEST(core_getPointFromInvPoint){
    point = getPointFromInvPoint(window, x, y);
    fail_unless(point.x == -120+640, "getPointFromInvPoint function test failed");
    fail_unless(point.y == -150+480, "getPointFromInvPoint function test failed");
-   SDL_DestroyWindow();
+   SDL_DestroyWindow(window);
 
   }
 END_TEST
@@ -355,7 +355,7 @@ START_TEST(core_getPointFromPerc){
    fail_unless(point.x == 640*0.2, "getPointFromPerc function test failed");
    fail_unless(point.y == 480*0.3, "getPointFromPerc function test failed");
 
-   SDL_DestroyWindow();
+   SDL_DestroyWindow(window);
 
    }
 END_TEST
