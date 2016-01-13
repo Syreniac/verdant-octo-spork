@@ -217,7 +217,7 @@ START_TEST(core_getAngleBetweenRects){
 END_TEST
 
 
-/* Test passes! */
+/* Test passes!*/
 START_TEST(core_getCenterOfRect){
     SDL_Rect rect;
     SDL_Point point;
@@ -230,7 +230,7 @@ START_TEST(core_getCenterOfRect){
   }
 END_TEST
 
-/* Test passes! tbc*/
+/* Test passes!*/
 START_TEST(core_getRectFromInvRect){
    SDL_Window *window;
    SDL_Rect rect;
@@ -254,12 +254,13 @@ START_TEST(core_getRectFromInvRect){
    fail_unless(rect.w == (640-1), "getRectFromInvRect function test failed3 %d", rect.w);
    fail_unless(rect.h == (480-3), "getRectFromInvRect function test failed4 %d", rect.h);
 
+   SDL_DestroyWindow();
 
 
   }
 END_TEST
 
-/* Test passes! tbc*/
+/* Test passes!*/
 START_TEST(core_getRectFromPercRect){
    SDL_Window *window;
    SDL_Rect rect;
@@ -283,11 +284,12 @@ START_TEST(core_getRectFromPercRect){
    fail_unless(rect.w == 640*0.3, "getRectFromPercRect function test failed");
    fail_unless(rect.h == 480*0.5, "getRectFromPercRect function test failed");
 
+   SDL_DestroyWindow();
 
   }
 END_TEST
 
-/* Test passes! tbc*/
+/* Test passes!*/
 START_TEST(core_fileToString){
 /* testing method: generate a new text file with specified content, read the content, and delete the file*/
    FILE *fp;
@@ -308,7 +310,7 @@ START_TEST(core_fileToString){
   }
 END_TEST
 
-/* Test passes! tbc*/
+/* Test passes!*/
 START_TEST(core_getPointFromInvPoint){
    SDL_Window *window;
    SDL_Point point;
@@ -327,11 +329,12 @@ START_TEST(core_getPointFromInvPoint){
    point = getPointFromInvPoint(window, x, y);
    fail_unless(point.x == -120+640, "getPointFromInvPoint function test failed");
    fail_unless(point.y == -150+480, "getPointFromInvPoint function test failed");
+   SDL_DestroyWindow();
 
   }
 END_TEST
 
-/* Test passes! tbc*/
+/* Test passes!*/
 START_TEST(core_getPointFromPerc){
 
    SDL_Window *window;
@@ -352,10 +355,12 @@ START_TEST(core_getPointFromPerc){
    fail_unless(point.x == 640*0.2, "getPointFromPerc function test failed");
    fail_unless(point.y == 480*0.3, "getPointFromPerc function test failed");
 
+   SDL_DestroyWindow();
+
    }
 END_TEST
 
-/* Test passes! tbc*/
+/* Test passes!*/
 START_TEST(core_shrinkRectToFit){
     SDL_Rect rectA;
     SDL_Rect rectB;
@@ -404,7 +409,8 @@ START_TEST(test_handleEvent){
 
     event.type = SDL_MOUSEMOTION;
     /* int handleEvent(SDL_Event *event, GameObjectData *gameObjectData, UIData *uiData, ControlsData *controlsData, GraphicsData *graphicsData); */
-    /*fail_unless(handleEvent(&event,&gameData.gameObjectData,&gameData.uiData,&gameData.controlsData, &gameData.graphicsData) == 0, "isPointInRect function test failed!");*/
+    fail_unless(handleEvent(&event,&gameData.gameObjectData,&gameData.uiData,&gameData.controlsData, &gameData.graphicsData) == 0, "isPointInRect function test failed!");
+
   }
 END_TEST
 
@@ -485,7 +491,18 @@ int main(void)
 
   /* Adds suites into theRunner's list of suites to run. */
   srunner_add_suite (theRunner, makeSuiteForGeneric());
+  srunner_add_suite (theRunner, makeSuiteForAI());
+  srunner_add_suite (theRunner, makeSuiteForAnnouncements());
+  srunner_add_suite (theRunner, makeSuiteForAudio());
+  srunner_add_suite (theRunner, makeSuiteForConfiguration());
   srunner_add_suite (theRunner, makeSuiteForControls());
+  srunner_add_suite (theRunner, makeSuiteForGame());
+  srunner_add_suite (theRunner, makeSuiteForGame_objects());
+  srunner_add_suite (theRunner, makeSuiteForGraphics());
+  srunner_add_suite (theRunner, makeSuiteForInit());
+  srunner_add_suite (theRunner, makeSuiteForMain());
+  srunner_add_suite (theRunner, makeSuiteForUI());
+  srunner_add_suite (theRunner, makeSuiteForWorld_generation());
 
   /* Runs all the suites in theRunner's list of suites.
    * 'CK_VERBOSE' prints even passes while 'CK_NORMAL' prints just failures. */
