@@ -60,6 +60,9 @@ struct BlockFunctionTemplate{
   char name[50];
   int numOfArguments;
   int terminal;
+  int red;
+  int green;
+  int blue;
   BlockFunctionArgumentType *arguments;
 };
 

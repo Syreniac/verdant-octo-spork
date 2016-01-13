@@ -2,6 +2,8 @@
 
 #define SHOW_SUBRECTS 1
 
+static int countUIActionsNeededForAITemplate(BlockFunctionTemplate *template);
+
 static void UIAction_Init(UI_Element *element, UI_Action *action);
 static void UIAction_Free(UI_Action *action);
 static void UITrigger_Execute(UI_Action *action);
@@ -41,6 +43,51 @@ int UIAction_SlideWithMouseWheel(UI_Action *action, UIData *uiData);
 int UIAction_Minimap(UI_Action *action, UIData *uiData);
 int UIAction_MinimapMouseMove(UI_Action *action, UIData *uiData);
 int UIAction_ToggleInteger(UI_Action *action, UIData *uiData);
+
+
+static UI_Action* makeAIBlockLineLinker(UI_Element *element, int *nextAvailableActionPointer, int x, int y, char *label, enum LineOrigins lineorigin){
+	int nextAvailableAction = *nextAvailableActionPointer;
+	UIConfigure_StoreMousePosition(element, &element->actions[nextAvailableAction],2,&element->actions[nextAvailableAction+3],&element->actions[nextAvailableAction+2]);
+		element->actions[nextAvailableAction].status = 0;
+		element->actions[nextAvailableAction].new_status = 0;
+	UIConfigure_LeftClickSubrect(element, &element->actions[nextAvailableAction+1], x, y, 25, 25);
+		element->actions[nextAvailableAction+1].status = 1;
+		element->actions[nextAvailableAction+1].new_status = 1;
+		UITrigger_Bind(&element->actions[nextAvailableAction+1],&element->actions[nextAvailableAction+3],-1,1);
+		UITrigger_Bind(&element->actions[nextAvailableAction+1],&element->actions[nextAvailableAction+1],1,0);
+		UITrigger_Bind(&element->actions[nextAvailableAction+1],&element->actions[nextAvailableAction],0,1);
+		UITrigger_Bind(&element->actions[nextAvailableAction+1],&element->actions[nextAvailableAction+4],0,1);
+		UIConfigure_CalculateSibling(element, &element->actions[nextAvailableAction+2],1,&element->actions[nextAvailableAction+3]);
+			element->actions[nextAvailableAction+2].status = 0;
+			element->actions[nextAvailableAction+2].new_status = 0;
+	UIConfigure_RenderLine(element, &element->actions[nextAvailableAction+3],lineorigin,NULL);
+	UIConfigure_LeftReleaseAnywhere(element, &element->actions[nextAvailableAction+4]);
+		element->actions[nextAvailableAction+4].status = 0;
+		element->actions[nextAvailableAction+4].new_status = 0;
+		UITrigger_Bind(&element->actions[nextAvailableAction+4],&element->actions[nextAvailableAction+3],1,2);
+		UITrigger_Bind(&element->actions[nextAvailableAction+4],&element->actions[nextAvailableAction+1],0,1);
+		UITrigger_Bind(&element->actions[nextAvailableAction+4],&element->actions[nextAvailableAction],1,0);
+		UITrigger_Bind(&element->actions[nextAvailableAction+4],&element->actions[nextAvailableAction+2],0,1);
+		UITrigger_Bind(&element->actions[nextAvailableAction+4],&element->actions[nextAvailableAction+4],1,0);
+	UIConfigure_DisplayStringSubrect(element, &element->actions[nextAvailableAction+5],label,1,x,y);
+	*nextAvailableActionPointer = *nextAvailableActionPointer + 6;
+	return &element->actions[nextAvailableAction+3];
+}
+
+static int countUIActionsNeededForAITemplate(BlockFunctionTemplate *template){
+	int i = 0;
+	int count = 0;
+	while(i < template->numOfArguments){
+		switch(template->arguments[i]){
+			case BF_PRIMARY:
+			case BF_SECONDARY:
+				count += 6;
+				break;
+		}
+		i++;
+	}
+	return count;
+}
 
 UI_Element *makeHiveCellBlock(int x_offset, int y_offset, UI_Element *parent, HiveCell *hiveCell){
 	UI_Element *element = UIElement_Create(x_offset, y_offset, 50,50,6);
@@ -154,10 +201,23 @@ UI_Element *makeAITemplateScrollList(int x_offset, int y_offset, AIData *aiData,
 	return element;
 }
 
-UI_Element *makeAIBlock(int x_offset, int y_offset, char *aiString, UI_Element *parent){
+UI_Element *makeAIBlock(int x_offset, int y_offset, BlockFunctionTemplate *template, UI_Element *parent){
 	UI_Element *element2;
-	element2 = UIElement_Create(x_offset,y_offset,200,50,19);
-	UIConfigure_FillAndBorderRect(element2,&element2->actions[0],248,221,35,0,0,0,BLOCK);
+	char *aiString = template->name;
+	int nextAvailableAction = 0;
+	int i = 0;
+	int count = 8 + countUIActionsNeededForAITemplate(template);
+	element2 = UIElement_Create(x_offset,y_offset,200,50,count);
+	UI_Action *primary = NULL;
+	UI_Action *secondary = NULL;
+	/* Set it up */
+	printf("expecting %d elements\n",count);
+	UIConfigure_FillAndBorderRect(element2,
+															  &element2->actions[0],
+																template->red,
+																template->green,
+																template->blue,
+																0,0,0,BLOCK);
 	UIConfigure_ShrinkFitToParent(element2,&element2->actions[1]);
 	UIConfigure_RightClickRect(element2, &element2->actions[2]);
 		UITrigger_Bind(&element2->actions[2],&element2->actions[3],0,1);
@@ -170,66 +230,27 @@ UI_Element *makeAIBlock(int x_offset, int y_offset, char *aiString, UI_Element *
 	UIConfigure_DraggableRectOverride(element2, &element2->actions[4],1,&element2->actions[1]);
 	UIConfigure_DisplayString(element2, &element2->actions[5],aiString,0,UISTRING_ALIGN_CENTER);
 
-	/* Line 1 */
-	UIConfigure_RenderLine(element2, &element2->actions[9],BL_CORNER,NULL);
-	UIConfigure_LeftClickSubrect(element2, &element2->actions[7], 0, 25, 25, 25);
-		element2->actions[7].status = 1;
-		element2->actions[7].new_status = 1;
-		UITrigger_Bind(&element2->actions[7],&element2->actions[9],-1,1);
-		UITrigger_Bind(&element2->actions[7],&element2->actions[7],1,0);
-		UITrigger_Bind(&element2->actions[7],&element2->actions[6],0,1);
-		UITrigger_Bind(&element2->actions[7],&element2->actions[10],0,1);
-	UIConfigure_StoreMousePosition(element2, &element2->actions[6],2,&element2->actions[9],&element2->actions[8]);
-		element2->actions[6].status = 0;
-		element2->actions[6].new_status = 0;
-	UIConfigure_CalculateSibling(element2, &element2->actions[8],1,&element2->actions[9]);
-		element2->actions[8].status = 0;
-		element2->actions[8].new_status = 0;
-	UIConfigure_LeftReleaseAnywhere(element2, &element2->actions[10]);
-		element2->actions[10].status = 0;
-		element2->actions[10].new_status = 0;
-		UITrigger_Bind(&element2->actions[10],&element2->actions[9],1,2);
-		UITrigger_Bind(&element2->actions[10],&element2->actions[7],0,1);
-		UITrigger_Bind(&element2->actions[10],&element2->actions[6],1,0);
-		UITrigger_Bind(&element2->actions[10],&element2->actions[8],0,1);
-		UITrigger_Bind(&element2->actions[10],&element2->actions[10],1,0);
-		UITrigger_Bind(&element2->actions[10],&element2->actions[18],0,1);
+	nextAvailableAction = 6;
 
-	/* Line 2 */
-	UIConfigure_RenderLine(element2, &element2->actions[14],BR_CORNER,NULL);
-	UIConfigure_LeftClickSubrect(element2, &element2->actions[12], 175, 25, 25, 25);
-		UITrigger_Bind(&element2->actions[12],&element2->actions[14],-1,1);
-		UITrigger_Bind(&element2->actions[12],&element2->actions[12],1,0);
-		UITrigger_Bind(&element2->actions[12],&element2->actions[11],0,1);
-		UITrigger_Bind(&element2->actions[12],&element2->actions[15],0,1);
-	UIConfigure_StoreMousePosition(element2, &element2->actions[11],2,&element2->actions[14],&element2->actions[13]);
-		element2->actions[11].status = 0;
-		element2->actions[11].new_status = 0;
-	UIConfigure_CalculateSibling(element2, &element2->actions[13],1,&element2->actions[14]);
-		element2->actions[13].status = 0;
-		element2->actions[13].new_status = 0;
-	UIConfigure_LeftReleaseAnywhere(element2, &element2->actions[15]);
-		element2->actions[15].status = 0;
-		element2->actions[15].new_status = 0;
-		UITrigger_Bind(&element2->actions[15],&element2->actions[14],1,2);
-		UITrigger_Bind(&element2->actions[15],&element2->actions[12],0,1);
-		UITrigger_Bind(&element2->actions[15],&element2->actions[11],1,0);
-		UITrigger_Bind(&element2->actions[15],&element2->actions[13],0,1);
-		UITrigger_Bind(&element2->actions[15],&element2->actions[15],1,0);
-		UITrigger_Bind(&element2->actions[15],&element2->actions[18],0,1);
+	while(i < template->numOfArguments){
+		printf("%d\n",nextAvailableAction);
+		switch(template->arguments[i]){
+			case BF_PRIMARY:
+				printf("making primary\n");
+				primary = makeAIBlockLineLinker(element2, &nextAvailableAction, 0,25, "Yes", BL_CORNER);
+				break;
+			case BF_SECONDARY:
+				printf("making secondary\n");
+				secondary = makeAIBlockLineLinker(element2, &nextAvailableAction, 175,25, "No", BR_CORNER);
+				break;
+		}
+		i++;
+	}
 
-	/* Lines Clear */
-	UIConfigure_LeftClickRect(element2, &element2->actions[16]);
-		element2->actions[16].status = 0;
-		element2->actions[16].new_status = 0;
-		UITrigger_Bind(&element2->actions[16],&element2->actions[9],-1,4);
-		UITrigger_Bind(&element2->actions[16],&element2->actions[14],-1,4);
-		UITrigger_Bind(&element2->actions[16],&element2->actions[7],0,1);
-		UITrigger_Bind(&element2->actions[16],&element2->actions[16],1,0);
-		UITrigger_Bind(&element2->actions[16],&element2->actions[18],0,1);
-
-	UIConfigure_DeleteKeyFlagDestroy(element2, &element2->actions[17]);
-	UIConfigure_SetUpAiBlock(element2,&element2->actions[18],3,&element2->actions[5],&element2->actions[9],&element2->actions[14]);
+	UIConfigure_DeleteKeyFlagDestroy(element2, &element2->actions[nextAvailableAction]);
+	UIConfigure_SetUpAiBlock(element2,&element2->actions[nextAvailableAction+1],3,&element2->actions[5],primary,secondary);
+	printf("nextAvailableAction %d && element2->num_of_actions %d\n",nextAvailableAction,element2->num_of_actions);
+	assert(nextAvailableAction < element2->num_of_actions);
 
 	UIElement_Reparent(element2,parent);
 	return element2;
@@ -280,6 +301,90 @@ UI_Element *UIElement_Create(int x, int y, int w, int h, int num_of_actions){
 	   element->exposed_data_count = 0;
 	   return element;
 }
+
+/* UIAction_DisplayStringSubrect
+
+	*/
+
+#define currentString strings[0]
+#define newString strings[1]
+#define fontID integers[0]
+#define alignOffset integers[3]
+#define rectX integers[4]
+#define rectY integers[5]
+
+
+int UIAction_DisplayStringSubrect(UI_Action *action, UIData *uiData){
+	GraphicsData *graphicsData;
+	SDL_Color colour;
+	SDL_Surface *temp;
+	SDL_Rect temp_rect;
+	int w,h;
+	colour.r = 0;
+	colour.g = 0;
+	colour.b = 0;
+	graphicsData = uiData->graphicsData;
+	if(action->currentString != NULL && action->newString != NULL && strcmp(action->currentString,action->newString) != 0){
+		action->currentString = realloc(action->currentString, strlen(action->newString)+1);
+		strcpy(action->currentString,action->newString);
+		SDL_DestroyTexture(action->texture);
+		temp = TTF_RenderText_Blended(graphicsData->fonts[action->fontID],action->currentString,colour);
+		action->texture = SDL_CreateTextureFromSurface(graphicsData->renderer,temp);
+		SDL_FreeSurface(temp);
+		TTF_SizeText(graphicsData->fonts[action->fontID],action->currentString,&w,&h);
+		action->alignOffset = w;
+	}
+	if(UIElement_isVisible(action->element) && action->element->rect.h > TTF_FontHeight(graphicsData->fonts[action->fontID]) && action->currentString != NULL && action->status != 0 && action->texture != NULL){
+		temp_rect.x = action->rectX + action->element->rect.x;
+		temp_rect.y = action->rectY + action->element->rect.y;
+		TTF_SizeText(graphicsData->fonts[action->fontID], action->currentString, &temp_rect.w, &temp_rect.h);
+		if(temp_rect.x > action->element->rect.x + action->element->rect.w){
+			temp_rect.x-= temp_rect.w/2;
+		}
+		else{
+			temp_rect.x+= temp_rect.w/2;
+
+		}
+		shrinkRectToFit(&temp_rect, &action->element->rect);
+		SDL_RenderCopy(graphicsData->renderer,action->texture,NULL,&temp_rect);
+		return 1;
+	}
+	return 0;
+}
+
+void UIConfigure_DisplayStringSubrect(UI_Element *element, UI_Action *action, char *string, int font, int x, int y){
+	#if DEBUGGING==1
+	printf("UIConfigure_DisplayString\n");
+	#endif
+	UIAction_Init(element,action);
+	action->response = UPDATE;
+	action->function = UIAction_DisplayStringSubrect;
+	action->strings = malloc(sizeof(char*) * 2);
+	if(string != NULL){
+		action->currentString = calloc(strlen(string)+1,sizeof(char));
+		action->newString = calloc(strlen(string)+1,sizeof(char));
+		strcpy(action->newString, string);
+	}
+	else{
+		action->currentString = NULL;
+		action->newString = NULL;
+	}
+	action->new_status = 1;
+	action->status = 1;
+	action->num_of_strings = 2;
+	action->integers = calloc(6,sizeof(int));
+	action->fontID = font;
+	action->rectX = x;
+	action->rectY = y;
+	action->num_of_integers = 4;
+}
+
+#undef currentString
+#undef newString
+#undef fontID
+#undef alignStyle
+#undef alignOffset
+
 
 /* UIAction_ClickSubrect
 
@@ -1585,7 +1690,7 @@ int UIAction_AddAiBlock(UI_Action *action, UIData *uiData){
 	BlockFunctionTemplate *template;
 	if(action->status == 1){
 		template = action->linkedTemplate;
-		makeAIBlock(action->external->rect.x,action->external->rect.y,template->name,action->external);
+		makeAIBlock(action->external->rect.x,action->external->rect.y,template,action->external);
 		action->new_status = 0;
 		return 1;
 	}
@@ -2612,9 +2717,6 @@ void UIConfigure_FillAndBorderRect(UI_Element *element, UI_Action *action, int f
 		case HIVECELL:
       action->function = UIAction_DrawHivecell;
       break;
-		case BLOCK:
-      action->function = UIAction_DrawBlock;
-      break;
     case STOPBOX:
       action->function = UIAction_DrawStopbox;
       break;
@@ -3277,7 +3379,6 @@ void UIRoot_ExecuteUpwards(UIData *uiData, enum Response response, int stopAtFir
  }
 
 static void UIAction_Init(UI_Element *element, UI_Action *action){
-	assert(element->num_of_actions >= action-element->actions);
 	action->response = NONE;
 	action->function = NULL;
 	action->element = element;

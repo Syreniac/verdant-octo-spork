@@ -179,6 +179,7 @@ void UIConfigure_SetCellToSpawn(UI_Element *element, UI_Action *action, HiveCell
 void UIConfigure_FillSubrect(UI_Element *element, UI_Action *action, int x, int y, int w, int h, int red, int green, int blue);
 void UIConfigure_LeftClickSubrect(UI_Element *element, UI_Action *action, int x, int y, int w, int h);
 void UIConfigure_RightClickSubrect(UI_Element *element, UI_Action *action, int x, int y, int w, int h);
+void UIConfigure_DisplayStringSubrect(UI_Element *element, UI_Action *action, char *string, int font, int x, int y);
 
 void UITrigger_Bind(UI_Action *action, UI_Action *target, int state_from, int state_to);
 
@@ -194,7 +195,7 @@ void UIRoot_Destroy(UIData *uiData);
 void UIRoot_Pack(UIData *uiData, GraphicsData *graphicsData);
 void UIRoot_ExecuteUpwards(UIData *uiData, enum Response response, int stopAtFirst);
 
-UI_Element *makeAIBlock(int x_offset, int y_offset, char *aiString, UI_Element *parent);
+UI_Element *makeAIBlock(int x_offset, int y_offset, BlockFunctionTemplate *template, UI_Element *parent);
 UI_Element *makeStartBlock(int x_offset, int y_offset, UI_Element *parent);
 UI_Element *makeAIResetButton(int x_offset, int y_offset, UI_Element *parent);
 UI_Element *makeAITemplateScrollList(int x_offset, int y_offset, AIData *aiData, UI_Element *parent, UI_Element *blockHolder);

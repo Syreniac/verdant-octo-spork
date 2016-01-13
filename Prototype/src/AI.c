@@ -687,10 +687,13 @@ int testBlockFunctionRootForStart(BlockFunctionRoot *root){
 	return 0;
 }
 
-static void makeAIBlockTemplate(AIData *aiData, char name[50], int numOfArguments, BlockFunctionArgumentType *arguments){
+static void makeAIBlockTemplate(AIData *aiData, char name[50], int r, int g, int b, int numOfArguments, BlockFunctionArgumentType *arguments){
   BlockFunctionTemplate *template = malloc(sizeof(BlockFunctionTemplate));
   BlockFunctionTemplate *previous = aiData->templates;
   int i = 0;
+  template->red = r;
+  template->green = g;
+  template->blue = b;
   strcpy(template->name,name);
   if(numOfArguments != 0){
     template->arguments = malloc(sizeof(BlockFunctionArgumentType) * numOfArguments);
@@ -736,34 +739,34 @@ AIData initAIData(void){
   	}
   }
   aiData.templates = NULL;
-	makeAIBlockTemplate(&aiData,"Void",1,arguments);
-	makeAIBlockTemplate(&aiData,"IfIdle",2,arguments);
-	makeAIBlockTemplate(&aiData,"IfReturning",2,arguments);
-	makeAIBlockTemplate(&aiData,"IfHasCargo",2,arguments);
-	makeAIBlockTemplate(&aiData,"IfOutsideBounds",2,arguments);
-	makeAIBlockTemplate(&aiData,"IfNearHive",2,arguments);
-	makeAIBlockTemplate(&aiData,"SetHeadingRandomly",1,arguments);
-	makeAIBlockTemplate(&aiData,"ReturnToHive",1,arguments);
-	makeAIBlockTemplate(&aiData,"RememberCurrentLocation",1,arguments);
-	makeAIBlockTemplate(&aiData,"GoToStoredLocation",2,arguments);
-	makeAIBlockTemplate(&aiData,"ForgetStoredLocation",1,arguments);
-	makeAIBlockTemplate(&aiData,"IfNodeFound",2,arguments);
-	makeAIBlockTemplate(&aiData,"HeadToFoundNode",1,arguments);
-	makeAIBlockTemplate(&aiData,"HasStoredLocation",2,arguments);
-  makeAIBlockTemplate(&aiData,"IfNearOtherWorker",2,arguments);
-  makeAIBlockTemplate(&aiData,"CoinFlip",2,arguments);
-  makeAIBlockTemplate(&aiData,"OneInAHundred",2,arguments);
-  makeAIBlockTemplate(&aiData,"Sleep",1,arguments);
-  makeAIBlockTemplate(&aiData,"CountNearWorkers",1,arguments);
-  makeAIBlockTemplate(&aiData,"IfCountZero",2,arguments);
-  makeAIBlockTemplate(&aiData,"LoadCount",1,arguments);
-  makeAIBlockTemplate(&aiData,"SaveCount",1,arguments);
-  makeAIBlockTemplate(&aiData,"LoadCountFromOther",1,arguments);
-  makeAIBlockTemplate(&aiData,"SaveCountFromOther",1,arguments);
-  makeAIBlockTemplate(&aiData,"PickNearbyWorker",2,arguments);
-  makeAIBlockTemplate(&aiData,"IfGreaterThanSaved",2,arguments);
-  makeAIBlockTemplate(&aiData,"CopyPointFromSelected",1,arguments);
-  makeAIBlockTemplate(&aiData,"CountNearFlowers",1,arguments);
+	makeAIBlockTemplate(&aiData,"Void",248,221,35,1,arguments);
+	makeAIBlockTemplate(&aiData,"IfIdle",248,221,35,2,arguments);
+	makeAIBlockTemplate(&aiData,"IfReturning",248,221,35,2,arguments);
+	makeAIBlockTemplate(&aiData,"IfHasCargo",248,221,35,2,arguments);
+	makeAIBlockTemplate(&aiData,"IfOutsideBounds",248,221,35,1,arguments);
+	makeAIBlockTemplate(&aiData,"IfNearHive",248,221,35,2,arguments);
+	makeAIBlockTemplate(&aiData,"SetHeadingRandomly",248,221,35,1,arguments);
+	makeAIBlockTemplate(&aiData,"ReturnToHive",248,221,35,1,arguments);
+	makeAIBlockTemplate(&aiData,"RememberCurrentLocation",248,221,35,1,arguments);
+	makeAIBlockTemplate(&aiData,"GoToStoredLocation",248,221,35,2,arguments);
+	makeAIBlockTemplate(&aiData,"ForgetStoredLocation",248,221,35,1,arguments);
+	makeAIBlockTemplate(&aiData,"IfNodeFound",248,221,35,2,arguments);
+	makeAIBlockTemplate(&aiData,"HeadToFoundNode",248,221,35,1,arguments);
+	makeAIBlockTemplate(&aiData,"HasStoredLocation",248,221,35,2,arguments);
+  makeAIBlockTemplate(&aiData,"IfNearOtherWorker",248,221,35,2,arguments);
+  makeAIBlockTemplate(&aiData,"CoinFlip",248,221,35,2,arguments);
+  makeAIBlockTemplate(&aiData,"OneInAHundred",248,221,35,2,arguments);
+  makeAIBlockTemplate(&aiData,"Sleep",248,221,35,1,arguments);
+  makeAIBlockTemplate(&aiData,"CountNearWorkers",248,221,35,1,arguments);
+  makeAIBlockTemplate(&aiData,"IfCountZero",248,221,35,2,arguments);
+  makeAIBlockTemplate(&aiData,"LoadCount",248,221,35,1,arguments);
+  makeAIBlockTemplate(&aiData,"SaveCount",248,221,35,1,arguments);
+  makeAIBlockTemplate(&aiData,"LoadCountFromOther",248,221,35,1,arguments);
+  makeAIBlockTemplate(&aiData,"SaveCountFromOther",248,221,35,1,arguments);
+  makeAIBlockTemplate(&aiData,"PickNearbyWorker",248,221,35,2,arguments);
+  makeAIBlockTemplate(&aiData,"IfGreaterThanSaved",248,221,35,2,arguments);
+  makeAIBlockTemplate(&aiData,"CopyPointFromSelected",248,221,35,1,arguments);
+  makeAIBlockTemplate(&aiData,"CountNearFlowers",248,221,35,1,arguments);
 
 	return aiData;
 }
