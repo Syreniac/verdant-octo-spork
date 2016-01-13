@@ -65,7 +65,7 @@ UI_Element *makeStartBlock(int x_offset, int y_offset, UI_Element *parent){
 	UIConfigure_DisplayString(element, &element->actions[2],"START",0,UISTRING_ALIGN_CENTER);
 	UIConfigure_RenderLine(element, &element->actions[7],BR_CORNER,NULL);
 
-	UIConfigure_LeftClickSubrect(element, &element->actions[4], 25, 25, 25, 25);
+	UIConfigure_LeftClickSubrect(element, &element->actions[4], 175, 25, 25, 25);
 		UITrigger_Bind(&element->actions[4],&element->actions[7],-1,1);
 		UITrigger_Bind(&element->actions[4],&element->actions[4],1,0);
 		UITrigger_Bind(&element->actions[4],&element->actions[5],0,1);
@@ -87,7 +87,7 @@ UI_Element *makeStartBlock(int x_offset, int y_offset, UI_Element *parent){
 		element->actions[3].status = 0;
 		element->actions[3].new_status = 0;
 	UIConfigure_SetUpAiBlock(element,&element->actions[8],2,&element->actions[2],&element->actions[7]);
-	UIConfigure_FillSubrect(element, &element->actions[9], 25, 25, 25, 25, 255, 255, 255);
+	UIConfigure_FillSubrect(element, &element->actions[9], 175, 25, 25, 25, 255, 255, 255);
 	UIElement_Reparent(element,parent);
 	return element;
 }
@@ -198,8 +198,6 @@ UI_Element *makeAIBlock(int x_offset, int y_offset, char *aiString, UI_Element *
 	/* Line 2 */
 	UIConfigure_RenderLine(element2, &element2->actions[14],BR_CORNER,NULL);
 	UIConfigure_LeftClickSubrect(element2, &element2->actions[12], 175, 25, 25, 25);
-		element2->actions[12].status = 0;
-		element2->actions[12].new_status = 0;
 		UITrigger_Bind(&element2->actions[12],&element2->actions[14],-1,1);
 		UITrigger_Bind(&element2->actions[12],&element2->actions[12],1,0);
 		UITrigger_Bind(&element2->actions[12],&element2->actions[11],0,1);
