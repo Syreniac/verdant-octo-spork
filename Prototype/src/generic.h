@@ -51,7 +51,7 @@ FILE *DEBUGGING_FILE_FREE;
 #define RAIN_TILE_HEIGHT 9
 #define RAIN_FRAME_DELAY 4
 
-#define INITIAL_NUMBER_OF_WORKERS 1
+#define INITIAL_NUMBER_OF_WORKERS 150
 
 /*lower values result in a higher chance of bees regaining flight when wet, with
 each call to updateProgrammableWorker*/
@@ -129,7 +129,7 @@ each call to updateProgrammableWorker*/
 
 #define LENGTH_OF_STATUS_STRING 32
 
-#define WINTER_COUNTDOWN_SPEED 0.0
+#define WINTER_COUNTDOWN_SPEED 0.02
 
 #define MAX_DAYS_TO_WINTER 301
 #define AUTUMN_THRESHOLD (MAX_DAYS_TO_WINTER / 3)
@@ -164,6 +164,7 @@ typedef enum personGraphic {WITH_ICE_CREAM_STRIDE1, WITH_ICE_CREAM_STRIDE2} pers
 #define NO_ICECREAM_INDEX_OFFSET 2
 
 #define SPIDER 0
+#define SPIDER_ATTACK_AREA 50
 
 
 #if DEBUGGING==1

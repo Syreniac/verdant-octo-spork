@@ -637,6 +637,9 @@ void runAI(AIData *aiData, GameObjectData *gameObjectData, int ticks){
 
      This function is where we run the AI over all the ProgrammableWorkers. */
   ProgrammableWorker *programmableWorker;
+  if(&aiData->blockFunctionRoots[0].numOfBlockFunctions == 0){
+    return;
+  }
   for(programmableWorker = gameObjectData -> first_programmable_worker; programmableWorker != NULL; programmableWorker = programmableWorker->next){
     runBlockFunctionRootOverWorker(&aiData->blockFunctionRoots[0],
                                    programmableWorker,

@@ -240,6 +240,7 @@ ProgrammableWorker *createProgrammableWorker(GameObjectData *gameObjectData){
 
 	programmableWorker->stunned_after_sting = 0;
 	programmableWorker->insideHive = 0;
+	programmableWorker->fighting_spider = 0;
 
 
 
@@ -607,23 +608,37 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
 			}
 		}
 		else{ /*programmable worker has been caught in rain and hasn't regained ability to fly yet*/
-  		int flapChance;
-  		programmableWorker->beeStatus = "Wet, can't fly";
-  		if(programmableWorker->displayInfo){
-				sprintf(tempString," Status: %s", programmableWorker
-				->beeStatus);
-				setObjectInfoDisplay(&announcementsData->objectInfoDisplay, tempString, STATUS);
-		}
-  		if(!(rand() % CHANCE_OF_REGAINING_FLIGHT)){
-  			programmableWorker->wet_and_cant_fly = 0;
+			int flapChance;
+			programmableWorker->beeStatus = "Wet, can't fly";
+			if(programmableWorker->displayInfo){
+					sprintf(tempString," Status: %s", programmableWorker
+					->beeStatus);
+					setObjectInfoDisplay(&announcementsData->objectInfoDisplay, tempString, STATUS);
+			}
+			if(!(rand() % CHANCE_OF_REGAINING_FLIGHT)){
+				programmableWorker->wet_and_cant_fly = 0;
 
-  		}
-  		if((flapChance = rand() % 100)){
-    		if(!(rand() % flapChance)){
-    		   programmableWorker->currentGraphicIndex = (programmableWorker->currentGraphicIndex + 1) % 2;
-    		}
-  		}
+			}
+			if((flapChance = rand() % 100)){
+				if(!(rand() % flapChance)){
+				   programmableWorker->currentGraphicIndex = (programmableWorker->currentGraphicIndex + 1) % 2;
+				}
+			}
 		}
+		
+		/*for battling with enemies*/
+		if(isPointInRangeOf(getCenterOfRect(programmableWorker->rect), getCenterOfRect(gameObjectData->roamingSpider->rect),SPIDER_ATTACK_AREA)) {
+			programmableWorker->beeStatus = "Fighting a spider!";
+			if(programmableWorker->displayInfo){
+					sprintf(tempString," Status: %s", programmableWorker
+					->beeStatus);
+					setObjectInfoDisplay(&announcementsData->objectInfoDisplay, tempString, STATUS);
+			}
+			programmableWorker->fighting_spider = 1;
+			programmableWorker->speed = 0.0;
+			printf("DEBUG: Worker Bee caught by spider\n\n");
+		}
+		
 		  /* Sensory Perception */
 		if(programmableWorker->brain.foundNode != NULL &&
 		(getDistance2BetweenRects(programmableWorker->rect,programmableWorker->brain.foundNode->rect) >= WORKER_SENSE_RANGE * WORKER_SENSE_RANGE ||
@@ -837,16 +852,27 @@ void updateRoamingSpider(GameObjectData *gameObjectData, int ticks){
 	
 	/*if roamingSpider not yet stung, and bee is close enough to sting*/
 	/*STING_HIT_RADIUS can be made so small that this would never actually happen unless it's behaviour*/
-	/*that is explicitly programmed into the bees, or (as it currently is) but enough to happen on an occasional collision*/
+	/*if any bees are within the attack radius, the state of the spider is set to eating bees.*/
   	if(!gameObjectData->roamingSpider->stung && countProgrammableWorkersInRange(gameObjectData,
-  	getCenterOfRect(gameObjectData->roamingSpider->rect), STING_HIT_RADIUS) != 0){
+  	getCenterOfRect(gameObjectData->roamingSpider->rect), SPIDER_ATTACK_AREA) == 1){
   	
-  		gameObjectData->roamingSpider->stung = 1;
   		/*eat bee!*/
   		gameObjectData->roamingSpider->eating_bee = 1;
   
-  		/*run for your life!*/
-  		gameObjectData->roamingSpider->speed = 0.1;
+  		/*spider stops moving to eat!*/
+  		gameObjectData->roamingSpider->speed = 0.0;
+		
+		/*spider attacked by another bee who saves his friend*/
+		if(!gameObjectData->roamingSpider->stung && countProgrammableWorkersInRange(gameObjectData, getCenterOfRect(gameObjectData->roamingSpider->rect), SPIDER_ATTACK_AREA) > 1){
+  	
+			gameObjectData->roamingSpider->stung = 1;
+			
+			/*eat bee!*/
+			gameObjectData->roamingSpider->eating_bee = 0;
+  
+			/*run for your life!*/
+			gameObjectData->roamingSpider->speed = 0.5;
+		}
   		
   	}
 
@@ -1097,7 +1123,7 @@ void reInitialiseRoamingSpider(RoamingSpider *roamingSpider){
 
 	roamingSpider->eating_bee = 0;
 	roamingSpider->going_home = 0;
-	roamingSpider->speed = 0.1; /*pixels per millisecond*/
+	roamingSpider->speed = 0.5; /*pixels per millisecond*/
 	roamingSpider->stung = 0;
 
 	roamingSpider->countDownToStride = (double)STRIDE_FREQUENCY / roamingSpider->speed;

@@ -140,6 +140,8 @@ int game_welcome_page(GraphicsData graphicsData, AudioData audioData){
     UIElement_Reparent(element2,initData.uiData.root);
 	UIRoot_Pack(&initData.uiData,&initData.graphicsData);
 
+	initData.uiData.audioData = &initData.audioData;
+	
    playMusic(&initData.audioData,0);
 
    while(menuRunning){
@@ -181,7 +183,6 @@ int game_welcome_page(GraphicsData graphicsData, AudioData audioData){
 
    fadeOutMusic(&initData.audioData);
 
-   gameStart(graphicsData,audioData);
    return 0;
 }
 
