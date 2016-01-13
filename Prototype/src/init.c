@@ -183,7 +183,6 @@ int game_welcome_page(GraphicsData graphicsData, AudioData audioData){
 
    fadeOutMusic(&initData.audioData);
 
-   gameStart(graphicsData,audioData);
    return 0;
 }
 
