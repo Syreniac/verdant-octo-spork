@@ -492,18 +492,18 @@ int main(void)
 
   /* Adds suites into theRunner's list of suites to run. */
   srunner_add_suite (theRunner, makeSuiteForGeneric());
-  srunner_add_suite (theRunner, makeSuiteForAI());
-  srunner_add_suite (theRunner, makeSuiteForAnnouncements());
-  srunner_add_suite (theRunner, makeSuiteForAudio());
-  srunner_add_suite (theRunner, makeSuiteForConfiguration());
-  srunner_add_suite (theRunner, makeSuiteForControls());
-  srunner_add_suite (theRunner, makeSuiteForGame());
-  srunner_add_suite (theRunner, makeSuiteForGame_objects());
-  srunner_add_suite (theRunner, makeSuiteForGraphics());
-  srunner_add_suite (theRunner, makeSuiteForInit());
-  srunner_add_suite (theRunner, makeSuiteForMain());
-  srunner_add_suite (theRunner, makeSuiteForUI());
-  srunner_add_suite (theRunner, makeSuiteForWorld_generation());
+//  srunner_add_suite (theRunner, makeSuiteForAI());
+//  srunner_add_suite (theRunner, makeSuiteForAnnouncements());
+//  srunner_add_suite (theRunner, makeSuiteForAudio());
+//  srunner_add_suite (theRunner, makeSuiteForConfiguration());
+//  srunner_add_suite (theRunner, makeSuiteForControls());
+//  srunner_add_suite (theRunner, makeSuiteForGame());
+//  srunner_add_suite (theRunner, makeSuiteForGame_objects());
+//  srunner_add_suite (theRunner, makeSuiteForGraphics());
+//  srunner_add_suite (theRunner, makeSuiteForInit());
+//  srunner_add_suite (theRunner, makeSuiteForMain());
+//  srunner_add_suite (theRunner, makeSuiteForUI());
+//  srunner_add_suite (theRunner, makeSuiteForWorld_generation());
 
   /* Runs all the suites in theRunner's list of suites.
    * 'CK_VERBOSE' prints even passes while 'CK_NORMAL' prints just failures. */
