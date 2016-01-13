@@ -1,4 +1,4 @@
-#include "generic.h"
+#include "configuration.h"
 
 
 typedef struct GraphicsData GraphicsData;
@@ -23,11 +23,14 @@ enum WeatherStatus {/*Should belong in game_objects.h, but graphics.c needs to a
 
 #define BEE_FLAP_GRAPHIC_1 0
 #define BEE_FLAP_GRAPHIC_2 1
+
 #define SCROLLHANDLE_GRAPHIC 0
 #define CROSSBOX_GRAPHIC 1
 #define COMPILEBOX_GRAPHIC 2
 #define STOP_GRAPHIC 3
 #define BLOCK_GRAPHIC 4
+#define HIVECELL_GRAPHIC 5
+#define HIVECELLMASK_GRAPHIC 6
 
 
 struct GraphicsData{

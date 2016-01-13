@@ -154,21 +154,16 @@ void fadeInChannel(int channel, AudioData *audioData, char* name) {
 }
 
 void muteMusic(AudioData *audioData) {
-						printf("DEBUG: muteMusic START\n");
-						printf("DEBUG: audioData->music_mute = %d\n", audioData->music_mute);
 	if (audioData->music_mute == 0) {
-					printf("DEBUG: muteMusic IF\n");
 		Mix_Volume(1, 0);
 		printf("Music muted.\n");
 		audioData->music_mute = 1;
 	}
 	else {
-						printf("DEBUG: muteMusic ELSE\n");
 		Mix_Volume(1, 128);
 		printf("Music un-muted.\n");		
 		audioData->music_mute = 0;
 	}
-						printf("DEBUG: muteMusic END\n");
 }
 
 void muteSoundEffects(AudioData *audioData) {
