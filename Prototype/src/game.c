@@ -668,7 +668,6 @@ int gameLoop(GameData *gameData){
 
   while (SDL_PollEvent(&event)){
     continuing = handleEvent(&event,&gameData->gameObjectData,&gameData->uiData,&gameData->controlsData, &gameData->graphicsData);
-		printf("continuing after event %d\n",continuing);
 	  if(continuing != 1){
 		  printf("escape\n");
 		  return continuing;
