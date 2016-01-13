@@ -321,12 +321,23 @@ END_TEST
 /* From controls.h */
 START_TEST(test_handleEvent){
     SDL_Event event;
-    /* see startGame in game.c */
     GameData gameData;
 
-    event.type = SDL_MOUSEMOTION;
-    /* int handleEvent(SDL_Event *event, GameObjectData *gameObjectData, UIData *uiData, ControlsData *controlsData, GraphicsData *graphicsData); */
-    fail_unless(handleEvent(&event,&gameData.gameObjectData,&gameData.uiData,&gameData.controlsData, &gameData.graphicsData) == 0, "isPointInRect function test failed!");
+    SDL_Init(SDL_INIT_VIDEO);
+    /* see startGame in game.c */
+
+    event.type = SDL_KEYDOWN;
+    event.key.type = SDL_KEYDOWN;
+    event.key.state = SDL_PRESSED;
+
+    fail_unless(handleEvent(&event,&gameData.gameObjectData,&gameData.uiData,&gameData.controlsData, &gameData.graphicsData) == 1);
+
+    event.key.type = 0;
+    event.key.state = 0;
+    event.type = SDL_QUIT;
+    event.quit.type = SDL_QUIT;
+
+    fail_unless(handleEvent(&event,&gameData.gameObjectData,&gameData.uiData,&gameData.controlsData, &gameData.graphicsData) == 0);
   }
 END_TEST
 

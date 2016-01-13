@@ -685,7 +685,7 @@ int gameLoop(GameData *gameData){
   paintBackground(&gameData->graphicsData,0,200,100);
 
   updateGameObjects(&gameData->gameObjectData, &gameData->audioData, &gameData->graphicsData, &gameData->announcementsData, gameData->delta);
- 
+
 
 	  UIRoot_Execute(&gameData->uiData,UPDATE,0);
 	  runAI(&gameData->aiData,&gameData->gameObjectData,gameData->delta);
