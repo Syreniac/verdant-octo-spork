@@ -394,6 +394,8 @@ END_TEST
 
 /* Test segfaults. Matt's input: "SDL_Events are weird." */
 /* From controls.h */
+
+/* Test passes!*/
 START_TEST(test_handleEvent){
     SDL_Event event;
     GameData gameData;
@@ -412,12 +414,71 @@ START_TEST(test_handleEvent){
     event.quit.type = SDL_QUIT;
 
     fail_unless(handleEvent(&event,&gameData.gameObjectData,&gameData.uiData,&gameData.controlsData, &gameData.graphicsData) == 0);
+    SDL_Quit();
   }
 END_TEST
 
+/* Test passes!*/
+START_TEST(test_keydown){
+    SDL_Event event;
+    GameData gameData;
+    SDL_Init(SDL_INIT_VIDEO);
+    /* see startGame in game.c */
 
+    event.type = SDL_KEYDOWN;
+    event.key.type = SDL_KEYDOWN;
+    event.key.state = SDL_PRESSED;
 
+    fail_unless(keydown(&gameData.controlsData, &gameData.gameObjectData,&gameData.graphicsData, &gameData.uiData,&event) == 1);
+    SDL_Quit();
 
+  }
+END_TEST
+
+/* Test passes!*/
+START_TEST(test_keyup){
+    SDL_Event event;
+    GameData gameData;
+    SDL_Init(SDL_INIT_VIDEO);
+    /* see startGame in game.c */
+
+    event.type = SDL_KEYUP;
+    event.key.type = SDL_KEYUP;
+    event.key.state = SDL_RELEASED;
+
+    fail_unless(keyup(&gameData.controlsData, &gameData.gameObjectData,&gameData.uiData,&event) == 1);
+    SDL_Quit();
+
+  }
+END_TEST
+
+START_TEST(test_panScreen){
+    SDL_Event event;
+    GameData gameData;
+    int delta_t = 1;
+    SDL_Init(SDL_INIT_VIDEO);
+    /* see startGame in game.c */
+
+    /*fail if cannot panScreen*/
+    panScreen(&gameData.graphicsData, &gameData.controlsData, delta_t);
+    SDL_Quit();
+
+  }
+END_TEST
+
+START_TEST(test_initControlData){
+    SDL_Event event;
+    GameData gameData;
+    SDL_Init(SDL_INIT_VIDEO);
+    /* see startGame in game.c */
+
+    initControlData(&gameData.controlsData);
+
+    /*fail if cannot perform the function initControlData*/
+    SDL_Quit();
+
+  }
+END_TEST
 
 
 
@@ -473,6 +534,10 @@ Suite *makeSuiteForControls(void)
 
   /* Adds tests to the 'core' testcase. */
   tcase_add_test(core, test_handleEvent);
+  tcase_add_test(core, test_keydown);
+  tcase_add_test(core, test_keyup);
+  tcase_add_test(core, test_panScreen);
+  tcase_add_test(core, test_initControlData);
 
   /* Adds tc_core to the testcases in the suite. */
   suite_add_tcase(controls, core);
@@ -492,18 +557,18 @@ int main(void)
 
   /* Adds suites into theRunner's list of suites to run. */
   srunner_add_suite (theRunner, makeSuiteForGeneric());
-  srunner_add_suite (theRunner, makeSuiteForAI());
+/*  srunner_add_suite (theRunner, makeSuiteForAI());
   srunner_add_suite (theRunner, makeSuiteForAnnouncements());
   srunner_add_suite (theRunner, makeSuiteForAudio());
-  srunner_add_suite (theRunner, makeSuiteForConfiguration());
+  srunner_add_suite (theRunner, makeSuiteForConfiguration());*/
   srunner_add_suite (theRunner, makeSuiteForControls());
-  srunner_add_suite (theRunner, makeSuiteForGame());
+/*  srunner_add_suite (theRunner, makeSuiteForGame());
   srunner_add_suite (theRunner, makeSuiteForGame_objects());
   srunner_add_suite (theRunner, makeSuiteForGraphics());
   srunner_add_suite (theRunner, makeSuiteForInit());
   srunner_add_suite (theRunner, makeSuiteForMain());
   srunner_add_suite (theRunner, makeSuiteForUI());
-  srunner_add_suite (theRunner, makeSuiteForWorld_generation());
+  srunner_add_suite (theRunner, makeSuiteForWorld_generation());*/
 
   /* Runs all the suites in theRunner's list of suites.
    * 'CK_VERBOSE' prints even passes while 'CK_NORMAL' prints just failures. */
