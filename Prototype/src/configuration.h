@@ -21,3 +21,4 @@ struct ConfigurationData{
 
 void initConfigurationData(ConfigurationData *configurationData);
 ConfigurationFlag *makeConfigurationFlag(char *data);
+int getConfiguredInt(ConfigurationData *configurationData, char *name);

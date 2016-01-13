@@ -1,8 +1,6 @@
 #include "UI.h"
 
-#define RENDERRECT_R integers[0]
-#define RENDERRECT_B integers[1]
-#define RENDERRECT_G integers[2]
+#define SHOW_SUBRECTS 1
 
 static void UIAction_Init(UI_Element *element, UI_Action *action);
 static void UIAction_Free(UI_Action *action);
@@ -61,14 +59,13 @@ UI_Element *makeHiveCellBlock(int x_offset, int y_offset, UI_Element *parent, Hi
 
 UI_Element *makeStartBlock(int x_offset, int y_offset, UI_Element *parent){
 	UI_Element *element;
-	element = UIElement_Create(x_offset,y_offset,200,50,9);
-	printf("start block @ %p\n",element);
+	element = UIElement_Create(x_offset,y_offset,200,50,10);
 	UIConfigure_FillAndBorderRect(element,&element->actions[0],248,221,35,0,0,0,FILLRECT);
 	UIConfigure_ShrinkFitToParent(element, &element->actions[1]);
 	UIConfigure_DisplayString(element, &element->actions[2],"START",0,UISTRING_ALIGN_CENTER);
 	UIConfigure_RenderLine(element, &element->actions[7],BR_CORNER,NULL);
 
-	UIConfigure_LeftClickRect(element, &element->actions[4]);
+	UIConfigure_LeftClickSubrect(element, &element->actions[4], 175, 25, 25, 25);
 		UITrigger_Bind(&element->actions[4],&element->actions[7],-1,1);
 		UITrigger_Bind(&element->actions[4],&element->actions[4],1,0);
 		UITrigger_Bind(&element->actions[4],&element->actions[5],0,1);
@@ -90,13 +87,13 @@ UI_Element *makeStartBlock(int x_offset, int y_offset, UI_Element *parent){
 		element->actions[3].status = 0;
 		element->actions[3].new_status = 0;
 	UIConfigure_SetUpAiBlock(element,&element->actions[8],2,&element->actions[2],&element->actions[7]);
+	UIConfigure_FillSubrect(element, &element->actions[9], 175, 25, 25, 25, 255, 255, 255);
 	UIElement_Reparent(element,parent);
 	return element;
 }
 
 UI_Element *makeAIResetButton(int x_offset, int y_offset, UI_Element *parent){
 	UI_Element *element;
-	printf("AI reset button @ %p\n",element);
 	element = UIElement_Create(x_offset,y_offset,200,50,6);
 	UIConfigure_FillAndBorderRect(element,&element->actions[0],74,74,74,0,0,0,STOPBOX);
 	UIConfigure_ShrinkFitToParent(element,&element->actions[1]);
@@ -117,12 +114,10 @@ UI_Element *makeAITemplateScrollList(int x_offset, int y_offset, AIData *aiData,
 	int y_offset2 = 0;
 	/* Set up the main panel */
 	element = UIElement_Create(x_offset, y_offset, 220, 360,6);
-	printf("scroll bar panel @ %p\n",element);
 	UIConfigure_FillAndBorderRect(element,&element->actions[0],185,122,87,0,0,0,FILLRECT);
 	UIConfigure_ShrinkFitToParent(element,&element->actions[1]);
 	/* Set up the slider bar */
 		element2 = UIElement_Create(x_offset+200,y_offset,21,20,7);
-		printf("scroll bar slider @ %p\n",element2);
 		UIConfigure_FillAndBorderRect(element2,&element2->actions[0],249,252,124,0,0,0,SCROLLHANDLE);
 		UIConfigure_ShrinkFitToParent(element2,&element2->actions[1]);
 		UIConfigure_DraggableVerticalOverride(element2,&element2->actions[2],1,&element2->actions[1]);
@@ -142,7 +137,6 @@ UI_Element *makeAITemplateScrollList(int x_offset, int y_offset, AIData *aiData,
 	/* Set up the options */
 	while(template!=NULL){
 		element2 = UIElement_Create(x_offset, y_offset + y_offset2, 200,50,6);
-		printf("block template @ %p\n",element2);
 		UIConfigure_FillAndBorderRect(element2,&element2->actions[0],248,221,35,0,0,0,BLOCK);
 		UIConfigure_ShrinkFitToParentWithYShift(element2,&element2->actions[1],&element->actions[3]);
 		UIConfigure_DisplayString(element2,&element2->actions[2],template->name,0,UISTRING_ALIGN_CENTER);
@@ -163,7 +157,6 @@ UI_Element *makeAITemplateScrollList(int x_offset, int y_offset, AIData *aiData,
 UI_Element *makeAIBlock(int x_offset, int y_offset, char *aiString, UI_Element *parent){
 	UI_Element *element2;
 	element2 = UIElement_Create(x_offset,y_offset,200,50,19);
-	printf("AI block made @ %p\n",element2);
 	UIConfigure_FillAndBorderRect(element2,&element2->actions[0],248,221,35,0,0,0,BLOCK);
 	UIConfigure_ShrinkFitToParent(element2,&element2->actions[1]);
 	UIConfigure_RightClickRect(element2, &element2->actions[2]);
@@ -179,7 +172,7 @@ UI_Element *makeAIBlock(int x_offset, int y_offset, char *aiString, UI_Element *
 
 	/* Line 1 */
 	UIConfigure_RenderLine(element2, &element2->actions[9],BL_CORNER,NULL);
-	UIConfigure_LeftClickRect(element2, &element2->actions[7]);
+	UIConfigure_LeftClickSubrect(element2, &element2->actions[7], 0, 25, 25, 25);
 		element2->actions[7].status = 1;
 		element2->actions[7].new_status = 1;
 		UITrigger_Bind(&element2->actions[7],&element2->actions[9],-1,1);
@@ -196,7 +189,7 @@ UI_Element *makeAIBlock(int x_offset, int y_offset, char *aiString, UI_Element *
 		element2->actions[10].status = 0;
 		element2->actions[10].new_status = 0;
 		UITrigger_Bind(&element2->actions[10],&element2->actions[9],1,2);
-		UITrigger_Bind(&element2->actions[10],&element2->actions[12],0,1);
+		UITrigger_Bind(&element2->actions[10],&element2->actions[7],0,1);
 		UITrigger_Bind(&element2->actions[10],&element2->actions[6],1,0);
 		UITrigger_Bind(&element2->actions[10],&element2->actions[8],0,1);
 		UITrigger_Bind(&element2->actions[10],&element2->actions[10],1,0);
@@ -204,9 +197,7 @@ UI_Element *makeAIBlock(int x_offset, int y_offset, char *aiString, UI_Element *
 
 	/* Line 2 */
 	UIConfigure_RenderLine(element2, &element2->actions[14],BR_CORNER,NULL);
-	UIConfigure_LeftClickRect(element2, &element2->actions[12]);
-		element2->actions[12].status = 0;
-		element2->actions[12].new_status = 0;
+	UIConfigure_LeftClickSubrect(element2, &element2->actions[12], 175, 25, 25, 25);
 		UITrigger_Bind(&element2->actions[12],&element2->actions[14],-1,1);
 		UITrigger_Bind(&element2->actions[12],&element2->actions[12],1,0);
 		UITrigger_Bind(&element2->actions[12],&element2->actions[11],0,1);
@@ -221,7 +212,7 @@ UI_Element *makeAIBlock(int x_offset, int y_offset, char *aiString, UI_Element *
 		element2->actions[15].status = 0;
 		element2->actions[15].new_status = 0;
 		UITrigger_Bind(&element2->actions[15],&element2->actions[14],1,2);
-		UITrigger_Bind(&element2->actions[15],&element2->actions[16],0,1);
+		UITrigger_Bind(&element2->actions[15],&element2->actions[12],0,1);
 		UITrigger_Bind(&element2->actions[15],&element2->actions[11],1,0);
 		UITrigger_Bind(&element2->actions[15],&element2->actions[13],0,1);
 		UITrigger_Bind(&element2->actions[15],&element2->actions[15],1,0);
@@ -289,6 +280,119 @@ UI_Element *UIElement_Create(int x, int y, int w, int h, int num_of_actions){
 	   element->exposed_data_count = 0;
 	   return element;
 }
+
+/* UIAction_ClickSubrect
+
+	 This is a mutli-configurable action - you can do both left and right click versions
+	 of it */
+
+#define rectX integers[0]
+#define rectY integers[1]
+#define rectW integers[2]
+#define rectH integers[3]
+
+int UIAction_ClickSubrect(UI_Action *action, UIData *uiData){
+		SDL_Rect r;
+		if(action->status != 0){
+			r.x = action->rectX + action->element->rect.x;
+			r.y = action->rectY + action->element->rect.y;
+			r.w = action->rectW;
+			r.h = action->rectH;
+			shrinkRectToFit(&r,&action->element->rect);
+
+			#if SHOW_SUBRECTS
+			SDL_SetRenderDrawColor(uiData->graphicsData->renderer, 255,255,255,50);
+			SDL_RenderFillRect(uiData->graphicsData->renderer, &r);
+			#endif
+
+			if(isPointInRect(uiData->event->button.x, uiData->event->button.y, r)){
+				UITrigger_Execute(action);
+				return 1;
+			}
+		}
+		return 0;
+}
+
+void UIConfigure_LeftClickSubrect(UI_Element *element, UI_Action *action, int x, int y, int w, int h){
+	UIAction_Init(element,action);
+	action->response = LEFT_CLICK;
+	action->function = UIAction_ClickSubrect;
+	action->integers = calloc(4,sizeof(int));
+	action->rectX = x;
+	action->rectY = y;
+	action->rectW = w;
+	action->rectH = h;
+	action->num_of_integers = 4;
+}
+
+void UIConfigure_RightClickSubrect(UI_Element *element, UI_Action *action, int x, int y, int w, int h){
+	UIAction_Init(element,action);
+	action->response = RIGHT_CLICK;
+	action->function = UIAction_ClickSubrect;
+	action->integers = calloc(4,sizeof(int));
+	action->rectX = x;
+	action->rectY = y;
+	action->rectW = w;
+	action->rectH = h;
+	action->num_of_integers = 4;
+}
+
+#undef rectX
+#undef rectY
+#undef rectW
+#undef rectH
+
+/* UIAction_FillSubrect
+
+	 This will fill a smaller rectangle on the surface of a UI_Element */
+
+#define rectX integers[0]
+#define rectY integers[1]
+#define rectW integers[2]
+#define rectH integers[3]
+
+#define fillRed integers[4]
+#define fillGreen integers[5]
+#define fillBlue integers[6]
+
+int UIAction_FillSubrect(UI_Action *action, UIData *uiData){
+	SDL_Rect r;
+	if(action->status != 0){
+		r.x = action->rectX + action->element->rect.x;
+		r.y = action->rectY + action->element->rect.y;
+		r.w = action->rectW;
+		r.h = action->rectH;
+		shrinkRectToFit(&r,&action->element->rect);
+		SDL_SetRenderDrawColor(uiData->graphicsData->renderer,action->fillRed,action->fillGreen,action->fillBlue,255);
+		SDL_RenderFillRect(uiData->graphicsData->renderer,&r);
+		return 1;
+	}
+	return 0;
+}
+
+void UIConfigure_FillSubrect(UI_Element *element, UI_Action *action, int x, int y, int w, int h, int red, int green, int blue){
+	UIAction_Init(element,action);
+	action->response = UPDATE;
+	action->function = UIAction_FillSubrect;
+	action->integers = calloc(7,sizeof(int));
+	action->num_of_integers = 7;
+	action->rectX = x;
+	action->rectY = y;
+	action->rectW = w;
+	action->rectH = h;
+	action->fillRed = red;
+	action->fillGreen = green;
+	action->fillBlue = blue;
+}
+
+#undef rectX
+#undef rectY
+#undef rectW
+#undef rectH
+#undef fillRed
+#undef fillGreen
+#undef fillBlue
+
 /* UIAction_SetCellToSpawn
 
 	 This makes a cell start counting down from the start to spawn a new bee */
@@ -332,7 +436,6 @@ int UIAction_GetCellPercentDone(UI_Action *action, UIData *uiData){
 		else{
 			action->percentage = (double)((double)((HiveCell*)action->cell)->timer) / action->max_timer;
 		}
-		printf("%lf\n",action->percentage);
 		int i = 0;
 		while(i < action->num_of_companions){
 			action->companions[0]->percentage = action->percentage;
@@ -385,7 +488,6 @@ int UIAction_PercentageFillRect(UI_Action *action, UIData *uiData){
 		rect.w = action->element->rect.w;
 		rect.h = (int)(action->percentage *(double)action->element->rect.h);
 		rect.y = action->element->rect.y + (int)((1.0 - action->percentage) * (double)action->element->rect.h);
-		printf("rect.h: %d rect.y: %d\n",rect.h,rect.y);
 		SDL_SetRenderDrawColor(uiData->graphicsData->renderer,action->fillRed,action->fillGreen,action->fillBlue,100);
 		SDL_RenderFillRect(uiData->graphicsData->renderer,&rect);
     SDL_RenderCopy(graphicsData->renderer, graphicsData->uiEle->graphic[HIVECELLMASK_GRAPHIC], NULL, &action->element->rect);
@@ -1989,7 +2091,6 @@ int UIAction_RenderLine(UI_Action *action, UIData *uiData){
 				action->external = NULL;
 				action->drawPosX = action->element->rect.x;
 				action->drawPosY = action->element->rect.y;
-				printf("TEST FAILED\n");
 			}
 			else{
 				action->new_status = 2;
@@ -2913,16 +3014,13 @@ void UIElement_Free(UI_Element *element){
 	  UIAction_Free(&element->actions[i]);
 	  i++;
 	}
-	printf("remove exposed data because we want to free the element...\n");
 	UIElement_RemoveExposedData(element);
-	printf("done\n");
 	free(element->actions);
 	free(element);
 }
 
 static void UIAction_Free(UI_Action *action){
 	int i = 0;
-	printf("freeing action %p\n",action);
 	while(action->triggers!=NULL){
 		UITrigger_Destroy(action,action->triggers);
 	}
@@ -2974,7 +3072,6 @@ void UIElement_Deparent(UI_Element *element){
 	UI_Element *child;
 	UI_Element *sibling;
 	int i;
-	printf("deparenting\n");
 	if(parent==NULL){
 		return;
 	}
@@ -3165,7 +3262,6 @@ void UIRoot_ExecuteUpwards(UIData *uiData, enum Response response, int stopAtFir
 		/* We have to do our disposal here because doing it in a top down traversal
 		   of the tree would break things */
 		if(response == FREED){
-			printf("freeing element %p\n",queue_element);
 			UIElement_Free(queue_element);
 		}
 		if(response == DISPOSAL && queue_element->destroy){

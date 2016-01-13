@@ -1,9 +1,28 @@
 #include "configuration.h"
 
+int getConfiguredInt(ConfigurationData *configurationData, char *name){
+  int i;
+  ConfigurationFlag *flag = configurationData->flags;
+  while(flag != NULL){
+    if(strcmp(flag->name,name)){
+      if(flag->type == CFT_INT){
+        sscanf(flag->data,"%d",&i);
+        return i;
+      }
+      else{
+        assert(flag->type == CFT_INT);
+      }
+    }
+    flag = flag->next;
+  }
+  assert(flag!=NULL);
+}
+
 ConfigurationFlag *makeConfigurationFlag(char *data){
   ConfigurationFlag *cf = calloc(1,sizeof(ConfigurationFlag));
   int equalsPosition = 0;
   int len = strlen(data);
+  printf("making ");
   while(data[equalsPosition] != '='){
     if(equalsPosition >= len){
       return NULL;
@@ -16,16 +35,16 @@ ConfigurationFlag *makeConfigurationFlag(char *data){
   }
   switch(data[0]){
     case 'i':
-      printf("making CF_INT ");
+      printf("CF_INT ");
       cf->type = CFT_INT;
       break;
     case 'd':
     case 'f':
-      printf("making CF_DOUBLE ");
+      printf("CF_DOUBLE ");
       cf->type = CFT_DOUBLE;
       break;
     case 's':
-      printf("making CF_STRING ");
+      printf("CF_STRING ");
       cf->type = CFT_STRING;
       break;
     default:
@@ -66,8 +85,8 @@ void initConfigurationData(ConfigurationData *configurationData){
       i--;
   }
   i = 0;
-  while(i < i2){
-      if(f2s[i] == '\0'){
+  while(i <= i2){
+      if(f2s[i] == '\0' || f2s[i] == EOF){
         free(makeConfigurationFlag(&f2s[previousIndex]));
         previousIndex = i+1;
       }
