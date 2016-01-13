@@ -67,7 +67,6 @@ int handleEvent(SDL_Event *event, GameObjectData *gameObjectData, UIData *uiData
 			case SDL_QUIT:
 				printf("SDL_QUIT\n");
 				return 0;
-				break;
 			case SDL_MOUSEWHEEL:
 				UIRoot_Execute(uiData,MOUSEWHEEL,0);
 				break;

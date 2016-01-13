@@ -154,7 +154,6 @@ void fadeInChannel(int channel, AudioData *audioData, char* name) {
 }
 
 void muteMusic(AudioData *audioData) {
-	
 	if (audioData->music_mute == 0) {
 		Mix_Volume(1, 0);
 		printf("Music muted.\n");
