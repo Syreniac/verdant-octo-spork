@@ -332,7 +332,6 @@ int UIAction_GetCellPercentDone(UI_Action *action, UIData *uiData){
 		else{
 			action->percentage = (double)((double)((HiveCell*)action->cell)->timer) / action->max_timer;
 		}
-		printf("%lf\n",action->percentage);
 		int i = 0;
 		while(i < action->num_of_companions){
 			action->companions[0]->percentage = action->percentage;
@@ -383,7 +382,6 @@ int UIAction_PercentageFillRect(UI_Action *action, UIData *uiData){
 		rect.w = action->element->rect.w;
 		rect.h = (int)(action->percentage *(double)action->element->rect.h);
 		rect.y = action->element->rect.y + (int)((1.0 - action->percentage) * (double)action->element->rect.h);
-		printf("rect.h: %d rect.y: %d\n",rect.h,rect.y);
 		SDL_SetRenderDrawColor(uiData->graphicsData->renderer,action->fillRed,action->fillGreen,action->fillBlue,255);
 		SDL_RenderFillRect(uiData->graphicsData->renderer,&rect);
 		return 1;

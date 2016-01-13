@@ -140,6 +140,8 @@ int game_welcome_page(GraphicsData graphicsData, AudioData audioData){
     UIElement_Reparent(element2,initData.uiData.root);
 	UIRoot_Pack(&initData.uiData,&initData.graphicsData);
 
+	initData.uiData.audioData = &initData.audioData;
+	
    playMusic(&initData.audioData,0);
 
    while(menuRunning){
