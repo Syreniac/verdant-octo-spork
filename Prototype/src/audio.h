@@ -41,3 +41,5 @@ void fadeOutChannel(int channel, AudioData *audioData);
 void fadeInChannel(int channel, AudioData *audioData, char* name);
 void muteMusic(AudioData *audioData);
 void muteSoundEffects(AudioData *audioData);
+
+void initAudioData(AudioData *audioData, ConfigurationData *configData);

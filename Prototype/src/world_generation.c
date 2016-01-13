@@ -23,8 +23,8 @@ void generateProgrammableWorkers(GameObjectData *gameObjectData){
   int i = 0;
 
   while(i < gameObjectData->INITIAL_NUMBER_OF_WORKERS){
-	createProgrammableWorker(gameObjectData);
-	i++;
+	   createProgrammableWorker(gameObjectData);
+	    i++;
   }
 }
 

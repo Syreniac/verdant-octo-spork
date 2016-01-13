@@ -15,7 +15,7 @@ int calculateDt(int previousRunTime){
 
 
 
-int gameStart(GraphicsData graphicsData, AudioData audioData){
+int gameStart(GraphicsData graphicsData, AudioData audioData, ConfigurationData configData){
   /* SDL_Window *window = the pointer to the program's window
      This function will start the game looping.
      The return should be 0 unless there's an error we need to catch.*/
@@ -50,12 +50,13 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
   gameData.gameObjectData.objectDisplayEventNum = SDL_RegisterEvents(1);
   gameData.gameObjectData.gameRestart = 0;
 
-  initControlData(&gameData.controlsData);
-
+  initControlsData(&gameData.controlsData,&configData);
+  initGameObjectData(&gameData.gameObjectData,&configData);
   /* initialise navigationOffset values */
 
   gameData.graphicsData.trackingMode = 0;
 
+  printf(">>>>>> %p\n",graphicsData.fonts[0]);
 
 
   /* We also need some time information to make things run smoothly */
@@ -112,6 +113,7 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
 
 static void cleanUpGameData(GameData *gameData){
   UIRoot_Destroy(&gameData->uiData);
+  destroyGameObjectData(&gameData->gameObjectData);
 }
 
 static void createGameUI(GameData *gameData){
@@ -161,11 +163,11 @@ static void createGameUI(GameData *gameData){
 
 
 	/*hive button*/
-  element2 = makeHiveButton(&gameData->uiData,&gameData->gameObjectData,OBJECT_SELECTION_CONTROL);
+  element2 = makeHiveButton(&gameData->uiData,&gameData->gameObjectData,&gameData->graphicsData,OBJECT_SELECTION_CONTROL);
 
   /*b++ editor button*/
 
-  element2 = makeBPPEditor(&gameData->uiData);
+  element2 = makeBPPEditor(&gameData->uiData,&gameData->aiData,&gameData->graphicsData,OBJECT_SELECTION_CONTROL);
   /* Nullify AI button */
   UIRoot_Pack(&gameData->uiData,&gameData->graphicsData);
 }

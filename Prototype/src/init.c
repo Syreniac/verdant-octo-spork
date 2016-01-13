@@ -12,7 +12,6 @@ InitData initialise(void){
   /* This function will initialise the SDL library and create a blank window.
      I'll line by line comment what I'm doing here. */
   InitData initData;
-  ConfigurationData configData;
 
   srand(time(NULL));
 
@@ -26,8 +25,7 @@ InitData initialise(void){
   	exit(1);
   }
 
-  initConfigurationData(&configData);
-
+  initConfigurationData(&initData.configData);
   /* Now that SDL has been initialised by call SDL_Init, we can make the window
      The arguments are:
         - The window's name
@@ -36,7 +34,7 @@ InitData initialise(void){
         - The X size of the window in pixels
         - The Y size like above
         - SDL configuration options which can be found online in the API documentation*/
-	initGraphicsData(&initData.graphicsData,&configData);
+	initGraphicsData(&initData.graphicsData,&initData.configData);
 
 	/*Audio needs to be initialized at the very start too.*/
 	audioSystem(&initData.audioData);
@@ -80,7 +78,7 @@ void audioSystem(AudioData *AudioSettings){
 
 }
 
-int game_welcome_page(GraphicsData graphicsData, AudioData audioData){
+int game_welcome_page(GraphicsData graphicsData, AudioData audioData, ConfigData configData){
 
    InitData initData;
 
@@ -137,6 +135,8 @@ int game_welcome_page(GraphicsData graphicsData, AudioData audioData){
 
    playMusic(&initData.audioData,0);
 
+   printf(">>>>>>>>> %p\n",graphicsData.fonts[0]);
+
    while(menuRunning){
 
       /*UIRoot_Execute(&initData.uiData,UPDATE,0);*/
@@ -176,7 +176,7 @@ int game_welcome_page(GraphicsData graphicsData, AudioData audioData){
 
    fadeOutMusic(&initData.audioData);
 
-   gameStart(graphicsData,audioData);
+   gameStart(graphicsData,audioData,configData);
    return 0;
 }
 

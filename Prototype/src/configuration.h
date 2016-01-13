@@ -1,4 +1,5 @@
 #include "generic.h"
+#define getConfiguredDouble getConfiguredFloat
 enum ConfigurationFlagType{
   CFT_STRING,
   CFT_INT,
@@ -7,6 +8,7 @@ enum ConfigurationFlagType{
 typedef enum ConfigurationFlagType ConfigurationFlagType;
 typedef struct ConfigurationData ConfigurationData;
 typedef struct ConfigurationFlag ConfigurationFlag;
+typedef ConfigurationData ConfigData;
 
 struct ConfigurationFlag{
   ConfigurationFlagType type;
@@ -22,3 +24,6 @@ struct ConfigurationData{
 void initConfigurationData(ConfigurationData *configurationData);
 ConfigurationFlag *makeConfigurationFlag(char *data);
 int getConfiguredInt(ConfigurationData *configurationData, char *name);
+char *getConfiguredString(ConfigurationData *configurationData, char *name);
+double getConfiguredFloat(ConfigurationData *configurationData, char *name);
+void printAllConfiguredData(ConfigurationData *configurationData);

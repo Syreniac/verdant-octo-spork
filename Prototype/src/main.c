@@ -15,14 +15,10 @@ int main(int argc, char *argv[]){
   DEBUGGING_FILE_ALLOC= fopen("debug_output_alloc.txt","w");
   DEBUGGING_FILE_FREE= fopen("debug_output_free.txt","w");
   #endif
-  ConfigurationData configData;
-  initConfigurationData(&configData);
-  printf("WORKER SIZE IS: %d\n",getConfiguredInt(&configData,"WORKER_SIZE"));
-  printf("WORKER SPEED IS: %d\n",getConfiguredInt(&configData,"WORKER_SPEED"));
   initData  = initialise();
-	game_welcome_page(initData.graphicsData,initData.audioData);
+	game_welcome_page(initData.graphicsData,initData.audioData,initData.configData);
   while(game_return == 2){
-    game_return = gameStart(initData.graphicsData,initData.audioData);
+    game_return = gameStart(initData.graphicsData,initData.audioData,initData.configData);
   }
   uninitialise();
   exit(0);

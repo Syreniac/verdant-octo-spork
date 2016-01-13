@@ -204,8 +204,12 @@ void panScreen(GraphicsData *graphicsData, ControlsData *controlsData, int delta
 
 }
 
-void initControlData(ControlsData *controlsData){
+void initControlsData(ControlsData *controlsData, ConfigurationData *configData){
 	int i = 0;
+
+	/* Load configured constants */
+	controlsData->PANSPEEDMULTI = getConfiguredFloat(configData,"PANSPEEDMULTI");
+
 	while(i < MAX_KEYS){
 		controlsData->keys[i] = 0;
 		i++;
@@ -216,4 +220,5 @@ void initControlData(ControlsData *controlsData){
 		i++;
 	}
 	controlsData->objectSelection = 1;
+	printf("controls data initialised\n");
 }

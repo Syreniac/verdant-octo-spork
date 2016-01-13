@@ -163,7 +163,7 @@ char *fileToString(FILE *file){
 		i2++;
 		if(i2 > i){
 			i += FILE_TO_STRING_STEP_SIZE;
-			s = realloc(s,i);
+			s = realloc(s,i+2);
 		}
 		s[i2 - 1] = c;
 	}

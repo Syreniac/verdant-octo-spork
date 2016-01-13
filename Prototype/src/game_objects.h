@@ -220,7 +220,7 @@ struct GameObjectData{
   int SIZE_OF_TREE;
   int X_SIZE_OF_HIVE;
   int Y_SIZE_OF_HIVE;
-  int WORKER_SENSE_RANGE;
+  double WORKER_SENSE_RANGE;
   int X_SIZE_OF_WORKER;
   int Y_SIZE_OF_WORKER;
   int LENGTH_OF_STATUS_STRING;
@@ -237,7 +237,7 @@ struct GameObjectData{
   int SUGAR_VALUE_OF_ICECREAM;
   int ICECREAM_PICKUP_RADIUS;
   int CHANCE_OF_REGAINING_FLIGHT;
-  int STRIDE_FREQUENCY;
+  double STRIDE_FREQUENCY;
   int STING_HIT_RADIUS;
   int DEFAULT_SPAWNDELAY;
   int X_SIZE_OF_NODE;
@@ -255,7 +255,7 @@ struct GameObjectData{
   int MELT_TIME_THRESHOLD;
   int MAX_DROPPED_ICECREAM_WIDTH;
   int COLD_DEATH_THRESHOLD;
-  int BEE_SHRINK_FACTOR_ON_GROUND;
+  double BEE_SHRINK_FACTOR_ON_GROUND;
   int CARRYING_FLOWER_INDEX_OFFSET;
   int CARRYING_ICECREAM_INDEX_OFFSET;
   int ICE_CREAM_PERSON_PROB;
@@ -300,3 +300,4 @@ SDL_MouseButtonEvent *mbEvent);
 
 void nullifyLocalAIInformation(GameObjectData *gameObjectData);
 int countResourceNodesInRadius(GameObjectData *gameObjectData, int x, int y, double radius);
+void destroyGameObjectData(GameObjectData *gameObjectData);

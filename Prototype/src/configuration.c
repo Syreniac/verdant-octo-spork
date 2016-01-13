@@ -1,11 +1,52 @@
 #include "configuration.h"
 
+double getConfiguredFloat(ConfigurationData *configurationData, char *name){
+  double i;
+  ConfigurationFlag *flag = configurationData->flags;
+  if(flag != NULL){
+    printf("attempting to retrieve flag \'%s\'\n",name);
+  }
+  while(flag != NULL){
+    printf("checking \'%s\'",flag->name);
+    printf(" vs \'%s\'",name);
+    printf(" :: %d\n",strcmp(flag->name,name));
+    if(strcmp(flag->name,name) == 0){
+      if(flag->type == CFT_DOUBLE){
+        sscanf(flag->data,"%lf",&i);
+        return i;
+      }
+      else{
+        assert(flag->type != CFT_INT);
+      }
+    }
+    flag = flag->next;
+  }
+  assert(flag!=NULL);
+}
+
+char *getConfiguredString(ConfigurationData *configurationData, char *name){
+  ConfigurationFlag *flag = configurationData->flags;
+  printf("attempting to retrieve flag \'%s\'\n",name);
+  while(flag != NULL){
+    printf("checking \'%s\' vs \'%s\' :: %d\n",flag->name,name,strcmp(flag->name,name));
+    if(strcmp(flag->name,name) == 0){
+      if(flag->type == CFT_STRING){
+        return flag->data;
+      }
+      else{
+        assert(flag->type != CFT_INT);
+      }
+    }
+    flag = flag->next;
+  }
+  assert(flag!=NULL);
+}
+
 int getConfiguredInt(ConfigurationData *configurationData, char *name){
   int i;
   ConfigurationFlag *flag = configurationData->flags;
   printf("attempting to retrieve flag \'%s\'\n",name);
   while(flag != NULL){
-    printf("checking \'%s\' vs \'%s\' :: %d\n",flag->name,name,strcmp(flag->name,name));
     if(strcmp(flag->name,name) == 0){
       if(flag->type == CFT_INT){
         sscanf(flag->data,"%d",&i);
@@ -52,7 +93,7 @@ ConfigurationFlag *makeConfigurationFlag(char *data){
     default:
       return NULL;
   }
-  cf->name = calloc(equalsPosition,1);
+  cf->name = calloc(equalsPosition+10,1);
   if(data[equalsPosition-2] == ' '){
     strncpy(cf->name,&data[1],equalsPosition - 3);
   }
@@ -60,7 +101,7 @@ ConfigurationFlag *makeConfigurationFlag(char *data){
     strncpy(cf->name,&data[1],equalsPosition - 1);
   }
   printf("called \'%s\' ",cf->name);
-  cf->data = calloc(strlen(&data[equalsPosition])+1,1);
+  cf->data = calloc(strlen(&data[equalsPosition])+10,1);
   strcpy(cf->data,&data[equalsPosition+1]);
   printf("with data \'%s\'\n",cf->data);
   return cf;
@@ -97,4 +138,13 @@ void initConfigurationData(ConfigurationData *configurationData){
   }
 
   free(f2s);
+  printAllConfiguredData(configurationData);
+}
+
+void printAllConfiguredData(ConfigurationData *configData){
+  ConfigurationFlag *flag = configData->flags;
+  while(flag != NULL){
+    printf("%s::%s\n",flag->name, flag->data);
+    flag = flag->next;
+  }
 }

@@ -1527,11 +1527,14 @@ int UIAction_DisplayString(UI_Action *action, UIData *uiData){
 	colour.r = 0;
 	colour.g = 0;
 	colour.b = 0;
+	int font;
 	graphicsData = uiData->graphicsData;
 	if(action->currentString != NULL && action->newString != NULL && strcmp(action->currentString,action->newString) != 0){
 		action->currentString = realloc(action->currentString, strlen(action->newString)+1);
 		strcpy(action->currentString,action->newString);
 		SDL_DestroyTexture(action->texture);
+		printf("chosen font is %d\n",action->fontID);
+		printf("it points to %p\n",graphicsData->fonts[action->fontID]);
 		temp = TTF_RenderText_Blended(graphicsData->fonts[action->fontID],action->currentString,colour);
 		action->texture = SDL_CreateTextureFromSurface(graphicsData->renderer,temp);
 		SDL_FreeSurface(temp);

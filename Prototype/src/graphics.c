@@ -283,13 +283,27 @@ void setNavigationOffset(GraphicsData *graphicsData, int x, int y){
 }
 
 void initGraphicsData(GraphicsData *graphicsData, ConfigurationData *configData){
+	graphicsData->X_SIZE_OF_WORLD = getConfiguredInt(configData,"X_SIZE_OF_WORLD");
+	graphicsData->Y_SIZE_OF_WORLD = getConfiguredInt(configData,"Y_SIZE_OF_WORLD");
+	graphicsData->PARALLAX_INTENSITY = getConfiguredInt(configData,"PARALLAX_INTENSITY");
+	graphicsData->GRASS_TILE_WIDTH = getConfiguredInt(configData,"GRASS_TILE_WIDTH");
+	graphicsData->GRASS_TILE_HEIGHT = getConfiguredInt(configData,"GRASS_TILE_HEIGHT");
 	graphicsData->RAIN_TILE_WIDTH = getConfiguredInt(configData,"RAIN_TILE_WIDTH");
 	graphicsData->RAIN_TILE_HEIGHT = getConfiguredInt(configData,"RAIN_TILE_HEIGHT");
 	graphicsData->PROGRAM_NAME = getConfiguredString(configData,"PROGRAM_NAME");
 	graphicsData->X_SIZE_OF_SCREEN = getConfiguredInt(configData,"X_SIZE_OF_SCREEN");
 	graphicsData->Y_SIZE_OF_SCREEN = getConfiguredInt(configData,"Y_SIZE_OF_SCREEN");
-	graphicsData->X_SIZE_OF_WORLD = getConfiguredInt(configData,"X_SIZE_OF_WORLD");
-	graphicsData->Y_SIZE_OF_WORLD = getConfiguredInt(configData,"Y_SIZE_OF_WORLD");
+	graphicsData->BEE_FLAP_GRAPHIC_1 = getConfiguredInt(configData,"BEE_FLAP_GRAPHIC_1");
+	graphicsData->BEE_FLAP_GRAPHIC_2 = getConfiguredInt(configData,"BEE_FLAP_GRAPHIC_2");
+	graphicsData->CARRYING_ICECREAM_INDEX_OFFSET = getConfiguredInt(configData,"CARRYING_ICECREAM_INDEX_OFFSET");
+	graphicsData->CARRYING_FLOWER_INDEX_OFFSET = getConfiguredInt(configData,"CARRYING_FLOWER_INDEX_OFFSET");
+	graphicsData->SCROLLHANDLE_GRAPHIC = getConfiguredInt(configData,"SCROLLHANDLE_GRAPHIC");
+	graphicsData->CROSSBOX_GRAPHIC = getConfiguredInt(configData,"CROSSBOX_GRAPHIC");
+	graphicsData->STOP_GRAPHIC = getConfiguredInt(configData,"STOP_GRAPHIC");
+	graphicsData->BLOCK_GRAPHIC = getConfiguredInt(configData,"BLOCK_GRAPHIC");
+	graphicsData->HIVECELL_GRAPHIC = getConfiguredInt(configData,"HIVECELL_GRAPHIC");
+	graphicsData->HIVECELLMASK_GRAPHIC = getConfiguredInt(configData,"HIVECELLMASK_GRAPHIC");
+	graphicsData->COMPILEBOX_GRAPHIC = getConfiguredInt(configData,"COMPILEBOX_GRAPHIC");
 
 	graphicsData->window = SDL_CreateWindow(graphicsData->PROGRAM_NAME,
 										                       25,

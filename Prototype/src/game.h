@@ -19,6 +19,6 @@ struct GameData{
   AnnouncementsData announcementsData;
 };
 
-int gameStart(GraphicsData graphicsData, AudioData audioData);
+int gameStart(GraphicsData graphicsData, AudioData audioData, ConfigData configData);
 int gameLoop(GameData *gameData);
 int calculateDt(int previousRunTime);

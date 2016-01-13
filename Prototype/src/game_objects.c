@@ -176,9 +176,10 @@ static int updateProgrammableWorkers(GameObjectData *gameObjectData, GraphicsDat
 	ProgrammableWorker *programmableWorker;
 	char GOCause[255];
 	char finalScore[255];
-	for(programmableWorker = gameObjectData->first_programmable_worker; programmableWorker != NULL ;){
-
-		if(programmableWorker->wet_and_cant_fly || programmableWorker->cold_and_about_to_die){
+	int i = 0;
+	for(programmableWorker = gameObjectData->first_programmable_worker; programmableWorker != NULL; programmableWorker = programmableWorker->next){
+		printf("picking worker %d\n",i++);
+		if(!programmableWorker->wet_and_cant_fly && !programmableWorker->cold_and_about_to_die){
 			if(!gameObjectData->pause_status){
 				updateProgrammableWorker(programmableWorker,gameObjectData,announcementsData,ticks);
 			}
@@ -203,7 +204,6 @@ static int updateProgrammableWorkers(GameObjectData *gameObjectData, GraphicsDat
 				return 0;
 			}
 		}
-		programmableWorker = programmableWorker->next;
 	}
 	return 1;
 }
@@ -213,7 +213,7 @@ static void renderDisabledWorkers(GameObjectData *gameObjectData, GraphicsData *
 	SDL_Rect smallerBeeRect;
 	int window_x,window_y, tempXOffset, tempYOffset;
 	/* Then we render the ones wet and or cold */
-	for(programmableWorker = gameObjectData->first_programmable_worker; programmableWorker != NULL ;){
+	for(programmableWorker = gameObjectData->first_programmable_worker; programmableWorker != NULL; programmableWorker = programmableWorker->next){
 		if(programmableWorker->wet_and_cant_fly || programmableWorker->cold_and_about_to_die){
 			if(programmableWorker->displayInfo && graphicsData->trackingMode){
 				SDL_Point point = getCenterOfRect(programmableWorker->rect);
@@ -257,7 +257,7 @@ static void renderHealthyWorkers(GameObjectData *gameObjectData, GraphicsData *g
 	ProgrammableWorker *programmableWorker;
 	int window_x,window_y, tempXOffset, tempYOffset;
 	int graphicIndex;
-	for(programmableWorker = gameObjectData->first_programmable_worker; programmableWorker != NULL ;){
+	for(programmableWorker = gameObjectData->first_programmable_worker; programmableWorker != NULL; programmableWorker = programmableWorker->next){
 		if(!programmableWorker->wet_and_cant_fly && !programmableWorker->cold_and_about_to_die){
 			/* This needs to have some changes to adjust the rawX and rawY values too */
 			//fitRectToWorld(&programmableWorker->rect);
@@ -691,13 +691,15 @@ Hive initHive(GameObjectData *gameObjectData, ConfigurationData *configData){
 	hive.delayBeforeSummer = gameObjectData->DELAY_BEFORE_SUMMER;
 	hive.winterCountdownFloat = gameObjectData->MAX_DAYS_TO_WINTER;
 	hive.hiveCellCount = getConfiguredInt(configData,"HIVE_CELL_COUNT");
+	printf("making space for %d hive cells\n",hive.hiveCellCount);
 	hive.hiveCells = calloc(hive.hiveCellCount,sizeof(HiveCell));
 	hive.hiveCellSpawnDelay = getConfiguredInt(configData,"HIVE_CELL_SPAWN_DELAY");
 	while(i < hive.hiveCellCount){
 		hive.hiveCells[i].timer = hive.hiveCellSpawnDelay;
 		i++;
 	}
-	return(hive);
+	gameObjectData->hive = hive;
+	return hive;
 }
 
 Tree createTree(GameObjectData *gameObjectData, int forceX, int forceY){
@@ -1485,6 +1487,8 @@ void updateHiveCell(GameObjectData *gameObjectData, HiveCell *hiveCell, int tick
 void updateHive(GameObjectData *gameObjectData, int ticks){
 	int i = 0;
 	while(i < gameObjectData->hive.hiveCellCount){
+		printf("updating cell %d\n",i);
+		printf("%p\n",&gameObjectData->hive.hiveCells[i]);
 		updateHiveCell(gameObjectData,&gameObjectData->hive.hiveCells[i],ticks);
 		i++;
 	}
@@ -1509,9 +1513,10 @@ void updateGameObjects(GameObjectData *gameObjectData, AudioData *audioData, Gra
 
 
 	updateEnvironment(gameObjectData,graphicsData,announcementsData);
+	printf("environment updated\n");
 
 	updateResourceNodeSpawners(gameObjectData, graphicsData, ticks);
-
+	printf("resource node spawners updated\n");
 
 	if(gameObjectData->hive.displayInfo){
 		SDL_Point point = getCenterOfRect(gameObjectData->hive.rect);
@@ -1521,6 +1526,7 @@ void updateGameObjects(GameObjectData *gameObjectData, AudioData *audioData, Gra
 	if(!gameObjectData->pause_status){
 		updateHive(gameObjectData,ticks);
 	}
+	printf("hive updated\n");
 
 	/* First, we need to draw the Hive in at the correct position. */
 	blitGameObject(gameObjectData->hive.rect,
@@ -1529,15 +1535,16 @@ void updateGameObjects(GameObjectData *gameObjectData, AudioData *audioData, Gra
 				 			   0,
 				 			 	 NULL,
 				 			 	 SDL_FLIP_NONE);
-
+	printf("hive blitted\n");
 
 	if(!gameObjectData->gameOver){ /*start of if not game over*/
 		/* This returns 0 if there are no workers left - in which case it's game over! */
 		if(updateAndRenderProgrammableWorkers(gameObjectData, graphicsData, announcementsData, ticks) == 0){
 			return;
 		}
+		printf("programmableWorkers updated\n");
 		updateIceCream(gameObjectData, graphicsData);
-
+		printf("iceCream updated\n");
 
 	 /*determine if iceCreamPerson is on screen and needs animating*/
 		if(gameObjectData->iceCreamPerson->currently_on_screen){
@@ -1568,6 +1575,7 @@ void updateGameObjects(GameObjectData *gameObjectData, AudioData *audioData, Gra
 
 			}
 	 	}
+		printf("iceCreamPerson updated\n");
 
 		/*determine if roamingSpider is on screen and needs animating*/
 		if(gameObjectData->roamingSpider->currently_on_screen){
@@ -1591,15 +1599,18 @@ void updateGameObjects(GameObjectData *gameObjectData, AudioData *audioData, Gra
 			}
 	 	}
 	}
+	printf("roamingSpider updated\n");
 
 
 	/* render tree tops last, so that they appear above everything else*/
 	updateTrees(gameObjectData,graphicsData);
+	printf("trees updated\n");
 
 	/*finally render a layer or rain splatter if its raining*/
 	if(gameObjectData->weather.present_weather == Rain){
 		blitRainRandomly(graphicsData);
 	}
+	printf("rain updated\n");
 
 	updateWeather(gameObjectData, audioData, &gameObjectData->weather, ticks);
 
@@ -1760,9 +1771,67 @@ void nullifyLocalAIInformation(GameObjectData *gameObjectData){
 }
 
 void initGameObjectData(GameObjectData *gameObjectData, ConfigurationData *configData){
-	gameObjectData->HONEY_REQUIRED_FOR_WINTER = getConfiguredInt(configData,"HONEY_REQUIRED_FOR_WINTER");
-	gameObjectData->REQUIREMENT_YEAR_INCREASE_PERCENTAGE = getConfiguredInt(configData,"REQUIREMENT_YEAR_INCREASE_PERCENTAGE");
+ gameObjectData->HONEY_REQUIRED_FOR_WINTER	= getConfiguredInt(configData,"HONEY_REQUIRED_FOR_WINTER");
+ gameObjectData->REQUIREMENT_YEAR_INCREASE_PERCENTAGE = getConfiguredInt(configData,"REQUIREMENT_YEAR_INCREASE_PERCENTAGE");
+ gameObjectData->DELAY_BEFORE_SUMMER = getConfiguredInt(configData,"DELAY_BEFORE_SUMMER");
+ gameObjectData->NUMBER_OF_FLOWER_PATCHES = getConfiguredInt(configData,"NUMBER_OF_FLOWER_PATCHES");
+ gameObjectData->DEFAULT_MAXNODECOUNT = getConfiguredInt(configData,"DEFAULT_MAXNODECOUNT");
+ gameObjectData->X_SIZE_OF_WORLD = getConfiguredInt(configData,"X_SIZE_OF_WORLD");
+ gameObjectData->Y_SIZE_OF_WORLD = getConfiguredInt(configData,"Y_SIZE_OF_WORLD");
+ gameObjectData->DEFAULT_SPAWNRADIUS = getConfiguredInt(configData,"DEFAULT_SPAWNRADIUS");
+ gameObjectData->INITIAL_NUMBER_OF_WORKERS = getConfiguredInt(configData,"INITIAL_NUMBER_OF_WORKERS");
+ gameObjectData->NUMBER_OF_TREES = getConfiguredInt(configData,"NUMBER_OF_TREES");
+ gameObjectData->SIZE_OF_TREE = getConfiguredInt(configData,"SIZE_OF_TREE");
+ gameObjectData->X_SIZE_OF_HIVE = getConfiguredInt(configData,"X_SIZE_OF_HIVE");
+ gameObjectData->Y_SIZE_OF_HIVE = getConfiguredInt(configData,"Y_SIZE_OF_HIVE");
+ gameObjectData->WORKER_SENSE_RANGE = getConfiguredFloat(configData,"WORKER_SENSE_RANGE");
+ gameObjectData->X_SIZE_OF_WORKER = getConfiguredInt(configData,"X_SIZE_OF_WORKER");
+ gameObjectData->Y_SIZE_OF_WORKER = getConfiguredInt(configData,"Y_SIZE_OF_WORKER");
+ gameObjectData->LENGTH_OF_STATUS_STRING = getConfiguredInt(configData,"LENGTH_OF_STATUS_STRING");
+ gameObjectData->WORKER_SPEED = getConfiguredDouble(configData, "WORKER_SPEED");
+ gameObjectData->PERSON_HEIGHT = getConfiguredInt(configData,"PERSON_HEIGHT");
+ gameObjectData->PERSON_WIDTH = getConfiguredInt(configData,"PERSON_WIDTH");
+ gameObjectData->MAX_DAYS_TO_WINTER = getConfiguredInt(configData,"MAX_DAYS_TO_WINTER");
+ gameObjectData->SIZE_OF_TREESTUMP = getConfiguredInt(configData,"SIZE_OF_TREESTUMP");
+ gameObjectData->WINTER_THRESHOLD = getConfiguredInt(configData,"WINTER_THRESHOLD");
+ gameObjectData->HIVE_SHELTER_RADIUS = getConfiguredInt(configData,"HIVE_SHELTER_RADIUS");
+ gameObjectData->MS_BETWEEN_FLAPPING = getConfiguredInt(configData,"MS_BETWEEN_FLAPPING");
+ gameObjectData->STUNNED_AFTER_STING_DURATION = getConfiguredInt(configData,"STUNNED_AFTER_STING_DURATION");
+ gameObjectData->SUGAR_VALUE_OF_FLOWER = getConfiguredInt(configData,"SUGAR_VALUE_OF_FLOWER");
+ gameObjectData->SUGAR_VALUE_OF_ICECREAM = getConfiguredInt(configData,"SUGAR_VALUE_OF_ICECREAM");
+ gameObjectData->ICECREAM_PICKUP_RADIUS = getConfiguredInt(configData,"ICECREAM_PICKUP_RADIUS");
+ gameObjectData->CHANCE_OF_REGAINING_FLIGHT = getConfiguredInt(configData,"CHANCE_OF_REGAINING_FLIGHT");
+ gameObjectData->STRIDE_FREQUENCY = getConfiguredFloat(configData,"STRIDE_FREQUENCY");
+ gameObjectData->STING_HIT_RADIUS = getConfiguredInt(configData,"STING_HIT_RADIUS");
+ gameObjectData->DEFAULT_SPAWNDELAY = getConfiguredInt(configData,"DEFAULT_SPAWNDELAY");
+ gameObjectData->X_SIZE_OF_NODE = getConfiguredInt(configData,"X_SIZE_OF_NODE");
+ gameObjectData->Y_SIZE_OF_NODE = getConfiguredInt(configData,"Y_SIZE_OF_NODE");
+ gameObjectData->TICKSPERWEATHER = getConfiguredInt(configData,"TICKSPERWEATHER");
+ gameObjectData->CHANCE_OF_CLOUD = getConfiguredInt(configData,"CHANCE_OF_CLOUD");
+ gameObjectData->CHANCE_OF_RAIN = getConfiguredInt(configData,"CHANCE_OF_RAIN");
+ gameObjectData->SIZE_OF_FLOWER = getConfiguredInt(configData,"SIZE_OF_FLOWER");
+ gameObjectData->WINTER_COUNTDOWN_SPEED = getConfiguredDouble(configData, "WINTER_COUNTDOWN_SPEED");
+ gameObjectData->AUTUMN_THRESHOLD = getConfiguredInt(configData,"AUTUMN_THRESHOLD");
+ gameObjectData->DROPPED_ICECREAM_WIDTH = getConfiguredInt(configData,"DROPPED_ICECREAM_WIDTH");
+ gameObjectData->DROPPED_ICECREAM_HEIGHT = getConfiguredInt(configData,"DROPPED_ICECREAM_HEIGHT");
+ gameObjectData->RANDOMISE_SPAWNRADIUS = getConfiguredInt(configData,"RANDOMISE_SPAWNRADIUS");
+ gameObjectData->TREE_SHELTER_RADIUS = getConfiguredInt(configData,"TREE_SHELTER_RADIUS");
+ gameObjectData->MELT_TIME_THRESHOLD = getConfiguredInt(configData,"MELT_TIME_THRESHOLD");
+ gameObjectData->MAX_DROPPED_ICECREAM_WIDTH = getConfiguredInt(configData,"MAX_DROPPED_ICECREAM_WIDTH");
+ gameObjectData->COLD_DEATH_THRESHOLD = getConfiguredInt(configData,"COLD_DEATH_THRESHOLD");
+ gameObjectData->BEE_SHRINK_FACTOR_ON_GROUND = getConfiguredDouble(configData,"BEE_SHRINK_FACTOR_ON_GROUND");
+ gameObjectData->CARRYING_FLOWER_INDEX_OFFSET = getConfiguredInt(configData,"CARRYING_FLOWER_INDEX_OFFSET");
+ gameObjectData->CARRYING_ICECREAM_INDEX_OFFSET = getConfiguredInt(configData,"CARRYING_ICECREAM_INDEX_OFFSET");
+ gameObjectData->ICE_CREAM_PERSON_PROB = getConfiguredInt(configData,"ICE_CREAM_PERSON_PROB");
 
-	gameObjectData->tree = calloc(1,sizeof(Tree));
-	gameObjectData->resourceNodeSpawners = calloc(1,sizeof(ResourceNodeSpawner));
+	gameObjectData->tree = calloc(gameObjectData->NUMBER_OF_TREES,sizeof(Tree));
+	gameObjectData->resourceNodeSpawners = calloc(gameObjectData->NUMBER_OF_FLOWER_PATCHES,sizeof(ResourceNodeSpawner));
+	gameObjectData->first_programmable_worker = NULL;
+	gameObjectData->pause_status = 0;
+	initHive(gameObjectData,configData);
+}
+
+void destroyGameObjectData(GameObjectData *gameObjectData){
+	free(gameObjectData->tree);
+	free(gameObjectData->resourceNodeSpawners);
 }

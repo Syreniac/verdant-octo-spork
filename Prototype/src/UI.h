@@ -76,6 +76,7 @@ struct UIData{
   int STOP_GRAPHIC;
   int BLOCK_GRAPHIC;
   int HIVECELL_GRAPHIC;
+  int HIVECELLMASK_GRAPHIC;
 };
 
 struct UI_Element{
