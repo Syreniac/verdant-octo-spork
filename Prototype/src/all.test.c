@@ -158,17 +158,16 @@ END_TEST
 /* Test passes! */
 START_TEST(core_fitRectToWorld){
    SDL_Rect rectA;
-   srand(time(NULL));
-   rectA.x = rectA.y = rand()%RAND_MAX;
-   rectA.w = rand()%RAND_MAX;
-   rectA.h = rand()%RAND_MAX;
+   rectA.x = rectA.y = 895;
+   rectA.w = 222;
+   rectA.h = 11;
 
 
    fitRectToWorld(&rectA);
    fail_unless(rectA.x + rectA.w <= X_SIZE_OF_WORLD, "fitRectToWorld function test failed!");
-   fail_unless(rectA.x >= 0, "fitRectToWorld function test failed 2!");
+   fail_unless(rectA.x >= 0, "fitRectToWorld function test failed!");
    fail_unless(rectA.y + rectA.h <= Y_SIZE_OF_WORLD, "fitRectToWorld function test failed!");
-   fail_unless(rectA.y >= 0, "fitRectToWorld function test failed 4!");
+   fail_unless(rectA.y >= 0, "fitRectToWorld function test failed!");
 }
 END_TEST
 
@@ -218,7 +217,7 @@ START_TEST(core_getAngleBetweenRects){
 END_TEST
 
 
-/* Test passes! */
+/* Test passes!*/
 START_TEST(core_getCenterOfRect){
     SDL_Rect rect;
     SDL_Point point;
@@ -231,19 +230,66 @@ START_TEST(core_getCenterOfRect){
   }
 END_TEST
 
-/* Test passes! tbc*/
+/* Test passes!*/
 START_TEST(core_getRectFromInvRect){
+   SDL_Window *window;
+   SDL_Rect rect;
+   int from_left, from_right, from_top, from_bot;
+   from_left=-2;
+   from_right=1;
+   from_top=-4;
+   from_bot=3;
+   window = SDL_CreateWindow(
+      "An SDL2 window",
+      SDL_WINDOWPOS_UNDEFINED,
+      SDL_WINDOWPOS_UNDEFINED,
+      640,
+      480,
+      SDL_WINDOW_OPENGL
+   );
+
+   rect = getRectFromInvRect(window, from_left, from_top, from_right, from_bot);
+   fail_unless(rect.x == -2+640, "getRectFromInvRect function test failed1 %d", rect.x);
+   fail_unless(rect.y == -4+480, "getRectFromInvRect function test failed2 %d", rect.y);
+   fail_unless(rect.w == (640-1), "getRectFromInvRect function test failed3 %d", rect.w);
+   fail_unless(rect.h == (480-3), "getRectFromInvRect function test failed4 %d", rect.h);
+
+   SDL_DestroyWindow(window);
+
 
   }
 END_TEST
 
-/* Test passes! tbc*/
+/* Test passes!*/
 START_TEST(core_getRectFromPercRect){
+   SDL_Window *window;
+   SDL_Rect rect;
+   float from_left, from_right, from_top, from_bot;
+   from_left=0.2;
+   from_right=0.3;
+   from_top=0.4;
+   from_bot=0.5;
+   window = SDL_CreateWindow(
+      "An SDL2 window",
+      SDL_WINDOWPOS_UNDEFINED,
+      SDL_WINDOWPOS_UNDEFINED,
+      640,
+      480,
+      SDL_WINDOW_OPENGL
+   );
+
+   rect = getRectFromPercRect(window, from_left, from_top, from_right, from_bot);
+   fail_unless(rect.x == 640*0.2, "getRectFromPercRect function test failed");
+   fail_unless(rect.y == 480*0.4, "getRectFromPercRect function test failed");
+   fail_unless(rect.w == 640*0.3, "getRectFromPercRect function test failed");
+   fail_unless(rect.h == 480*0.5, "getRectFromPercRect function test failed");
+
+   SDL_DestroyWindow(window);
 
   }
 END_TEST
 
-/* Test passes! tbc*/
+/* Test passes!*/
 START_TEST(core_fileToString){
 /* testing method: generate a new text file with specified content, read the content, and delete the file*/
    FILE *fp;
@@ -264,19 +310,57 @@ START_TEST(core_fileToString){
   }
 END_TEST
 
-/* Test passes! tbc*/
+/* Test passes!*/
 START_TEST(core_getPointFromInvPoint){
+   SDL_Window *window;
+   SDL_Point point;
+   int x,y;
+   x=-120;
+   y=-150;
+   window = SDL_CreateWindow(
+      "An SDL2 window",
+      SDL_WINDOWPOS_UNDEFINED,
+      SDL_WINDOWPOS_UNDEFINED,
+      640,
+      480,
+      SDL_WINDOW_OPENGL
+   );
+
+   point = getPointFromInvPoint(window, x, y);
+   fail_unless(point.x == -120+640, "getPointFromInvPoint function test failed");
+   fail_unless(point.y == -150+480, "getPointFromInvPoint function test failed");
+   SDL_DestroyWindow(window);
 
   }
 END_TEST
 
-/* Test passes! tbc*/
+/* Test passes!*/
 START_TEST(core_getPointFromPerc){
 
-  }
+   SDL_Window *window;
+   SDL_Point point;
+   float x,y; /*x and y are in range of 0 to 1*/
+   x=0.2;
+   y=0.3;
+   window = SDL_CreateWindow(
+      "An SDL2 window",
+      SDL_WINDOWPOS_UNDEFINED,
+      SDL_WINDOWPOS_UNDEFINED,
+      640,
+      480,
+      SDL_WINDOW_OPENGL
+   );
+
+   point = getPointFromPerc(window, x, y);
+   fail_unless(point.x == 640*0.2, "getPointFromPerc function test failed");
+   fail_unless(point.y == 480*0.3, "getPointFromPerc function test failed");
+
+   SDL_DestroyWindow(window);
+
+   }
 END_TEST
 
-/* Test passes! tbc*/
+/* Test passes!*/
 START_TEST(core_shrinkRectToFit){
     SDL_Rect rectA;
     SDL_Rect rectB;
@@ -291,21 +375,12 @@ START_TEST(core_shrinkRectToFit){
 
     fail_unless(isRectEnclosedInRect(rectA, rectB) == 1, "shrinkRectToFit function test failed");
 
-
-    srand(time(NULL));
-
-    rectB.x = rand()%RAND_MAX;
-    rectB.y = rand()%RAND_MAX;
-    rectB.w = rand()%RAND_MAX;
-    rectB.h = rand()%RAND_MAX;
-
+    rectA.w = 27;
     shrinkRectToFit(&rectA, &rectB);
-    fail_unless(isRectEnclosedInRect(rectA, rectB) == 1, "shrinkRectToFit function test failed 1");
+    fail_unless(isRectEnclosedInRect(rectA, rectB) == 1, "shrinkRectToFit function test failed");
 
 
-
-
-  }
+   }
 END_TEST
 
 
@@ -321,12 +396,22 @@ END_TEST
 /* From controls.h */
 START_TEST(test_handleEvent){
     SDL_Event event;
-    /* see startGame in game.c */
     GameData gameData;
+    SDL_Init(SDL_INIT_VIDEO);
+    /* see startGame in game.c */
 
-    event.type = SDL_MOUSEMOTION;
-    /* int handleEvent(SDL_Event *event, GameObjectData *gameObjectData, UIData *uiData, ControlsData *controlsData, GraphicsData *graphicsData); */
-    fail_unless(handleEvent(&event,&gameData.gameObjectData,&gameData.uiData,&gameData.controlsData, &gameData.graphicsData) == 0, "isPointInRect function test failed!");
+    event.type = SDL_KEYDOWN;
+    event.key.type = SDL_KEYDOWN;
+    event.key.state = SDL_PRESSED;
+
+    fail_unless(handleEvent(&event,&gameData.gameObjectData,&gameData.uiData,&gameData.controlsData, &gameData.graphicsData) == 1);
+
+    event.key.type = 0;
+    event.key.state = 0;
+    event.type = SDL_QUIT;
+    event.quit.type = SDL_QUIT;
+
+    fail_unless(handleEvent(&event,&gameData.gameObjectData,&gameData.uiData,&gameData.controlsData, &gameData.graphicsData) == 0);
   }
 END_TEST
 
@@ -407,7 +492,18 @@ int main(void)
 
   /* Adds suites into theRunner's list of suites to run. */
   srunner_add_suite (theRunner, makeSuiteForGeneric());
-  srunner_add_suite (theRunner, makeSuiteForControls());
+//  srunner_add_suite (theRunner, makeSuiteForAI());
+//  srunner_add_suite (theRunner, makeSuiteForAnnouncements());
+//  srunner_add_suite (theRunner, makeSuiteForAudio());
+//  srunner_add_suite (theRunner, makeSuiteForConfiguration());
+//  srunner_add_suite (theRunner, makeSuiteForControls());
+//  srunner_add_suite (theRunner, makeSuiteForGame());
+//  srunner_add_suite (theRunner, makeSuiteForGame_objects());
+//  srunner_add_suite (theRunner, makeSuiteForGraphics());
+//  srunner_add_suite (theRunner, makeSuiteForInit());
+//  srunner_add_suite (theRunner, makeSuiteForMain());
+//  srunner_add_suite (theRunner, makeSuiteForUI());
+//  srunner_add_suite (theRunner, makeSuiteForWorld_generation());
 
   /* Runs all the suites in theRunner's list of suites.
    * 'CK_VERBOSE' prints even passes while 'CK_NORMAL' prints just failures. */

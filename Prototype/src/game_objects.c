@@ -628,9 +628,15 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
 		
 		/*for battling with enemies*/
 		if(isPointInRangeOf(getCenterOfRect(programmableWorker->rect), getCenterOfRect(gameObjectData->roamingSpider->rect),SPIDER_ATTACK_AREA)) {
+			programmableWorker->beeStatus = "Fighting a spider!";
+			if(programmableWorker->displayInfo){
+					sprintf(tempString," Status: %s", programmableWorker
+					->beeStatus);
+					setObjectInfoDisplay(&announcementsData->objectInfoDisplay, tempString, STATUS);
+			}
 			programmableWorker->fighting_spider = 1;
 			programmableWorker->speed = 0.0;
-			printf("DEBUG: Worker Bee caught by spider\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
+			printf("DEBUG: Worker Bee caught by spider\n\n");
 		}
 		
 		  /* Sensory Perception */
