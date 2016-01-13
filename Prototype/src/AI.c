@@ -738,35 +738,38 @@ AIData initAIData(void){
   		nullifyBlockFunctionRoot(&aiData.blockFunctionRoots[0],NULL);
   	}
   }
+  #define ACTION_BLOCK_COLOR 0xFF,0x80,0x00
+  #define WAIT_BLOCK_COLOR 0x04,0x5F,0xB4
+  #define COUNT_BLOCK_COLOR 0x5F,0xB4,0x04
   aiData.templates = NULL;
-	makeAIBlockTemplate(&aiData,"Void",248,221,35,1,arguments);
+	makeAIBlockTemplate(&aiData,"Void",255,255,255,1,arguments);
 	makeAIBlockTemplate(&aiData,"IfIdle",248,221,35,2,arguments);
 	makeAIBlockTemplate(&aiData,"IfReturning",248,221,35,2,arguments);
 	makeAIBlockTemplate(&aiData,"IfHasCargo",248,221,35,2,arguments);
-	makeAIBlockTemplate(&aiData,"IfOutsideBounds",248,221,35,1,arguments);
+	makeAIBlockTemplate(&aiData,"IfOutsideBounds",248,221,35,2,arguments);
 	makeAIBlockTemplate(&aiData,"IfNearHive",248,221,35,2,arguments);
-	makeAIBlockTemplate(&aiData,"SetHeadingRandomly",248,221,35,1,arguments);
-	makeAIBlockTemplate(&aiData,"ReturnToHive",248,221,35,1,arguments);
-	makeAIBlockTemplate(&aiData,"RememberCurrentLocation",248,221,35,1,arguments);
-	makeAIBlockTemplate(&aiData,"GoToStoredLocation",248,221,35,2,arguments);
-	makeAIBlockTemplate(&aiData,"ForgetStoredLocation",248,221,35,1,arguments);
+	makeAIBlockTemplate(&aiData,"SetHeadingRandomly",ACTION_BLOCK_COLOR,1,arguments);
+	makeAIBlockTemplate(&aiData,"ReturnToHive",ACTION_BLOCK_COLOR,1,arguments);
+	makeAIBlockTemplate(&aiData,"RememberCurrentLocation",ACTION_BLOCK_COLOR,1,arguments);
+	makeAIBlockTemplate(&aiData,"GoToStoredLocation",ACTION_BLOCK_COLOR,2,arguments);
+	makeAIBlockTemplate(&aiData,"ForgetStoredLocation",ACTION_BLOCK_COLOR,1,arguments);
 	makeAIBlockTemplate(&aiData,"IfNodeFound",248,221,35,2,arguments);
-	makeAIBlockTemplate(&aiData,"HeadToFoundNode",248,221,35,1,arguments);
+	makeAIBlockTemplate(&aiData,"HeadToFoundNode",ACTION_BLOCK_COLOR,1,arguments);
 	makeAIBlockTemplate(&aiData,"HasStoredLocation",248,221,35,2,arguments);
   makeAIBlockTemplate(&aiData,"IfNearOtherWorker",248,221,35,2,arguments);
   makeAIBlockTemplate(&aiData,"CoinFlip",248,221,35,2,arguments);
   makeAIBlockTemplate(&aiData,"OneInAHundred",248,221,35,2,arguments);
-  makeAIBlockTemplate(&aiData,"Sleep",248,221,35,1,arguments);
-  makeAIBlockTemplate(&aiData,"CountNearWorkers",248,221,35,1,arguments);
+  makeAIBlockTemplate(&aiData,"Sleep",WAIT_BLOCK_COLOR,1,arguments);
+  makeAIBlockTemplate(&aiData,"CountNearWorkers",COUNT_BLOCK_COLOR,1,arguments);
   makeAIBlockTemplate(&aiData,"IfCountZero",248,221,35,2,arguments);
-  makeAIBlockTemplate(&aiData,"LoadCount",248,221,35,1,arguments);
-  makeAIBlockTemplate(&aiData,"SaveCount",248,221,35,1,arguments);
-  makeAIBlockTemplate(&aiData,"LoadCountFromOther",248,221,35,1,arguments);
-  makeAIBlockTemplate(&aiData,"SaveCountFromOther",248,221,35,1,arguments);
+  makeAIBlockTemplate(&aiData,"LoadCount",COUNT_BLOCK_COLOR,1,arguments);
+  makeAIBlockTemplate(&aiData,"SaveCount",COUNT_BLOCK_COLOR,1,arguments);
+  makeAIBlockTemplate(&aiData,"LoadCountFromOther",COUNT_BLOCK_COLOR,1,arguments);
+  makeAIBlockTemplate(&aiData,"SaveCountFromOther",COUNT_BLOCK_COLOR,1,arguments);
   makeAIBlockTemplate(&aiData,"PickNearbyWorker",248,221,35,2,arguments);
-  makeAIBlockTemplate(&aiData,"IfGreaterThanSaved",248,221,35,2,arguments);
-  makeAIBlockTemplate(&aiData,"CopyPointFromSelected",248,221,35,1,arguments);
-  makeAIBlockTemplate(&aiData,"CountNearFlowers",248,221,35,1,arguments);
+  makeAIBlockTemplate(&aiData,"IfGreaterThanSaved",COUNT_BLOCK_COLOR,2,arguments);
+  makeAIBlockTemplate(&aiData,"CopyPointFromSelected",ACTION_BLOCK_COLOR,1,arguments);
+  makeAIBlockTemplate(&aiData,"CountNearFlowers",ACTION_BLOCK_COLOR,1,arguments);
 
 	return aiData;
 }

@@ -585,7 +585,7 @@ static void createGameUI(GameData *gameData){
   /* I'm making it a little bigger so the border doesn't doublepixel */
   element4 = UIElement_Create(0,0,0,0,4);
   printf("compiler output bar is %p\n",element4);
-  UIConfigure_FillAndBorderRect(element4,&element4->actions[0],222,0,0,0,0,0,FILLRECT);
+  UIConfigure_FillAndBorderRect(element4,&element4->actions[0],255,255,255,0,0,0,FILLRECT);
   UIConfigure_ShrinkFitToParent(element4,&element4->actions[1]);
   UIConfigure_DisplayString(element4,&element4->actions[2],"                                                                                                                          ",0,UISTRING_ALIGN_LEFT);
 	UIConfigure_PercOffsetRect(element4,&element4->actions[3],0.0,1.0,1.0,1.0,50,-125,-269,-100,1,&element4->actions[1]);

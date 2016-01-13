@@ -69,8 +69,9 @@ static UI_Action* makeAIBlockLineLinker(UI_Element *element, int *nextAvailableA
 		UITrigger_Bind(&element->actions[nextAvailableAction+4],&element->actions[nextAvailableAction],1,0);
 		UITrigger_Bind(&element->actions[nextAvailableAction+4],&element->actions[nextAvailableAction+2],0,1);
 		UITrigger_Bind(&element->actions[nextAvailableAction+4],&element->actions[nextAvailableAction+4],1,0);
-	UIConfigure_DisplayStringSubrect(element, &element->actions[nextAvailableAction+5],label,1,x,y);
-	*nextAvailableActionPointer = *nextAvailableActionPointer + 6;
+	UIConfigure_FillAndBorderSubrect(element, &element->actions[nextAvailableAction+5],x,y,25,25,255,255,255,0,0,0);
+	UIConfigure_DisplayStringSubrect(element, &element->actions[nextAvailableAction+6],label,1,x,y,25,25);
+	*nextAvailableActionPointer = *nextAvailableActionPointer + 7;
 	return &element->actions[nextAvailableAction+3];
 }
 
@@ -81,7 +82,7 @@ static int countUIActionsNeededForAITemplate(BlockFunctionTemplate *template){
 		switch(template->arguments[i]){
 			case BF_PRIMARY:
 			case BF_SECONDARY:
-				count += 6;
+				count += 7;
 				break;
 		}
 		i++;
@@ -134,7 +135,7 @@ UI_Element *makeStartBlock(int x_offset, int y_offset, UI_Element *parent){
 		element->actions[3].status = 0;
 		element->actions[3].new_status = 0;
 	UIConfigure_SetUpAiBlock(element,&element->actions[8],2,&element->actions[2],&element->actions[7]);
-	UIConfigure_FillSubrect(element, &element->actions[9], 175, 25, 25, 25, 255, 255, 255);
+	UIConfigure_FillSubrect(element, &element->actions[9], 175, 25, 24, 24, 255, 255, 255);
 	UIElement_Reparent(element,parent);
 	return element;
 }
@@ -160,8 +161,8 @@ UI_Element *makeAITemplateScrollList(int x_offset, int y_offset, AIData *aiData,
 	BlockFunctionTemplate *template = aiData->templates;
 	int y_offset2 = 0;
 	/* Set up the main panel */
-	element = UIElement_Create(x_offset, y_offset, 220, 360,6);
-	UIConfigure_FillAndBorderRect(element,&element->actions[0],185,122,87,0,0,0,FILLRECT);
+	element = UIElement_Create(x_offset, y_offset, 220, 360,7);
+	UIConfigure_FillAndBorderRect(element,&element->actions[0],147,147, 170,0,0,0,FILLRECT);
 	UIConfigure_ShrinkFitToParent(element,&element->actions[1]);
 	/* Set up the slider bar */
 		element2 = UIElement_Create(x_offset+200,y_offset,21,20,7);
@@ -179,13 +180,13 @@ UI_Element *makeAITemplateScrollList(int x_offset, int y_offset, AIData *aiData,
 		UIConfigure_SlideWithMouseWheel(element2,&element2->actions[6],0,15,1,&element2->actions[1]);
 			element2->actions[6].response = NONE;
 		/* Set up the main panel again */
-	UIConfigure_GetDifferenceInChildYOffset(element,&element->actions[2],0.0,y_offset,element2,1,&element->actions[3]);
-	UIConfigure_PassThrough(element,&element->actions[5],MOUSEWHEEL,1,&element2->actions[6]);
+	UIConfigure_GetDifferenceInChildYOffset(element,&element->actions[2],0.0,y_offset,element2,1,&element->actions[4]);
+	UIConfigure_PassThrough(element,&element->actions[3],MOUSEWHEEL,1,&element2->actions[6]);
 	/* Set up the options */
 	while(template!=NULL){
-		element2 = UIElement_Create(x_offset, y_offset + y_offset2, 200,50,6);
-		UIConfigure_FillAndBorderRect(element2,&element2->actions[0],248,221,35,0,0,0,BLOCK);
-		UIConfigure_ShrinkFitToParentWithYShift(element2,&element2->actions[1],&element->actions[3]);
+		element2 = UIElement_Create(x_offset, y_offset + y_offset2, 200,25,6);
+		UIConfigure_FillAndBorderRect(element2,&element2->actions[0],template->red,template->green,template->blue,0,0,0,BLOCK);
+		UIConfigure_ShrinkFitToParentWithYShift(element2,&element2->actions[1],&element->actions[4]);
 		UIConfigure_DisplayString(element2,&element2->actions[2],template->name,0,UISTRING_ALIGN_CENTER);
 		UIConfigure_LeftClickRect(element2,&element2->actions[3]);
 			UITrigger_Bind(&element2->actions[3],&element2->actions[4],-1,1);
@@ -193,10 +194,11 @@ UI_Element *makeAITemplateScrollList(int x_offset, int y_offset, AIData *aiData,
 		UIConfigure_PercPosition(element2,&element2->actions[5],1.0,0.0,-x_offset,y_offset+y_offset2,1,&element2->actions[1]);
 		UIElement_Reparent(element2,element);
 		template = template->next;
-		y_offset2 += 60;
+		y_offset2 += 35;
 	}
-	UIConfigure_CalculateScrollListOffset(element,&element->actions[3],y_offset2+60);
-	UIConfigure_PercOffsetRect(element,&element->actions[4],1.0,0.0,1.0,1.0,-x_offset,y_offset,-50,-50,1,&element->actions[1]);
+	UIConfigure_CalculateScrollListOffset(element,&element->actions[4],y_offset2+60);
+	UIConfigure_PercOffsetRect(element,&element->actions[5],1.0,0.0,1.0,1.0,-x_offset,y_offset,-50,-50,1,&element->actions[1]);
+	UIConfigure_FillAndBorderSubrect(element,&element->actions[6],200,0,19,99999,74,74,74,0,0,0);
 	UIElement_Reparent(element,parent);
 	return element;
 }
@@ -312,6 +314,8 @@ UI_Element *UIElement_Create(int x, int y, int w, int h, int num_of_actions){
 #define alignOffset integers[3]
 #define rectX integers[4]
 #define rectY integers[5]
+#define rectW integers[6]
+#define rectH integers[7]
 
 
 int UIAction_DisplayStringSubrect(UI_Action *action, UIData *uiData){
@@ -319,6 +323,7 @@ int UIAction_DisplayStringSubrect(UI_Action *action, UIData *uiData){
 	SDL_Color colour;
 	SDL_Surface *temp;
 	SDL_Rect temp_rect;
+	SDL_Rect temp_rect2;
 	int w,h;
 	colour.r = 0;
 	colour.g = 0;
@@ -335,24 +340,21 @@ int UIAction_DisplayStringSubrect(UI_Action *action, UIData *uiData){
 		action->alignOffset = w;
 	}
 	if(UIElement_isVisible(action->element) && action->element->rect.h > TTF_FontHeight(graphicsData->fonts[action->fontID]) && action->currentString != NULL && action->status != 0 && action->texture != NULL){
-		temp_rect.x = action->rectX + action->element->rect.x;
-		temp_rect.y = action->rectY + action->element->rect.y;
+		temp_rect2.w = action->rectW;
+		temp_rect2.h = action->rectH;
+		temp_rect2.x = action->rectX + action->element->rect.x;
+		temp_rect2.y = action->rectY + action->element->rect.y;
+		shrinkRectToFit(&temp_rect2, &action->element->rect);
 		TTF_SizeText(graphicsData->fonts[action->fontID], action->currentString, &temp_rect.w, &temp_rect.h);
-		if(temp_rect.x > action->element->rect.x + action->element->rect.w){
-			temp_rect.x-= temp_rect.w/2;
-		}
-		else{
-			temp_rect.x+= temp_rect.w/2;
-
-		}
-		shrinkRectToFit(&temp_rect, &action->element->rect);
+		temp_rect.x = temp_rect2.x + (temp_rect2.w - temp_rect.w)/2;
+		temp_rect.y = temp_rect2.y + (temp_rect2.h - temp_rect.h)/2;
 		SDL_RenderCopy(graphicsData->renderer,action->texture,NULL,&temp_rect);
 		return 1;
 	}
 	return 0;
 }
 
-void UIConfigure_DisplayStringSubrect(UI_Element *element, UI_Action *action, char *string, int font, int x, int y){
+void UIConfigure_DisplayStringSubrect(UI_Element *element, UI_Action *action, char *string, int font, int x, int y, int w, int h){
 	#if DEBUGGING==1
 	printf("UIConfigure_DisplayString\n");
 	#endif
@@ -372,10 +374,12 @@ void UIConfigure_DisplayStringSubrect(UI_Element *element, UI_Action *action, ch
 	action->new_status = 1;
 	action->status = 1;
 	action->num_of_strings = 2;
-	action->integers = calloc(6,sizeof(int));
+	action->integers = calloc(8,sizeof(int));
 	action->fontID = font;
 	action->rectX = x;
 	action->rectY = y;
+	action->rectW = w;
+	action->rectH = h;
 	action->num_of_integers = 4;
 }
 
@@ -446,6 +450,68 @@ void UIConfigure_RightClickSubrect(UI_Element *element, UI_Action *action, int x
 #undef rectY
 #undef rectW
 #undef rectH
+
+/* UIAction_FillSubrect
+
+	 This will fill a smaller rectangle on the surface of a UI_Element */
+
+#define rectX integers[0]
+#define rectY integers[1]
+#define rectW integers[2]
+#define rectH integers[3]
+
+#define fillRed integers[4]
+#define fillGreen integers[5]
+#define fillBlue integers[6]
+#define borderRed integers[7]
+#define borderGreen integers[8]
+#define borderBlue integers[9]
+
+int UIAction_FillAndBorderSubrect(UI_Action *action, UIData *uiData){
+	SDL_Rect r;
+	if(action->status != 0){
+		r.x = action->rectX + action->element->rect.x;
+		r.y = action->rectY + action->element->rect.y;
+		r.w = action->rectW;
+		r.h = action->rectH;
+		shrinkRectToFit(&r,&action->element->rect);
+		SDL_SetRenderDrawColor(uiData->graphicsData->renderer,action->fillRed,action->fillGreen,action->fillBlue,255);
+		SDL_RenderFillRect(uiData->graphicsData->renderer,&r);
+		SDL_SetRenderDrawColor(uiData->graphicsData->renderer, action->borderRed, action->borderBlue, action->borderGreen,255);
+		SDL_RenderDrawRect(uiData->graphicsData->renderer,&r);
+		return 1;
+	}
+	return 0;
+}
+
+void UIConfigure_FillAndBorderSubrect(UI_Element *element, UI_Action *action, int x, int y, int w, int h, int red, int green, int blue,int bred, int bgreen, int bblue){
+	UIAction_Init(element,action);
+	action->response = UPDATE;
+	action->function = UIAction_FillAndBorderSubrect;
+	action->integers = calloc(10,sizeof(int));
+	action->num_of_integers = 10;
+	action->rectX = x;
+	action->rectY = y;
+	action->rectW = w;
+	action->rectH = h;
+	action->fillRed = red;
+	action->fillGreen = green;
+	action->fillBlue = blue;
+	action->borderRed = bred;
+	action->borderGreen = bgreen;
+	action->borderBlue = bblue;
+}
+
+#undef rectX
+#undef rectY
+#undef rectW
+#undef rectH
+#undef fillRed
+#undef fillGreen
+#undef fillBlue
+#undef borderRed
+#undef borderGreen
+#undef borderBlue
 
 /* UIAction_FillSubrect
 
