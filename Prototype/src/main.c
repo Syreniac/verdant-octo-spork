@@ -15,8 +15,8 @@ int main(int argc, char *argv[]){
   DEBUGGING_FILE_ALLOC= fopen("debug_output_alloc.txt","w");
   DEBUGGING_FILE_FREE= fopen("debug_output_free.txt","w");
   #endif
-  ConfigurationData configData;
-  initConfigurationData(&configData);
+  //ConfigurationData configData;
+  //initConfigurationData(&configData);
   initData  = initialise();
 	game_welcome_page(initData.graphicsData,initData.audioData);
   while(game_return == 2){
