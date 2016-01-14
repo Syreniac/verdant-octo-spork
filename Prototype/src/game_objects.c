@@ -1059,8 +1059,6 @@ void updateWeather(GameObjectData *gameObjectData, AudioData *audioData, Weather
 			fflush(stderr);
 			exit(1);
 		}
-	}else{
-		weather->present_weather = Snow;
 	}
 }
 
