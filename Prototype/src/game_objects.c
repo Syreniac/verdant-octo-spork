@@ -509,7 +509,7 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
 						setObjectInfoDisplay(&announcementsData->objectInfoDisplay, tempString, STATUS);
 					}
 				}
-				if(programmableWorker->insideHive){
+				if(!programmableWorker->insideHive){
 					j++;
 				}
 				if(j == NUMBER_OF_TREES + 1 /* + 1 includes the hive as shelter*/){
@@ -1059,6 +1059,10 @@ void updateWeather(GameObjectData *gameObjectData, AudioData *audioData, Weather
 			fflush(stderr);
 			exit(1);
 		}
+	}
+	
+	if(gameObjectData->gameOver){
+		weather->present_weather = Snow;
 	}
 }
 
