@@ -24,6 +24,46 @@ static ResourceNode *chooseNodeRandomly(ResourceNodeSpawner *resourceNodeSpawner
 	return NULL;
 }
 
+ProgrammableWorker *getNearestWorker(GameObjectData *gameObjectData, int x, int y, ProgrammableWorker *ignore){
+	int i = 0;
+	SDL_Point point;
+	double d2;
+	double d22;
+	ProgrammableWorker *pw = NULL;
+	ProgrammableWorker *p;
+	printf("%lf\n",d2);
+	p = gameObjectData->first_programmable_worker;
+	while(p!=NULL){
+		point = getCenterOfRect(p->rect);
+		d22 = getDistance2BetweenPoints(point.x,point.y,x,y);
+		if(p!= ignore && (d22 < d2 || pw == NULL)){
+			d2 = d22;
+			pw = p;
+		}
+		p = p->next;
+	}
+	return pw;
+}
+
+Tree *getNearestTree(GameObjectData *gameObjectData, int x, int y){
+	int i = 0;
+	SDL_Point p;
+	double d2;
+	double d22;
+	Tree *tree = NULL;
+	printf("%lf\n",d2);
+	while(i < NUMBER_OF_TREES){
+		p = getCenterOfRect(gameObjectData->tree[i].stumpRect);
+		d22 = getDistance2BetweenPoints(p.x,p.y,x,y);
+		if(d22 < d2 || tree == NULL){
+			d2 = d22;
+			tree = &gameObjectData->tree[i];
+		}
+		i++;
+	}
+	return tree;
+}
+
 int countResourceNodesInRadius(GameObjectData *gameObjectData, int x, int y, double radius){
 	int count = 0;
 	int i = 0, j;
@@ -164,7 +204,6 @@ int getFirstDeadResourceNode(ResourceNodeSpawner *resourceNodeSpawner){
 
 void killAllBees(ProgrammableWorker **programmableWorker){
 	ProgrammableWorker *p;
-printf("top of kill all bees function\n");
 	while(*programmableWorker != NULL){
 
 		p = *programmableWorker;
@@ -172,20 +211,13 @@ printf("top of kill all bees function\n");
 
 		free(p);
 	}
-printf("bottom of kill all bees function\n");
 }
 
 void killProgrammableWorker(GameObjectData *gameObjectData, ProgrammableWorker **programmableWorker){
 
 	ProgrammableWorker *p = NULL;
-
-printf("top of kill programmable worker function\n");
-	if(*programmableWorker == NULL){
-		printf("programmable worker == NULL, this shouldn't be\n");
-	}
 	if((*programmableWorker)->next == NULL){
 		p = *programmableWorker;
-		printf("here\n");
 	    for(*programmableWorker = gameObjectData->first_programmable_worker;
 	    (*programmableWorker)->next != p ;
 	    *programmableWorker = (*programmableWorker)->next){
@@ -201,19 +233,15 @@ printf("top of kill programmable worker function\n");
 		free(p);
 	}else{
 		p = *programmableWorker;
-    	printf("here0000\n");
 	    for(*programmableWorker = gameObjectData->first_programmable_worker;
 	    (*programmableWorker)->next != p ;
 	    *programmableWorker = (*programmableWorker)->next){
 	    }
-	    printf("here0\n");
 	    (*programmableWorker)->next = p->next;
 	    *programmableWorker = p;
-		printf("here1\n");
 		free(*programmableWorker);
 		*programmableWorker = NULL;
 	}
-printf("bottom of kill programmable worker function\n");
 }
 
 ProgrammableWorker *createProgrammableWorker(GameObjectData *gameObjectData){
@@ -522,7 +550,7 @@ int updateProgrammableWorker(ProgrammableWorker **programmableWorkerP, GameObjec
 					j++;
 				}
 				if(j == NUMBER_OF_TREES + 1 /* + 1 includes the hive as shelter*/){
-					programmableWorker->wet_and_cant_fly = 1; /*true*/
+					programmableWorker->wet_and_cant_fly =  rand() % 100 < CHANCE_OF_FALLING_IN_RAIN ? 0 : programmableWorker->wet_and_cant_fly;/*true*/
 				}
 			}
 
@@ -1152,7 +1180,6 @@ void updateWeather(GameObjectData *gameObjectData, AudioData *audioData, Weather
 			audioData->weatherSoundActive = 0;
 			break;
 		case Snow:
-      printf("Snow\n");
 			/*honey stocks should be built up first. WINTER IS COMING.. (haha game of drones).*/
 			break;
 		default:
@@ -1161,7 +1188,7 @@ void updateWeather(GameObjectData *gameObjectData, AudioData *audioData, Weather
 			exit(1);
 		}
 	}
-	
+
 	if(gameObjectData->gameOver){
 		weather->present_weather = Snow;
 	}
@@ -1276,10 +1303,10 @@ ResourceNode createResourceNode(GameObjectData *gameObjectData, ResourceNodeSpaw
 	resourceNode.rect.h = SIZE_OF_FLOWER;
 
 	long int r = rand();
-	if(r * r < getDistance2BetweenRects(resourceNode.rect,gameObjectData->hive.rect) * 2){
+	if(r < getDistance2BetweenRects(resourceNode.rect,gameObjectData->hive.rect) * 1.5){
 		resourceNode.type = 2;
 	}
-	else if(r*r < getDistance2BetweenRects(resourceNode.rect,gameObjectData->hive.rect) * 8){
+	else if(r < getDistance2BetweenRects(resourceNode.rect,gameObjectData->hive.rect) * 4.5){
 		resourceNode.type = 1;
 	}
 	else{
@@ -1330,13 +1357,6 @@ void updateGameObjects(GameObjectData *gameObjectData, AudioData *audioData, Gra
 	ProgrammableWorker *programmableWorker;
 		char GOCause[256];
 		char finalScore[256];
-
-	if(gameObjectData->pause_status){
-		if(paa++ == 0)
-		printf("bees taking shelter in hive = %d\n", gameObjectData->hive.bees_taking_shelter);
-	}else{
-		paa = 0;
-	}
 
 	if(!gameObjectData->gameOver){/*start of it not game over*/
 
@@ -1389,7 +1409,6 @@ void updateGameObjects(GameObjectData *gameObjectData, AudioData *audioData, Gra
 
 					setGameOverInfo(&announcementsData->gameOverData, GOCause);
 				    setFinalScore(&announcementsData->gameOverData, finalScore);
-					printf("gameover by starvation\n");
 					killAllBees(&gameObjectData->first_programmable_worker);
 					return;
 				}
@@ -1397,7 +1416,6 @@ void updateGameObjects(GameObjectData *gameObjectData, AudioData *audioData, Gra
 				blitTiledBackground(graphicsData, graphicsData->grassTexture);
 				gameObjectData->weather.present_weather = Cloud;
 				/*AFTER A SHORT DELAY SET TREES BACK TO SUMMER TREES AND OTHER SUMMER STUFF*/
-				printf("%d\n", gameObjectData->hive.delayBeforeSummer);
 				if(!(gameObjectData->hive.delayBeforeSummer--)){
 					gameObjectData->hive.delayBeforeSummer = DELAY_BEFORE_SUMMER;
 					gameObjectData->tree->currentGraphicIndex = SUMMER_INDEX;
@@ -1447,7 +1465,6 @@ void updateGameObjects(GameObjectData *gameObjectData, AudioData *audioData, Gra
 				SDL_Point point = getCenterOfRect(gameObjectData->resourceNodeSpawners[i].resourceNodes[j].rect);
 				renderFillRadius(graphicsData, &point, SIZE_OF_FLOWER, 255,255,255, 80);
 			}
-
 		blitGameObject(gameObjectData->resourceNodeSpawners[i].resourceNodes[j].rect,
 						 graphicsData,
 						 graphicsData->nodeTexture[gameObjectData->resourceNodeSpawners[i].resourceNodes[j].type],
@@ -1521,10 +1538,6 @@ void updateGameObjects(GameObjectData *gameObjectData, AudioData *audioData, Gra
 				int i = 0;
 
 				killProgrammableWorker(gameObjectData, &programmableWorker);
-				for(worker = gameObjectData->first_programmable_worker; worker != NULL; worker = worker->next){
-					printf("%d  ", i++);
-				}
-				printf("\n");
 			}else{
 				gameObjectData->gameOver = 1;
 				gameObjectData->gameOverCause = COLD;
@@ -1535,7 +1548,6 @@ void updateGameObjects(GameObjectData *gameObjectData, AudioData *audioData, Gra
 
 				setGameOverInfo(&announcementsData->gameOverData, GOCause);
 				setFinalScore(&announcementsData->gameOverData, finalScore);
-				printf("gameOver, all bees die from the cold\n");
 				free(gameObjectData->first_programmable_worker);
 				gameObjectData->first_programmable_worker = NULL;
 				return;
@@ -1558,11 +1570,11 @@ void updateGameObjects(GameObjectData *gameObjectData, AudioData *audioData, Gra
 				gameObjectData->droppedIceCream->sizeOscillator = 1;
 			}
 			gameObjectData->droppedIceCream->rect.w += gameObjectData->droppedIceCream->sizeOscillator;
-			gameObjectData->droppedIceCream->xPosition -= ((float)gameObjectData->droppedIceCream->sizeOscillator)/2.0;
+			//gameObjectData->droppedIceCream->xPosition -= ((float)gameObjectData->droppedIceCream->sizeOscillator)/2.0;
 			gameObjectData->droppedIceCream->rect.x = gameObjectData->droppedIceCream->xPosition;
 
 			gameObjectData->droppedIceCream->rect.h += gameObjectData->droppedIceCream->sizeOscillator;
-			gameObjectData->droppedIceCream->yPosition -= ((float)gameObjectData->droppedIceCream->sizeOscillator)/2.0;
+			//gameObjectData->droppedIceCream->yPosition -= ((float)gameObjectData->droppedIceCream->sizeOscillator)/2.0;
 			gameObjectData->droppedIceCream->rect.y = gameObjectData->droppedIceCream->yPosition;
 
 			if(gameObjectData->droppedIceCream->displayInfo){

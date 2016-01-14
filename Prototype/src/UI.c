@@ -104,7 +104,10 @@ static int countOptionsForAITemplate(BlockFunctionTemplate *template){
 		switch(template->arguments[i]){
 			case BF_COMPARISON:
 			case BF_CARGO_QUANTITY:
+			case BF_PERCENT:
+			case BF_COUNT_QUANTITY:
 			case BF_DISTANCE:
+			case BF_SEASON_TIME:
 				count += 1;
 				break;
 		}
@@ -126,7 +129,10 @@ static int countUIActionsNeededForAITemplate(BlockFunctionTemplate *template){
 				break;
 			case BF_CARGO_QUANTITY:
 			case BF_DISTANCE:
+			case BF_COUNT_QUANTITY:
 			case BF_COMPARISON:
+			case BF_PERCENT:
+			case BF_SEASON_TIME:
 				printf("+1 required option\n");
 				count += 4;
 				break;
@@ -312,7 +318,10 @@ UI_Element *makeAIBlock(int x_offset, int y_offset, BlockFunctionTemplate *templ
 				optionsPlaced++;
 				break;
 			case BF_DISTANCE:
+			case BF_COUNT_QUANTITY:
 			case BF_CARGO_QUANTITY:
+			case BF_PERCENT:
+			case BF_SEASON_TIME:
 				printf("making integrator\n");
 				x = 130 / (optionsCount + 1);
 				x *= (1 + optionsPlaced);

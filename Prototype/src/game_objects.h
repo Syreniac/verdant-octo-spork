@@ -259,3 +259,5 @@ SDL_MouseButtonEvent *mbEvent);
 
 void nullifyLocalAIInformation(GameObjectData *gameObjectData);
 int countResourceNodesInRadius(GameObjectData *gameObjectData, int x, int y, double radius);
+Tree *getNearestTree(GameObjectData *gameObjectData, int x, int y);
+ProgrammableWorker *getNearestWorker(GameObjectData *gameObjectData, int x, int y, ProgrammableWorker *ignore);
