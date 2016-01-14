@@ -6,6 +6,9 @@ enum ProgrammableWorkerStatus {LEAVING = 1,
                                NODE_FOUND = 4,
 							   IDLE = 5,
                                BLANK = -1};
+enum GameOverCause {STARVATION,
+	COLD};
+typedef enum GameOverCause GameOverCause;
 
 typedef struct ProgrammableWorker ProgrammableWorker;
 typedef struct ResourceNode ResourceNode;
@@ -183,7 +186,7 @@ struct Weather{
   int tickCount;
 };
 
-typedef enum {STARVATION, COLD} gameOverCause;
+
 
 struct GameObjectData{
   Weather weather;
@@ -201,7 +204,7 @@ struct GameObjectData{
   char gameOverString[256];
   int gameOver;
   int gameOverBoxVisible;
-  gameOverCause gameOverCause;
+  GameOverCause gameOverCause;
   Uint32 gameOverEventNum;
   Uint32 objectDisplayEventNum;
   int gameRestart;
@@ -225,6 +228,7 @@ Weather createWeatherLayer(void);
    checking quickly and respawning resources will be easier */
 
 int getFirstDeadResourceNode(ResourceNodeSpawner *resourceNodeSpawner);
+ResourceNode createResourceNode(GameObjectData *gameObjectData, ResourceNodeSpawner *parentSpawner, int resourceUnits);
 ResourceNodeSpawner createResourceNodeSpawner(GameObjectData *gameObjectData, int maximumNodeCount, float xPosition, float yPosition, float radius);
 void updateResourceNodeSpawner(GameObjectData *gameObjectData, ResourceNodeSpawner *spawner, int ticks);
 void updateWeather(GameObjectData *gameObjectData, AudioData *audioData, Weather *weather, int ticks);
@@ -237,6 +241,8 @@ RoamingSpider *createRoamingSpider(void);
 void reInitialiseIceCreamPerson(IceCreamPerson *iceCreamPerson);
 void reInitialiseRoamingSpider(RoamingSpider *roamingSpider);
 void updateGameObjects(GameObjectData *gameObjectData, AudioData *audioData, GraphicsData *graphicsData, AnnouncementsData *announcementsData, int ticks);
+void updateHiveCell(GameObjectData *gameObjectData, AnnouncementsData *announcementsData, HiveCell *hiveCell, int ticks);
+void updateHive(GameObjectData *gameObjectData, AnnouncementsData *announcementsData,  int ticks);
 int countProgrammableWorkersInRange(GameObjectData *gameObjectData, SDL_Point center, double radius);
 int isPointInRangeOf(SDL_Point point, SDL_Point center, double radius);
 
