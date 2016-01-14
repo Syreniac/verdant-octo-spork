@@ -406,14 +406,14 @@ START_TEST(test_handleEvent){
     event.key.type = SDL_KEYDOWN;
     event.key.state = SDL_PRESSED;
 
-    fail_unless(handleEvent(&event,&gameData.gameObjectData,&gameData.uiData,&gameData.controlsData, &gameData.graphicsData) == 1);
+    fail_unless(handleEvent(&event,&gameData.gameObjectData,&gameData.uiData,&gameData.controlsData, &gameData.graphicsData) == 1, "handleEvent function failed.");
 
     event.key.type = 0;
     event.key.state = 0;
     event.type = SDL_QUIT;
     event.quit.type = SDL_QUIT;
 
-    fail_unless(handleEvent(&event,&gameData.gameObjectData,&gameData.uiData,&gameData.controlsData, &gameData.graphicsData) == 0);
+    fail_unless(handleEvent(&event,&gameData.gameObjectData,&gameData.uiData,&gameData.controlsData, &gameData.graphicsData) == 0, "handleEvent function failed.");
     SDL_Quit();
   }
 END_TEST
@@ -429,7 +429,7 @@ START_TEST(test_keydown){
     event.key.type = SDL_KEYDOWN;
     event.key.state = SDL_PRESSED;
 
-    fail_unless(keydown(&gameData.controlsData, &gameData.gameObjectData,&gameData.graphicsData, &gameData.uiData,&event) == 1);
+    fail_unless(keydown(&gameData.controlsData, &gameData.gameObjectData,&gameData.graphicsData, &gameData.uiData,&event) == 1, "keydown function failed.");
     SDL_Quit();
 
   }
@@ -446,7 +446,7 @@ START_TEST(test_keyup){
     event.key.type = SDL_KEYUP;
     event.key.state = SDL_RELEASED;
 
-    fail_unless(keyup(&gameData.controlsData, &gameData.gameObjectData,&gameData.uiData,&event) == 1);
+    fail_unless(keyup(&gameData.controlsData, &gameData.gameObjectData,&gameData.uiData,&event) == 1, "keyup function failed.");
     SDL_Quit();
 
   }
@@ -459,9 +459,13 @@ START_TEST(test_panScreen){
     SDL_Init(SDL_INIT_VIDEO);
     /* see startGame in game.c */
 
+    gameData.controlsData.keys[ARROW_RIGHT] = 1;
+    gameData.graphicsData.navigationOffset.x = 50;
 
     /*fail if cannot panScreen*/
     panScreen(&gameData.graphicsData, &gameData.controlsData, delta_t);
+    fail_unless(gameData.graphicsData.navigationOffset.x == 0, "panScreen function failed. %d", gameData.graphicsData.navigationOffset.x);
+
     SDL_Quit();
 
   }
@@ -470,10 +474,17 @@ END_TEST
 START_TEST(test_initControlData){
     SDL_Event event;
     GameData gameData;
+    int total, i;
     SDL_Init(SDL_INIT_VIDEO);
     /* see startGame in game.c */
 
     initControlData(&gameData.controlsData);
+
+    total = 0;
+    for(i=0; i<MAX_KEYS; i++){
+      total += gameData.controlsData.keys[i];
+   }
+    fail_unless(total == 0, "initControlData function failed.");
 
     /*fail if cannot perform the function initControlData*/
     SDL_Quit();
