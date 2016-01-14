@@ -815,7 +815,7 @@ void updateIceCreamPerson(GameObjectData *gameObjectData, int ticks){
 	programmableWorker = programmableWorker->next){
 
   		if(isPointInRangeOf(getCenterOfRect(programmableWorker->rect),
-  		getCenterOfRect(gameObjectData->iceCreamPerson->rect), STING_HIT_RADIUS) != 0){
+  		getCenterOfRect(gameObjectData->iceCreamPerson->rect), STING_HIT_RADIUS) != 0 && !gameObjectData->droppedIceCream->dropped){
 
 	  		gameObjectData->iceCreamPerson->stung = 1;
 	  		/*drop iceCream!*/
@@ -885,6 +885,9 @@ void updateRoamingSpider(GameObjectData *gameObjectData, int ticks){
 	double newX,newY;
 	int distanceFromYBorder;
 	int distanceFromXBorder;
+	SDL_Point spiderCentre;
+	
+	spiderCentre = getCenterOfRect(gameObjectData->roamingSpider->rect);
 
 	/*set roamingSpider->currently_on_screen to false if he has walked off screen*/
 	if(gameObjectData->roamingSpider->xPosition > X_SIZE_OF_WORLD ||
@@ -967,7 +970,7 @@ void updateRoamingSpider(GameObjectData *gameObjectData, int ticks){
 				/*stop eating bee*/
 				gameObjectData->roamingSpider->eating_bee = 0;
 				/*spider back to movingn*/
-				gameObjectData->roamingSpider->speed = SPIDER_SPEED;
+				gameObjectData->roamingSpider->speed = SPIDER_SPEED/2;
 				gameObjectData->roamingSpider->ticksSinceEating = 0;
 				break;
 				
@@ -975,8 +978,8 @@ void updateRoamingSpider(GameObjectData *gameObjectData, int ticks){
 				gameObjectData->roamingSpider->stung = 1;
 				/*stop eating bee*/
 				gameObjectData->roamingSpider->eating_bee = 0;
-				/*spider back to movingn*/
-				gameObjectData->roamingSpider->speed = SPIDER_SPEED;
+				/*spider back to movinng*/
+				gameObjectData->roamingSpider->speed = SPIDER_SPEED/2;
 				gameObjectData->roamingSpider->ticksSinceEating = 0;
 				break;
 				
@@ -1004,7 +1007,8 @@ void updateRoamingSpider(GameObjectData *gameObjectData, int ticks){
 			gameObjectData->roamingSpider->ticksSinceStung += ticks;
 			if(gameObjectData->roamingSpider->ticksSinceStung >= 20000) {
 				gameObjectData->roamingSpider->stung = 0;
-				gameObjectData->roamingSpider->ticksSinceStung = 0;			
+				gameObjectData->roamingSpider->ticksSinceStung = 0;
+				gameObjectData->roamingSpider->speed = SPIDER_SPEED;
 				printf("DEBUG: SPIDER UNSTUNG AND ACTIVE AGAIN (SPIDER FUNCTION)\n");
 			}
 		}
@@ -1017,29 +1021,37 @@ void updateRoamingSpider(GameObjectData *gameObjectData, int ticks){
 		}
 	}
 
-
+	/*If there are fewer than 3 bees perilously close*/
 	if(countProgrammableWorkersInRange(gameObjectData, getCenterOfRect(gameObjectData->roamingSpider->rect), 250.0) <= 3 && !gameObjectData->roamingSpider->going_home){
+	    ProgrammableWorker *pw = getNearestWorker(gameObjectData, spiderCentre.x, spiderCentre.y, NULL);
+		SDL_Point pp = getCenterOfRect(pw->rect);
+		if(isPointInRangeOf(pp, spiderCentre,2000.0 ) && !gameObjectData->roamingSpider->stung){
+			printf("DEBUG: SUCCESS\n");
+			gameObjectData->roamingSpider->heading = getAngleBetweenRects(&pw->rect, &gameObjectData->roamingSpider->rect);
+		
+		}else{
+			
+			if(gameObjectData->roamingSpider->xPosition >= X_SIZE_OF_WORLD - PERSON_WIDTH/2){
+				/*world border has been reached and sun is still out, change direction*/
+			gameObjectData->roamingSpider->heading = 1.571;
 
-		if(gameObjectData->roamingSpider->xPosition >= X_SIZE_OF_WORLD - PERSON_WIDTH/2){
-			/*world border has been reached and sun is still out, change direction*/
-		gameObjectData->roamingSpider->heading = 1.571;
+			}else if(gameObjectData->roamingSpider->xPosition <= -PERSON_WIDTH/2){
+				/*world border has been reached and sun is still out, change direction*/
+			gameObjectData->roamingSpider->heading = 4.713;
 
-		}else if(gameObjectData->roamingSpider->xPosition <= -PERSON_WIDTH/2){
-			/*world border has been reached and sun is still out, change direction*/
-		gameObjectData->roamingSpider->heading = 4.713;
+			}else if(gameObjectData->roamingSpider->yPosition >= Y_SIZE_OF_WORLD - PERSON_HEIGHT/2){
+				/*world border has been reached and sun is still out, change direction*/
+			gameObjectData->roamingSpider->heading = 3.142;
 
-		}else if(gameObjectData->roamingSpider->yPosition >= Y_SIZE_OF_WORLD - PERSON_HEIGHT/2){
-			/*world border has been reached and sun is still out, change direction*/
-		gameObjectData->roamingSpider->heading = 3.142;
+			}else if(gameObjectData->roamingSpider->yPosition <= -PERSON_HEIGHT/2){
+				/*world border has been reached and sun is still out, change direction*/
+			gameObjectData->roamingSpider->heading = 0;
 
-		}else if(gameObjectData->roamingSpider->yPosition <= -PERSON_HEIGHT/2){
-			/*world border has been reached and sun is still out, change direction*/
-		gameObjectData->roamingSpider->heading = 0;
-
-		}else if(rand() % 500 == 0){
-			/*randomly change direction, just for the hell of it*/
-	 		gameObjectData->roamingSpider->heading += ((double)(rand() % 30) / (double)10) - 1.5;
-	 	}
+			}else if(rand() % 500 == 0){
+				/*randomly change direction, just for the hell of it*/
+				gameObjectData->roamingSpider->heading += ((double)(rand() % 30) / (double)10) - 1.5;
+			}
+		}
 
 	}else{
 		distanceFromYBorder = (int)(gameObjectData->roamingSpider->yPosition - Y_SIZE_OF_WORLD/2);

@@ -53,7 +53,7 @@ FILE *DEBUGGING_FILE_FREE;
 #define RAIN_FRAME_DELAY 4
 
 
-#define INITIAL_NUMBER_OF_WORKERS 3
+#define INITIAL_NUMBER_OF_WORKERS 700
 
 /*lower values result in a higher chance of bees regaining flight when wet, with
 each call to updateProgrammableWorker*/
@@ -135,9 +135,9 @@ each call to updateProgrammableWorker*/
 
 #define LENGTH_OF_STATUS_STRING 32
 
-#define WINTER_COUNTDOWN_SPEED 0.05
+#define WINTER_COUNTDOWN_SPEED 0.01
 
-#define MAX_DAYS_TO_WINTER 31
+#define MAX_DAYS_TO_WINTER 301
 #define AUTUMN_THRESHOLD (MAX_DAYS_TO_WINTER / 3)
 #define WINTER_THRESHOLD 1
 
