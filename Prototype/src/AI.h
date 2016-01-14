@@ -8,7 +8,10 @@ enum BlockFunctionArgumentType{
   BF_PRIMARY,
   BF_SECONDARY,
   BF_THEN,
-  BF_COMPARISON
+  BF_COMPARISON,
+  BF_COUNT_QUANTITY,
+  BF_PERCENT,
+  BF_SEASON_TIME
 };
 
 typedef struct BlockFunctionArgs BlockFunctionArgs;

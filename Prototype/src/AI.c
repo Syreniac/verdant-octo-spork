@@ -48,6 +48,75 @@ FILE *fopenAndVerify(char *file_name, char *permission){
   return file;
 }
 
+int blockFunction_HeadToNearestWorker(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
+  SDL_Point point = getCenterOfRect(programmableWorker->rect);
+  ProgrammableWorker *p = getNearestWorker(gameObjectData,point.x,point.y,programmableWorker);
+  if(p!=NULL){
+    programmableWorker->heading = getAngleBetweenRects(&p->rect,&programmableWorker->rect);
+  }
+  return 1;
+}
+
+int blockFunction_IfCountToWinter(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
+  if(doIntCompWithCharOperator(gameObjectData->hive.winterCountdown,arguments->integers[0],arguments->characters[0])){
+    return 1;
+  }
+  return 2;
+}
+
+int blockFunction_GoToIceCream(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
+  if(gameObjectData->droppedIceCream->dropped){
+    programmableWorker->status = LEAVING;
+    programmableWorker->heading = getAngleBetweenRects(&gameObjectData->droppedIceCream->rect,&programmableWorker->rect);
+  }
+  return 1;
+}
+
+int blockFunction_IfIceCreamExists(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
+  if(gameObjectData->droppedIceCream->dropped){
+    return 1;
+  }
+  return 2;
+}
+
+int blockFunction_IfIceCreamManExists(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
+  if(gameObjectData->iceCreamPerson->currently_on_screen){
+    return 1;
+  }
+  return 2;
+}
+
+int blockFunction_GoToIceCreamMan(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
+  if(gameObjectData->iceCreamPerson->currently_on_screen){
+    programmableWorker->status = LEAVING;
+    programmableWorker->heading = getAngleBetweenRects(&gameObjectData->iceCreamPerson->rect,&programmableWorker->rect);
+  }
+  return 1;
+}
+
+int blockFunction_GoToTree(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
+  SDL_Point p = getCenterOfRect(programmableWorker->rect);
+  Tree *tree = getNearestTree(gameObjectData,p.x,p.y);
+  if(tree != NULL){
+    programmableWorker->heading = getAngleBetweenRects(&tree->stumpRect,&programmableWorker->rect);
+  }
+  return 1;
+}
+
+int blockFunction_IsRaining(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
+  if(gameObjectData->weather.present_weather == Rain){
+    return 1;
+  }
+  return 0;
+}
+
+int blockFunction_PercentChance(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
+  if(rand() % 100 < arguments->integers[0]){
+    return 1;
+  }
+  return 2;
+}
+
 int blockFunction_IfCargo(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
   if(doIntCompWithCharOperator(programmableWorker->cargo,arguments->integers[0],arguments->characters[0])){
     return 1;
@@ -68,8 +137,8 @@ int blockFunction_CopyPointFromSelected(BlockFunctionGlobals *globals, BlockFunc
   return 1;
 }
 
-int blockFunction_IfGreaterThanSaved(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
-  if(globals->count > programmableWorker->brain.storedCount){
+int blockFunction_CompareCountToSaved(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
+  if(doIntCompWithCharOperator(globals->count, programmableWorker->brain.storedCount, arguments->characters[0])){
     return 1;
   }
   return 2;
@@ -140,6 +209,13 @@ int blockFunction_CountNearWorkers(BlockFunctionGlobals *globals, BlockFunctionA
 
 int blockFunction_IfCountZero(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
   if(globals->count == 0){
+    return 1;
+  }
+  return 2;
+}
+
+int blockFunction_IfCount(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
+  if(doIntCompWithCharOperator(globals->count, arguments->integers[0], arguments->characters[0])){
     return 1;
   }
   return 2;
@@ -228,9 +304,9 @@ int blockFunction_IfWithinDistanceOfHive(BlockFunctionGlobals *globals, BlockFun
   return(2);
 }
 
-int blockFunction_IfNearHive(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
+int blockFunction_IfDistanceToHive(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
 	double d2 = getDistance2BetweenRects(programmableWorker->rect,gameObjectData->hive.rect);
-  if(d2 <= 50.0){
+  if(doDoubleCompWithCharOperator(d2, (double) pow(arguments->integers[0]*WORKER_SENSE_RANGE,2),arguments->characters[0])){
     return(1);
   }
   return(2);
@@ -282,7 +358,7 @@ int blockFunction_RememberCurrentLocation(BlockFunctionGlobals *globals, BlockFu
 int blockFunction_GoToStoredLocation(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
     SDL_Point p = getCenterOfRect(programmableWorker->rect);
     if(!programmableWorker->brain.is_point_remembered){
-      return 2;
+      return 1;
     }
     programmableWorker->heading = atan2((double)(programmableWorker->brain.remembered_point.x - p.x),
                                         (double)(programmableWorker->brain.remembered_point.y - p.y));
@@ -418,8 +494,8 @@ blockFunction_WrappedFunction getBlockFunctionByName(char *blockFunctionName){
   if(strcmp(blockFunctionName, "HeadToFoundNode") == 0){
     return &blockFunction_HeadToFoundNode;
   }
-  if(strcmp(blockFunctionName, "IfNearHive") == 0){
-	  return &blockFunction_IfNearHive;
+  if(strcmp(blockFunctionName, "IfDistanceToHive") == 0){
+	  return &blockFunction_IfDistanceToHive;
   }
   if(strcmp(blockFunctionName, "START") == 0){
 	  return &blockFunction_Void;
@@ -466,8 +542,8 @@ blockFunction_WrappedFunction getBlockFunctionByName(char *blockFunctionName){
   if(strcmp(blockFunctionName,"PickNearbyWorker") == 0){
     return &blockFunction_PickNearbyWorker;
   }
-  if(strcmp(blockFunctionName,"IfGreaterThanSaved") == 0){
-    return &blockFunction_IfGreaterThanSaved;
+  if(strcmp(blockFunctionName,"CompareCountToSaved") == 0){
+    return &blockFunction_CompareCountToSaved;
   }
   if(strcmp(blockFunctionName,"CopyPointFromSelected") == 0){
     return &blockFunction_CopyPointFromSelected;
@@ -477,6 +553,36 @@ blockFunction_WrappedFunction getBlockFunctionByName(char *blockFunctionName){
   }
   if(strcmp(blockFunctionName,"IfCargo") == 0){
     return &blockFunction_IfCargo;
+  }
+  if(strcmp(blockFunctionName,"IfCount") == 0){
+    return &blockFunction_IfCount;
+  }
+  if(strcmp(blockFunctionName,"PercentChance") == 0){
+    return &blockFunction_PercentChance;
+  }
+  if(strcmp(blockFunctionName,"GoToTree") == 0){
+    return &blockFunction_GoToTree;
+  }
+  if(strcmp(blockFunctionName,"IfRaining") == 0){
+    return &blockFunction_IsRaining;
+  }
+  if(strcmp(blockFunctionName,"GoToIceCreamMan") == 0){
+    return &blockFunction_GoToIceCreamMan;
+  }
+  if(strcmp(blockFunctionName,"IfIceCreamManExists") == 0){
+    return &blockFunction_IfIceCreamManExists;
+  }
+  if(strcmp(blockFunctionName,"IfIceCreamExists") == 0){
+    return &blockFunction_IfIceCreamExists;
+  }
+  if(strcmp(blockFunctionName,"GoToIceCream") == 0){
+    return &blockFunction_GoToIceCream;
+  }
+  if(strcmp(blockFunctionName,"IfCountToWinter") == 0){
+    return &blockFunction_IfCountToWinter;
+  }
+  if(strcmp(blockFunctionName,"HeadToNearestWorker") == 0){
+    return &blockFunction_HeadToNearestWorker;
   }
   printf("ERROR: Unrecognised function name: \"%s\".\n Substituting a VOID function.\n",blockFunctionName);
   return &blockFunction_Void;
@@ -805,36 +911,47 @@ AIData initAIData(void){
   #define WAIT_BLOCK_COLOR 0x04,0x5F,0xB4
   #define COUNT_BLOCK_COLOR 0x5F,0xB4,0x04
   #define IF_BLOCK_COLOR 248,221,35
+  #define POINT_BLOCK_COLOR 0xcc,0x99,0xff
   aiData.templates = NULL;
 	makeAIBlockTemplate(&aiData,"Void",255,255,255,3,BF_THEN,BF_COMPARISON,BF_DISTANCE);
-	makeAIBlockTemplate(&aiData,"IfIdle",IF_BLOCK_COLOR,2,BF_PRIMARY,BF_SECONDARY);
-	makeAIBlockTemplate(&aiData,"IfReturning",IF_BLOCK_COLOR,2,BF_PRIMARY, BF_SECONDARY);
-	makeAIBlockTemplate(&aiData,"IfHasCargo",IF_BLOCK_COLOR,2,BF_PRIMARY, BF_SECONDARY);
-	makeAIBlockTemplate(&aiData,"IfOutsideBounds",IF_BLOCK_COLOR,2,BF_PRIMARY, BF_SECONDARY);
-	makeAIBlockTemplate(&aiData,"IfNearHive",IF_BLOCK_COLOR,2,BF_PRIMARY, BF_SECONDARY);
+
 	makeAIBlockTemplate(&aiData,"SetHeadingRandomly",ACTION_BLOCK_COLOR,1,BF_THEN);
 	makeAIBlockTemplate(&aiData,"ReturnToHive",ACTION_BLOCK_COLOR,1,BF_THEN);
-	makeAIBlockTemplate(&aiData,"RememberCurrentLocation",ACTION_BLOCK_COLOR,1,BF_THEN);
-	makeAIBlockTemplate(&aiData,"GoToStoredLocation",ACTION_BLOCK_COLOR,2,BF_PRIMARY, BF_SECONDARY);
-	makeAIBlockTemplate(&aiData,"ForgetStoredLocation",ACTION_BLOCK_COLOR,1,BF_THEN);
-	makeAIBlockTemplate(&aiData,"IfNodeFound",IF_BLOCK_COLOR,2,BF_PRIMARY, BF_SECONDARY);
+	makeAIBlockTemplate(&aiData,"GoToStoredLocation",ACTION_BLOCK_COLOR,1,BF_THEN);
 	makeAIBlockTemplate(&aiData,"HeadToFoundNode",ACTION_BLOCK_COLOR,1,BF_THEN);
-	makeAIBlockTemplate(&aiData,"HasStoredLocation",IF_BLOCK_COLOR,2,BF_PRIMARY, BF_SECONDARY);
-  makeAIBlockTemplate(&aiData,"IfNearOtherWorker",IF_BLOCK_COLOR,2,BF_PRIMARY, BF_SECONDARY);
-  makeAIBlockTemplate(&aiData,"CoinFlip",IF_BLOCK_COLOR,2,BF_PRIMARY, BF_SECONDARY);
-  makeAIBlockTemplate(&aiData,"OneInAHundred",IF_BLOCK_COLOR,2,BF_PRIMARY, BF_SECONDARY);
+  makeAIBlockTemplate(&aiData,"GoToTree",ACTION_BLOCK_COLOR,1,BF_THEN);
+  makeAIBlockTemplate(&aiData,"GoToIceCreamMan",ACTION_BLOCK_COLOR,1,BF_THEN);
+  makeAIBlockTemplate(&aiData,"GoToIceCream",ACTION_BLOCK_COLOR,1,BF_THEN);
+  makeAIBlockTemplate(&aiData,"HeadToNearestWorker",ACTION_BLOCK_COLOR,1,BF_THEN);
+
   makeAIBlockTemplate(&aiData,"Sleep",WAIT_BLOCK_COLOR,1,BF_THEN);
+
+  makeAIBlockTemplate(&aiData,"HasStoredLocation",IF_BLOCK_COLOR,2,BF_PRIMARY, BF_SECONDARY);
+  makeAIBlockTemplate(&aiData,"PickNearbyWorker",IF_BLOCK_COLOR,2,BF_PRIMARY, BF_SECONDARY);
+	makeAIBlockTemplate(&aiData,"IfNodeFound",IF_BLOCK_COLOR,2,BF_PRIMARY, BF_SECONDARY);
+	makeAIBlockTemplate(&aiData,"IfIdle",IF_BLOCK_COLOR,2,BF_PRIMARY,BF_SECONDARY);
+	makeAIBlockTemplate(&aiData,"IfReturning",IF_BLOCK_COLOR,2,BF_PRIMARY, BF_SECONDARY);
+	makeAIBlockTemplate(&aiData,"IfOutsideBounds",IF_BLOCK_COLOR,2,BF_PRIMARY, BF_SECONDARY);
+  makeAIBlockTemplate(&aiData,"IfRaining",IF_BLOCK_COLOR,2,BF_PRIMARY,BF_SECONDARY);
+  makeAIBlockTemplate(&aiData,"PercentChance",IF_BLOCK_COLOR,3,BF_PRIMARY, BF_SECONDARY, BF_PERCENT);
+  makeAIBlockTemplate(&aiData,"CompareCountToSaved",IF_BLOCK_COLOR,3,BF_PRIMARY, BF_SECONDARY, BF_COMPARISON);
+  makeAIBlockTemplate(&aiData,"IfCargo",IF_BLOCK_COLOR,4,BF_PRIMARY,BF_SECONDARY,BF_COMPARISON,BF_CARGO_QUANTITY);
+  makeAIBlockTemplate(&aiData,"IfCount",IF_BLOCK_COLOR,4,BF_PRIMARY, BF_SECONDARY, BF_COMPARISON, BF_COUNT_QUANTITY);
+	makeAIBlockTemplate(&aiData,"IfDistanceToHive",IF_BLOCK_COLOR,4,BF_PRIMARY, BF_SECONDARY, BF_COMPARISON, BF_DISTANCE);
+  makeAIBlockTemplate(&aiData,"IfIceCreamManExists",IF_BLOCK_COLOR,2,BF_PRIMARY, BF_SECONDARY);
+  makeAIBlockTemplate(&aiData,"IfIceCreamExists",IF_BLOCK_COLOR,2,BF_PRIMARY,BF_SECONDARY);
+  makeAIBlockTemplate(&aiData,"IfCountToWinter",IF_BLOCK_COLOR,4,BF_PRIMARY,BF_SECONDARY,BF_COMPARISON,BF_SEASON_TIME);
+
+  makeAIBlockTemplate(&aiData,"CountNearFlowers",COUNT_BLOCK_COLOR,1,BF_THEN);
   makeAIBlockTemplate(&aiData,"CountNearWorkers",COUNT_BLOCK_COLOR,1,BF_THEN);
-  makeAIBlockTemplate(&aiData,"IfCountZero",IF_BLOCK_COLOR,2,BF_PRIMARY, BF_SECONDARY);
   makeAIBlockTemplate(&aiData,"LoadCount",COUNT_BLOCK_COLOR,1,BF_THEN);
   makeAIBlockTemplate(&aiData,"SaveCount",COUNT_BLOCK_COLOR,1,BF_THEN);
   makeAIBlockTemplate(&aiData,"LoadCountFromOther",COUNT_BLOCK_COLOR,1,BF_THEN);
   makeAIBlockTemplate(&aiData,"SaveCountFromOther",COUNT_BLOCK_COLOR,1,BF_THEN);
-  makeAIBlockTemplate(&aiData,"PickNearbyWorker",IF_BLOCK_COLOR,2,BF_PRIMARY, BF_SECONDARY);
-  makeAIBlockTemplate(&aiData,"IfGreaterThanSaved",COUNT_BLOCK_COLOR,2,BF_PRIMARY, BF_SECONDARY);
-  makeAIBlockTemplate(&aiData,"CopyPointFromSelected",ACTION_BLOCK_COLOR,1,BF_THEN);
-  makeAIBlockTemplate(&aiData,"CountNearFlowers",ACTION_BLOCK_COLOR,1,BF_THEN);
-  makeAIBlockTemplate(&aiData,"IfCargo",IF_BLOCK_COLOR,4,BF_PRIMARY,BF_SECONDARY,BF_COMPARISON,BF_CARGO_QUANTITY);
+
+	makeAIBlockTemplate(&aiData,"RememberCurrentLocation",POINT_BLOCK_COLOR,1,BF_THEN);
+	makeAIBlockTemplate(&aiData,"ForgetStoredLocation",POINT_BLOCK_COLOR,1,BF_THEN);
+  makeAIBlockTemplate(&aiData,"CopyPointFromSelected",POINT_BLOCK_COLOR,1,BF_THEN);
 
 	return aiData;
 }
