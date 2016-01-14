@@ -6,7 +6,9 @@ enum BlockFunctionArgumentType{
   BF_DISTANCE,
   BF_CARGO_QUANTITY,
   BF_PRIMARY,
-  BF_SECONDARY
+  BF_SECONDARY,
+  BF_THEN,
+  BF_COMPARISON
 };
 
 typedef struct BlockFunctionArgs BlockFunctionArgs;

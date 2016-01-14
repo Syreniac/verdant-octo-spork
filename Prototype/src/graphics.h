@@ -38,7 +38,7 @@ struct GraphicsData{
   SDL_Rect navigationOffset;
   int trackingMode;
   SDL_Renderer *renderer;
-  SDL_Texture *nodeTexture;
+  SDL_Texture *nodeTexture[3];
   SDL_Texture *hiveTexture;
   SDL_Texture *treeStumpTexture;
   SDL_Texture *grassTexture;
