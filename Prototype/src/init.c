@@ -117,13 +117,13 @@ int game_welcome_page(GraphicsData graphicsData, AudioData audioData){
    UIConfigure_PercOffsetRect(initData.uiData.root,&initData.uiData.root->actions[1],0.0,0.0,1.0,1.0,
                                                                                      0,  0,  0,  0,  0);
 
-   element = UIElement_Create(0,0,0,0,4);
+   element = UIElement_Create(0,0,0,0,3);
    UIConfigure_Counter(element,&element->actions[0],1,0);
    UIConfigure_LeftClickRect(element,&element->actions[1]);
        UITrigger_Bind(&element->actions[1],&element->actions[0],-1,UITRIGGER_PLUSONE);
    UIConfigure_PercOffsetRect(element,&element->actions[2],0.55, 0.69, 0.9, 0.82,
                                                            0,    0,  0,0,0);
-   UIConfigure_FillRect(element,&element->actions[3],255,255,255);
+   //UIConfigure_FillRect(element,&element->actions[3],255,255,255);
 
    UIElement_Reparent(element,initData.uiData.root);
 

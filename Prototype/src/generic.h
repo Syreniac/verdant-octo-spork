@@ -51,7 +51,7 @@ FILE *DEBUGGING_FILE_FREE;
 #define RAIN_TILE_HEIGHT 9
 #define RAIN_FRAME_DELAY 4
 
-#define INITIAL_NUMBER_OF_WORKERS 15
+#define INITIAL_NUMBER_OF_WORKERS 3
 
 /*lower values result in a higher chance of bees regaining flight when wet, with
 each call to updateProgrammableWorker*/
@@ -101,7 +101,7 @@ each call to updateProgrammableWorker*/
 #define MS_BETWEEN_FLAPPING 45
 
 
-#define BENCHMARK_TEST 0
+#define BENCHMARK_TEST 1
 
 #define X_SIZE_OF_WORKER 40
 #define Y_SIZE_OF_WORKER 40
@@ -117,6 +117,7 @@ each call to updateProgrammableWorker*/
 
 #define HIVE_SHELTER_RADIUS (X_SIZE_OF_HIVE/2)
 
+#define CELEBRATION_THRESHOLD 50
 
 #define DEFAULT_RESOURCEUNITS 100
 #define DEFAULT_SPAWNDELAY 1000
@@ -129,7 +130,7 @@ each call to updateProgrammableWorker*/
 
 #define LENGTH_OF_STATUS_STRING 32
 
-#define WINTER_COUNTDOWN_SPEED 0.02
+#define WINTER_COUNTDOWN_SPEED 0.01
 
 #define MAX_DAYS_TO_WINTER 301
 #define AUTUMN_THRESHOLD (MAX_DAYS_TO_WINTER / 3)
@@ -157,6 +158,8 @@ each call to updateProgrammableWorker*/
 #define WINTER_INDEX 2
 
 #define WORKER_SENSE_RANGE 500.0
+
+#define PROGRAMMABLE_WORKER_CARGO_SPEED_FACTOR 0.7
 
 #define FILE_TO_STRING_STEP_SIZE 10
 
