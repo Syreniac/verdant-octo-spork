@@ -790,8 +790,8 @@ void UIConfigure_FillSubrect(UI_Element *element, UI_Action *action, int x, int 
 
 int UIAction_SetCellToSpawn(UI_Action *action, UIData *uiData){
 	if(action->status != 0){
-		if(uiData->gameObjectData->hive.flowers_collected >= 1 && ((HiveCell*)action->cell)->timer == -1){
-			uiData->gameObjectData->hive.flowers_collected -= 1;
+		if(uiData->gameObjectData->hive.flowers_collected >= SUGAR_COST_OF_WORKER && ((HiveCell*)action->cell)->timer == -1){
+			uiData->gameObjectData->hive.flowers_collected -= SUGAR_COST_OF_WORKER;
 			((HiveCell*)action->cell)->timer = HIVE_CELL_SPAWN_DELAY;
 		}
 		action->new_status = 0;

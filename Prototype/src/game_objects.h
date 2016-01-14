@@ -32,6 +32,7 @@ struct ResourceNode{
   /* standard positioning data - x,y coords */
   int displayInfo;
   SDL_Rect rect;
+  int type;
 };
 
 /*   Rather than having an array with just resourceNodes in, if we have a
@@ -81,7 +82,7 @@ struct ProgrammableWorker{
   int cold_and_about_to_die;
   int stunned_after_sting;
   int fighting_spider;
-  
+
   int flapTimer;
 
   char *beeStatus;
@@ -224,12 +225,12 @@ Weather createWeatherLayer(void);
    checking quickly and respawning resources will be easier */
 
 int getFirstDeadResourceNode(ResourceNodeSpawner *resourceNodeSpawner);
-ResourceNodeSpawner createResourceNodeSpawner(int maximumNodeCount, float xPosition, float yPosition, float radius);
-void updateResourceNodeSpawner(ResourceNodeSpawner *spawner, int ticks);
+ResourceNodeSpawner createResourceNodeSpawner(GameObjectData *gameObjectData, int maximumNodeCount, float xPosition, float yPosition, float radius);
+void updateResourceNodeSpawner(GameObjectData *gameObjectData, ResourceNodeSpawner *spawner, int ticks);
 void updateWeather(GameObjectData *gameObjectData, AudioData *audioData, Weather *weather, int ticks);
 
 void initResourceNode(ResourceNode *resourceNode);
-ResourceNode createResourceNode(ResourceNodeSpawner *parentSpawner, int resourceUnits);
+ResourceNode createResourceNode(GameObjectData *gameObjectData, ResourceNodeSpawner *parentSpawner, int resourceUnits);
 IceCreamPerson *createIceCreamPerson(void);
 DroppedIceCream *createDroppedIceCream(void);
 RoamingSpider *createRoamingSpider(void);

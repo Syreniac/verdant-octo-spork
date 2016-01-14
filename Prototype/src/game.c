@@ -89,8 +89,10 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
 
   gameData.graphicsData.grassTexture = loadTextureFromFile("images/grass/grass4.bmp",&gameData.graphicsData, 0);
   gameData.graphicsData.treeStumpTexture = loadTextureFromFile("images/stump.bmp",&gameData.graphicsData, 1);
-  gameData.graphicsData.nodeTexture = loadTextureFromFile("images/blueFlower.bmp",
-														  &gameData.graphicsData, 1);
+  gameData.graphicsData.nodeTexture[0] = loadTextureFromFile("images/blueFlower.bmp",
+														                                 &gameData.graphicsData, 1);
+  gameData.graphicsData.nodeTexture[1] = loadTextureFromFile("images/redFlower.bmp",&gameData.graphicsData, 1);
+  gameData.graphicsData.nodeTexture[2] = loadTextureFromFile("images/yellowFlower.bmp",&gameData.graphicsData, 1);
 
   gameData.graphicsData.shelter = malloc(sizeof(struct Shelter));
 

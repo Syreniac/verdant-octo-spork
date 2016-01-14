@@ -34,7 +34,17 @@ int countResourceNodesInRadius(GameObjectData *gameObjectData, int x, int y, dou
 			while(j < gameObjectData->resourceNodeSpawners[i].maximumNodeCount){
 				p = getCenterOfRect(gameObjectData->resourceNodeSpawners[i].resourceNodes[j].rect);
 				if(getDistance2BetweenPoints(x,y,p.x,p.y) < radius * radius){
-					count++;
+					switch(gameObjectData->resourceNodeSpawners[i].resourceNodes[j].type){
+						case 0:
+							count += 1;
+							break;
+						case 1:
+							count += 2;
+							break;
+						case 2:
+							count += 5;
+							break;
+					}
 				}
 				j++;
 			}
@@ -555,19 +565,13 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
 			}
 			else if(getDistance2BetweenRects(programmableWorker->rect,gameObjectData->hive.rect) < 50.0 && programmableWorker->status
 			== RETURNING){
-				if(programmableWorker->cargo >= SUGAR_VALUE_OF_FLOWER){
+				if(programmableWorker->cargo > 0){
+					gameObjectData->hive.flowers_collected += programmableWorker->cargo;
 					programmableWorker->cargo = 0;
-					gameObjectData->hive.flowers_collected += SUGAR_VALUE_OF_FLOWER;
 					if(gameObjectData->hive.flowers_collected % CELEBRATION_THRESHOLD == 0){
 						playSoundEffect(2, &gameObjectData->audioData, "returnFlower");
 						sprintf(announcement,"Congratulations you have collected %d flowers!",gameObjectData->hive.flowers_collected);
 						announce(announcementsData, announcement);
-					}
-				}else if(programmableWorker->cargo == SUGAR_VALUE_OF_ICECREAM){
-					programmableWorker->cargo = 0;
-					gameObjectData->hive.flowers_collected += SUGAR_VALUE_OF_ICECREAM;
-					if(gameObjectData->hive.flowers_collected % 50 < SUGAR_VALUE_OF_ICECREAM){
-						playSoundEffect(2, &gameObjectData->audioData, "returnFlower");
 					}
 				}
 
@@ -598,7 +602,17 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
   			  				resourceNode->alive = 0;
   			  				/* Make sure the ResourceNodeSpawner knows that it's lost a ResourceNode */
   			  				resourceNodeSpawner->currentNodeCount--;
-  	  						programmableWorker->cargo++;/*assumes sugar value of flower to be 1*/
+									switch(resourceNode->type){
+										case 0:
+											programmableWorker->cargo = SUGAR_VALUE_OF_BLUE_FLOWER;
+											break;
+										case 1:
+											programmableWorker->cargo = SUGAR_VALUE_OF_RED_FLOWER;
+											break;
+										case 2:
+											programmableWorker->cargo = SUGAR_VALUE_OF_YELLOW_FLOWER;
+											break;
+									}
   	  						programmableWorker->brain.foundNode = NULL;
   						}
   					}
@@ -920,7 +934,7 @@ void updateRoamingSpider(GameObjectData *gameObjectData, int ticks){
 
 }
 
-ResourceNodeSpawner createResourceNodeSpawner(int maximumNodeCount, float xPosition, float yPosition, float radius){
+ResourceNodeSpawner createResourceNodeSpawner(GameObjectData *gameObjectData,int maximumNodeCount, float xPosition, float yPosition, float radius){
 	/* int maximumNodeCount = the maximum number of ResourceNodes for this spawner
 							to create
 	 float xPosition		= the x coordinates that the spawner will be created
@@ -935,7 +949,7 @@ ResourceNodeSpawner createResourceNodeSpawner(int maximumNodeCount, float xPosit
 	ResourceNodeSpawner resourceNodeSpawner;
 	int i = 0;
 
-	resourceNodeSpawner.maximumNodeCount = maximumNodeCount;
+	resourceNodeSpawner.maximumNodeCount = maximumNodeCount + rand() % maximumNodeCount;
 	/* Set the currentNodeCount to 0 because no nodes have been spawned yet */
 	resourceNodeSpawner.currentNodeCount = 0;
 
@@ -952,11 +966,14 @@ ResourceNodeSpawner createResourceNodeSpawner(int maximumNodeCount, float xPosit
 	resourceNodeSpawner.collisionRect.h = (int)floor(radius);
 
 	/* calloc up an array for us to use here */
-	resourceNodeSpawner.resourceNodes = calloc((size_t)maximumNodeCount, sizeof(ResourceNode));
-	while(i<maximumNodeCount){
+	resourceNodeSpawner.resourceNodes = calloc((size_t)resourceNodeSpawner.maximumNodeCount, sizeof(ResourceNode));
+	while(i<resourceNodeSpawner.maximumNodeCount){
 	/* run through it and init the resourceNodes */
-	 initResourceNode(&resourceNodeSpawner.resourceNodes[i]);
-	i++;
+		initResourceNode(&resourceNodeSpawner.resourceNodes[i]);
+	 if(rand() % 2 != 0){
+		 resourceNodeSpawner.resourceNodes[i] = createResourceNode(gameObjectData,&resourceNodeSpawner,0);
+	 }
+	 i++;
 	}
 	return(resourceNodeSpawner);
 }
@@ -970,13 +987,14 @@ void initResourceNode(ResourceNode *resourceNode){
 	 are alive without this.*/
 	resourceNode->alive = 0;
 	resourceNode->resourceUnits = 0;
+	resourceNode->type = 0;
 	resourceNode->rect.x = 0;
 	resourceNode->rect.y = 0;
 	resourceNode->rect.w = X_SIZE_OF_NODE;
 	resourceNode->rect.h = Y_SIZE_OF_NODE;
 }
 
-void updateResourceNodeSpawner(ResourceNodeSpawner *spawner, int ticks){
+void updateResourceNodeSpawner(GameObjectData *gameObjectData, ResourceNodeSpawner *spawner, int ticks){
 	/* ResourceNodeSpawner *spawner = the spawner that we are updating
 	 float ticks = the number of ticks we are updating over.
 
@@ -996,7 +1014,7 @@ void updateResourceNodeSpawner(ResourceNodeSpawner *spawner, int ticks){
 		/* get the index we're replacing */
 		i = getFirstDeadResourceNode(spawner);
 		/* create the new ResourceNode */
-		resNode = createResourceNode(spawner,DEFAULT_RESOURCEUNITS);
+		resNode = createResourceNode(gameObjectData,spawner,DEFAULT_RESOURCEUNITS);
 		/* attach it to the spawner by inserting it into the resourceNodes array */
 		spawner->resourceNodes[i] = resNode;
 		/* Set the timer back to 0 */
@@ -1132,7 +1150,7 @@ void reInitialiseRoamingSpider(RoamingSpider *roamingSpider){
 
 }
 
-ResourceNode createResourceNode(ResourceNodeSpawner *parentSpawner, int resourceUnits){
+ResourceNode createResourceNode(GameObjectData *gameObjectData, ResourceNodeSpawner *parentSpawner, int resourceUnits){
 	/* ResourceNodeSpawner *parentSpawner = the spawner which this resource node
 											is attached to
 	 int resourceUnits = the amount of resources to put into this node
@@ -1148,6 +1166,18 @@ ResourceNode createResourceNode(ResourceNodeSpawner *parentSpawner, int resource
 	resourceNode.rect.y = (int)floor(parentSpawner->yPosition + generateRandomCoordOffset(parentSpawner->spawnRadius) - Y_SIZE_OF_NODE/2);
 	resourceNode.rect.w = SIZE_OF_FLOWER;
 	resourceNode.rect.h = SIZE_OF_FLOWER;
+
+	long int r = rand();
+	if(r * r < getDistance2BetweenRects(resourceNode.rect,gameObjectData->hive.rect) * 2){
+		resourceNode.type = 2;
+	}
+	else if(r*r < getDistance2BetweenRects(resourceNode.rect,gameObjectData->hive.rect) * 8){
+		resourceNode.type = 1;
+	}
+	else{
+		resourceNode.type = 0;
+	}
+
 	resourceNode.displayInfo = 0;
 	fitRectToWorld(&resourceNode.rect);
 	return resourceNode;
@@ -1299,7 +1329,7 @@ void updateGameObjects(GameObjectData *gameObjectData, AudioData *audioData, Gra
 
 	if(!gameObjectData->pause_status){
 		 /* Update each one to reflect respawning nodes and so on. */
-		 updateResourceNodeSpawner(&gameObjectData->resourceNodeSpawners[i],ticks);
+		 updateResourceNodeSpawner(gameObjectData,&gameObjectData->resourceNodeSpawners[i],ticks);
 	}
 	/* Then we need to loop through the attached ResourceNodes and draw them */
 	 while(j < gameObjectData->resourceNodeSpawners[i].maximumNodeCount){
@@ -1312,7 +1342,7 @@ void updateGameObjects(GameObjectData *gameObjectData, AudioData *audioData, Gra
 
 		blitGameObject(gameObjectData->resourceNodeSpawners[i].resourceNodes[j].rect,
 						 graphicsData,
-						 graphicsData->nodeTexture,
+						 graphicsData->nodeTexture[gameObjectData->resourceNodeSpawners[i].resourceNodes[j].type],
 						 0,
 						 NULL,
 						 SDL_FLIP_NONE);
@@ -1564,7 +1594,7 @@ void updateGameObjects(GameObjectData *gameObjectData, AudioData *audioData, Gra
 				blitGameObject(programmableWorker->rect,
 							 	graphicsData,
 							 	graphicsData->bee->graphic[programmableWorker->currentGraphicIndex +
-        	           			((programmableWorker->cargo == SUGAR_VALUE_OF_FLOWER) ? CARRYING_FLOWER_INDEX_OFFSET :
+        	           			((programmableWorker->cargo < SUGAR_VALUE_OF_ICECREAM && programmableWorker->cargo > 0) ? CARRYING_FLOWER_INDEX_OFFSET :
         	           			((programmableWorker->cargo == SUGAR_VALUE_OF_ICECREAM) ? CARRYING_ICECREAM_INDEX_OFFSET : 0))],
 							 	DEGREESINCIRCLE-(programmableWorker->heading * RADIANSTODEGREES),
 							 	NULL,
