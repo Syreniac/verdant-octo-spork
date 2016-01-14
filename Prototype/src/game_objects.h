@@ -166,12 +166,18 @@ struct RoamingSpider{
   double heading;
   double speed;
 
-  int countDownToStride;
+  double countDownToStride;
   int currentGraphicIndex;
 
   int going_home;
 
+  int ticksSinceEating;
+  int ticksSinceStung;
+  int ticksSinceDead;
+
+  int deadSpider;  
   int eating_bee;
+  int eating_bee_complete;
   int currently_on_screen;
   int stung;
   int displayInfo;
@@ -210,7 +216,7 @@ struct GameObjectData{
 void killAllBees(ProgrammableWorker **programmableWorker);
 void killProgrammableWorker(GameObjectData *gameObjectData, ProgrammableWorker **programmableWorker);
 ProgrammableWorker *createProgrammableWorker(GameObjectData *gameObjectData);
-void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, AnnouncementsData *announcementsData, int ticks);
+int updateProgrammableWorker(ProgrammableWorker **programmableWorker, GameObjectData *gameObjectData, AnnouncementsData *announcementsData, int ticks);
 void updateIceCreamPerson(GameObjectData *gameObjectData, int ticks);
 
 Hive createHive(void);

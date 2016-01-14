@@ -160,7 +160,7 @@ void muteMusic(AudioData *audioData) {
 		audioData->music_mute = 1;
 	}
 	else {
-		Mix_Volume(1, 128);
+		Mix_Volume(1, 102);
 		printf("Music un-muted.\n");		
 		audioData->music_mute = 0;
 	}
@@ -179,12 +179,12 @@ void muteSoundEffects(AudioData *audioData) {
 	}
 	
 	else {		
-		Mix_Volume(weatherChannel, 128); 
+		Mix_Volume(weatherChannel, 102); 
 		if (audioData->weatherSoundActive != 0) {
 			fadeInChannel(weatherChannel, audioData, "thunder"); /*restart weather effects*/
 			printf("On un-mute: weatherSoundActive = %d\n FADING IN CHANNEL\n", audioData->weatherSoundActive);
 		}
-		Mix_Volume(2, 128); /*channel 2 is the sound effects channel*/
+		Mix_Volume(2, 102); /*channel 2 is the sound effects channel*/
 		printf("Sound effects un-muted.\n");		
 		audioData->soundEffect_mute = 0;
 	}

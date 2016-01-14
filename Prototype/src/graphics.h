@@ -67,7 +67,7 @@ struct Person{
 };
 
 struct RoamingArachnid{
-	SDL_Texture *graphic[1];
+	SDL_Texture *graphic[6];
 };
 
 struct Rainy{

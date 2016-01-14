@@ -51,7 +51,7 @@ FILE *DEBUGGING_FILE_FREE;
 #define RAIN_TILE_HEIGHT 9
 #define RAIN_FRAME_DELAY 4
 
-#define INITIAL_NUMBER_OF_WORKERS 150
+#define INITIAL_NUMBER_OF_WORKERS 500
 
 /*lower values result in a higher chance of bees regaining flight when wet, with
 each call to updateProgrammableWorker*/
@@ -164,7 +164,15 @@ typedef enum personGraphic {WITH_ICE_CREAM_STRIDE1, WITH_ICE_CREAM_STRIDE2} pers
 #define NO_ICECREAM_INDEX_OFFSET 2
 
 #define SPIDER 0
+#define SPIDER2 1
+#define SPIDER15 2
+#define SPIDER15b 3
+#define SPIDER_DEAD 4
+#define SPIDER_FIGHTING 5
 #define SPIDER_ATTACK_AREA 50
+#define SPIDER_SPEED 0.25
+#define SPIDER_STRIDE_FREQUENCY 1.0
+
 
 
 #if DEBUGGING==1
