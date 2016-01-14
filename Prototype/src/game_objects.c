@@ -44,6 +44,8 @@ int countResourceNodesInRadius(GameObjectData *gameObjectData, int x, int y, dou
 						case 2:
 							count += 5;
 							break;
+            default:
+              break;
 					}
 				}
 				j++;
@@ -72,7 +74,6 @@ ResourceNode *checkResourceNodeCollision(ResourceNodeSpawner **resourceNodeSpawn
 	 attached, doing it simply by checking ResourceNodes will be 1 million
 	 checks at worst whilst this way will be 2000 checks at worst.*/
 	int i = 0, j = 0;
-	int x,y,x2,y2;
 	SDL_Point worker_p;
 	SDL_Point node_p;
 	double d2;
@@ -162,7 +163,7 @@ int getFirstDeadResourceNode(ResourceNodeSpawner *resourceNodeSpawner){
 }
 
 void killAllBees(ProgrammableWorker **programmableWorker){
-	ProgrammableWorker *p = (*programmableWorker);
+	ProgrammableWorker *p;
 printf("top of kill all bees function\n");
 	while(*programmableWorker != NULL){
 
@@ -612,6 +613,8 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
 										case 2:
 											programmableWorker->cargo = SUGAR_VALUE_OF_YELLOW_FLOWER;
 											break;
+                    default:
+                      break;
 									}
   	  						programmableWorker->brain.foundNode = NULL;
   						}
@@ -722,7 +725,7 @@ void updateIceCreamPerson(GameObjectData *gameObjectData, int ticks){
 	/*if countDownToStride equals zero, reset count, and change stride image*/
 	if(gameObjectData->iceCreamPerson->countDownToStride <= 0){
 		gameObjectData->iceCreamPerson->countDownToStride =
-		(double)STRIDE_FREQUENCY / gameObjectData->iceCreamPerson->speed;
+        (int)((double)STRIDE_FREQUENCY / gameObjectData->iceCreamPerson->speed);
 
 
 		switch(gameObjectData->iceCreamPerson->currentGraphicIndex){
@@ -732,6 +735,8 @@ void updateIceCreamPerson(GameObjectData *gameObjectData, int ticks){
 			case 1:
 				gameObjectData->iceCreamPerson->currentGraphicIndex = WITH_ICE_CREAM_STRIDE1;
 				break;
+      default:
+        break;
 		}
 	}
 
@@ -799,8 +804,8 @@ void updateIceCreamPerson(GameObjectData *gameObjectData, int ticks){
 	 	}
 
 	}else{
-		distanceFromYBorder = gameObjectData->iceCreamPerson->yPosition - Y_SIZE_OF_WORLD/2;
-		distanceFromXBorder = gameObjectData->iceCreamPerson->xPosition - X_SIZE_OF_WORLD/2;
+		distanceFromYBorder = (int)(gameObjectData->iceCreamPerson->yPosition - Y_SIZE_OF_WORLD/2);
+		distanceFromXBorder = (int)(gameObjectData->iceCreamPerson->xPosition - X_SIZE_OF_WORLD/2);
 		if(abs(distanceFromXBorder) > abs(distanceFromYBorder)){
 			if(distanceFromXBorder > 0){
 				gameObjectData->iceCreamPerson->heading = PI * 0.75 + 0.069813;
@@ -839,7 +844,7 @@ void updateRoamingSpider(GameObjectData *gameObjectData, int ticks){
 	/*if countDownToStride equals zero, reset count, and change stride image*/
 	if(gameObjectData->roamingSpider->countDownToStride <= 0){
 		gameObjectData->roamingSpider->countDownToStride =
-		(double)STRIDE_FREQUENCY / gameObjectData->roamingSpider->speed;
+        (int)((double)STRIDE_FREQUENCY / gameObjectData->roamingSpider->speed);
 
 
 		switch(gameObjectData->roamingSpider->currentGraphicIndex){
@@ -849,6 +854,8 @@ void updateRoamingSpider(GameObjectData *gameObjectData, int ticks){
 			case 1:
 				gameObjectData->roamingSpider->currentGraphicIndex = SPIDER;
 			break;
+      default:
+        break;
 		}
 	}
 
@@ -914,8 +921,8 @@ void updateRoamingSpider(GameObjectData *gameObjectData, int ticks){
 	 	}
 
 	}else{
-		distanceFromYBorder = gameObjectData->roamingSpider->yPosition - Y_SIZE_OF_WORLD/2;
-		distanceFromXBorder = gameObjectData->roamingSpider->xPosition - X_SIZE_OF_WORLD/2;
+		distanceFromYBorder = (int)(gameObjectData->roamingSpider->yPosition - Y_SIZE_OF_WORLD/2);
+		distanceFromXBorder = (int)(gameObjectData->roamingSpider->xPosition - X_SIZE_OF_WORLD/2);
 		if(abs(distanceFromXBorder) > abs(distanceFromYBorder)){
 			if(distanceFromXBorder > 0){
 				gameObjectData->roamingSpider->heading = PI * 0.75 + 0.069813;
@@ -1052,6 +1059,7 @@ void updateWeather(GameObjectData *gameObjectData, AudioData *audioData, Weather
 			audioData->weatherSoundActive = 0;
 			break;
 		case Snow:
+      printf("Snow\n");
 			/*honey stocks should be built up first. WINTER IS COMING.. (haha game of drones).*/
 			break;
 		default:
@@ -1138,15 +1146,15 @@ void reInitialiseRoamingSpider(RoamingSpider *roamingSpider){
 		roamingSpider->xPosition = rand() % X_SIZE_OF_WORLD;
 	}
 
-	roamingSpider->rect.x = roamingSpider->xPosition;
-	roamingSpider->rect.y = roamingSpider->yPosition;
+	roamingSpider->rect.x = (int)(roamingSpider->xPosition);
+	roamingSpider->rect.y = (int)(roamingSpider->yPosition);
 
 	roamingSpider->eating_bee = 0;
 	roamingSpider->going_home = 0;
 	roamingSpider->speed = 0.5; /*pixels per millisecond*/
 	roamingSpider->stung = 0;
 
-	roamingSpider->countDownToStride = (double)STRIDE_FREQUENCY / roamingSpider->speed;
+	roamingSpider->countDownToStride = (int)((double)STRIDE_FREQUENCY / roamingSpider->speed);
 
 	roamingSpider->currentGraphicIndex = 0;
 
@@ -1198,6 +1206,7 @@ void updateHiveCell(GameObjectData *gameObjectData, AnnouncementsData *announcem
 
 void updateHive(GameObjectData *gameObjectData, AnnouncementsData *announcementsData,  int ticks){
 	int i = 0;
+
 	while(i < NUMBER_OF_CELLS_IN_HIVE){
 		updateHiveCell(gameObjectData, announcementsData,&gameObjectData->hive.hiveCells[i],ticks);
 		i++;
@@ -1223,7 +1232,6 @@ void updateGameObjects(GameObjectData *gameObjectData, AudioData *audioData, Gra
 	ProgrammableWorker *programmableWorker;
 		char GOCause[256];
 		char finalScore[256];
-
 
 	if(gameObjectData->pause_status){
 		if(paa++ == 0)
