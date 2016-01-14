@@ -52,6 +52,7 @@ FILE *DEBUGGING_FILE_FREE;
 #define RAIN_TILE_HEIGHT 9
 #define RAIN_FRAME_DELAY 4
 
+
 #define INITIAL_NUMBER_OF_WORKERS 3
 
 /*lower values result in a higher chance of bees regaining flight when wet, with
@@ -60,7 +61,7 @@ each call to updateProgrammableWorker*/
 
 /*lower values result in a higher chance of bees falling during rain, with
 each call to updateProgrammableWorker*/
-#define CHANCE_OF_FALLING_IN_RAIN 100
+#define CHANCE_OF_FALLING_IN_RAIN 1
 
 /*how much smaller are the bees when they are on the ground (further away from screen*/
 #define BEE_SHRINK_FACTOR_ON_GROUND 1.2
@@ -105,7 +106,7 @@ each call to updateProgrammableWorker*/
 #define MS_BETWEEN_FLAPPING 45
 
 
-#define BENCHMARK_TEST 1
+#define BENCHMARK_TEST 0
 
 #define X_SIZE_OF_WORKER 40
 #define Y_SIZE_OF_WORKER 40
@@ -171,7 +172,15 @@ typedef enum personGraphic {WITH_ICE_CREAM_STRIDE1, WITH_ICE_CREAM_STRIDE2} pers
 #define NO_ICECREAM_INDEX_OFFSET 2
 
 #define SPIDER 0
+#define SPIDER2 1
+#define SPIDER15 2
+#define SPIDER15b 3
+#define SPIDER_DEAD 4
+#define SPIDER_FIGHTING 5
 #define SPIDER_ATTACK_AREA 50
+#define SPIDER_SPEED 0.25
+#define SPIDER_STRIDE_FREQUENCY 1.0
+
 
 
 #if DEBUGGING==1

@@ -136,8 +136,20 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
 
   gameData.graphicsData.roamingArachnid = (RoamingArachnid*) malloc(sizeof(RoamingArachnid));
 
+  /*roamingSpider graphics*/
   gameData.graphicsData.roamingArachnid->graphic[SPIDER] =
   loadTextureFromFile("images/spider.bmp", &gameData.graphicsData, 1);
+  gameData.graphicsData.roamingArachnid->graphic[SPIDER2] =
+  loadTextureFromFile("images/spider2.bmp", &gameData.graphicsData, 1);
+  gameData.graphicsData.roamingArachnid->graphic[SPIDER15] =
+  loadTextureFromFile("images/spider15.bmp", &gameData.graphicsData, 1);
+  gameData.graphicsData.roamingArachnid->graphic[SPIDER15b] =
+  loadTextureFromFile("images/spider15.bmp", &gameData.graphicsData, 1);
+  
+  gameData.graphicsData.roamingArachnid->graphic[SPIDER_DEAD] =
+  loadTextureFromFile("images/spider_dead2.bmp", &gameData.graphicsData, 1);
+  gameData.graphicsData.roamingArachnid->graphic[SPIDER_FIGHTING] =
+  loadTextureFromFile("images/spiderFighting.bmp", &gameData.graphicsData, 1);
 
   gameData.graphicsData.rainy = (Rainy*) malloc(sizeof(Rainy));
 

@@ -24,6 +24,46 @@ static ResourceNode *chooseNodeRandomly(ResourceNodeSpawner *resourceNodeSpawner
 	return NULL;
 }
 
+ProgrammableWorker *getNearestWorker(GameObjectData *gameObjectData, int x, int y, ProgrammableWorker *ignore){
+	int i = 0;
+	SDL_Point point;
+	double d2;
+	double d22;
+	ProgrammableWorker *pw = NULL;
+	ProgrammableWorker *p;
+	printf("%lf\n",d2);
+	p = gameObjectData->first_programmable_worker;
+	while(p!=NULL){
+		point = getCenterOfRect(p->rect);
+		d22 = getDistance2BetweenPoints(point.x,point.y,x,y);
+		if(p!= ignore && (d22 < d2 || pw == NULL)){
+			d2 = d22;
+			pw = p;
+		}
+		p = p->next;
+	}
+	return pw;
+}
+
+Tree *getNearestTree(GameObjectData *gameObjectData, int x, int y){
+	int i = 0;
+	SDL_Point p;
+	double d2;
+	double d22;
+	Tree *tree = NULL;
+	printf("%lf\n",d2);
+	while(i < NUMBER_OF_TREES){
+		p = getCenterOfRect(gameObjectData->tree[i].stumpRect);
+		d22 = getDistance2BetweenPoints(p.x,p.y,x,y);
+		if(d22 < d2 || tree == NULL){
+			d2 = d22;
+			tree = &gameObjectData->tree[i];
+		}
+		i++;
+	}
+	return tree;
+}
+
 int countResourceNodesInRadius(GameObjectData *gameObjectData, int x, int y, double radius){
 	int count = 0;
 	int i = 0, j;
@@ -164,7 +204,6 @@ int getFirstDeadResourceNode(ResourceNodeSpawner *resourceNodeSpawner){
 
 void killAllBees(ProgrammableWorker **programmableWorker){
 	ProgrammableWorker *p;
-printf("top of kill all bees function\n");
 	while(*programmableWorker != NULL){
 
 		p = *programmableWorker;
@@ -172,20 +211,13 @@ printf("top of kill all bees function\n");
 
 		free(p);
 	}
-printf("bottom of kill all bees function\n");
 }
 
 void killProgrammableWorker(GameObjectData *gameObjectData, ProgrammableWorker **programmableWorker){
 
 	ProgrammableWorker *p = NULL;
-
-printf("top of kill programmable worker function\n");
-	if(*programmableWorker == NULL){
-		printf("programmable worker == NULL, this shouldn't be\n");
-	}
 	if((*programmableWorker)->next == NULL){
 		p = *programmableWorker;
-		printf("here\n");
 	    for(*programmableWorker = gameObjectData->first_programmable_worker;
 	    (*programmableWorker)->next != p ;
 	    *programmableWorker = (*programmableWorker)->next){
@@ -195,26 +227,21 @@ printf("top of kill programmable worker function\n");
 		free(*programmableWorker);
 		*programmableWorker = NULL;
 	}else if(*programmableWorker == gameObjectData->first_programmable_worker){
-		printf("hhhhhhere\n");
 		p = *programmableWorker;
 		gameObjectData->first_programmable_worker = gameObjectData->first_programmable_worker->next;
 		*programmableWorker = gameObjectData->first_programmable_worker;
 		free(p);
 	}else{
 		p = *programmableWorker;
-    	printf("here0000\n");
 	    for(*programmableWorker = gameObjectData->first_programmable_worker;
 	    (*programmableWorker)->next != p ;
 	    *programmableWorker = (*programmableWorker)->next){
 	    }
-	    printf("here0\n");
 	    (*programmableWorker)->next = p->next;
 	    *programmableWorker = p;
-		printf("here1\n");
 		free(*programmableWorker);
 		*programmableWorker = NULL;
 	}
-printf("bottom of kill programmable worker function\n");
 }
 
 ProgrammableWorker *createProgrammableWorker(GameObjectData *gameObjectData){
@@ -286,7 +313,7 @@ IceCreamPerson *createIceCreamPerson(void){
 	iceCreamPerson->rect.y = Y_SIZE_OF_WORLD * 2;
 	iceCreamPerson->currently_on_screen = 0;
 	iceCreamPerson->has_ice_cream = 0;
-	iceCreamPerson->speed = 0;
+	iceCreamPerson->speed = 0.2;
 	iceCreamPerson->stung = 0;
 	iceCreamPerson->displayInfo = 0;
 
@@ -319,10 +346,18 @@ RoamingSpider *createRoamingSpider(void){
 	roamingSpider->rect.y = Y_SIZE_OF_WORLD * 2;
 	roamingSpider->currently_on_screen = 0;
 	roamingSpider->eating_bee = 0;
-	roamingSpider->speed = 0;
+	roamingSpider->eating_bee_complete = 0;
+	roamingSpider->speed = SPIDER_SPEED;
 	roamingSpider->stung = 0;
 	roamingSpider->displayInfo = 0;
-
+	roamingSpider->ticksSinceEating = 0;
+	roamingSpider->ticksSinceStung = 0;
+	roamingSpider->ticksSinceDead = 0;
+	roamingSpider->deadSpider = 0;
+	
+	roamingSpider->countDownToStride = SPIDER_STRIDE_FREQUENCY;
+	
+	
 	return roamingSpider;
 
 }
@@ -392,7 +427,7 @@ Tree createTree(Hive *hive, int forceX, int forceY){
 	return tree;
 }
 
-void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, AnnouncementsData *announcementsData, int ticks){
+int updateProgrammableWorker(ProgrammableWorker **programmableWorkerP, GameObjectData *gameObjectData, AnnouncementsData *announcementsData, int ticks){
 	/* ProgrammableWorker *programmableWorker = the ProgrammableWorker we're going
 												to be updating
 	 GameObjectData *gameObjectData		 = the pointer to the GameObjectData
@@ -404,6 +439,7 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
 	ResourceNodeSpawner *resourceNodeSpawner = NULL;
 	ResourceNode *resourceNode = NULL;
 	char announcement[256];
+	ProgrammableWorker *programmableWorker = *programmableWorkerP;
 
 		char tempString[255];
 
@@ -514,7 +550,7 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
 					j++;
 				}
 				if(j == NUMBER_OF_TREES + 1 /* + 1 includes the hive as shelter*/){
-					programmableWorker->wet_and_cant_fly = 1; /*true*/
+					programmableWorker->wet_and_cant_fly =  rand() % 100 < CHANCE_OF_FALLING_IN_RAIN ? 0 : programmableWorker->wet_and_cant_fly;/*true*/
 				}
 			}
 
@@ -569,6 +605,7 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
 				if(programmableWorker->cargo > 0){
 					gameObjectData->hive.flowers_collected += programmableWorker->cargo;
 					programmableWorker->cargo = 0;
+
 					if(gameObjectData->hive.flowers_collected % CELEBRATION_THRESHOLD == 0){
 						playSoundEffect(2, &gameObjectData->audioData, "returnFlower");
 						sprintf(announcement,"Congratulations you have collected %d flowers!",gameObjectData->hive.flowers_collected);
@@ -645,15 +682,30 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
 
 		/*for battling with enemies*/
 		if(isPointInRangeOf(getCenterOfRect(programmableWorker->rect), getCenterOfRect(gameObjectData->roamingSpider->rect),SPIDER_ATTACK_AREA)) {
-			announce(announcementsData,"A spider is attacking one of your bees!");
-			programmableWorker->beeStatus = "Fighting a spider!";
-			if(programmableWorker->displayInfo){
-					sprintf(tempString," Status: %s", programmableWorker
-					->beeStatus);
-					setObjectInfoDisplay(&announcementsData->objectInfoDisplay, tempString, STATUS);
+
+			if(!gameObjectData->roamingSpider->stung){
+				announce(announcementsData,"A spider is attacking one of your bees!");
+				programmableWorker->beeStatus = "Fighting a spider!";
+				if(programmableWorker->displayInfo){
+						sprintf(tempString," Status: %s", programmableWorker
+						->beeStatus);
+						setObjectInfoDisplay(&announcementsData->objectInfoDisplay, tempString, STATUS);
+				}
+				programmableWorker->fighting_spider = 1;
+				programmableWorker->wet_and_cant_fly = 1;
 			}
-			programmableWorker->fighting_spider = 1;
-			programmableWorker->speed = 0.0;
+			/*bee freeing his friend*/
+			if(gameObjectData->roamingSpider->stung == 1) {
+				programmableWorker->fighting_spider = 0;
+				programmableWorker->stunned_after_sting = 1;
+			}
+			
+			if(gameObjectData->roamingSpider->eating_bee_complete == 1) {
+				killProgrammableWorker(gameObjectData, &programmableWorker);
+				printf("DEBUG: A BEE HAS BEEN EATEN (BEE FUNCTION)\n\n");
+				return 1;
+			}
+
 		}
 
 		  /* Sensory Perception */
@@ -671,12 +723,16 @@ void updateProgrammableWorker(ProgrammableWorker *programmableWorker, GameObject
 	}
 
 	if(programmableWorker->cargo != 0){
-  	if(programmableWorker->displayInfo){
+		programmableWorker->speed = WORKER_SPEED/1.5;
+		if(programmableWorker->displayInfo){
 				sprintf(tempString,"%s %s",programmableWorker->beeStatus , "& has cargo");
 				setObjectInfoDisplay(&announcementsData->objectInfoDisplay, tempString, STATUS);
 		}
+	}else{
+		programmableWorker->speed = WORKER_SPEED;
 	}
-
+	*programmableWorkerP = programmableWorker;
+	return 0;
 }
 
 void centerViewOnHive(GraphicsData *graphicsData, GameObjectData *gameObjectData){
@@ -839,24 +895,37 @@ void updateRoamingSpider(GameObjectData *gameObjectData, int ticks){
 	}
 
 	/*decrement countDownToStride*/
-	gameObjectData->roamingSpider->countDownToStride--;
+	gameObjectData->roamingSpider->countDownToStride -= ticks;
 
-	/*if countDownToStride equals zero, reset count, and change stride image*/
-	if(gameObjectData->roamingSpider->countDownToStride <= 0){
-		gameObjectData->roamingSpider->countDownToStride =
-        (int)((double)STRIDE_FREQUENCY / gameObjectData->roamingSpider->speed);
+	if(gameObjectData->roamingSpider->deadSpider != 1) {	
+		/*if countDownToStride equals zero, reset count, and change stride image*/
+		if(gameObjectData->roamingSpider->countDownToStride <= 0){
+			gameObjectData->roamingSpider->countDownToStride =
+			SPIDER_STRIDE_FREQUENCY*100;
 
-
-		switch(gameObjectData->roamingSpider->currentGraphicIndex){
-			case 0:
-				gameObjectData->roamingSpider->currentGraphicIndex = SPIDER;
-			break;
-			case 1:
-				gameObjectData->roamingSpider->currentGraphicIndex = SPIDER;
-			break;
-      default:
-        break;
+			switch(gameObjectData->roamingSpider->currentGraphicIndex){
+				case SPIDER2:
+					gameObjectData->roamingSpider->currentGraphicIndex = SPIDER15;
+					break;
+				case SPIDER:
+					gameObjectData->roamingSpider->currentGraphicIndex = SPIDER15b;
+					break;
+				case SPIDER15:
+					gameObjectData->roamingSpider->currentGraphicIndex = SPIDER;
+					break;
+				case SPIDER15b:
+					gameObjectData->roamingSpider->currentGraphicIndex = SPIDER2;
+					break;
+				case SPIDER_FIGHTING:
+					gameObjectData->roamingSpider->currentGraphicIndex = SPIDER;
+					break;
+			}
 		}
+		
+	/*}else if(gameObjectData->roamingSpider->eating_bee){
+		gameObjectData->roamingSpider->currentGraphicIndex = SPIDER_FIGHTING;*/
+	}else{
+		gameObjectData->roamingSpider->currentGraphicIndex = SPIDER_DEAD;
 	}
 
 	/*use trig to find new locations based on heading angle (radians)*/
@@ -870,34 +939,86 @@ void updateRoamingSpider(GameObjectData *gameObjectData, int ticks){
 	gameObjectData->roamingSpider->yPosition += newY;
 	gameObjectData->roamingSpider->rect.x = (int)floor(gameObjectData->roamingSpider->xPosition);
 	gameObjectData->roamingSpider->rect.y = (int)floor(gameObjectData->roamingSpider->yPosition);
-
-	/*if roamingSpider not yet stung, and bee is close enough to sting*/
-	/*STING_HIT_RADIUS can be made so small that this would never actually happen unless it's behaviour*/
-	/*if any bees are within the attack radius, the state of the spider is set to eating bees.*/
-  	if(!gameObjectData->roamingSpider->stung && countProgrammableWorkersInRange(gameObjectData,
-  	getCenterOfRect(gameObjectData->roamingSpider->rect), SPIDER_ATTACK_AREA) == 1){
-
-  		/*eat bee!*/
-  		gameObjectData->roamingSpider->eating_bee = 1;
-
-  		/*spider stops moving to eat!*/
-  		gameObjectData->roamingSpider->speed = 0.0;
-
-		/*spider attacked by another bee who saves his friend*/
-		if(!gameObjectData->roamingSpider->stung && countProgrammableWorkersInRange(gameObjectData, getCenterOfRect(gameObjectData->roamingSpider->rect), SPIDER_ATTACK_AREA) > 1){
-
-			gameObjectData->roamingSpider->stung = 1;
-
-			/*eat bee!*/
-			gameObjectData->roamingSpider->eating_bee = 0;
-
-			/*run for your life!*/
-			gameObjectData->roamingSpider->speed = 0.5;
+	
+	if(gameObjectData->roamingSpider->deadSpider != 1) {	
+		/*if roamingSpider not yet stung, and bee is close enough to sting*/
+		/*STING_HIT_RADIUS can be made so small that this would never actually happen unless it's behaviour*/
+		/*if any bees are within the attack radius, the state of the spider is set to eating bees.*/
+		switch(countProgrammableWorkersInRange(gameObjectData,getCenterOfRect(gameObjectData->roamingSpider->rect), SPIDER_ATTACK_AREA)){
+			case 0:
+				if(gameObjectData->roamingSpider->eating_bee_complete){
+					gameObjectData->roamingSpider->eating_bee_complete = 0;
+			  		/*spider starts moving to having finished his tasty snack*/
+					gameObjectData->roamingSpider->speed = SPIDER_SPEED;
+				}
+				break;
+				
+			case 1:
+				if(!gameObjectData->roamingSpider->stung){
+					/*eat bee!*/
+					gameObjectData->roamingSpider->eating_bee = 1;
+			  		/*spider stops moving to eat*/
+					gameObjectData->roamingSpider->speed = 0.0;
+				}
+				break;
+				
+			case 2:
+				gameObjectData->roamingSpider->stung = 1;
+				/*stop eating bee*/
+				gameObjectData->roamingSpider->eating_bee = 0;
+				/*spider back to movingn*/
+				gameObjectData->roamingSpider->speed = SPIDER_SPEED;
+				gameObjectData->roamingSpider->ticksSinceEating = 0;
+				break;
+				
+			case 3:
+				gameObjectData->roamingSpider->stung = 1;
+				/*stop eating bee*/
+				gameObjectData->roamingSpider->eating_bee = 0;
+				/*spider back to movingn*/
+				gameObjectData->roamingSpider->speed = SPIDER_SPEED;
+				gameObjectData->roamingSpider->ticksSinceEating = 0;
+				break;
+				
+			default: /*If there are more than 3 bees converging on the spider he dies*/
+				gameObjectData->roamingSpider->speed = 0.0;	
+				gameObjectData->roamingSpider->deadSpider = 1;
 		}
+		
 
-  	}
+	
+		/*fight duration / kill time */
+		if(gameObjectData->roamingSpider->eating_bee == 1) {
+			gameObjectData->roamingSpider->ticksSinceEating += ticks;
+			if(gameObjectData->roamingSpider->ticksSinceEating >= 10000) {
+				gameObjectData->roamingSpider->eating_bee_complete = 1;
+				gameObjectData->roamingSpider->eating_bee = 0;	
+				gameObjectData->roamingSpider->ticksSinceEating = 0;			
+				printf("DEBUG: A BEE HAS BEEN EATEN (SPIDER FUNCTION)\n");
+		
+			}
+		}
+		
+		/*stung duration / time till active again */
+		if(gameObjectData->roamingSpider->stung == 1) {
+			gameObjectData->roamingSpider->ticksSinceStung += ticks;
+			if(gameObjectData->roamingSpider->ticksSinceStung >= 20000) {
+				gameObjectData->roamingSpider->stung = 0;
+				gameObjectData->roamingSpider->ticksSinceStung = 0;			
+				printf("DEBUG: SPIDER UNSTUNG AND ACTIVE AGAIN (SPIDER FUNCTION)\n");
+			}
+		}
+		
+	}else {
+		gameObjectData->roamingSpider->ticksSinceDead += ticks;
+		if(gameObjectData->roamingSpider->ticksSinceDead >= 60000) {
+			printf("DEBUG: SPIDER REINITIALIZING\n");
+			reInitialiseRoamingSpider(gameObjectData->roamingSpider);
+		}
+	}
 
-	if(countProgrammableWorkersInRange(gameObjectData, getCenterOfRect(gameObjectData->roamingSpider->rect), 250.0) == 0 && !gameObjectData->roamingSpider->going_home){
+
+	if(countProgrammableWorkersInRange(gameObjectData, getCenterOfRect(gameObjectData->roamingSpider->rect), 250.0) <= 3 && !gameObjectData->roamingSpider->going_home){
 
 		if(gameObjectData->roamingSpider->xPosition >= X_SIZE_OF_WORLD - PERSON_WIDTH/2){
 			/*world border has been reached and sun is still out, change direction*/
@@ -915,7 +1036,7 @@ void updateRoamingSpider(GameObjectData *gameObjectData, int ticks){
 			/*world border has been reached and sun is still out, change direction*/
 		gameObjectData->roamingSpider->heading = 0;
 
-		}else if(rand() % 1000 == 0){
+		}else if(rand() % 500 == 0){
 			/*randomly change direction, just for the hell of it*/
 	 		gameObjectData->roamingSpider->heading += ((double)(rand() % 30) / (double)10) - 1.5;
 	 	}
@@ -1059,7 +1180,6 @@ void updateWeather(GameObjectData *gameObjectData, AudioData *audioData, Weather
 			audioData->weatherSoundActive = 0;
 			break;
 		case Snow:
-      printf("Snow\n");
 			/*honey stocks should be built up first. WINTER IS COMING.. (haha game of drones).*/
 			break;
 		default:
@@ -1068,7 +1188,7 @@ void updateWeather(GameObjectData *gameObjectData, AudioData *audioData, Weather
 			exit(1);
 		}
 	}
-	
+
 	if(gameObjectData->gameOver){
 		weather->present_weather = Snow;
 	}
@@ -1106,7 +1226,7 @@ void reInitialiseIceCreamPerson(IceCreamPerson *iceCreamPerson){
 
 	iceCreamPerson->has_ice_cream = 1;
 	iceCreamPerson->going_home = 0;
-	iceCreamPerson->speed = 0.05; /*pixels per millisecond*/
+	iceCreamPerson->speed = 0.2; /*pixels per millisecond*/
 	iceCreamPerson->stung = 0;
 
 	iceCreamPerson->countDownToStride = (double)STRIDE_FREQUENCY / iceCreamPerson->speed;
@@ -1150,9 +1270,14 @@ void reInitialiseRoamingSpider(RoamingSpider *roamingSpider){
 	roamingSpider->rect.y = (int)(roamingSpider->yPosition);
 
 	roamingSpider->eating_bee = 0;
+	roamingSpider->eating_bee_complete = 0;
 	roamingSpider->going_home = 0;
-	roamingSpider->speed = 0.5; /*pixels per millisecond*/
+	roamingSpider->speed = SPIDER_SPEED; /*pixels per millisecond*/
 	roamingSpider->stung = 0;
+	roamingSpider->ticksSinceEating = 0;
+	roamingSpider->ticksSinceStung = 0;
+	roamingSpider->ticksSinceDead = 0;
+	roamingSpider->deadSpider = 0;
 
 	roamingSpider->countDownToStride = (int)((double)STRIDE_FREQUENCY / roamingSpider->speed);
 
@@ -1178,10 +1303,10 @@ ResourceNode createResourceNode(GameObjectData *gameObjectData, ResourceNodeSpaw
 	resourceNode.rect.h = SIZE_OF_FLOWER;
 
 	long int r = rand();
-	if(r * r < getDistance2BetweenRects(resourceNode.rect,gameObjectData->hive.rect) * 2){
+	if(r < getDistance2BetweenRects(resourceNode.rect,gameObjectData->hive.rect) * 1.5){
 		resourceNode.type = 2;
 	}
-	else if(r*r < getDistance2BetweenRects(resourceNode.rect,gameObjectData->hive.rect) * 8){
+	else if(r < getDistance2BetweenRects(resourceNode.rect,gameObjectData->hive.rect) * 4.5){
 		resourceNode.type = 1;
 	}
 	else{
@@ -1232,13 +1357,6 @@ void updateGameObjects(GameObjectData *gameObjectData, AudioData *audioData, Gra
 	ProgrammableWorker *programmableWorker;
 		char GOCause[256];
 		char finalScore[256];
-
-	if(gameObjectData->pause_status){
-		if(paa++ == 0)
-		printf("bees taking shelter in hive = %d\n", gameObjectData->hive.bees_taking_shelter);
-	}else{
-		paa = 0;
-	}
 
 	if(!gameObjectData->gameOver){/*start of it not game over*/
 
@@ -1291,7 +1409,6 @@ void updateGameObjects(GameObjectData *gameObjectData, AudioData *audioData, Gra
 
 					setGameOverInfo(&announcementsData->gameOverData, GOCause);
 				    setFinalScore(&announcementsData->gameOverData, finalScore);
-					printf("gameover by starvation\n");
 					killAllBees(&gameObjectData->first_programmable_worker);
 					return;
 				}
@@ -1300,7 +1417,6 @@ void updateGameObjects(GameObjectData *gameObjectData, AudioData *audioData, Gra
 		((gameObjectData->hive.winterCountdown < AUTUMN_THRESHOLD) ? 1 : 0)]);
 				gameObjectData->weather.present_weather = Cloud;
 				/*AFTER A SHORT DELAY SET TREES BACK TO SUMMER TREES AND OTHER SUMMER STUFF*/
-				printf("%d\n", gameObjectData->hive.delayBeforeSummer);
 				if(!(gameObjectData->hive.delayBeforeSummer--)){
 					gameObjectData->hive.delayBeforeSummer = DELAY_BEFORE_SUMMER;
 					gameObjectData->tree->currentGraphicIndex = SUMMER_INDEX;
@@ -1353,7 +1469,6 @@ void updateGameObjects(GameObjectData *gameObjectData, AudioData *audioData, Gra
 				SDL_Point point = getCenterOfRect(gameObjectData->resourceNodeSpawners[i].resourceNodes[j].rect);
 				renderFillRadius(graphicsData, &point, SIZE_OF_FLOWER, 255,255,255, 80);
 			}
-
 		blitGameObject(gameObjectData->resourceNodeSpawners[i].resourceNodes[j].rect,
 						 graphicsData,
 						 graphicsData->nodeTexture[gameObjectData->resourceNodeSpawners[i].resourceNodes[j].type],
@@ -1382,25 +1497,27 @@ void updateGameObjects(GameObjectData *gameObjectData, AudioData *audioData, Gra
 				 NULL,
 				 SDL_FLIP_NONE);
 
+	ProgrammableWorker *next = NULL;
+	if(!gameObjectData->pause_status){
+		for(programmableWorker = gameObjectData->first_programmable_worker; programmableWorker != NULL; programmableWorker = next){
+			next = programmableWorker->next;
+			updateProgrammableWorker(&programmableWorker,gameObjectData,announcementsData,ticks);
+		}
+	}
 
 	if(!gameObjectData->gameOver){ /*start of if not game over*/
-
+	next = NULL;
 	/*BEES ON GROUND NEED RENDERING BEFORE PERSON*/
-	for(programmableWorker = gameObjectData->first_programmable_worker; programmableWorker != NULL ;){
+	for(programmableWorker = gameObjectData->first_programmable_worker; programmableWorker != NULL ; programmableWorker = next){
 		ProgrammableWorker *progWork;
 		SDL_Rect smallerBeeRect;
+		next = programmableWorker->next;
 		smallerBeeRect.w = (int)((float)programmableWorker->rect.w/BEE_SHRINK_FACTOR_ON_GROUND);
 		smallerBeeRect.h = (int)((float)programmableWorker->rect.h/BEE_SHRINK_FACTOR_ON_GROUND);
 		smallerBeeRect.y = programmableWorker->rect.y;
 		smallerBeeRect.x = programmableWorker->rect.x;
 
-		if(programmableWorker->wet_and_cant_fly || programmableWorker->cold_and_about_to_die){
-
-			if(!gameObjectData->pause_status){
-				updateProgrammableWorker(programmableWorker,gameObjectData,announcementsData,ticks);
-			}
-
-
+		if(programmableWorker->wet_and_cant_fly == 1 || programmableWorker->cold_and_about_to_die == 1){
 			if(programmableWorker->displayInfo){
 				SDL_Point point = getCenterOfRect(programmableWorker->rect);
 				point.x -= 5;
@@ -1409,29 +1526,22 @@ void updateGameObjects(GameObjectData *gameObjectData, AudioData *audioData, Gra
 			}
 
 			blitGameObject(smallerBeeRect,
-					 	graphicsData,
-					 	graphicsData->bee->graphic[programmableWorker->currentGraphicIndex],
-					 	DEGREESINCIRCLE-(programmableWorker->heading * RADIANSTODEGREES),
-					 	NULL,
-					 	SDL_FLIP_NONE);
+						graphicsData,
+						graphicsData->bee->graphic[programmableWorker->currentGraphicIndex > 5 ? 0 : programmableWorker->currentGraphicIndex],
+						DEGREESINCIRCLE-(programmableWorker->heading * RADIANSTODEGREES),
+						NULL,
+						SDL_FLIP_NONE);
 		}
 
 
 
 		if(programmableWorker->cold_and_about_to_die > COLD_DEATH_THRESHOLD){
-
-
-
 			if(!(programmableWorker == gameObjectData->first_programmable_worker && programmableWorker->next == NULL)){
 				ProgrammableWorker *worker;
 
 				int i = 0;
 
 				killProgrammableWorker(gameObjectData, &programmableWorker);
-				for(worker = gameObjectData->first_programmable_worker; worker != NULL; worker = worker->next){
-					printf("%d  ", i++);
-				}
-				printf("\n");
 			}else{
 				gameObjectData->gameOver = 1;
 				gameObjectData->gameOverCause = COLD;
@@ -1442,15 +1552,10 @@ void updateGameObjects(GameObjectData *gameObjectData, AudioData *audioData, Gra
 
 				setGameOverInfo(&announcementsData->gameOverData, GOCause);
 				setFinalScore(&announcementsData->gameOverData, finalScore);
-				printf("gameOver, all bees die from the cold\n");
 				free(gameObjectData->first_programmable_worker);
 				gameObjectData->first_programmable_worker = NULL;
 				return;
 			}
-
-
-		}else{
-			programmableWorker = programmableWorker->next;
 		}
 	}
 
@@ -1469,11 +1574,11 @@ void updateGameObjects(GameObjectData *gameObjectData, AudioData *audioData, Gra
 				gameObjectData->droppedIceCream->sizeOscillator = 1;
 			}
 			gameObjectData->droppedIceCream->rect.w += gameObjectData->droppedIceCream->sizeOscillator;
-			gameObjectData->droppedIceCream->xPosition -= ((float)gameObjectData->droppedIceCream->sizeOscillator)/2.0;
+			//gameObjectData->droppedIceCream->xPosition -= ((float)gameObjectData->droppedIceCream->sizeOscillator)/2.0;
 			gameObjectData->droppedIceCream->rect.x = gameObjectData->droppedIceCream->xPosition;
 
 			gameObjectData->droppedIceCream->rect.h += gameObjectData->droppedIceCream->sizeOscillator;
-			gameObjectData->droppedIceCream->yPosition -= ((float)gameObjectData->droppedIceCream->sizeOscillator)/2.0;
+			//gameObjectData->droppedIceCream->yPosition -= ((float)gameObjectData->droppedIceCream->sizeOscillator)/2.0;
 			gameObjectData->droppedIceCream->rect.y = gameObjectData->droppedIceCream->yPosition;
 
 			if(gameObjectData->droppedIceCream->displayInfo){
@@ -1549,12 +1654,28 @@ void updateGameObjects(GameObjectData *gameObjectData, AudioData *audioData, Gra
 			renderFillRadius(graphicsData, &point, PERSON_WIDTH/2, 255,255,255, 80);
 		}
 
-  	 	blitGameObject(gameObjectData->roamingSpider->rect,
+  	 	/*if (gameObjectData->roamingSpider->eating_bee == 1) {
+			SDL_Rect largerSpiderRect;
+			
+			largerSpiderRect.w = (int)((float)gameObjectData->roamingSpider->rect.w*1.4);
+			largerSpiderRect.h = (int)((float)gameObjectData->roamingSpider->rect.h*1.4);
+			largerSpiderRect.y = gameObjectData->roamingSpider->rect.y;
+			largerSpiderRect.x = gameObjectData->roamingSpider->rect.x;
+			
+			blitGameObject(largerSpiderRect,
                   	graphicsData,
-                   	graphicsData->roamingArachnid->graphic[0],
+                   	graphicsData->roamingArachnid->graphic[gameObjectData->roamingSpider->currentGraphicIndex],
                    	DEGREESINCIRCLE-(gameObjectData->roamingSpider->heading * RADIANSTODEGREES),
                    	NULL,
                    	SDL_FLIP_NONE);
+		}else{*/
+			blitGameObject(gameObjectData->roamingSpider->rect,
+                  	graphicsData,
+                   	graphicsData->roamingArachnid->graphic[gameObjectData->roamingSpider->currentGraphicIndex],
+                   	DEGREESINCIRCLE-(gameObjectData->roamingSpider->heading * RADIANSTODEGREES),
+                   	NULL,
+                   	SDL_FLIP_NONE);
+		/*}*/
 
 	}else{ /*small probability of re-initialising iceCreamPerson and setting location to on-screen*/
 	 	if((rand() % ICE_CREAM_PERSON_PROB == 0)){
@@ -1572,18 +1693,17 @@ void updateGameObjects(GameObjectData *gameObjectData, AudioData *audioData, Gra
 	/* Also, remember the important rule - AI should tell workers to do things rather
 	 than directly doing things itself! */
 			gameObjectData->hive.bees_taking_shelter = 0;
-	for(programmableWorker = gameObjectData->first_programmable_worker; programmableWorker != NULL ; programmableWorker = programmableWorker->next){
+	ProgrammableWorker *nextt = NULL;
+	int dead = 0;
+	for(programmableWorker = gameObjectData->first_programmable_worker; programmableWorker != NULL ; programmableWorker = nextt){
+		nextt = programmableWorker->next;
 		if(!(programmableWorker->wet_and_cant_fly || programmableWorker->cold_and_about_to_die)){
-			if(!gameObjectData->pause_status){
-				updateProgrammableWorker(programmableWorker,gameObjectData,announcementsData,ticks);
-			}
-
 			if(programmableWorker->displayInfo && graphicsData->trackingMode){
-			  	int window_x,window_y, tempXOffset, tempYOffset;
+				int window_x,window_y, tempXOffset, tempYOffset;
 				SDL_Point point = getCenterOfRect(programmableWorker->rect);
 
 				renderRadius(graphicsData, &point, WORKER_SENSE_RANGE, 255,255,255, 180);
- 					SDL_GetWindowSize(graphicsData->window,&window_x,&window_y);
+					SDL_GetWindowSize(graphicsData->window,&window_x,&window_y);
 				/* I'm internally debating whether to center the screen or not here */
 				tempXOffset = -programmableWorker->rawX + (programmableWorker->xRenderPosWhenSelected);
 				tempYOffset = -programmableWorker->rawY  + (programmableWorker->yRenderPosWhenSelected);
@@ -1606,17 +1726,16 @@ void updateGameObjects(GameObjectData *gameObjectData, AudioData *audioData, Gra
 			getCenterOfRect(gameObjectData->hive.rect), HIVE_SHELTER_RADIUS)){
 
 				blitGameObject(programmableWorker->rect,
-							 	graphicsData,
-							 	graphicsData->bee->graphic[programmableWorker->currentGraphicIndex +
-        	           			((programmableWorker->cargo < SUGAR_VALUE_OF_ICECREAM && programmableWorker->cargo > 0) ? CARRYING_FLOWER_INDEX_OFFSET :
-        	           			((programmableWorker->cargo == SUGAR_VALUE_OF_ICECREAM) ? CARRYING_ICECREAM_INDEX_OFFSET : 0))],
-							 	DEGREESINCIRCLE-(programmableWorker->heading * RADIANSTODEGREES),
-							 	NULL,
-							 	SDL_FLIP_NONE);
+						graphicsData,
+						graphicsData->bee->graphic[programmableWorker->currentGraphicIndex +
+						((programmableWorker->cargo < SUGAR_VALUE_OF_ICECREAM && programmableWorker->cargo > 0) ? CARRYING_FLOWER_INDEX_OFFSET :
+						((programmableWorker->cargo == SUGAR_VALUE_OF_ICECREAM) ? CARRYING_ICECREAM_INDEX_OFFSET : 0))],
+						DEGREESINCIRCLE-(programmableWorker->heading * RADIANSTODEGREES),
+						NULL,
+						SDL_FLIP_NONE);
 			}else{
 				gameObjectData->hive.bees_taking_shelter++;
 			}
-
 			i++;
 		}
 	}
