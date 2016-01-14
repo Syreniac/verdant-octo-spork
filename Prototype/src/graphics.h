@@ -41,10 +41,11 @@ struct GraphicsData{
   SDL_Texture *nodeTexture[3];
   SDL_Texture *hiveTexture;
   SDL_Texture *treeStumpTexture;
-  SDL_Texture *grassTexture;
+  /*SDL_Texture *grassTexture;*/
   TTF_Font *fonts[2];
   SDL_Texture *droppedIceCreamTexture;
   SDL_Texture *meltedIceCreamTexture;
+  struct Grass *grass;
   struct Shelter *shelter;
   struct Bee *bee;
   struct Rainy *rainy;
@@ -52,6 +53,10 @@ struct GraphicsData{
   struct RoamingArachnid *roamingArachnid;
   struct UIEle *uiEle;
   SDL_Texture *mainMenuImage;
+};
+
+struct Grass{
+	SDL_Texture *graphic[2];
 };
 
 struct Shelter{

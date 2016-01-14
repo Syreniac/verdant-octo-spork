@@ -1296,7 +1296,8 @@ void updateGameObjects(GameObjectData *gameObjectData, AudioData *audioData, Gra
 					return;
 				}
 			}else{
-				blitTiledBackground(graphicsData, graphicsData->grassTexture);
+				blitTiledBackground(graphicsData, graphicsData->grass->graphic[SUMMER_INDEX +
+		((gameObjectData->hive.winterCountdown < AUTUMN_THRESHOLD) ? 1 : 0)]);
 				gameObjectData->weather.present_weather = Cloud;
 				/*AFTER A SHORT DELAY SET TREES BACK TO SUMMER TREES AND OTHER SUMMER STUFF*/
 				printf("%d\n", gameObjectData->hive.delayBeforeSummer);
@@ -1310,7 +1311,8 @@ void updateGameObjects(GameObjectData *gameObjectData, AudioData *audioData, Gra
 			}
 
 		}else{
-			blitTiledBackground(graphicsData, graphicsData->grassTexture);
+			blitTiledBackground(graphicsData, graphicsData->grass->graphic[SUMMER_INDEX +
+		((gameObjectData->hive.winterCountdown < AUTUMN_THRESHOLD) ? 1 : 0)]);
 		}
 	}else if(gameObjectData->hive.winterCountdown < AUTUMN_THRESHOLD){
 		if(gameObjectData->tree->currentGraphicIndex != AUTUMN_INDEX){
@@ -1318,11 +1320,13 @@ void updateGameObjects(GameObjectData *gameObjectData, AudioData *audioData, Gra
 		}
 		gameObjectData->hive.scoreBeforeWinter = 0;
 		gameObjectData->tree->currentGraphicIndex = AUTUMN_INDEX;
-		blitTiledBackground(graphicsData, graphicsData->grassTexture);
+		blitTiledBackground(graphicsData, graphicsData->grass->graphic[SUMMER_INDEX +
+		((gameObjectData->hive.winterCountdown < AUTUMN_THRESHOLD) ? 1 : 0)]);
 	}else{
 		gameObjectData->hive.scoreBeforeWinter = 0;
 		gameObjectData->tree->currentGraphicIndex = SUMMER_INDEX;
-		blitTiledBackground(graphicsData, graphicsData->grassTexture);
+		blitTiledBackground(graphicsData, graphicsData->grass->graphic[SUMMER_INDEX +
+		((gameObjectData->hive.winterCountdown < AUTUMN_THRESHOLD) ? 1 : 0)]);
 	}
 
 	}else{/*end of it not game over*/

@@ -86,8 +86,11 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
 
   memset(&gameData.gameObjectData.droppedIceCream->rect.x,256,sizeof(int));
   memset(&gameData.gameObjectData.droppedIceCream->rect.y,256,sizeof(int));
+  
+  gameData.graphicsData.grass = malloc(sizeof(struct Shelter));
 
-  gameData.graphicsData.grassTexture = loadTextureFromFile("images/grass/grass4.bmp",&gameData.graphicsData, 0);
+  gameData.graphicsData.grass->graphic[SUMMER_INDEX] = loadTextureFromFile("images/grass/grass4.bmp",&gameData.graphicsData, 0);
+  gameData.graphicsData.grass->graphic[AUTUMN_INDEX] = loadTextureFromFile("images/grass/autumnGrass4.bmp", &gameData.graphicsData, 0);
   gameData.graphicsData.treeStumpTexture = loadTextureFromFile("images/stump.bmp",&gameData.graphicsData, 1);
   gameData.graphicsData.nodeTexture[0] = loadTextureFromFile("images/blueFlower.bmp",
 														                                 &gameData.graphicsData, 1);

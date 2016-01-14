@@ -1037,10 +1037,12 @@ int UIAction_Minimap(UI_Action *action, UIData *uiData){
 		sUIAction_Minimap_DrawGameObject(action,graphicsData,&gameObjectData->roamingSpider->rect);
 		SDL_SetRenderDrawColor(graphicsData->renderer,255,255,255,255);
 		sUIAction_Minimap_DrawGameObject(action, graphicsData,&gameObjectData->iceCreamPerson->rect);
+		
 		if(gameObjectData->droppedIceCream->dropped){
 			SDL_SetRenderDrawColor(graphicsData->renderer,255,0,0,255);
 			sUIAction_Minimap_DrawGameObject(action, graphicsData,&gameObjectData->droppedIceCream->rect);
 		}
+		
 		SDL_SetRenderDrawColor(graphicsData->renderer,255,255,255,255);
 		rect.x = (double)-graphicsData->navigationOffset.x / X_SIZE_OF_WORLD * action->element->rect.w + action->element->rect.x;
 		rect.y = (double)-graphicsData->navigationOffset.y / Y_SIZE_OF_WORLD * action->element->rect.h + action->element->rect.y;
