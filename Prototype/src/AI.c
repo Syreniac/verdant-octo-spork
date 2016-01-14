@@ -1,6 +1,32 @@
 #include "AI.h"
 
 static void resetBlockFunctionGlobals(BlockFunctionGlobals *globals);
+static int doIntCompWithCharOperator(int a, int b, char op);
+static int doDoubleCompWithCharOperator(double a, double b, char op);
+
+static int doIntCompWithCharOperator(int a, int b, char op){
+  switch(op){
+    case '<':
+      return a < b;
+    case '>':
+      return a > b;
+    case '=':
+      return a == b;
+  }
+  assert(op != op);
+}
+
+static int doDoubleCompWithCharOperator(double a, double b, char op){
+  switch(op){
+    case '<':
+      return a < b;
+    case '>':
+      return a > b;
+    case '=':
+      return a == b;
+  }
+  assert(op != op);
+}
 
 /* All blockFunctions must:
   - Return either integers between 0 and 2.
@@ -20,6 +46,13 @@ FILE *fopenAndVerify(char *file_name, char *permission){
   }
 
   return file;
+}
+
+int blockFunction_IfCargo(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
+  if(doIntCompWithCharOperator(programmableWorker->cargo,arguments->integers[0],arguments->characters[0])){
+    return 1;
+  }
+  return 2;
 }
 
 int blockFunction_CountNearFlowers(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
@@ -137,6 +170,9 @@ int blockFunction_CoinFlip(BlockFunctionGlobals *globals, BlockFunctionArgs *arg
 }
 
 int blockFunction_Void(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
+  if(arguments->numOfChars > 0 && arguments->numOfInts > 0){
+    printf("test: %d\n",doIntCompWithCharOperator(1,arguments->integers[0],arguments->characters[0]));
+  }
 	return(1);
 }
 
@@ -439,6 +475,9 @@ blockFunction_WrappedFunction getBlockFunctionByName(char *blockFunctionName){
   if(strcmp(blockFunctionName,"CountNearFlowers") == 0){
     return &blockFunction_CountNearFlowers;
   }
+  if(strcmp(blockFunctionName,"IfCargo") == 0){
+    return &blockFunction_IfCargo;
+  }
   printf("ERROR: Unrecognised function name: \"%s\".\n Substituting a VOID function.\n",blockFunctionName);
   return &blockFunction_Void;
 }
@@ -545,7 +584,7 @@ BlockFunction createAIBlockFunctionFromTokens(BlockFunctionRoot *blockFunctionRo
 	int read_int;
 	float read_float;
 	char read_char;
-	int read_position;
+	int read_position = 0;
 	int read_add;
 	int read_count;
 	blockFunction.primary = NULL;
@@ -573,8 +612,15 @@ BlockFunction createAIBlockFunctionFromTokens(BlockFunctionRoot *blockFunctionRo
 			read_position = 12;
 			blockFunction.arguments.numOfInts = 0;
 			blockFunction.arguments.integers = NULL;
-			while((sscanf(&tokensToUse[i][read_position],"%d%n",&read_int,&read_add)) != 0 && read_add != 0){
-				read_position += read_add+1;
+      int ii = 0;
+      while(ii < strlen(tokensToUse[i])){
+        printf("%d%c",ii,tokensToUse[i][ii]);
+        ii++;
+      }
+      printf("\n");
+			while((sscanf(&tokensToUse[i][read_position],"%d%n",&read_int,&read_add)) != 0 && read_add != 0 && read_position < strlen(tokensToUse[i])){
+        printf("adding integer %d %d\n",read_position,read_int);
+  			read_position += read_add+1;
 				blockFunction.arguments.numOfInts++;
 				blockFunction.arguments.integers = realloc(blockFunction.arguments.integers,
 				                                           blockFunction.arguments.numOfInts * sizeof(int));
@@ -593,8 +639,22 @@ BlockFunction createAIBlockFunctionFromTokens(BlockFunctionRoot *blockFunctionRo
 				blockFunction.arguments.floats[blockFunction.arguments.numOfFloats-1] = read_float;
 			}
 		}
+		else if(strncmp(tokensToUse[i],"\tchars = ",8) == 0){
+			read_position = 9;
+			blockFunction.arguments.numOfChars = 0;
+			blockFunction.arguments.characters = NULL;
+			while(tokensToUse[i][read_position] != '\n' && tokensToUse[i][read_position] != '\0' && tokensToUse[i][read_position] != EOF){
+          read_char = tokensToUse[i][read_position];
+          read_position += 1;
+          blockFunction.arguments.numOfChars++;
+          blockFunction.arguments.characters = realloc(blockFunction.arguments.characters,
+                                                   blockFunction.arguments.numOfChars * sizeof(char));
+          blockFunction.arguments.characters[blockFunction.arguments.numOfChars-1] = read_char;
+			}
+		}
 		i++;
 	}
+  printf("-----------\n");
 	return blockFunction;
 }
 
@@ -614,7 +674,7 @@ void nullifyBlockFunctionRoot(BlockFunctionRoot *root, GameObjectData *gameObjec
 			root->blockFunctions[i].arguments.floats = NULL;
 			root->blockFunctions[i].arguments.numOfFloats = 0;
 		}
-		if(root->blockFunctions[i].arguments.numOfInts != 0){
+		if(root->blockFunctions[i].arguments.numOfChars != 0){
 			free(root->blockFunctions[i].arguments.characters);
 			root->blockFunctions[i].arguments.characters = NULL;
 			root->blockFunctions[i].arguments.numOfChars = 0;
@@ -687,16 +747,21 @@ int testBlockFunctionRootForStart(BlockFunctionRoot *root){
 	return 0;
 }
 
-static void makeAIBlockTemplate(AIData *aiData, char name[50], int numOfArguments, BlockFunctionArgumentType *arguments){
+static void makeAIBlockTemplate(AIData *aiData, char name[50], int r, int g, int b, int numOfArguments, ...){
+  va_list vargs;
+  va_start(vargs,numOfArguments);
   BlockFunctionTemplate *template = malloc(sizeof(BlockFunctionTemplate));
   BlockFunctionTemplate *previous = aiData->templates;
   int i = 0;
+  template->red = r;
+  template->green = g;
+  template->blue = b;
   strcpy(template->name,name);
   if(numOfArguments != 0){
     template->arguments = malloc(sizeof(BlockFunctionArgumentType) * numOfArguments);
     template->numOfArguments = numOfArguments;
     while(i < numOfArguments){
-      template->arguments[i] = arguments[i];
+      template->arguments[i] = va_arg(vargs,BlockFunctionArgumentType);
       i++;
     }
   }
@@ -714,6 +779,7 @@ static void makeAIBlockTemplate(AIData *aiData, char name[50], int numOfArgument
     }
     previous->next = template;
   }
+  va_end(vargs);
 }
 
 AIData initAIData(void){
@@ -735,35 +801,40 @@ AIData initAIData(void){
   		nullifyBlockFunctionRoot(&aiData.blockFunctionRoots[0],NULL);
   	}
   }
+  #define ACTION_BLOCK_COLOR 0xFF,0x80,0x00
+  #define WAIT_BLOCK_COLOR 0x04,0x5F,0xB4
+  #define COUNT_BLOCK_COLOR 0x5F,0xB4,0x04
+  #define IF_BLOCK_COLOR 248,221,35
   aiData.templates = NULL;
-	makeAIBlockTemplate(&aiData,"Void",1,arguments);
-	makeAIBlockTemplate(&aiData,"IfIdle",2,arguments);
-	makeAIBlockTemplate(&aiData,"IfReturning",2,arguments);
-	makeAIBlockTemplate(&aiData,"IfHasCargo",2,arguments);
-	makeAIBlockTemplate(&aiData,"IfOutsideBounds",2,arguments);
-	makeAIBlockTemplate(&aiData,"IfNearHive",2,arguments);
-	makeAIBlockTemplate(&aiData,"SetHeadingRandomly",1,arguments);
-	makeAIBlockTemplate(&aiData,"ReturnToHive",1,arguments);
-	makeAIBlockTemplate(&aiData,"RememberCurrentLocation",1,arguments);
-	makeAIBlockTemplate(&aiData,"GoToStoredLocation",2,arguments);
-	makeAIBlockTemplate(&aiData,"ForgetStoredLocation",1,arguments);
-	makeAIBlockTemplate(&aiData,"IfNodeFound",2,arguments);
-	makeAIBlockTemplate(&aiData,"HeadToFoundNode",1,arguments);
-	makeAIBlockTemplate(&aiData,"HasStoredLocation",2,arguments);
-  makeAIBlockTemplate(&aiData,"IfNearOtherWorker",2,arguments);
-  makeAIBlockTemplate(&aiData,"CoinFlip",2,arguments);
-  makeAIBlockTemplate(&aiData,"OneInAHundred",2,arguments);
-  makeAIBlockTemplate(&aiData,"Sleep",1,arguments);
-  makeAIBlockTemplate(&aiData,"CountNearWorkers",1,arguments);
-  makeAIBlockTemplate(&aiData,"IfCountZero",2,arguments);
-  makeAIBlockTemplate(&aiData,"LoadCount",1,arguments);
-  makeAIBlockTemplate(&aiData,"SaveCount",1,arguments);
-  makeAIBlockTemplate(&aiData,"LoadCountFromOther",1,arguments);
-  makeAIBlockTemplate(&aiData,"SaveCountFromOther",1,arguments);
-  makeAIBlockTemplate(&aiData,"PickNearbyWorker",2,arguments);
-  makeAIBlockTemplate(&aiData,"IfGreaterThanSaved",2,arguments);
-  makeAIBlockTemplate(&aiData,"CopyPointFromSelected",1,arguments);
-  makeAIBlockTemplate(&aiData,"CountNearFlowers",1,arguments);
+	makeAIBlockTemplate(&aiData,"Void",255,255,255,3,BF_THEN,BF_COMPARISON,BF_DISTANCE);
+	makeAIBlockTemplate(&aiData,"IfIdle",IF_BLOCK_COLOR,2,BF_PRIMARY,BF_SECONDARY);
+	makeAIBlockTemplate(&aiData,"IfReturning",IF_BLOCK_COLOR,2,BF_PRIMARY, BF_SECONDARY);
+	makeAIBlockTemplate(&aiData,"IfHasCargo",IF_BLOCK_COLOR,2,BF_PRIMARY, BF_SECONDARY);
+	makeAIBlockTemplate(&aiData,"IfOutsideBounds",IF_BLOCK_COLOR,2,BF_PRIMARY, BF_SECONDARY);
+	makeAIBlockTemplate(&aiData,"IfNearHive",IF_BLOCK_COLOR,2,BF_PRIMARY, BF_SECONDARY);
+	makeAIBlockTemplate(&aiData,"SetHeadingRandomly",ACTION_BLOCK_COLOR,1,BF_THEN);
+	makeAIBlockTemplate(&aiData,"ReturnToHive",ACTION_BLOCK_COLOR,1,BF_THEN);
+	makeAIBlockTemplate(&aiData,"RememberCurrentLocation",ACTION_BLOCK_COLOR,1,BF_THEN);
+	makeAIBlockTemplate(&aiData,"GoToStoredLocation",ACTION_BLOCK_COLOR,2,BF_PRIMARY, BF_SECONDARY);
+	makeAIBlockTemplate(&aiData,"ForgetStoredLocation",ACTION_BLOCK_COLOR,1,BF_THEN);
+	makeAIBlockTemplate(&aiData,"IfNodeFound",IF_BLOCK_COLOR,2,BF_PRIMARY, BF_SECONDARY);
+	makeAIBlockTemplate(&aiData,"HeadToFoundNode",ACTION_BLOCK_COLOR,1,BF_THEN);
+	makeAIBlockTemplate(&aiData,"HasStoredLocation",IF_BLOCK_COLOR,2,BF_PRIMARY, BF_SECONDARY);
+  makeAIBlockTemplate(&aiData,"IfNearOtherWorker",IF_BLOCK_COLOR,2,BF_PRIMARY, BF_SECONDARY);
+  makeAIBlockTemplate(&aiData,"CoinFlip",IF_BLOCK_COLOR,2,BF_PRIMARY, BF_SECONDARY);
+  makeAIBlockTemplate(&aiData,"OneInAHundred",IF_BLOCK_COLOR,2,BF_PRIMARY, BF_SECONDARY);
+  makeAIBlockTemplate(&aiData,"Sleep",WAIT_BLOCK_COLOR,1,BF_THEN);
+  makeAIBlockTemplate(&aiData,"CountNearWorkers",COUNT_BLOCK_COLOR,1,BF_THEN);
+  makeAIBlockTemplate(&aiData,"IfCountZero",IF_BLOCK_COLOR,2,BF_PRIMARY, BF_SECONDARY);
+  makeAIBlockTemplate(&aiData,"LoadCount",COUNT_BLOCK_COLOR,1,BF_THEN);
+  makeAIBlockTemplate(&aiData,"SaveCount",COUNT_BLOCK_COLOR,1,BF_THEN);
+  makeAIBlockTemplate(&aiData,"LoadCountFromOther",COUNT_BLOCK_COLOR,1,BF_THEN);
+  makeAIBlockTemplate(&aiData,"SaveCountFromOther",COUNT_BLOCK_COLOR,1,BF_THEN);
+  makeAIBlockTemplate(&aiData,"PickNearbyWorker",IF_BLOCK_COLOR,2,BF_PRIMARY, BF_SECONDARY);
+  makeAIBlockTemplate(&aiData,"IfGreaterThanSaved",COUNT_BLOCK_COLOR,2,BF_PRIMARY, BF_SECONDARY);
+  makeAIBlockTemplate(&aiData,"CopyPointFromSelected",ACTION_BLOCK_COLOR,1,BF_THEN);
+  makeAIBlockTemplate(&aiData,"CountNearFlowers",ACTION_BLOCK_COLOR,1,BF_THEN);
+  makeAIBlockTemplate(&aiData,"IfCargo",IF_BLOCK_COLOR,4,BF_PRIMARY,BF_SECONDARY,BF_COMPARISON,BF_CARGO_QUANTITY);
 
 	return aiData;
 }

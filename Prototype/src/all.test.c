@@ -217,7 +217,7 @@ START_TEST(core_getAngleBetweenRects){
 END_TEST
 
 
-/* Test passes! */
+/* Test passes!*/
 START_TEST(core_getCenterOfRect){
     SDL_Rect rect;
     SDL_Point point;
@@ -230,7 +230,7 @@ START_TEST(core_getCenterOfRect){
   }
 END_TEST
 
-/* Test passes! tbc*/
+/* Test passes!*/
 START_TEST(core_getRectFromInvRect){
    SDL_Window *window;
    SDL_Rect rect;
@@ -254,12 +254,13 @@ START_TEST(core_getRectFromInvRect){
    fail_unless(rect.w == (640-1), "getRectFromInvRect function test failed3 %d", rect.w);
    fail_unless(rect.h == (480-3), "getRectFromInvRect function test failed4 %d", rect.h);
 
+   SDL_DestroyWindow(window);
 
 
   }
 END_TEST
 
-/* Test passes! tbc*/
+/* Test passes!*/
 START_TEST(core_getRectFromPercRect){
    SDL_Window *window;
    SDL_Rect rect;
@@ -283,11 +284,12 @@ START_TEST(core_getRectFromPercRect){
    fail_unless(rect.w == 640*0.3, "getRectFromPercRect function test failed");
    fail_unless(rect.h == 480*0.5, "getRectFromPercRect function test failed");
 
+   SDL_DestroyWindow(window);
 
   }
 END_TEST
 
-/* Test passes! tbc*/
+/* Test passes!*/
 START_TEST(core_fileToString){
 /* testing method: generate a new text file with specified content, read the content, and delete the file*/
    FILE *fp;
@@ -308,7 +310,7 @@ START_TEST(core_fileToString){
   }
 END_TEST
 
-/* Test passes! tbc*/
+/* Test passes!*/
 START_TEST(core_getPointFromInvPoint){
    SDL_Window *window;
    SDL_Point point;
@@ -327,11 +329,12 @@ START_TEST(core_getPointFromInvPoint){
    point = getPointFromInvPoint(window, x, y);
    fail_unless(point.x == -120+640, "getPointFromInvPoint function test failed");
    fail_unless(point.y == -150+480, "getPointFromInvPoint function test failed");
+   SDL_DestroyWindow(window);
 
   }
 END_TEST
 
-/* Test passes! tbc*/
+/* Test passes!*/
 START_TEST(core_getPointFromPerc){
 
    SDL_Window *window;
@@ -352,10 +355,12 @@ START_TEST(core_getPointFromPerc){
    fail_unless(point.x == 640*0.2, "getPointFromPerc function test failed");
    fail_unless(point.y == 480*0.3, "getPointFromPerc function test failed");
 
+   SDL_DestroyWindow(window);
+
    }
 END_TEST
 
-/* Test passes! tbc*/
+/* Test passes!*/
 START_TEST(core_shrinkRectToFit){
     SDL_Rect rectA;
     SDL_Rect rectB;
@@ -389,28 +394,92 @@ END_TEST
 
 /* Test segfaults. Matt's input: "SDL_Events are weird." */
 /* From controls.h */
+
+/* Test passes!*/
 START_TEST(test_handleEvent){
     SDL_Event event;
-    /* see startGame in game.c */
     GameData gameData;
-    InitData initData;
+    SDL_Init(SDL_INIT_VIDEO);
+    /* see startGame in game.c */
 
-    initData = initialise();
-    gameData.graphicsData = initData.graphicsData;
-    gameData.audioData = initData.audioData;
-    gameData.uiData = initData.uiData;
-    gameData.gameObjectData = *initData.uiData.gameObjectData;
-    initControlData(&gameData.controlsData);
+    event.type = SDL_KEYDOWN;
+    event.key.type = SDL_KEYDOWN;
+    event.key.state = SDL_PRESSED;
 
-    event.type = SDL_MOUSEMOTION;
-    /* int handleEvent(SDL_Event *event, GameObjectData *gameObjectData, UIData *uiData, ControlsData *controlsData, GraphicsData *graphicsData); */
-    /*fail_unless(handleEvent(&event,&gameData.gameObjectData,&gameData.uiData,&gameData.controlsData, &gameData.graphicsData) == 0, "isPointInRect function test failed!");*/
+    fail_unless(handleEvent(&event,&gameData.gameObjectData,&gameData.uiData,&gameData.controlsData, &gameData.graphicsData) == 1);
+
+    event.key.type = 0;
+    event.key.state = 0;
+    event.type = SDL_QUIT;
+    event.quit.type = SDL_QUIT;
+
+    fail_unless(handleEvent(&event,&gameData.gameObjectData,&gameData.uiData,&gameData.controlsData, &gameData.graphicsData) == 0);
+    SDL_Quit();
   }
 END_TEST
 
+/* Test passes!*/
+START_TEST(test_keydown){
+    SDL_Event event;
+    GameData gameData;
+    SDL_Init(SDL_INIT_VIDEO);
+    /* see startGame in game.c */
+
+    event.type = SDL_KEYDOWN;
+    event.key.type = SDL_KEYDOWN;
+    event.key.state = SDL_PRESSED;
+
+    fail_unless(keydown(&gameData.controlsData, &gameData.gameObjectData,&gameData.graphicsData, &gameData.uiData,&event) == 1);
+    SDL_Quit();
+
+  }
+END_TEST
+
+/* Test passes!*/
+START_TEST(test_keyup){
+    SDL_Event event;
+    GameData gameData;
+    SDL_Init(SDL_INIT_VIDEO);
+    /* see startGame in game.c */
+
+    event.type = SDL_KEYUP;
+    event.key.type = SDL_KEYUP;
+    event.key.state = SDL_RELEASED;
+
+    fail_unless(keyup(&gameData.controlsData, &gameData.gameObjectData,&gameData.uiData,&event) == 1);
+    SDL_Quit();
+
+  }
+END_TEST
+
+START_TEST(test_panScreen){
+    SDL_Event event;
+    GameData gameData;
+    int delta_t = 1;
+    SDL_Init(SDL_INIT_VIDEO);
+    /* see startGame in game.c */
 
 
+    /*fail if cannot panScreen*/
+    panScreen(&gameData.graphicsData, &gameData.controlsData, delta_t);
+    SDL_Quit();
 
+  }
+END_TEST
+
+START_TEST(test_initControlData){
+    SDL_Event event;
+    GameData gameData;
+    SDL_Init(SDL_INIT_VIDEO);
+    /* see startGame in game.c */
+
+    initControlData(&gameData.controlsData);
+
+    /*fail if cannot perform the function initControlData*/
+    SDL_Quit();
+
+  }
+END_TEST
 
 
 
@@ -466,6 +535,10 @@ Suite *makeSuiteForControls(void)
 
   /* Adds tests to the 'core' testcase. */
   tcase_add_test(core, test_handleEvent);
+  tcase_add_test(core, test_keydown);
+  tcase_add_test(core, test_keyup);
+  tcase_add_test(core, test_panScreen);
+  tcase_add_test(core, test_initControlData);
 
   /* Adds tc_core to the testcases in the suite. */
   suite_add_tcase(controls, core);
@@ -485,7 +558,18 @@ int main(void)
 
   /* Adds suites into theRunner's list of suites to run. */
   srunner_add_suite (theRunner, makeSuiteForGeneric());
+/*  srunner_add_suite (theRunner, makeSuiteForAI());
+  srunner_add_suite (theRunner, makeSuiteForAnnouncements());
+  srunner_add_suite (theRunner, makeSuiteForAudio());
+  srunner_add_suite (theRunner, makeSuiteForConfiguration());*/
   srunner_add_suite (theRunner, makeSuiteForControls());
+/*  srunner_add_suite (theRunner, makeSuiteForGame());
+  srunner_add_suite (theRunner, makeSuiteForGame_objects());
+  srunner_add_suite (theRunner, makeSuiteForGraphics());
+  srunner_add_suite (theRunner, makeSuiteForInit());
+  srunner_add_suite (theRunner, makeSuiteForMain());
+  srunner_add_suite (theRunner, makeSuiteForUI());
+  srunner_add_suite (theRunner, makeSuiteForWorld_generation());*/
 
   /* Runs all the suites in theRunner's list of suites.
    * 'CK_VERBOSE' prints even passes while 'CK_NORMAL' prints just failures. */

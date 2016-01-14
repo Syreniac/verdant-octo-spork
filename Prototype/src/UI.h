@@ -122,7 +122,7 @@ void UIConfigure_LeftClickAnywhere(UI_Element *element, UI_Action *action);
 void UIConfigure_RightClickAnywhere(UI_Element *element, UI_Action *action);
 void UIConfigure_LeftReleaseAnywhere(UI_Element *element, UI_Action *action);
 void UIConfigure_RightReleaseAnywhere(UI_Element *element, UI_Action *action);
-void UIConfigure_Counter(UI_Element *element, UI_Action *action, enum Response response);
+void UIConfigure_Counter(UI_Element *element, UI_Action *action, int maximum, int num_of_companions, ...);
 void UIConfigure_ResourceCounter(UI_Element *element, UI_Action *action, int num_of_companions, ...);
 void UIConfigure_DaysCounter(UI_Element *element, UI_Action *action, int num_of_companions, ...);
 void UIConfigure_YearsCounter(UI_Element *element, UI_Action *action, int num_of_companions, ...);
@@ -179,7 +179,11 @@ void UIConfigure_SetCellToSpawn(UI_Element *element, UI_Action *action, HiveCell
 void UIConfigure_FillSubrect(UI_Element *element, UI_Action *action, int x, int y, int w, int h, int red, int green, int blue);
 void UIConfigure_LeftClickSubrect(UI_Element *element, UI_Action *action, int x, int y, int w, int h);
 void UIConfigure_RightClickSubrect(UI_Element *element, UI_Action *action, int x, int y, int w, int h);
+void UIConfigure_DisplayStringSubrect(UI_Element *element, UI_Action *action, char *string, int font, int x, int y, int w, int h);
 
+void UIConfigure_FillAndBorderSubrect(UI_Element *element, UI_Action *action, int x, int y, int w, int h, int red, int green, int blue,int bred, int bgreen, int bblue);
+void UIConfigure_StringCollection(UI_Element *element, UI_Action *action, int num_of_companions, int num_of_strings, ...);
+void UIConfigure_DisplayNumberSubrect(UI_Element *element, UI_Action *action, int number, int font, int x, int y, int w, int h);
 void UITrigger_Bind(UI_Action *action, UI_Action *target, int state_from, int state_to);
 
 void UIElement_Free(UI_Element *element);
@@ -194,7 +198,7 @@ void UIRoot_Destroy(UIData *uiData);
 void UIRoot_Pack(UIData *uiData, GraphicsData *graphicsData);
 void UIRoot_ExecuteUpwards(UIData *uiData, enum Response response, int stopAtFirst);
 
-UI_Element *makeAIBlock(int x_offset, int y_offset, char *aiString, UI_Element *parent);
+UI_Element *makeAIBlock(int x_offset, int y_offset, BlockFunctionTemplate *template, UI_Element *parent);
 UI_Element *makeStartBlock(int x_offset, int y_offset, UI_Element *parent);
 UI_Element *makeAIResetButton(int x_offset, int y_offset, UI_Element *parent);
 UI_Element *makeAITemplateScrollList(int x_offset, int y_offset, AIData *aiData, UI_Element *parent, UI_Element *blockHolder);

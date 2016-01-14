@@ -89,8 +89,10 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
 
   gameData.graphicsData.grassTexture = loadTextureFromFile("images/grass/grass4.bmp",&gameData.graphicsData, 0);
   gameData.graphicsData.treeStumpTexture = loadTextureFromFile("images/stump.bmp",&gameData.graphicsData, 1);
-  gameData.graphicsData.nodeTexture = loadTextureFromFile("images/blueFlower.bmp",
-														  &gameData.graphicsData, 1);
+  gameData.graphicsData.nodeTexture[0] = loadTextureFromFile("images/blueFlower.bmp",
+														                                 &gameData.graphicsData, 1);
+  gameData.graphicsData.nodeTexture[1] = loadTextureFromFile("images/redFlower.bmp",&gameData.graphicsData, 1);
+  gameData.graphicsData.nodeTexture[2] = loadTextureFromFile("images/yellowFlower.bmp",&gameData.graphicsData, 1);
 
   gameData.graphicsData.shelter = malloc(sizeof(struct Shelter));
 
@@ -251,18 +253,16 @@ static void createGameUI(GameData *gameData){
   SDL_GetCurrentDisplayMode(0, &dm);
 
   /* top information bar */
-  element = UIElement_Create(0,0,dm.w,31,3);
-  printf("top information bar is %p\n",element);
+  element = UIElement_Create(-1,0,dm.w+1,TOP_BAR_HEIGHT,4);
   UIConfigure_FillAndBorderRect(element,&element->actions[0],248,221,35,0,0,0,FILLRECT);
-
   UIConfigure_DisplayString(element, &element->actions[1], " ",0,UISTRING_ALIGN_LEFT);
-
   UIConfigure_GetAnnouncement(element, &element->actions[2], &element->actions[1]);
+  UIConfigure_PercOffsetRect(element, &element->actions[3], 0.0, 0.0, 1.0, 0.0, -1, 0, 100, 31,0);
   UIElement_Reparent(element,gameData->uiData.root);
 
 
     /*game Over box*/
-  element = UIElement_Create(0,0,win_x/2,win_y/2,6);
+  /*element = UIElement_Create(0,0,win_x/2,win_y/2,6);
   printf("game over box is %p\n",element);
   UIConfigure_Auto(element, &element->actions[0], GAME_OVER);
     UITrigger_Bind(&element->actions[0],&element->actions[0],-1,0);
@@ -284,7 +284,7 @@ static void createGameUI(GameData *gameData){
   	UITrigger_Bind(&element->actions[4],&element->actions[0],2,1);
   	UITrigger_Bind(&element->actions[4],&element->actions[1],2,1);
   UIConfigure_PercOffsetRect(element, &element->actions[5], 0.25, 0.25, 0.75,0.75, 0,0,0,0,0);
-  UIElement_Reparent(element,gameData->uiData.root);
+  UIElement_Reparent(element,gameData->uiData.root);*/
 
 
   /* Mute button */
@@ -304,21 +304,22 @@ static void createGameUI(GameData *gameData){
 
 
       /*objectInfoDisplay box*/
-  element = UIElement_Create(0,31,250,52,6);
-  printf("object info display box is %p\n",element);
+  element = UIElement_Create(49,30,250,52,8);
   UIConfigure_Auto(element, &element->actions[0], OBJECT_DISPLAY);
     UITrigger_Bind(&element->actions[0],&element->actions[0],-1,0);
     UITrigger_Bind(&element->actions[0],&element->actions[1],0,2);
     UITrigger_Bind(&element->actions[0],&element->actions[2],-1,0);
     UITrigger_Bind(&element->actions[0],&element->actions[3],-1,0);
+    UITrigger_Bind(&element->actions[0],&element->actions[6],-1,0);
 	  quickSetStatus(&element->actions[0],0);
   UIConfigure_Auto(element, &element->actions[1], OBJECT_DISPLAY);
     UITrigger_Bind(&element->actions[1],&element->actions[0],0,2);
     UITrigger_Bind(&element->actions[1],&element->actions[1],1,0);
     UITrigger_Bind(&element->actions[1],&element->actions[2],0,1);
     UITrigger_Bind(&element->actions[1],&element->actions[3],0,1);
+    UITrigger_Bind(&element->actions[1],&element->actions[6],0,1);
   	quickSetStatus(&element->actions[1],1);
-  UIConfigure_FillAndBorderRect(element,&element->actions[2],248,221,35,255,255,255,FILLRECT);
+  UIConfigure_FillAndBorderRect(element,&element->actions[2],248,221,35,0,0,0,FILLRECT);
 	  quickSetStatus(&element->actions[2],0);
   UIConfigure_DisplayString(element, &element->actions[3]," ",0, UISTRING_ALIGN_CENTER);
 	  quickSetStatus(&element->actions[3],0);
@@ -326,155 +327,62 @@ static void createGameUI(GameData *gameData){
   	UITrigger_Bind(&element->actions[4],&element->actions[0],2,1);
   	UITrigger_Bind(&element->actions[4],&element->actions[1],2,1);
   UIConfigure_GetInfoDisplayString(element, &element->actions[5], &element->actions[3]);
+  UIConfigure_DisplayStringSubrect(element, &element->actions[6]," ",0,0,0,250,52);
+    quickSetStatus(&element->actions[6],0);
+  UIConfigure_GetObjectStatusString(element, &element->actions[7], &element->actions[6]);
   UIElement_Reparent(element,gameData->uiData.root);
-        /*objectInfoDisplay box - status*/
-  element = UIElement_Create(1,51,248,31,6);
-  printf("object info display box status label is %p\n",element);
-  UIConfigure_Auto(element, &element->actions[0], OBJECT_DISPLAY);
-    UITrigger_Bind(&element->actions[0],&element->actions[0],-1,0);
-    UITrigger_Bind(&element->actions[0],&element->actions[1],0,2);
-    UITrigger_Bind(&element->actions[0],&element->actions[2],-1,0);
-    UITrigger_Bind(&element->actions[0],&element->actions[3],-1,0);
-	  quickSetStatus(&element->actions[0],0);
-  UIConfigure_Auto(element, &element->actions[1], OBJECT_DISPLAY);
-    UITrigger_Bind(&element->actions[1],&element->actions[0],0,2);
-    UITrigger_Bind(&element->actions[1],&element->actions[1],1,0);
-    UITrigger_Bind(&element->actions[1],&element->actions[2],0,1);
-    UITrigger_Bind(&element->actions[1],&element->actions[3],0,1);
-  	quickSetStatus(&element->actions[1],1);
-  UIConfigure_FillAndBorderRect(element,&element->actions[2],248,221,35,248,221,35,FILLRECT);
-	  quickSetStatus(&element->actions[2],0);
-  UIConfigure_DisplayString(element, &element->actions[3]," ",0, UISTRING_ALIGN_LEFT);
-	  quickSetStatus(&element->actions[3],0);
-  UIConfigure_Auto(element,&element->actions[4],UPDATE);
-  	UITrigger_Bind(&element->actions[4],&element->actions[0],2,1);
-  	UITrigger_Bind(&element->actions[4],&element->actions[1],2,1);
-  UIConfigure_GetObjectStatusString(element, &element->actions[5], &element->actions[3]);
-  UIElement_Reparent(element,gameData->uiData.root);
-
 
     /*gameOverInformation*/
-  element = UIElement_Create(0,0,200,25,7);
-  printf("game over information is %p\n",element);
+  element = UIElement_Create(0,0,400,100,8);
   UIConfigure_Auto(element, &element->actions[0], GAME_OVER);
-    UITrigger_Bind(&element->actions[0],&element->actions[0],-1,0);
-    UITrigger_Bind(&element->actions[0],&element->actions[1],0,2);
-    UITrigger_Bind(&element->actions[0],&element->actions[2],-1,0);
-    UITrigger_Bind(&element->actions[0],&element->actions[3],-1,0);
-	  quickSetStatus(&element->actions[0],0);
   UIConfigure_Auto(element, &element->actions[1], GAME_OVER);
     UITrigger_Bind(&element->actions[1],&element->actions[0],0,2);
     UITrigger_Bind(&element->actions[1],&element->actions[1],1,0);
     UITrigger_Bind(&element->actions[1],&element->actions[2],0,1);
     UITrigger_Bind(&element->actions[1],&element->actions[3],0,1);
+    UITrigger_Bind(&element->actions[1],&element->actions[7],0,1);
   	quickSetStatus(&element->actions[1],1);
-  UIConfigure_FillAndBorderRect(element,&element->actions[2],255,255,255,255,255,255,FILLRECT);
+  UIConfigure_FillAndBorderRect(element,&element->actions[2],255,255,255,0,0,0,FILLRECT);
 	  quickSetStatus(&element->actions[2],0);
   UIConfigure_DisplayString(element, &element->actions[3]," ",0, UISTRING_ALIGN_CENTER);
 	  quickSetStatus(&element->actions[3],0);
   UIConfigure_Auto(element,&element->actions[4],UPDATE);
   	UITrigger_Bind(&element->actions[4],&element->actions[0],2,1);
   	UITrigger_Bind(&element->actions[4],&element->actions[1],2,1);
-   UIConfigure_PercPosition(element, &element->actions[5],0.5,1.0,-100,-315,0);
+  UIConfigure_PercPosition(element, &element->actions[5],0.5,0.5,-200,-50,0);
   UIConfigure_GetGameOverString(element, &element->actions[6], &element->actions[3]);
+  UIConfigure_DisplayStringSubrect(element, &element->actions[7],"PRESS < ENTER > TO PLAY AGAIN",0,0,50,400,50);
+    quickSetStatus(&element->actions[7],0);
   UIElement_Reparent(element,gameData->uiData.root);
 
-    /*gameOverInformation*/
- /* element = UIElement_Create(0,0,200,25,4);
-  UIConfigure_FillAndBorderRect(element,&element->actions[0],255,255,255,255,255,255,FILLRECT);
-  UIConfigure_PercPosition(element, &element->actions[1],0.5,1.0,-100,-315,0);
-  UIConfigure_DisplayString(element, &element->actions[2], "Hello",0,UISTRING_ALIGN_LEFT);
-  UIConfigure_GetGameOverString(element, &element->actions[3], &element->actions[2]);
-  UIElement_Reparent(element,gameData->uiData.root);*/
-
-
- /*press enter to restart (part of game over box)*/
-   element = UIElement_Create(0,0,200,25,6);
-   printf("enter to restart is %p\n",element);
-  UIConfigure_Auto(element, &element->actions[0], GAME_OVER);
-    UITrigger_Bind(&element->actions[0],&element->actions[0],-1,0);
-    UITrigger_Bind(&element->actions[0],&element->actions[1],0,2);
-    UITrigger_Bind(&element->actions[0],&element->actions[2],-1,0);
-    UITrigger_Bind(&element->actions[0],&element->actions[3],-1,0);
-	  element->actions[0].status = 0;
-	  element->actions[0].new_status = 0;
-  UIConfigure_Auto(element, &element->actions[1], GAME_OVER);
-    UITrigger_Bind(&element->actions[1],&element->actions[0],0,2);
-    UITrigger_Bind(&element->actions[1],&element->actions[1],1,0);
-    UITrigger_Bind(&element->actions[1],&element->actions[2],0,1);
-    UITrigger_Bind(&element->actions[1],&element->actions[3],0,1);
-	  element->actions[1].status = 1;
-	  element->actions[1].new_status = 1;
-  UIConfigure_FillAndBorderRect(element, &element->actions[2],255,255,255,255,255,255,FILLRECT);
-	  element->actions[2].status = 0;
-	  element->actions[2].new_status = 0;
-  UIConfigure_DisplayString(element, &element->actions[3],"PRESS < ENTER > TO PLAY AGAIN",0, UISTRING_ALIGN_CENTER);
-	  element->actions[3].status = 0;
-	  element->actions[3].new_status = 0;
-  UIConfigure_Auto(element,&element->actions[4],UPDATE);
-	UITrigger_Bind(&element->actions[4],&element->actions[0],2,1);
-	UITrigger_Bind(&element->actions[4],&element->actions[1],2,1);
-  UIConfigure_PercPosition(element, &element->actions[5], 0.5, 1.0, -100, -215,0);
-  UIElement_Reparent(element,gameData->uiData.root);
-
-
+  // 249,252,220
 
       /*YEARS label*/
-  element2 = UIElement_Create(0,0,YEARS_LABEL_WIDTH,TOP_BAR_HEIGHT,3);
-  printf("years label is %p\n",element2);
+  element2 = UIElement_Create(0,0,YEARS_LABEL_WIDTH+YEARS_COUNTER_WIDTH,TOP_BAR_HEIGHT+1,6);
+  UIConfigure_FillAndBorderRect(element2,&element2->actions[0],147,147,170,0,0,0,FILLRECT);
+  UIConfigure_DisplayStringSubrect(element2, &element2->actions[1],"YEARS SURVIVED:",0,0,0,YEARS_LABEL_WIDTH,TOP_BAR_HEIGHT-1);
+  UIConfigure_PercPosition(element2, &element2->actions[2],1.0,0.0,-(YEARS_LABEL_WIDTH + YEARS_COUNTER_WIDTH),0,0);
+  UIConfigure_FillSubrect(element2,&element2->actions[3],YEARS_LABEL_WIDTH,1,YEARS_COUNTER_WIDTH-1,TOP_BAR_HEIGHT-1,249,252,220);
+  UIConfigure_DisplayNumberSubrect(element2, &element2->actions[4], 0,0,YEARS_LABEL_WIDTH,1,YEARS_COUNTER_WIDTH-1,TOP_BAR_HEIGHT-1);
+  UIConfigure_YearsCounter(element2, &element2->actions[5],1,&element2->actions[4]);
+  UIElement_Reparent(element2,element);
+
+  element2 = UIElement_Create(0,0,SCORE_LABEL_WIDTH+SCORE_COUNTER_WIDTH-1,TOP_BAR_HEIGHT,6);
   UIConfigure_FillRect(element2,&element2->actions[0],147,147, 170);
-  UIConfigure_DisplayString(element2, &element2->actions[1],"  YEARS SURVIVED: ",0,UISTRING_ALIGN_LEFT);
-  UIConfigure_PercPosition(element2, &element2->actions[2],1.0,0.0,
-  -(YEARS_LABEL_WIDTH + YEARS_COUNTER_WIDTH),0,0);
+  UIConfigure_DisplayStringSubrect(element2, &element2->actions[1],"SUGAR:",0,0,0,SCORE_LABEL_WIDTH,TOP_BAR_HEIGHT-1);
+  UIConfigure_PercPosition(element2, &element2->actions[2],1.0,0.0,-(SCORE_COUNTER_WIDTH + SCORE_LABEL_WIDTH)-(YEARS_LABEL_WIDTH + YEARS_COUNTER_WIDTH),0,0);
+  UIConfigure_FillSubrect(element2,&element2->actions[3],SCORE_LABEL_WIDTH,1,SCORE_COUNTER_WIDTH-1,TOP_BAR_HEIGHT-1,249,252,220);
+  UIConfigure_DisplayNumberSubrect(element2, &element2->actions[4], 0,0,SCORE_LABEL_WIDTH,0,SCORE_COUNTER_WIDTH-1,TOP_BAR_HEIGHT-1);
+  UIConfigure_ResourceCounter(element2, &element2->actions[5],1,&element2->actions[4]);
   UIElement_Reparent(element2,element);
 
-
-  /* YEARS counter*/
-  element2 = UIElement_Create(0,0,YEARS_COUNTER_WIDTH,TOP_BAR_HEIGHT,4);
-  printf("years counter is %p\n",element2);
-  UIConfigure_FillRect(element2,&element2->actions[0],249,252,220);
-  UIConfigure_DisplayNumber(element2, &element2->actions[1], 0,0,UISTRING_ALIGN_CENTER);
-  UIConfigure_YearsCounter(element2, &element2->actions[2],1,&element2->actions[1]);
-  UIConfigure_PercPosition(element2, &element2->actions[3],1.0,0.0,-YEARS_COUNTER_WIDTH,0,0);
-  UIElement_Reparent(element2,element);
-
-  /*score counter label*/
-  element2 = UIElement_Create(0,0,SCORE_LABEL_WIDTH,TOP_BAR_HEIGHT,3);
-  printf("score counter label is %p\n",element2);
-  UIConfigure_FillRect(element2,&element2->actions[0],127,127, 150);
-  UIConfigure_DisplayString(element2, &element2->actions[1],"  SUGAR: ",0,UISTRING_ALIGN_LEFT);
-  UIConfigure_PercPosition(element2, &element2->actions[2],1.0,0.0,
-  -(SCORE_COUNTER_WIDTH + SCORE_LABEL_WIDTH)-(YEARS_LABEL_WIDTH + YEARS_COUNTER_WIDTH),0,0);
-  UIElement_Reparent(element2,element);
-
-
-  /* Score counter */
-  element2 = UIElement_Create(0,0,SCORE_COUNTER_WIDTH,TOP_BAR_HEIGHT,4);
-  printf("score counter is %p\n",element2);
-  UIConfigure_FillRect(element2,&element2->actions[0],249,252,124);
-  UIConfigure_DisplayNumber(element2, &element2->actions[1], 0,0,UISTRING_ALIGN_CENTER);
-  UIConfigure_ResourceCounter(element2, &element2->actions[2],1,&element2->actions[1]);
-  UIConfigure_PercPosition(element2, &element2->actions[3],1.0,0.0,-SCORE_COUNTER_WIDTH -(YEARS_LABEL_WIDTH + YEARS_COUNTER_WIDTH),0,0);
-  UIElement_Reparent(element2,element);
-
-    /*day counter label*/
-  element2 = UIElement_Create(0,0,DAYS_LABEL_WIDTH,TOP_BAR_HEIGHT,3);
-  printf("day counter label is %p\n",element2);
-  UIConfigure_FillRect(element2,&element2->actions[0],147,147, 170);
-  UIConfigure_DisplayString(element2, &element2->actions[1],"  DAYS TO WINTER: ",0,UISTRING_ALIGN_LEFT);
-  UIConfigure_PercPosition(element2, &element2->actions[2],1.0,0.0,
-  -(SCORE_COUNTER_WIDTH + SCORE_LABEL_WIDTH)-(DAYS_LABEL_WIDTH + DAYS_COUNTER_WIDTH) -(YEARS_LABEL_WIDTH + YEARS_COUNTER_WIDTH),0,0);
-  UIElement_Reparent(element2,element);
-
-
-  /* day counter */
-  element2 = UIElement_Create(0,0,DAYS_COUNTER_WIDTH,TOP_BAR_HEIGHT,4);
-  printf("day counter is %p\n",element2);
-  UIConfigure_FillRect(element2,&element2->actions[0],249,252,124);
-  UIConfigure_DisplayNumber(element2, &element2->actions[1], 0,0,UISTRING_ALIGN_CENTER);
-  UIConfigure_DaysCounter(element2, &element2->actions[2],1,&element2->actions[1]);
-  UIConfigure_PercPosition(element2, &element2->actions[3],1.0,0.0,
-  -(SCORE_COUNTER_WIDTH + SCORE_LABEL_WIDTH)-DAYS_COUNTER_WIDTH -(YEARS_LABEL_WIDTH + YEARS_COUNTER_WIDTH),0,0);
+  element2 = UIElement_Create(0,0,DAYS_LABEL_WIDTH+DAYS_COUNTER_WIDTH,TOP_BAR_HEIGHT+1,6);
+  UIConfigure_FillAndBorderRect(element2,&element2->actions[0],147,147,170,0,0,0,FILLRECT);
+  UIConfigure_DisplayStringSubrect(element2, &element2->actions[1],"DAYS TO WINTER:",0,0,0,DAYS_LABEL_WIDTH,TOP_BAR_HEIGHT-1);
+  UIConfigure_PercPosition(element2, &element2->actions[2],1.0,0.0,-(SCORE_COUNTER_WIDTH + SCORE_LABEL_WIDTH)-(DAYS_LABEL_WIDTH + DAYS_COUNTER_WIDTH) -(YEARS_LABEL_WIDTH + YEARS_COUNTER_WIDTH),0,0);
+  UIConfigure_FillSubrect(element2,&element2->actions[3],DAYS_LABEL_WIDTH,1,DAYS_COUNTER_WIDTH-1,TOP_BAR_HEIGHT-1,249,252,220);
+  UIConfigure_DisplayNumberSubrect(element2, &element2->actions[4], 0,0,DAYS_LABEL_WIDTH,0,DAYS_COUNTER_WIDTH-1,TOP_BAR_HEIGHT-1);
+  UIConfigure_DaysCounter(element2, &element2->actions[5],1,&element2->actions[4]);
   UIElement_Reparent(element2,element);
 
   /* Minimap */
@@ -490,8 +398,8 @@ static void createGameUI(GameData *gameData){
 	UIConfigure_TwoRectOverride(element,&element->actions[4],0,  win_y - 100, 100,         100,
                                                            50, 50,          win_x - 100, win_y - 200,200);
   UIConfigure_UpdateTwoRectOverrideOnWindowResize(element, &element->actions[5],&element->actions[4],
-                                                                                  50,50,0.0,0.0,
-                                                                                  -100,-150,1.0,1.0,
+                                                                                  55,55,0.0,0.0,
+                                                                                  -105,-155,1.0,1.0,
                                                                                   -1,-199,0.0,1.0,
                                                                                   200,200,0.0,0.0);
   UIConfigure_ToggleInteger(element,&element->actions[6],&gameData->controlsData.objectSelection);
@@ -528,35 +436,6 @@ static void createGameUI(GameData *gameData){
   UIElement_Reparent(element,gameData->uiData.root);
 
 
-
-	/*hive button*/
-  element2 = UIElement_Create(0, win_y - 100, 100,100,6);
-  printf("Hive internals panel is %p\n",element2);
-	UIConfigure_FillAndBorderRect(element2,&element2->actions[0],249,252,124,0,0,0,FILLRECT);
-	UIConfigure_LeftClickRect(element2,&element2->actions[1]);
-		UITrigger_Bind(&element2->actions[1],&element2->actions[2],0,1);
-    UITrigger_Bind(&element2->actions[1],&element2->actions[2],3,2);
-    UITrigger_Bind(&element2->actions[1],&element2->actions[4],0,1);
-    UIConfigure_DisplayString(element2, &element2->actions[5],"Hive",0, UISTRING_ALIGN_CENTER);
-	UIConfigure_TwoRectOverride(element2,&element2->actions[2],0,win_y - 100, 100, 100,
-                                                               50, 50, win_x - 100, win_y - 200,
-                                                               200);
-  UIConfigure_UpdateTwoRectOverrideOnWindowResize(element2, &element2->actions[3],&element2->actions[2],
-                                                                                  50,50,0.0,0.0,
-                                                                                  -100,-150,1.0,1.0,
-                                                                                  49,-249,0.0,1.0,
-                                                                                  50,50,0.0,0.0);
-  UIConfigure_ToggleInteger(element2,&element2->actions[4],&gameData->controlsData.objectSelection);
-  UIElement_Reparent(element2,gameData->uiData.root);
-
-  i = 0;
-  while(i < NUMBER_OF_CELLS_IN_HIVE){
-    topX += 60;
-    makeHiveCellBlock(topX,topY,element2,&gameData->gameObjectData.hive.hiveCells[i]);
-    i++;
-  }
-
-
   /*b++ editor button*/
   element2 = UIElement_Create(0, win_y - 100, 100,100,6);
   printf("BPP editor panel is %p\n",element2);
@@ -570,10 +449,10 @@ static void createGameUI(GameData *gameData){
                                                                50, 50, win_x - 100, win_y - 200,
                                                                200);
   UIConfigure_UpdateTwoRectOverrideOnWindowResize(element2, &element2->actions[3],&element2->actions[2],
-                                                                                  50,50,0.0,0.0,
-                                                                                  -100,-150,1.0,1.0,
-                                                                                  -1,-249,0.0,1.0,
-                                                                                  50,50,0.0,0.0);
+                                                                                  55,55,0.0,0.0,
+                                                                                  -105,-155,1.0,1.0,
+                                                                                  -1,-248,0.0,1.0,
+                                                                                  51,50,0.0,0.0);
   UIConfigure_ToggleInteger(element2,&element2->actions[4],&gameData->controlsData.objectSelection);
   UIElement_Reparent(element2,gameData->uiData.root);
 
@@ -597,7 +476,7 @@ static void createGameUI(GameData *gameData){
   /* I'm making it a little bigger so the border doesn't doublepixel */
   element4 = UIElement_Create(0,0,0,0,4);
   printf("compiler output bar is %p\n",element4);
-  UIConfigure_FillAndBorderRect(element4,&element4->actions[0],222,0,0,0,0,0,FILLRECT);
+  UIConfigure_FillAndBorderRect(element4,&element4->actions[0],255,255,255,0,0,0,FILLRECT);
   UIConfigure_ShrinkFitToParent(element4,&element4->actions[1]);
   UIConfigure_DisplayString(element4,&element4->actions[2],"                                                                                                                          ",0,UISTRING_ALIGN_LEFT);
 	UIConfigure_PercOffsetRect(element4,&element4->actions[3],0.0,1.0,1.0,1.0,50,-125,-269,-100,1,&element4->actions[1]);
@@ -641,9 +520,26 @@ static void createGameUI(GameData *gameData){
 
   makeAIResetButton(-100,170,element2);
 
-  makeAITemplateScrollList(270,230,&gameData->aiData,element2,element3);
+  makeAITemplateScrollList(265,225,&gameData->aiData,element2,element3);
 
   element4 = makeStartBlock(60,60,element3);
+
+	/*hive button*/
+  element2 = UIElement_Create(0, win_y - 100, 100,100,3);
+  printf("Hive internals panel is %p\n",element2);
+	UIConfigure_FillAndBorderRect(element2,&element2->actions[0],249,252,124,0,0,0,FILLRECT);
+  UIConfigure_DisplayString(element2, &element2->actions[1],"Hive",0, UISTRING_ALIGN_CENTER);
+  UIConfigure_PercOffsetRect(element2, &element2->actions[2],0.0,0.0,0.0,1.0,-1,TOP_BAR_HEIGHT,50,-247,0);
+  UIElement_Reparent(element2,gameData->uiData.root);
+
+  i = 0;
+  topY = TOP_BAR_HEIGHT + 25;
+  topX = -1;
+  while(i < NUMBER_OF_CELLS_IN_HIVE){
+    makeHiveCellBlock(topX,topY,element2,&gameData->gameObjectData.hive.hiveCells[i]);
+      topY += 60;
+    i++;
+  }
   UIRoot_Pack(&gameData->uiData,&gameData->graphicsData);
 }
 
@@ -675,7 +571,9 @@ int gameLoop(GameData *gameData){
   after the function SDL_RenderPresent*/
 
   #if BENCHMARK_TEST==1
-  printf("t @ benchmark %d: %d\n", testMarker++,SDL_GetTicks() - gameData->gameRunTime);
+  if(gameData->gameRunTime % 50 == 0){
+    printf("t @ benchmark %s: %d\n", "START",SDL_GetTicks() - gameData->gameRunTime);
+  }
   #endif
 
   while (SDL_PollEvent(&event)){
@@ -695,19 +593,24 @@ int gameLoop(GameData *gameData){
   }
 
   paintBackground(&gameData->graphicsData,0,200,100);
-
   updateGameObjects(&gameData->gameObjectData, &gameData->audioData, &gameData->graphicsData, &gameData->announcementsData, gameData->delta);
+  UIRoot_Execute(&gameData->uiData,UPDATE,0);
+  runAI(&gameData->aiData,&gameData->gameObjectData,gameData->delta);
+  announce_update(&gameData->announcementsData, gameData->delta);
 
-
-	  UIRoot_Execute(&gameData->uiData,UPDATE,0);
-	  runAI(&gameData->aiData,&gameData->gameObjectData,gameData->delta);
-
-	  SDL_RenderPresent(gameData->graphicsData.renderer);
-	  announce_update(&gameData->announcementsData, gameData->delta);
-  if (Mix_Playing(1) == 0) {
- 	  playMusic(&gameData->audioData,1);
+  #if BENCHMARK_TEST==1
+  if(gameData->gameRunTime % 50 == 0){
+    printf("t @ benchmark %s: %d\n", "GAME",SDL_GetTicks() - gameData->gameRunTime);
   }
+  #endif
 
+  SDL_RenderPresent(gameData->graphicsData.renderer);
+
+  #if BENCHMARK_TEST==1
+  if(gameData->gameRunTime % 50 == 0){
+    printf("t @ benchmark %s: %d\n", "RENDER",SDL_GetTicks() - gameData->gameRunTime);
+  }
+  #endif
   if(gameData->gameObjectData.gameOver){
   	  if(gameData->gameObjectData.gameOverCause == STARVATION){
   		    gameData->gameObjectData.hive.flowers_collected = 0;
@@ -726,8 +629,10 @@ int gameLoop(GameData *gameData){
   UIRoot_ExecuteUpwards(&gameData->uiData,DISPOSAL,0);
 
   #if BENCHMARK_TEST==1
-  printf("t @ benchmark %d: %d\n", testMarker++,SDL_GetTicks() - gameData->gameRunTime);
-  printf("--------------------------\n");
+  if(gameData->gameRunTime % 50 == 0){
+    printf("t @ benchmark %s: %d\n", "FINAL",SDL_GetTicks() - gameData->gameRunTime);
+    printf("--------------------------\n");
+  }
   #endif
   return 1;
 }
