@@ -49,6 +49,23 @@ FILE *fopenAndVerify(char *file_name, char *permission){
   return file;
 }
 
+int blockFunction_HuntSpider(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
+  if(gameObjectData->roamingSpider->currently_on_screen && !gameObjectData->roamingSpider->deadSpider){
+    programmableWorker->status = LEAVING;
+    programmableWorker->heading = getAngleBetweenRects(&gameObjectData->roamingSpider->rect,&programmableWorker->rect);
+  }
+  return 1;
+}
+
+int blockFunction_IfDistanceToSpider(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
+	double d2 = getDistance2BetweenRects(programmableWorker->rect,gameObjectData->roamingSpider->rect);
+  if(doDoubleCompWithCharOperator(d2, (double) pow(arguments->integers[0]*WORKER_SENSE_RANGE,2),arguments->characters[0])){
+    return(1);
+  }
+  return(2);
+
+}
+
 int blockFunction_HeadToNearestWorker(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
   SDL_Point point = getCenterOfRect(programmableWorker->rect);
   ProgrammableWorker *p = getNearestWorker(gameObjectData,point.x,point.y,programmableWorker);
@@ -585,6 +602,12 @@ blockFunction_WrappedFunction getBlockFunctionByName(char *blockFunctionName){
   if(strcmp(blockFunctionName,"HeadToNearestWorker") == 0){
     return &blockFunction_HeadToNearestWorker;
   }
+  if(strcmp(blockFunctionName,"HuntSpider") == 0){
+    return &blockFunction_HuntSpider;
+  }
+  if(strcmp(blockFunctionName,"IfDistanceToSpider") == 0){
+    return &blockFunction_IfDistanceToSpider;
+  }
   printf("ERROR: Unrecognised function name: \"%s\".\n Substituting a VOID function.\n",blockFunctionName);
   return &blockFunction_Void;
 }
@@ -912,39 +935,41 @@ AIData initAIData(void){
 	makeAIBlockTemplate(&aiData,"ReturnToHive",ACTION_BLOCK_COLOR,1,BF_THEN);
 	makeAIBlockTemplate(&aiData,"GoToStoredLocation",ACTION_BLOCK_COLOR,1,BF_THEN);
 	makeAIBlockTemplate(&aiData,"HeadToFoundNode",ACTION_BLOCK_COLOR,1,BF_THEN);
-  makeAIBlockTemplate(&aiData,"GoToTree",ACTION_BLOCK_COLOR,1,BF_THEN);
-  makeAIBlockTemplate(&aiData,"GoToIceCreamMan",ACTION_BLOCK_COLOR,1,BF_THEN);
-  makeAIBlockTemplate(&aiData,"GoToIceCream",ACTION_BLOCK_COLOR,1,BF_THEN);
-  makeAIBlockTemplate(&aiData,"HeadToNearestWorker",ACTION_BLOCK_COLOR,1,BF_THEN);
+	makeAIBlockTemplate(&aiData,"GoToTree",ACTION_BLOCK_COLOR,1,BF_THEN);
+	makeAIBlockTemplate(&aiData,"GoToIceCreamMan",ACTION_BLOCK_COLOR,1,BF_THEN);
+	makeAIBlockTemplate(&aiData,"GoToIceCream",ACTION_BLOCK_COLOR,1,BF_THEN);
+	makeAIBlockTemplate(&aiData,"HeadToNearestWorker",ACTION_BLOCK_COLOR,1,BF_THEN);
+	makeAIBlockTemplate(&aiData,"HuntSpider",ACTION_BLOCK_COLOR,1,BF_THEN);
 
-  makeAIBlockTemplate(&aiData,"Sleep",WAIT_BLOCK_COLOR,1,BF_THEN);
+	makeAIBlockTemplate(&aiData,"Sleep",WAIT_BLOCK_COLOR,1,BF_THEN);
 
-  makeAIBlockTemplate(&aiData,"HasStoredLocation",IF_BLOCK_COLOR,2,BF_PRIMARY, BF_SECONDARY);
-  makeAIBlockTemplate(&aiData,"PickNearbyWorker",IF_BLOCK_COLOR,2,BF_PRIMARY, BF_SECONDARY);
+	makeAIBlockTemplate(&aiData,"HasStoredLocation",IF_BLOCK_COLOR,2,BF_PRIMARY, BF_SECONDARY);
+	makeAIBlockTemplate(&aiData,"PickNearbyWorker",IF_BLOCK_COLOR,2,BF_PRIMARY, BF_SECONDARY);
 	makeAIBlockTemplate(&aiData,"IfNodeFound",IF_BLOCK_COLOR,2,BF_PRIMARY, BF_SECONDARY);
 	makeAIBlockTemplate(&aiData,"IfIdle",IF_BLOCK_COLOR,2,BF_PRIMARY,BF_SECONDARY);
 	makeAIBlockTemplate(&aiData,"IfReturning",IF_BLOCK_COLOR,2,BF_PRIMARY, BF_SECONDARY);
 	makeAIBlockTemplate(&aiData,"IfOutsideBounds",IF_BLOCK_COLOR,2,BF_PRIMARY, BF_SECONDARY);
-  makeAIBlockTemplate(&aiData,"IfRaining",IF_BLOCK_COLOR,2,BF_PRIMARY,BF_SECONDARY);
-  makeAIBlockTemplate(&aiData,"PercentChance",IF_BLOCK_COLOR,3,BF_PRIMARY, BF_SECONDARY, BF_PERCENT);
-  makeAIBlockTemplate(&aiData,"CompareCountToSaved",IF_BLOCK_COLOR,3,BF_PRIMARY, BF_SECONDARY, BF_COMPARISON);
-  makeAIBlockTemplate(&aiData,"IfCargo",IF_BLOCK_COLOR,4,BF_PRIMARY,BF_SECONDARY,BF_COMPARISON,BF_CARGO_QUANTITY);
-  makeAIBlockTemplate(&aiData,"IfCount",IF_BLOCK_COLOR,4,BF_PRIMARY, BF_SECONDARY, BF_COMPARISON, BF_COUNT_QUANTITY);
+	makeAIBlockTemplate(&aiData,"IfRaining",IF_BLOCK_COLOR,2,BF_PRIMARY,BF_SECONDARY);
+	makeAIBlockTemplate(&aiData,"PercentChance",IF_BLOCK_COLOR,3,BF_PRIMARY, BF_SECONDARY, BF_PERCENT);
+	makeAIBlockTemplate(&aiData,"CompareCountToSaved",IF_BLOCK_COLOR,3,BF_PRIMARY, BF_SECONDARY, BF_COMPARISON);
+	makeAIBlockTemplate(&aiData,"IfCargo",IF_BLOCK_COLOR,4,BF_PRIMARY,BF_SECONDARY,BF_COMPARISON,BF_CARGO_QUANTITY);
+	makeAIBlockTemplate(&aiData,"IfCount",IF_BLOCK_COLOR,4,BF_PRIMARY, BF_SECONDARY, BF_COMPARISON, BF_COUNT_QUANTITY);
 	makeAIBlockTemplate(&aiData,"IfDistanceToHive",IF_BLOCK_COLOR,4,BF_PRIMARY, BF_SECONDARY, BF_COMPARISON, BF_DISTANCE);
-  makeAIBlockTemplate(&aiData,"IfIceCreamManExists",IF_BLOCK_COLOR,2,BF_PRIMARY, BF_SECONDARY);
-  makeAIBlockTemplate(&aiData,"IfIceCreamExists",IF_BLOCK_COLOR,2,BF_PRIMARY,BF_SECONDARY);
-  makeAIBlockTemplate(&aiData,"IfCountToWinter",IF_BLOCK_COLOR,4,BF_PRIMARY,BF_SECONDARY,BF_COMPARISON,BF_SEASON_TIME);
+	makeAIBlockTemplate(&aiData,"IfDistanceToSpider",IF_BLOCK_COLOR,4,BF_PRIMARY, BF_SECONDARY, BF_COMPARISON, BF_DISTANCE);
+	makeAIBlockTemplate(&aiData,"IfIceCreamManExists",IF_BLOCK_COLOR,2,BF_PRIMARY, BF_SECONDARY);
+	makeAIBlockTemplate(&aiData,"IfIceCreamExists",IF_BLOCK_COLOR,2,BF_PRIMARY,BF_SECONDARY);
+	makeAIBlockTemplate(&aiData,"IfCountToWinter",IF_BLOCK_COLOR,4,BF_PRIMARY,BF_SECONDARY,BF_COMPARISON,BF_SEASON_TIME);
 
-  makeAIBlockTemplate(&aiData,"CountNearFlowers",COUNT_BLOCK_COLOR,1,BF_THEN);
-  makeAIBlockTemplate(&aiData,"CountNearWorkers",COUNT_BLOCK_COLOR,1,BF_THEN);
-  makeAIBlockTemplate(&aiData,"LoadCount",COUNT_BLOCK_COLOR,1,BF_THEN);
-  makeAIBlockTemplate(&aiData,"SaveCount",COUNT_BLOCK_COLOR,1,BF_THEN);
-  makeAIBlockTemplate(&aiData,"LoadCountFromOther",COUNT_BLOCK_COLOR,1,BF_THEN);
-  makeAIBlockTemplate(&aiData,"SaveCountFromOther",COUNT_BLOCK_COLOR,1,BF_THEN);
+	makeAIBlockTemplate(&aiData,"CountNearFlowers",COUNT_BLOCK_COLOR,1,BF_THEN);
+	makeAIBlockTemplate(&aiData,"CountNearWorkers",COUNT_BLOCK_COLOR,1,BF_THEN);
+	makeAIBlockTemplate(&aiData,"LoadCount",COUNT_BLOCK_COLOR,1,BF_THEN);
+	makeAIBlockTemplate(&aiData,"SaveCount",COUNT_BLOCK_COLOR,1,BF_THEN);
+	makeAIBlockTemplate(&aiData,"LoadCountFromOther",COUNT_BLOCK_COLOR,1,BF_THEN);
+	makeAIBlockTemplate(&aiData,"SaveCountFromOther",COUNT_BLOCK_COLOR,1,BF_THEN);
 
 	makeAIBlockTemplate(&aiData,"RememberCurrentLocation",POINT_BLOCK_COLOR,1,BF_THEN);
 	makeAIBlockTemplate(&aiData,"ForgetStoredLocation",POINT_BLOCK_COLOR,1,BF_THEN);
-  makeAIBlockTemplate(&aiData,"CopyPointFromSelected",POINT_BLOCK_COLOR,1,BF_THEN);
+	makeAIBlockTemplate(&aiData,"CopyPointFromSelected",POINT_BLOCK_COLOR,1,BF_THEN);
 
 	return aiData;
 }
