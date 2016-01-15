@@ -55,12 +55,12 @@ void playMusic(AudioData *audioData, int season) {
 }
 
 void stopSound(AudioData *audioData, int channel) {
-
+	(void)audioData;
 	Mix_HaltChannel(channel);
 }
 
 void fadeOutMusic(AudioData *audioData) {
-
+	(void)audioData;
 	Mix_FadeOutChannel(-1, 5000);
 }
 
@@ -126,14 +126,13 @@ void playSoundEffect(int channel, AudioData *audioData, char* name) {
 }
 
 void fadeOutChannel(int channel, AudioData *audioData) {
-
+	(void)audioData;
 	Mix_FadeOutChannel(channel, 500);
 }
 
 void fadeInChannel(int channel, AudioData *audioData, char* name) {
 
 	SoundEffect *active = audioData->soundEffect;
-	int weatherChannel = 3;
 
 	if (active == NULL){
 		printf("active was NULL in fadeInChannel\n");

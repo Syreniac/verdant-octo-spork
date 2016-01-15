@@ -63,8 +63,8 @@ struct ResourceNodeSpawner{
   int maximumNodeCount;
   int currentNodeCount;
   /* fairly standard positioning data, just x,y coords */
-  float xPosition;
-  float yPosition;
+  double xPosition;
+  double yPosition;
   /* make a note of the time when the spawner was last updated. */
   int ticksSinceSpawn;
   int spawnDelay;
@@ -92,7 +92,7 @@ struct ProgrammableWorker{
   double rawY;
 
   double heading;
-  float speed;
+  double speed;
 
   int currentGraphicIndex;
 
@@ -124,8 +124,8 @@ struct HiveCell{
 };
 
 struct Hive{
-  float xPosition;
-  float yPosition;
+  double xPosition;
+  double yPosition;
   SDL_Rect rect;
   int flowers_collected;
   int bees_taking_shelter;
@@ -133,8 +133,8 @@ struct Hive{
 };
 
 struct Tree{
-  float xPosition;
-  float yPosition;
+  double xPosition;
+  double yPosition;
   SDL_Rect rect;
   SDL_Rect stumpRect;
   int bees_taking_shelter;
@@ -143,8 +143,8 @@ struct Tree{
 };
 
 struct DroppedIceCream{
-	float xPosition;
-	float yPosition;
+	double xPosition;
+	double yPosition;
 	SDL_Rect rect;
 	int dropped;
 	int droppedTimer;
@@ -153,8 +153,8 @@ struct DroppedIceCream{
 };
 
 struct IceCreamPerson{
-  float xPosition;
-  float yPosition;
+  double xPosition;
+  double yPosition;
   SDL_Rect rect;
 
   double heading;
@@ -172,8 +172,8 @@ struct IceCreamPerson{
 };
 
 struct RoamingSpider{
-  float xPosition;
-  float yPosition;
+  double xPosition;
+  double yPosition;
   SDL_Rect rect;
 
   double heading;
@@ -248,7 +248,7 @@ GameObjectData createGameObjectData(void);
 ProgrammableWorker *createProgrammableWorker(GameObjectData *gameObjectData);
 Hive createHive(void);
 Tree createTree(GameObjectData *gameObjectData, int forceX, int forceY);
-ResourceNodeSpawner createResourceNodeSpawner(GameObjectData *gameObjectData, int maximumNodeCount, float xPosition, float yPosition, float radius);
+ResourceNodeSpawner createResourceNodeSpawner(GameObjectData *gameObjectData, int maximumNodeCount, double xPosition, double yPosition, double radius);
 IceCreamPerson *createIceCreamPerson(void);
 DroppedIceCream *createDroppedIceCream(void);
 RoamingSpider *createRoamingSpider(void);

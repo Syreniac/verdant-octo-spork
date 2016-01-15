@@ -56,7 +56,7 @@ void blitGameObject(SDL_Rect objectRect, GraphicsData *graphicsData, SDL_Texture
   tempRect.x += graphicsData->navigationOffset.x;
   tempRect.y += graphicsData->navigationOffset.y;
 
-  SDL_RenderCopyEx(graphicsData->renderer, texture, NULL, &tempRect, angle, NULL, SDL_FLIP_NONE);
+  SDL_RenderCopyEx(graphicsData->renderer, texture, NULL, &tempRect, angle, center, flip);
 }
 
 void blitRainRandomly(GraphicsData *graphicsData){
@@ -152,7 +152,7 @@ void blitTiledBackground(GraphicsData *graphicsData, SDL_Texture *texture){
 		rect.h = window_y;
 		SDL_SetRenderDrawColor(graphicsData->renderer, 0, 0, 0, 100);
 		SDL_RenderFillRect(graphicsData->renderer, &rect);
-		graphicsData->navigationOffset.x+= ceil((float)rect.w/10.0);
+		graphicsData->navigationOffset.x+= ceil((double)rect.w/10.0);
 	}
 
 	if((window_y - graphicsData->navigationOffset.y) > Y_SIZE_OF_WORLD){
@@ -162,7 +162,7 @@ void blitTiledBackground(GraphicsData *graphicsData, SDL_Texture *texture){
 		rect.y = window_y - rect.h;
 		SDL_SetRenderDrawColor(graphicsData->renderer, 0, 0, 0, 100);
 		SDL_RenderFillRect(graphicsData->renderer, &rect);
-		graphicsData->navigationOffset.y+= ceil((float)rect.h/10.0);
+		graphicsData->navigationOffset.y+= ceil((double)rect.h/10.0);
 	}
 }
 

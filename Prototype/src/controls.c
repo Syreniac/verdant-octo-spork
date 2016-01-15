@@ -75,78 +75,108 @@ int handleEvent(SDL_Event *event, GameObjectData *gameObjectData, UIData *uiData
 }
 
 int keydown(ControlsData *controlsData, GameObjectData *gameObjectData, GraphicsData *graphicsData, UIData *uiData, SDL_Event *event){
+		(void)gameObjectData;
     switch (event->key.keysym.scancode){
-        case (SDL_SCANCODE_DOWN):
-        	if(!gameObjectData->gameOver){
-				controlsData->keys[ARROW_DOWN] = 1;
-				graphicsData->trackingMode = 0;
-			}
-            break;
-        case (SDL_SCANCODE_UP):
-        	if(!gameObjectData->gameOver){
-				controlsData->keys[ARROW_UP] = 1;
-				graphicsData->trackingMode = 0;
-			}
-            break;
-        case (SDL_SCANCODE_RIGHT):
-            if(!gameObjectData->gameOver){
-				controlsData->keys[ARROW_RIGHT] = 1;
-				graphicsData->trackingMode = 0;
-			}
-            break;
-        case (SDL_SCANCODE_LEFT):
-            if(!gameObjectData->gameOver){
-				controlsData->keys[ARROW_LEFT] = 1;
-				graphicsData->trackingMode = 0;
-			}
-            break;
-		case (SDL_SCANCODE_P):
+      case (SDL_SCANCODE_DOWN):
+      	if(!gameObjectData->gameOver){
+					controlsData->keys[ARROW_DOWN] = 1;
+					graphicsData->trackingMode = 0;
+				}
+        break;
+      case (SDL_SCANCODE_UP):
+      	if(!gameObjectData->gameOver){
+					controlsData->keys[ARROW_UP] = 1;
+					graphicsData->trackingMode = 0;
+				}
+        break;
+      case (SDL_SCANCODE_RIGHT):
+        if(!gameObjectData->gameOver){
+					controlsData->keys[ARROW_RIGHT] = 1;
+					graphicsData->trackingMode = 0;
+				}
+        break;
+      case (SDL_SCANCODE_LEFT):
+        if(!gameObjectData->gameOver){
+					controlsData->keys[ARROW_LEFT] = 1;
+					graphicsData->trackingMode = 0;
+				}
+        break;
+			case (SDL_SCANCODE_P):
+        gameObjectData->pause_status = 1 - gameObjectData->pause_status; /* 1 for pause, 0 for go on */
+				UIRoot_Execute(uiData,RESPONSE_PAUSE,0);
+        break;
+			case (SDL_SCANCODE_Q):
+				controlsData->keys[DELETE] = 1;
+				UIRoot_ExecuteUpwards(uiData,RESPONSE_DELETE,1);
+				break;
+			case (SDL_SCANCODE_RETURN):
+			case (SDL_SCANCODE_KP_ENTER):
+				printf("ENTER Key pressed\n");
+				if(gameObjectData->gameOver){
+					return 2;
+				}
+				break;
+			case (SDL_SCANCODE_H):
+				printf("finding home\n");
+				centerViewOnHive(graphicsData,gameObjectData);
+				break;
 
-            gameObjectData->pause_status = 1 - gameObjectData->pause_status; /* 1 for pause, 0 for go on */
-
-			UIRoot_Execute(uiData,RESPONSE_PAUSE,0);
-            break;
-
-		case (SDL_SCANCODE_Q):
-			controlsData->keys[DELETE] = 1;
-			UIRoot_ExecuteUpwards(uiData,RESPONSE_DELETE,1);
-			break;
-		case (SDL_SCANCODE_RETURN):
-		case (SDL_SCANCODE_KP_ENTER):
-			printf("ENTER Key pressed\n");
-			if(gameObjectData->gameOver){
-				return 2;
-			}
-			break;
-		case (SDL_SCANCODE_H):
-			printf("finding home\n");
-			centerViewOnHive(graphicsData,gameObjectData);
-			break;
-    default:
-			return 1;
+			#if DEV_HACKS==1
+			case (SDL_SCANCODE_S):
+				printf("DEV HACKING TOGGLING WEATHER TO SUN\n");
+				gameObjectData->environment.weather.tickCount = -1;
+				gameObjectData->environment.weather.present_weather = Sun;
+				break;
+			case (SDL_SCANCODE_R):
+				printf("DEV HACKING TOGGLING WEATHER TO RAIN\n");
+				gameObjectData->environment.weather.tickCount = -1;
+				gameObjectData->environment.weather.present_weather = Rain;
+				break;
+			case (SDL_SCANCODE_W):
+				printf("DEV HACKING TOGGLING SEASON TO WINTER\n");
+				gameObjectData->environment.winterCountdownFloat = WINTER_THRESHOLD;
+				break;
+			case (SDL_SCANCODE_A):
+				printf("DEV HACKING TOGGLING SEASON TO AUTUMN\n");
+				gameObjectData->environment.winterCountdownFloat = AUTUMN_THRESHOLD;
+				break;
+			case (SDL_SCANCODE_M):
+				printf("DEV HACKING 1000 DAYS OF SUMMER\n");
+				gameObjectData->environment.season = SUMMER;
+				gameObjectData->environment.winterCountdownFloat = 1000.0;
+				break;
+			case SDL_SCANCODE_G:
+				printf("DEV HACKING A LOT OF HONEY\n");
+				gameObjectData->hive.flowers_collected += 50000;
+				break;
+			#endif
+	    default:
+				return 1;
     }
 		return 1;
 }
 
 int keyup(ControlsData *controlsData, GameObjectData *gameObjectData, UIData *uiData, SDL_Event *event){
+		(void)gameObjectData;
+		(void)uiData;
     switch (event->key.keysym.scancode){
-        case (SDL_SCANCODE_DOWN):
-			controlsData->keys[ARROW_DOWN] = 0;
-            break;
-        case (SDL_SCANCODE_UP):
-			controlsData->keys[ARROW_UP] = 0;
-            break;
-		case (SDL_SCANCODE_RIGHT):
-			controlsData->keys[ARROW_RIGHT] = 0;
-            break;
-        case (SDL_SCANCODE_LEFT):
-			controlsData->keys[ARROW_LEFT] = 0;
-            break;
-		case (SDL_SCANCODE_DELETE):
-			controlsData->keys[DELETE] = 0;
-			break;
-    default:
-        return 1;
+		  case (SDL_SCANCODE_DOWN):
+				controlsData->keys[ARROW_DOWN] = 0;
+		    break;
+		  case (SDL_SCANCODE_UP):
+				controlsData->keys[ARROW_UP] = 0;
+		    break;
+			case (SDL_SCANCODE_RIGHT):
+				controlsData->keys[ARROW_RIGHT] = 0;
+		    break;
+		  case (SDL_SCANCODE_LEFT):
+				controlsData->keys[ARROW_LEFT] = 0;
+		    break;
+			case (SDL_SCANCODE_DELETE):
+				controlsData->keys[DELETE] = 0;
+				break;
+		  default:
+		      return 1;
     }
 		return 1;
 }

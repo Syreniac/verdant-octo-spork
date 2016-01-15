@@ -4,10 +4,6 @@ static void createGameUI(GameData *gameData);
 static void cleanUpGameData(GameData *gameData);
 
 int calculateDt(int previousRunTime){
-  /* float previousRunTime = the milliseconds you want to calculate from
-     This returns the difference in milliseconds between now and another time
-     in the past. It's used here to help keep the main loop running
-     consistently. */
   return SDL_GetTicks() - previousRunTime;
 }
 
@@ -26,7 +22,6 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
   /* By creating a new struct to hold our game data, we can more easily
      pass data between functions */
   GameData gameData;
-  FILE *file;
   int gameLoopReturn;
 
   gameLoopReturn = 1;
@@ -35,16 +30,9 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
   gameData.audioData = audioData;
 
 
-  gameData.uiData.root = UIElement_Create(0,0,0,0,0);
   gameData.running = 1;
-
+  gameData.uiData.root = UIElement_Create(0,0,0,0,0);
   gameData.gameObjectData = createGameObjectData();
-
-  gameData.gameObjectData.pause_status = 0;
-  gameData.gameObjectData.first_programmable_worker = NULL;
-  gameData.gameObjectData.gameOver = 0;
-  gameData.gameObjectData.gameOverEventNum = SDL_RegisterEvents(1);
-  gameData.gameObjectData.objectDisplayEventNum = SDL_RegisterEvents(1);
 
   initControlData(&gameData.controlsData);
 
@@ -64,6 +52,7 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
 
 
   /* Create some ResourceNodeSpawners to fill our world with ResourceNodes */
+  generateHive(&gameData.gameObjectData);
   generateResourceNodeSpawners(&gameData.gameObjectData);
 
   /* Create some ProgammableWorkers to carry out our tasks */
@@ -72,7 +61,6 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
 
   /* This doesn't actually do much, but it lets us give the workers somewhere
      to return home to */
-  generateHive(&gameData.gameObjectData);
   /*hive must be generated before trees, as this allows the last tree to be placed near the hive*/
   generateTrees(&gameData.gameObjectData);
 
@@ -222,6 +210,7 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
   }
 
   cleanUpGameData(&gameData);
+  printf("cleaned up\n");
   return gameLoopReturn;
 }
 
@@ -236,10 +225,7 @@ static void createGameUI(GameData *gameData){
   UI_Element *element4;
   int win_x, win_y;
 
-  BlockFunction *array[255] = {NULL};
-  UI_Element *array2[255];
   int i = 0;
-  int j = 0;
   int topX = 60;
   int topY = 60;
 
@@ -297,7 +283,6 @@ static void createGameUI(GameData *gameData){
 		UITrigger_Bind(&element->actions[4],&element->actions[5],0,1);
 	UIConfigure_MuteSoundFX(element,&element->actions[5]);
     UIElement_Reparent(element,gameData->uiData.root);
-	UIRoot_Pack(&gameData->uiData,&gameData->graphicsData);
 
 
 
@@ -521,7 +506,7 @@ static void createGameUI(GameData *gameData){
       topY += 60;
     i++;
   }
-  UIRoot_Pack(&gameData->uiData,&gameData->graphicsData);
+  UIRoot_Pack(&gameData->uiData);
 }
 
 

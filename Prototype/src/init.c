@@ -138,7 +138,7 @@ int game_welcome_page(GraphicsData graphicsData, AudioData audioData){
 		UITrigger_Bind(&element2->actions[2],&element2->actions[3],0,1);
 	UIConfigure_MuteSound(element2,&element2->actions[3]);
     UIElement_Reparent(element2,initData.uiData.root);
-	UIRoot_Pack(&initData.uiData,&initData.graphicsData);
+	UIRoot_Pack(&initData.uiData);
 
 	initData.uiData.audioData = &initData.audioData;
 

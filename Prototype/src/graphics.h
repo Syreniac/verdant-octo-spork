@@ -1,4 +1,4 @@
-#include "configuration.h"
+#include "generic.h"
 
 
 typedef struct GraphicsData GraphicsData;

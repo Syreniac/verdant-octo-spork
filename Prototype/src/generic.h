@@ -24,6 +24,11 @@ FILE *DEBUGGING_FILE_FREE;
 #endif
 #define VERBOSE 1
 
+#define DEV_HACKS 1
+
+#define YELLOW_FLOWER_THRESHOLD 0.5 * (Y_SIZE_OF_WORLD * Y_SIZE_OF_WORLD)
+#define RED_FLOWER_THRESHOLD 0.25 * (Y_SIZE_OF_WORLD * Y_SIZE_OF_WORLD)
+
 #define NUMBER_OF_CELLS_IN_HIVE 6
 #define SUGAR_COST_OF_WORKER 1
 #define HIVE_CELL_SPAWN_DELAY 1*1000
@@ -62,7 +67,7 @@ each call to updateProgrammableWorker*/
 /*lower values result in a higher chance of bees falling during rain, with
 each call to updateProgrammableWorker*/
 /* Just trust me with this value (I think it gives bees on average 3 seconds in the rain) */
-#define CHANCE_OF_FALLING_IN_RAIN 7000000
+#define CHANCE_OF_FALLING_IN_RAIN 500
 
 /*how much smaller are the bees when they are on the ground (further away from screen*/
 #define BEE_SHRINK_FACTOR_ON_GROUND 1.2
@@ -198,18 +203,18 @@ int isPointInRect(int point_x, int point_y, SDL_Rect rect);
 int isRectEnclosedInRect(SDL_Rect rectA, SDL_Rect rectB);
 void ensureRectEnclosed(SDL_Rect *ensure, SDL_Rect *against);
 int testRectIntersection(SDL_Rect rectA, SDL_Rect rectB);
-float generateRandomCoordOffset(float radius);
-double getDistance2BetweenPoints(float p1X, float p1Y, float p2X, float p2Y);
+double generateRandomCoordOffset(double radius);
+double getDistance2BetweenPoints(double p1X, double p1Y, double p2X, double p2Y);
 double getDistance2BetweenRects(SDL_Rect rectA, SDL_Rect rectB);
-float square(float f);
-float randPi(void);
+double square(double f);
+double randPi(void);
 void fitRectToWorld(SDL_Rect *rect);
 double getAngleBetweenRects(SDL_Rect *rectA, SDL_Rect *rectB);
 SDL_Point getCenterOfRect(SDL_Rect rect);
 SDL_Rect getRectFromInvRect(SDL_Window *window, int from_left, int from_top, int from_right, int from_bot);
-SDL_Rect getRectFromPercRect(SDL_Window *window, float from_left, float from_right, float from_top, float from_bot);
+SDL_Rect getRectFromPercRect(SDL_Window *window, double from_left, double from_right, double from_top, double from_bot);
 char *fileToString(FILE *file);
 SDL_Point getPointFromInvPoint(SDL_Window *window, int x, int y);
-SDL_Point getPointFromPerc(SDL_Window *window, float x, float y);
+SDL_Point getPointFromPerc(SDL_Window *window, double x, double y);
 void shrinkRectToFit(SDL_Rect *toShrink, SDL_Rect *fitTo);
 int isPointInRangeOf(SDL_Point point, SDL_Point center, double radius);

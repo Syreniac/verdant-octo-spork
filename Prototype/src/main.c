@@ -8,6 +8,9 @@ int main(int argc, char *argv[]){
      from Windows (or something?), so the functionality is split between other
      functions from other modules */
 
+  (void)argc;
+  (void)argv;
+
   InitData initData;
   int game_return = 2;
 

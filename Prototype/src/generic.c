@@ -67,24 +67,24 @@ void ensureRectEnclosed(SDL_Rect *ensure, SDL_Rect *limit){
 
 
 
-float randPi(void){
+double randPi(void){
   /* This returns a random value between PI and 0. It's very useful for working
      trigonometric randomness. */
-  return (float)(PI * (float) rand() / (float) RAND_MAX);
+  return (double)(PI * (double) rand() / (double) RAND_MAX);
 }
 
-float square(float f){
-  /* float f = the float to square
+double square(double f){
+  /* double f = the double to square
 
      Simply returns f*f to simulate squaring a number */
   return f*f;
 }
 
-double getDistance2BetweenPoints(float p1X, float p1Y, float p2X, float p2Y){
-  /* float p1X = the x position of the first point
-     float p1Y = the y position of the first point
-     float p2X = the x position of the second point
-     float p2Y = the y position of the second point
+double getDistance2BetweenPoints(double p1X, double p1Y, double p2X, double p2Y){
+  /* double p1X = the x position of the first point
+     double p1Y = the y position of the first point
+     double p2X = the x position of the second point
+     double p2Y = the y position of the second point
 
      Distance2 is the non-square rooted distance value between two points. If
      all we want is to check whether a point is within a radius of another,
@@ -107,13 +107,13 @@ void fitRectToWorld(SDL_Rect *rect){
   }
 }
 
-float generateRandomCoordOffset(float radius){
-  /* float radius = the range to generate random numbers within
+double generateRandomCoordOffset(double radius){
+  /* double radius = the range to generate random numbers within
 
      This function just generates a random x or y offset for a coordinate within
      a given range. It's the cheap hack I'm using to make randomly spaced nodes
      around a spawner. */
-  float return_value = (radius * ( (float) rand() - (float) RAND_MAX * 0.5 )/(float) RAND_MAX );
+  double return_value = (radius * ( (double) rand() - (double) RAND_MAX * 0.5 )/(double) RAND_MAX );
   return(return_value);
 }
 
@@ -157,14 +157,14 @@ SDL_Rect getRectFromInvRect(SDL_Window *window, int from_left, int from_top, int
 	return rect;
 }
 
-SDL_Rect getRectFromPercRect(SDL_Window *window, float from_left, float from_top, float from_right, float from_bot){
+SDL_Rect getRectFromPercRect(SDL_Window *window, double from_left, double from_top, double from_right, double from_bot){
 	int win_x = X_SIZE_OF_SCREEN, win_y = Y_SIZE_OF_SCREEN;
 	SDL_Rect rect;
 	SDL_GetWindowSize(window, &win_x, &win_y);
-	rect.x = (int)((float) win_x * from_left);
-	rect.y = (int)((float) win_y * from_top);
-	rect.w = (int)((float) win_x * from_right);
-	rect.h = (int)((float) win_y * from_bot);
+	rect.x = (int)((double) win_x * from_left);
+	rect.y = (int)((double) win_y * from_top);
+	rect.w = (int)((double) win_x * from_right);
+	rect.h = (int)((double) win_y * from_bot);
 	return rect;
 }
 
@@ -214,7 +214,7 @@ SDL_Point getPointFromInvPoint(SDL_Window *window, int x, int y){
      return point;
 }
 
-SDL_Point getPointFromPerc(SDL_Window *window, float x, float y){
+SDL_Point getPointFromPerc(SDL_Window *window, double x, double y){
   SDL_Point point;
   int win_x, win_y;
   SDL_GetWindowSize(window,&win_x, &win_y);

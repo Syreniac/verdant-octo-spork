@@ -264,7 +264,7 @@ END_TEST
 START_TEST(core_getRectFromPercRect){
    SDL_Window *window;
    SDL_Rect rect;
-   float from_left, from_right, from_top, from_bot;
+   double from_left, from_right, from_top, from_bot;
    from_left=0.2;
    from_right=0.3;
    from_top=0.4;
@@ -339,7 +339,7 @@ START_TEST(core_getPointFromPerc){
 
    SDL_Window *window;
    SDL_Point point;
-   float x,y; /*x and y are in range of 0 to 1*/
+   double x,y; /*x and y are in range of 0 to 1*/
    x=0.2;
    y=0.3;
    window = SDL_CreateWindow(

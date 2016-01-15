@@ -9,7 +9,6 @@ static void UIAction_Free(UI_Action *action);
 static void UITrigger_Execute(UI_Action *action);
 static int isLinked(UI_Element *test, UI_Element *to);
 static int UIElement_isVisible(UI_Element *element);
-static int percWindowDimension(int dimension, float perc);
 static void UIElement_DeExternalise(UI_Element *root, UI_Element *external);
 static void UITrigger_Destroy(UI_Action *action, UI_Trigger *trigger);
 static void UIElement_RemoveExposedData(UI_Element *element);
@@ -108,6 +107,7 @@ static int countOptionsForAITemplate(BlockFunctionTemplate *template){
 			case BF_COUNT_QUANTITY:
 			case BF_DISTANCE:
 			case BF_SEASON_TIME:
+			case BF_DURATION:
 				count += 1;
 				break;
 			default:
@@ -135,6 +135,7 @@ static int countUIActionsNeededForAITemplate(BlockFunctionTemplate *template){
 			case BF_COMPARISON:
 			case BF_PERCENT:
 			case BF_SEASON_TIME:
+			case BF_DURATION:
 				printf("+1 required option\n");
 				count += 4;
 				break;
@@ -152,7 +153,7 @@ UI_Element *makeHiveCellBlock(int x_offset, int y_offset, UI_Element *parent, Hi
 	UIConfigure_FillAndBorderRect(element,&element->actions[0], 150,150,150,0,0,0,HIVECELL);
 	UIConfigure_ShrinkFitToParent(element,&element->actions[1]);
 	UIConfigure_GetPercentCellDone(element,&element->actions[2],hiveCell,HIVE_CELL_SPAWN_DELAY,1,&element->actions[3]);
-	UIConfigure_PercentageFillRect(element,&element->actions[3],0.0,255,0,0);
+	UIConfigure_PercentageFillRect(element,&element->actions[3],255,0,0);
 	UIConfigure_LeftClickRect(element,&element->actions[4]);
 		UITrigger_Bind(&element->actions[4],&element->actions[5],0,1);
 	UIConfigure_SetCellToSpawn(element,&element->actions[5],hiveCell);
@@ -326,6 +327,7 @@ UI_Element *makeAIBlock(int x_offset, int y_offset, BlockFunctionTemplate *templ
 			case BF_CARGO_QUANTITY:
 			case BF_PERCENT:
 			case BF_SEASON_TIME:
+			case BF_DURATION:
 				printf("making integrator\n");
 				x = 130 / (optionsCount + 1);
 				x *= (1 + optionsPlaced);
@@ -347,26 +349,6 @@ UI_Element *makeAIBlock(int x_offset, int y_offset, BlockFunctionTemplate *templ
 
 	UIElement_Reparent(element2,parent);
 	return element2;
-}
-
-UI_Element *UIElement_CreateByPercentage(float rx, float ry, float rw, float rh, int x, int y, int num_of_actions){
-	   UI_Element *element;
-		 element  = calloc(1,sizeof(UI_Element));
-
-
-	   element->rect.x = percWindowDimension(x,rx);
-	   element->rect.y = percWindowDimension(y,ry);
-	   element->rect.w = percWindowDimension(x,rw);
-	   element->rect.h = percWindowDimension(y,rh);
-	   element->actions = malloc(sizeof(UI_Action)*num_of_actions);
-	   element->num_of_actions = num_of_actions;
-	   element->parent = NULL;
-	   element->child = NULL;
-	   element->sibling = NULL;
-	   element->exposed_data_types = NULL;
-	   element->exposed_data = NULL;
-	   element->exposed_data_count = 0;
-	return element;
 }
 
 UI_Element *UIElement_Create(int x, int y, int w, int h, int num_of_actions){
@@ -403,6 +385,7 @@ UI_Element *UIElement_Create(int x, int y, int w, int h, int num_of_actions){
 #define previousValue integers[0]
 
 int UIAction_OnIntegerChange(UI_Action *action, UIData *uiData){
+	(void)uiData;
 	if(action->status != 0){
 		if(action->previousValue != *((int*)action->watchedInteger)){
 			action->previousValue = *((int*)action->watchedInteger);
@@ -431,6 +414,7 @@ void UIConfigure_OnIntegerChange(UI_Element *element, UI_Action *action, int *ta
    The string selected is toggled by it's status, enabling it to be triggered using UITRIGGER_PLUSONE */
 
 int UIAction_StringCollection(UI_Action *action, UIData *uiData){
+	(void)uiData;
 	if(action->status != 0){
 		if(action->status > action->num_of_strings){
 			printf("resetting string collection\n");
@@ -450,7 +434,6 @@ int UIAction_StringCollection(UI_Action *action, UIData *uiData){
 void UIConfigure_StringCollection(UI_Element *element, UI_Action *action, int num_of_companions, int num_of_strings, ...){
 	va_list vargs;
 	int i = 0;
-	char *str;
 	va_start(vargs,num_of_strings);
 	UIAction_Init(element,action);
 	action->response = UPDATE;
@@ -863,6 +846,7 @@ void UIConfigure_SetCellToSpawn(UI_Element *element, UI_Action *action, HiveCell
 #define cell extra
 
 int UIAction_GetCellPercentDone(UI_Action *action, UIData *uiData){
+	(void)uiData;
 	if(action->status != 0){
 		if(((HiveCell*)action->cell)->timer < 0){
 			action->percentage = 0.0;
@@ -930,7 +914,7 @@ int UIAction_PercentageFillRect(UI_Action *action, UIData *uiData){
 	return 0;
 }
 
-void UIConfigure_PercentageFillRect(UI_Element *element, UI_Action *action, double percentage_filled, int r, int g, int b){
+void UIConfigure_PercentageFillRect(UI_Element *element, UI_Action *action, int r, int g, int b){
 	UIAction_Init(element,action);
 	action->response = UPDATE;
 	action->function = UIAction_PercentageFillRect;
@@ -1046,11 +1030,21 @@ int UIAction_Minimap(UI_Action *action, UIData *uiData){
 		/* Then we draw all the game object stuff into our element's rectangle */
 
 		/* This is for drawing on the nodes (AKA flowers) */
-		SDL_SetRenderDrawColor(graphicsData->renderer,0xFE,0x2E,0xF7,0xFF);
 		while(i < gameObjectData->resourceNodeSpawnerCount){
 			j = 0;
 			while(j < gameObjectData->resourceNodeSpawners[i].maximumNodeCount){
 				if(gameObjectData->resourceNodeSpawners[i].resourceNodes[j].alive){
+					switch(gameObjectData->resourceNodeSpawners[i].resourceNodes[j].type){
+						case 0:
+							SDL_SetRenderDrawColor(graphicsData->renderer,0,0,255,255);
+							break;
+						case 1:
+							SDL_SetRenderDrawColor(graphicsData->renderer,255,0,0,255);
+							break;
+						case 2:
+						  SDL_SetRenderDrawColor(graphicsData->renderer,255,255,0,255);
+							break;
+					}
 					sUIAction_Minimap_DrawGameObject(action,
 					                                 graphicsData,
 																				   &gameObjectData->resourceNodeSpawners[i].resourceNodes[j].rect);
@@ -1269,7 +1263,6 @@ void UIConfigure_GetGameOverString(UI_Element *element, UI_Action *action, UI_Ac
 }
 
 int UIAction_GetInfoDisplayString(UI_Action *action, UIData *uiData){
-		va_list vargs;
 		if(action->status != 0){
 			action->displayStringAction->companionChangeDisplayString = realloc(action->displayStringAction->companionChangeDisplayString,
 				                                                                  strlen(uiData->gameObjectData->gameObjectSelection.nameString)+1);
@@ -1288,7 +1281,6 @@ void UIConfigure_GetInfoDisplayString(UI_Element *element, UI_Action *action, UI
 }
 
 int UIAction_GetObjectStatusString(UI_Action *action, UIData *uiData){
-		va_list vargs;
 		if(action->status != 0){
 			action->displayStringAction->companionChangeDisplayString = realloc(action->displayStringAction->companionChangeDisplayString,
 				                                                                  strlen(uiData->gameObjectData->gameObjectSelection.infoString)+1);
@@ -1342,6 +1334,7 @@ void UIConfigure_GetFinalScoreString(UI_Element *element, UI_Action *action, UI_
 
 int UIAction_ToggleInteger(UI_Action *action, UIData *uiData){
 	int *p;
+	(void)uiData;
 	if(action->status == 1){
 		p = action->targetInt;
 		*p = !*(p);
@@ -1417,8 +1410,8 @@ int UIAction_PercOffsetRect(UI_Action *action, UIData *uiData){
 		return 0;
 }
 
-void UIConfigure_PercOffsetRect(UI_Element *element, UI_Action *action, float xPerc, float yPerc,
-	 																																			float wPerc, float hPerc,
+void UIConfigure_PercOffsetRect(UI_Element *element, UI_Action *action, double xPerc, double yPerc,
+	 																																			double wPerc, double hPerc,
                                                                         int xFixed, int yFixed,
 																																				int wFixed, int hFixed,
 																																			  int num_of_companions, ...){
@@ -1498,7 +1491,7 @@ int UIAction_PercPosition(UI_Action *action, UIData *uiData){
 		return 0;
 }
 
-void UIConfigure_PercPosition(UI_Element *element, UI_Action *action, float xPerc, float yPerc,
+void UIConfigure_PercPosition(UI_Element *element, UI_Action *action, double xPerc, double yPerc,
 	                                                                    int xFixed, int yFixed,
 																																			int num_of_companions, ...){
 	va_list vargs;
@@ -1541,13 +1534,14 @@ void UIConfigure_PercPosition(UI_Element *element, UI_Action *action, float xPer
 #define totalPossibleOffset integers[1]
 
 int UIAction_CalculateScrollListOffset(UI_Action *action, UIData *uiData){
+	(void)uiData;
 	if(action->status == 1){
 		if(action->totalPossibleOffset <= action->element->rect.h){
 			action->scrollListOffset = 0;
 			return 1;
 		}
 		/* Remind to make this clearer, at the moment it's rather bizarre */
-		action->scrollListOffset = -(float)((float)action->integers[0]/(float)action->element->rect.h) * (action->totalPossibleOffset - action->element->rect.h);
+		action->scrollListOffset = -(double)((double)action->integers[0]/(double)action->element->rect.h) * (action->totalPossibleOffset - action->element->rect.h);
 		return 1;
 	}
 	return 0;
@@ -1587,6 +1581,7 @@ void UIConfigure_CalculateScrollListOffset(UI_Element *element, UI_Action *actio
 int UIAction_ShrinkFitToParentWithYShift(UI_Action *action, UIData *uiData){
 	SDL_Rect temp_rect;
 	SDL_Rect *parent_rect = &action->element->parent->rect;
+	(void)uiData;
 	if(action->status == 1){
 			temp_rect.x = action->xPosition;
 			temp_rect.y = action->yPosition + action->yShiftSource->yShiftValue;
@@ -1681,7 +1676,7 @@ int UIAction_GetDifferenceInChildYOffset(UI_Action *action, UIData *uiData){
 	return 0;
 }
 
-void UIConfigure_GetDifferenceInChildYOffset(UI_Element *element, UI_Action *action, float yPercOffset, int yIntOffset, UI_Element *child, int num_of_companions, ...){
+void UIConfigure_GetDifferenceInChildYOffset(UI_Element *element, UI_Action *action, double yPercOffset, int yIntOffset, UI_Element *child, int num_of_companions, ...){
 		int i = 0;
 		va_list vargs;
 		va_start(vargs,num_of_companions);
@@ -1928,6 +1923,7 @@ void UIConfigure_ReadAiBlocks(UI_Element *element, UI_Action *action, UI_Action 
 int UIAction_SetUpAiBlock(UI_Action *action, UIData *uiData){
 	int stringLength = 1;
 	char workingSpace[30] = {0};
+	(void)uiData;
 	if(action->status == 1){
 		action->element->exposed_data_types = malloc(sizeof(enum UIDataTypes));
 		action->element->exposed_data_types[0] = UI_STRING;
@@ -2003,6 +1999,7 @@ void UIConfigure_SetUpAiBlock(UI_Element *element, UI_Action *action, int num_of
 
 int UIAction_DeleteKeyFlagDestroy(UI_Action *action, UIData *uiData){
 	int x,y;
+	(void)uiData;
 	if(action->status == 1){
 		SDL_GetMouseState(&x,&y);
 		if(x < action->element->rect.x || x > action->element->rect.x + action->element->rect.w){
@@ -2035,6 +2032,7 @@ void UIConfigure_DeleteKeyFlagDestroy(UI_Element *element, UI_Action *action){
 #define linkedTemplate extra
 
 int UIAction_AddAiBlock(UI_Action *action, UIData *uiData){
+	(void)uiData;
 	BlockFunctionTemplate *template;
 	if(action->status == 1){
 		template = action->linkedTemplate;
@@ -2092,6 +2090,7 @@ void UIConfigure_DisplayImage(UI_Element *element, UI_Action *action, SDL_Textur
 	 Takes a specified Response */
 
 int UIAction_Auto(UI_Action *action, UIData *uiData){
+	(void)uiData;
 	if(action->status == 1){
 		UITrigger_Execute(action);
 		return 1;
@@ -2124,6 +2123,7 @@ void UIConfigure_Auto(UI_Element *element, UI_Action *action, enum Response resp
 int UIAction_ShrinkFitToParent(UI_Action *action, UIData *uiData){
 	SDL_Rect temp_rect;
 	SDL_Rect *parent_rect = &action->element->parent->rect;
+	(void)uiData;
 	if(action->status == 1){
 			temp_rect.x = action->xPosition;
 			temp_rect.y = action->yPosition;
@@ -2493,6 +2493,7 @@ void UIConfigure_YearsCounter(UI_Element *element, UI_Action *action, int num_of
 
 int UIAction_Counter(UI_Action *action, UIData *uiData){
 	int i = 0;
+	(void)uiData;
 	if(action->status > action->integers[0]){
 		action->status = 1;
 		action->new_status = 1;
@@ -2664,6 +2665,7 @@ void UIConfigure_RenderLine(UI_Element *element, UI_Action *action, enum LineOri
 	 There are two UIConfigures for this action, each binding to Left or Right click */
 
 int UIAction_ClickAnywhere(UI_Action *action, UIData *uiData){
+	(void)uiData;
 	if(action->status == 1){
 		UITrigger_Execute(action);
 		return 1;
@@ -2696,6 +2698,7 @@ void UIConfigure_RightClickAnywhere(UI_Element *element, UI_Action *action){
 	 to the Left or Right mouse buttons.*/
 
 int UIAction_ReleaseAnywhere(UI_Action *action, UIData *uiData){
+	(void)uiData;
 	if(action->status == 1){
 		UITrigger_Execute(action);
 		return 1;
@@ -2736,6 +2739,7 @@ void UIConfigure_RightReleaseAnywhere(UI_Element *element, UI_Action *action){
 int UIAction_CalculateSibling(UI_Action *action, UIData *uiData){
 	UI_Element *element;
 	int i = 0;
+	(void)uiData;
 	if(action->status == 1){
 		/* Ignore the first sibling, because that's the start block */
 		element = action->element->parent->child->sibling;
@@ -3242,7 +3246,7 @@ void UIConfigure_DraggableRectOverride(UI_Element *element, UI_Action *action, i
 
 int UIAction_TwoRectOverride(UI_Action *action, UIData *uiData){
 	int dt;
-	float transition_multiplier;
+	double transition_multiplier;
 	dt = *uiData->ticks;
 
 	if(action->status == 0){
@@ -3260,7 +3264,7 @@ int UIAction_TwoRectOverride(UI_Action *action, UIData *uiData){
 	    action->new_status = 3;
 	    action->counter = action->transitionTime;
 	  }
-	  transition_multiplier = ((float) action->counter)/((float) action->transitionTime);
+	  transition_multiplier = ((double) action->counter)/((double) action->transitionTime);
 	  action->element->rect.x = action->smallX + (action->bigX - action->smallX) * transition_multiplier;
 	  action->element->rect.y = action->smallY + (action->bigY - action->smallY) * transition_multiplier;
 	  action->element->rect.w = action->smallW + (action->bigW - action->smallW) * transition_multiplier;
@@ -3275,7 +3279,7 @@ int UIAction_TwoRectOverride(UI_Action *action, UIData *uiData){
 	    action->new_status = 0;
 	    action->counter = 0;
 	  }
-	  transition_multiplier = ((float) action->counter)/((float) action->transitionTime);
+	  transition_multiplier = ((double) action->counter)/((double) action->transitionTime);
 	  action->element->rect.x = action->smallX + (action->bigX - action->smallX) * transition_multiplier;
 	  action->element->rect.y = action->smallY + (action->bigY - action->smallY) * transition_multiplier;
 	  action->element->rect.w = action->smallW + (action->bigW - action->smallW) * transition_multiplier;
@@ -3399,8 +3403,8 @@ int UIAction_UpdateTwoRectOverrideOnWindowResize(UI_Action *action, UIData *uiDa
 }
 /* These argument names are horrible, but they stand for Big/Small X/Y Int/Float Point/Dimension */
 void UIConfigure_UpdateTwoRectOverrideOnWindowResize(UI_Element *element, UI_Action *action,
-UI_Action *twoRectOverride, int bxip, int byip, float bxfp, float byfp, int bxid, int byid, float bxfd, float byfd,
-int sxip, int syip, float sxfp, float syfp, int sxid, int syid, float sxfd, float syfd){
+UI_Action *twoRectOverride, int bxip, int byip, double bxfp, double byfp, int bxid, int byid, double bxfd, double byfd,
+int sxip, int syip, double sxfp, double syfp, int sxid, int syid, double sxfd, double syfd){
 	UIAction_Init(element,action);
 	action->response = WINDOW_RESIZE;
 	action->function = UIAction_UpdateTwoRectOverrideOnWindowResize;
@@ -3672,7 +3676,7 @@ void UITrigger_Bind(UI_Action *action, UI_Action *target, int status_from, int s
 }
 
 void UIRoot_Execute(UIData *uiData, enum Response response, int stopAtFirst){
-	int shouldStop;
+	int shouldStop = 0;
 	UI_Element *queue[255] = {NULL};
 	UI_Element *queue_element;
 	UI_Element *queue_element_child;
@@ -3707,7 +3711,6 @@ void UIRoot_ExecuteUpwards(UIData *uiData, enum Response response, int stopAtFir
 	UI_Element **queue = calloc(guesstimated_queue_length,sizeof(UI_Element*));
 	UI_Element *queue_element;
 	UI_Element *queue_element_child;
-	int i = 0;
 	int front = 0,back = 1;
 	queue[0] = uiData->root;
 	assert(queue!=NULL);
@@ -3772,15 +3775,11 @@ static int UIElement_isVisible(UI_Element *element){
 	return element->rect.w && element->rect.h;
 }
 
-static int percWindowDimension(int dimension, float perc){
-	return (int) ((float) dimension * perc);
-}
-
 void UIRoot_Destroy(UIData *uiData){
 	UIRoot_ExecuteUpwards(uiData,FREED,0);
 }
 
-void UIRoot_Pack(UIData *uiData, GraphicsData *graphicsData){
+void UIRoot_Pack(UIData *uiData){
 	UIRoot_Execute(uiData,WINDOW_RESIZE,0);
 }
 

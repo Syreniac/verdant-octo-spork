@@ -137,25 +137,25 @@ void UIConfigure_SetUpAiBlock(UI_Element *element, UI_Action *action, int num_of
 void UIConfigure_NullifyAI(UI_Element *element, UI_Action *action);
 void UIConfigure_RecallWorkers(UI_Element *element, UI_Action *action);
 void UIConfigure_DraggableVerticalOverride(UI_Element *element, UI_Action *action, int num_of_companions, ...);
-void UIConfigure_GetDifferenceInChildYOffset(UI_Element *element, UI_Action *action, float yPercOffset, int yIntOffset, UI_Element *child, int num_of_companions, ...);
+void UIConfigure_GetDifferenceInChildYOffset(UI_Element *element, UI_Action *action, double yPercOffset, int yIntOffset, UI_Element *child, int num_of_companions, ...);
 void UIConfigure_ShiftChildren(UI_Element *element, UI_Action *action);
 void UIConfigure_ShrinkFitToParentWithYShift(UI_Element *element, UI_Action *action, UI_Action *shiftSourceElement);
 void UIConfigure_CalculateScrollListOffset(UI_Element *element, UI_Action *action, int totalOffset);
-void UIConfigure_PercPosition(UI_Element *element, UI_Action *action, float xPerc, float yPerc,
+void UIConfigure_PercPosition(UI_Element *element, UI_Action *action, double xPerc, double yPerc,
 	                                                                    int xFixed, int yFixed,
 																																			int num_of_companions, ...);
-void UIConfigure_UpdateTwoRectOverrideOnWindowResize(UI_Element *element, UI_Action *action, UI_Action *twoRectOverride, int bxip, int byip, float bxfp, float byfp,
+void UIConfigure_UpdateTwoRectOverrideOnWindowResize(UI_Element *element, UI_Action *action, UI_Action *twoRectOverride, int bxip, int byip, double bxfp, double byfp,
 
-	                                                                                                                      int bxid, int byid, float bxfd, float byfd,
-                                                                                                                        int sxip, int syip, float sxfp, float syfp,
-																																																											  int sxid, int syid, float sxfd, float syfd);
+	                                                                                                                      int bxid, int byid, double bxfd, double byfd,
+                                                                                                                        int sxip, int syip, double sxfp, double syfp,
+																																																											  int sxid, int syid, double sxfd, double syfd);
 
 void UIConfigure_MuteSound(UI_Element *element, UI_Action *action);
 void UIConfigure_MuteSoundFX(UI_Element *element, UI_Action *action);
 
 
-void UIConfigure_PercOffsetRect(UI_Element *element, UI_Action *action, float xPerc, float yPerc,
-	 																																			float wPerc, float hPerc,
+void UIConfigure_PercOffsetRect(UI_Element *element, UI_Action *action, double xPerc, double yPerc,
+	 																																			double wPerc, double hPerc,
                                                                         int xFixed, int yFixed,
 																																				int wFixed, int hFixed,
 																																			  int num_of_companions, ...);
@@ -170,7 +170,7 @@ void UIConfigure_PassThrough(UI_Element *element, UI_Action *action, enum Respon
 void UIConfigure_SlideWithMouseWheel(UI_Element *element, UI_Action *action, int x, int y, int num_of_companions,...);
 void UIConfigure_Minimap(UI_Element *element, UI_Action *action);
 void UIConfigure_MinimapMouseMove(UI_Element *element, UI_Action *action);
-void UIConfigure_PercentageFillRect(UI_Element *element, UI_Action *action, double percentage_filled, int r, int g, int b);
+void UIConfigure_PercentageFillRect(UI_Element *element, UI_Action *action, int r, int g, int b);
 void UIConfigure_SetCellToSpawn(UI_Element *element, UI_Action *action, HiveCell *cell);
 void UIConfigure_GetPercentCellDone(UI_Element *element, UI_Action *action, HiveCell *hiveCell, int maximumTime, int num_of_companions, ...);
 void UIConfigure_SetCellToSpawn(UI_Element *element, UI_Action *action, HiveCell *cell);
@@ -190,11 +190,11 @@ void UIElement_Reparent(UI_Element *element, UI_Element *parent);
 void UIElement_Deparent(UI_Element *element);
 int UIElement_Execute(UI_Element *element, UIData *uiData, enum Response response);
 UI_Element *UIElement_Create(int x, int y, int w, int h, int num_of_actions);
-UI_Element *UIElement_CreateByPercentage(float rx, float ry, float rw, float rh, int x, int y, int num_of_actions);
+UI_Element *UIElement_CreateByPercentage(double rx, double ry, double rw, double rh, int x, int y, int num_of_actions);
 
 void UIRoot_Execute(UIData *uiData, enum Response response, int stopAtFirst);
 void UIRoot_Destroy(UIData *uiData);
-void UIRoot_Pack(UIData *uiData, GraphicsData *graphicsData);
+void UIRoot_Pack(UIData *uiData);
 void UIRoot_ExecuteUpwards(UIData *uiData, enum Response response, int stopAtFirst);
 
 UI_Element *makeAIBlock(int x_offset, int y_offset, BlockFunctionTemplate *template, UI_Element *parent);

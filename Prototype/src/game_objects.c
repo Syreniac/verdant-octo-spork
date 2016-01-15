@@ -12,6 +12,7 @@ static ProgrammableWorkerBrain createProgrammableWorkerBrain(void);
 /* Subfunction for createResourceNodeSpawner */
 static void initResourceNode(ResourceNode *resourceNode);
 static ResourceNode createResourceNode(GameObjectData *gameObjectData, ResourceNodeSpawner *parentSpawner, int resourceUnits);
+static void chooseResourceNodeType(GameObjectData *gameObjectData, ResourceNode *resourceNode);
 /* Subfunctions for updateGameObjects */
 static void updateWeather(GameObjectData *gameObjectData, AudioData *audioData, Weather *weather, int ticks);
 static void reInitialiseRoamingSpider(RoamingSpider *roamingSpider);
@@ -80,6 +81,11 @@ GameObjectData createGameObjectData(void){
 	gameObjectData.gameObjectSelection = createGameObjectSelection();
 	gameObjectData.environment = createEnvironment();
 	gameObjectData.years_survived = 0;
+  gameObjectData.pause_status = 0;
+  gameObjectData.first_programmable_worker = NULL;
+  gameObjectData.gameOver = 0;
+  gameObjectData.gameOverEventNum = SDL_RegisterEvents(1);
+  gameObjectData.objectDisplayEventNum = SDL_RegisterEvents(1);
 	return gameObjectData;
 }
 /* createGameObjectSelection
@@ -132,10 +138,9 @@ static Weather createWeather(void){
 
 ProgrammableWorker *getNearestWorker(GameObjectData *gameObjectData, int x,int y,
 																		 ProgrammableWorker *ignore){
-	int i = 0;
 	SDL_Point point;
-	double d2;
-	double d22;
+	double d2 = 0.0;
+	double d22 = 0.0;
 	ProgrammableWorker *pw = NULL;
 	ProgrammableWorker *p;
 	p = gameObjectData->first_programmable_worker;
@@ -161,8 +166,8 @@ ProgrammableWorker *getNearestWorker(GameObjectData *gameObjectData, int x,int y
 Tree *getNearestTree(GameObjectData *gameObjectData, int x, int y){
 	int i = 0;
 	SDL_Point p;
-	double d2;
-	double d22;
+	double d2 = 0.0;
+	double d22 = 0.0;
 	Tree *tree = NULL;
 	while(i < NUMBER_OF_TREES){
 		p = getCenterOfRect(gameObjectData->tree[i].stumpRect);
@@ -410,7 +415,7 @@ Tree createTree(GameObjectData *gameObjectData, int forceX, int forceY){
    This creates a ResourceNodeSpawner at a given location with a given radius
 	 and initialises all the relevant bits of information */
 
-ResourceNodeSpawner createResourceNodeSpawner(GameObjectData *gameObjectData,int maximumNodeCount, float xPosition, float yPosition, float radius){
+ResourceNodeSpawner createResourceNodeSpawner(GameObjectData *gameObjectData,int maximumNodeCount, double xPosition, double yPosition, double radius){
 	ResourceNodeSpawner resourceNodeSpawner;
 	int i = 0;
 
@@ -475,20 +480,28 @@ static ResourceNode createResourceNode(GameObjectData *gameObjectData, ResourceN
 	resourceNode.rect.w = SIZE_OF_FLOWER;
 	resourceNode.rect.h = SIZE_OF_FLOWER;
 
-	long int r = rand();
-	if(r < getDistance2BetweenRects(resourceNode.rect,gameObjectData->hive.rect) * 1.5){
-		resourceNode.type = 2;
-	}
-	else if(r < getDistance2BetweenRects(resourceNode.rect,gameObjectData->hive.rect) * 4.5){
-		resourceNode.type = 1;
-	}
-	else{
-		resourceNode.type = 0;
-	}
+	chooseResourceNodeType(gameObjectData, &resourceNode);
 
 	resourceNode.displayInfo = 0;
 	fitRectToWorld(&resourceNode.rect);
 	return resourceNode;
+}
+
+static void chooseResourceNodeType(GameObjectData *gameObjectData, ResourceNode *resourceNode){
+	int r = 5 - (rand() % 11);
+	SDL_Point p = getCenterOfRect(resourceNode->rect);
+	SDL_Point p1 = getCenterOfRect(gameObjectData->hive.rect);
+	double d = 0.1 * r + getDistance2BetweenPoints(p.x,p.y,p1.x,p1.y) / (X_SIZE_OF_WORLD*X_SIZE_OF_WORLD);
+	printf("%lf\n",d);
+	if(d > 0.7 * 0.7){
+		resourceNode->type = 2;
+	}
+	else if(d > 0.5 * 0.5){
+		resourceNode->type = 1;
+	}
+	else{
+		resourceNode->type = 0;
+	}
 }
 
 /* -------------------------------------------------------------------------- */
@@ -585,9 +598,10 @@ void updateGameObjects(GameObjectData *gameObjectData, AudioData *audioData, Ann
 static void updateWeather(GameObjectData *gameObjectData, AudioData *audioData, Weather *weather, int ticks){
 	/* Advance weather every TICKSPERWEATHER ticks; this may be semi-random due to tick-skipping. */
 	int weatherChannel = 3;
-	int ticksPerWeather;
 
-	weather->tickCount += ticks;
+	if(weather->tickCount != -1){
+		weather->tickCount += ticks;
+	}
 
 	if(weather->tickCount > TICKSPERWEATHER && !gameObjectData->pause_status){
 		weather->tickCount = 0;
@@ -685,7 +699,6 @@ static void updateResourceNodes(GameObjectData *gameObjectData, int ticks){
 
 static void updateResourceNodeSpawner(GameObjectData *gameObjectData, ResourceNodeSpawner *spawner, int ticks){
 	/* ResourceNodeSpawner *spawner = the spawner that we are updating
-	 float ticks = the number of ticks we are updating over.
 
 	 This function will just update a ResourceNodeSpawner as part of the main
 	 game loop. */
@@ -1207,22 +1220,8 @@ static void updateIceCream(GameObjectData *gameObjectData, int ticks){
 		/*but not yet melted*/
 		if(gameObjectData->droppedIceCream->droppedTimer < MELT_TIME_THRESHOLD){
 
-			gameObjectData->droppedIceCream->droppedTimer++;
-
-			if(gameObjectData->droppedIceCream->rect.w >= MAX_DROPPED_ICECREAM_WIDTH){
-				gameObjectData->droppedIceCream->sizeOscillator = -1;
-			}
-			else if(gameObjectData->droppedIceCream->rect.w <= DROPPED_ICECREAM_WIDTH){
-				gameObjectData->droppedIceCream->sizeOscillator = 1;
-			}
-			gameObjectData->droppedIceCream->rect.w += gameObjectData->droppedIceCream->sizeOscillator;
-			gameObjectData->droppedIceCream->xPosition -= ((float)gameObjectData->droppedIceCream->sizeOscillator)/2.0;
-			gameObjectData->droppedIceCream->rect.x = gameObjectData->droppedIceCream->xPosition;
-
-			gameObjectData->droppedIceCream->rect.h += gameObjectData->droppedIceCream->sizeOscillator;
-			gameObjectData->droppedIceCream->yPosition -= ((float)gameObjectData->droppedIceCream->sizeOscillator)/2.0;
-			gameObjectData->droppedIceCream->rect.y = gameObjectData->droppedIceCream->yPosition;
-    }
+			gameObjectData->droppedIceCream->droppedTimer += ticks;
+		}
 		else{
   		gameObjectData->droppedIceCream->dropped = 0;
   		gameObjectData->droppedIceCream->droppedTimer = 0;
@@ -1293,14 +1292,7 @@ static void updateProgrammableWorkers(GameObjectData *gameObjectData, Announceme
 }
 
 int updateProgrammableWorker(ProgrammableWorker **programmableWorkerP, GameObjectData *gameObjectData, AnnouncementsData *announcementsData, AudioData *audioData, int ticks){
-	/* ProgrammableWorker *programmableWorker = the ProgrammableWorker we're going
-												to be updating
-	 GameObjectData *gameObjectData		 = the pointer to the GameObjectData
-												that we will be using when
-												determining collision
-	 float ticks							= The number of ticks to update for.*/
-	double newX,newY;
-	double pX,pY;
+
 	ResourceNodeSpawner *resourceNodeSpawner = NULL;
 	ResourceNode *resourceNode = NULL;
 	char announcement[256];
@@ -1407,7 +1399,7 @@ int updateProgrammableWorker(ProgrammableWorker **programmableWorkerP, GameObjec
 			if(!(rand() % CHANCE_OF_REGAINING_FLIGHT)){
 				programmableWorker->wet_and_cant_fly = 0;
 			}
-			if(!(rand() % rand() % 100)){
+			if(!(rand() % 100)){
 			   programmableWorker->currentGraphicIndex = (programmableWorker->currentGraphicIndex + 1) % 2;
 			}
 		}
@@ -1435,7 +1427,7 @@ static void updateProgrammableWorkerWeather(GameObjectData *gameObjectData, Prog
 			j++;
 		}
 		if(j == NUMBER_OF_TREES + 1 /* + 1 includes the hive as shelter*/){
-			programmableWorker->wet_and_cant_fly =  rand() % 100 < CHANCE_OF_FALLING_IN_RAIN ? 0 : programmableWorker->wet_and_cant_fly;/*true*/
+			programmableWorker->wet_and_cant_fly =  rand() < CHANCE_OF_FALLING_IN_RAIN ? 1 : programmableWorker->wet_and_cant_fly;/*true*/
 		}
 	}
 }
@@ -1710,6 +1702,22 @@ static void blitIceCreamPerson(GameObjectData *gameObjectData, GraphicsData *gra
 
 static void blitIceCream(GameObjectData *gameObjectData,GraphicsData *graphicsData){
 	if(gameObjectData->droppedIceCream->dropped){
+
+
+		if(gameObjectData->droppedIceCream->rect.w >= MAX_DROPPED_ICECREAM_WIDTH){
+			gameObjectData->droppedIceCream->sizeOscillator = -1;
+		}
+		else if(gameObjectData->droppedIceCream->rect.w <= DROPPED_ICECREAM_WIDTH){
+			gameObjectData->droppedIceCream->sizeOscillator = 1;
+		}
+		gameObjectData->droppedIceCream->rect.w += gameObjectData->droppedIceCream->sizeOscillator;
+		gameObjectData->droppedIceCream->xPosition -= ((double)gameObjectData->droppedIceCream->sizeOscillator)/2.0;
+		gameObjectData->droppedIceCream->rect.x = gameObjectData->droppedIceCream->xPosition;
+
+		gameObjectData->droppedIceCream->rect.h += gameObjectData->droppedIceCream->sizeOscillator;
+		gameObjectData->droppedIceCream->yPosition -= ((double)gameObjectData->droppedIceCream->sizeOscillator)/2.0;
+		gameObjectData->droppedIceCream->rect.y = gameObjectData->droppedIceCream->yPosition;
+
 		if(gameObjectData->droppedIceCream->droppedTimer < MELT_TIME_THRESHOLD + 40){
 			blitGameObject(gameObjectData->droppedIceCream->rect,
 								     graphicsData,
@@ -1748,8 +1756,8 @@ static void blitDisabledWorkers(GameObjectData *gameObjectData, GraphicsData *gr
 		next = programmableWorker->next;
 
 		if(programmableWorker->wet_and_cant_fly == 1 || programmableWorker->cold_and_about_to_die == 1){
-			smallerBeeRect.w = (int)((float)programmableWorker->rect.w/BEE_SHRINK_FACTOR_ON_GROUND);
-			smallerBeeRect.h = (int)((float)programmableWorker->rect.h/BEE_SHRINK_FACTOR_ON_GROUND);
+			smallerBeeRect.w = (int)((double)programmableWorker->rect.w/BEE_SHRINK_FACTOR_ON_GROUND);
+			smallerBeeRect.h = (int)((double)programmableWorker->rect.h/BEE_SHRINK_FACTOR_ON_GROUND);
 			smallerBeeRect.y = programmableWorker->rect.y;
 			smallerBeeRect.x = programmableWorker->rect.x;
 			blitGameObject(smallerBeeRect,
@@ -1765,7 +1773,6 @@ static void blitDisabledWorkers(GameObjectData *gameObjectData, GraphicsData *gr
 static void blitProgrammableWorkers(GameObjectData *gameObjectData, GraphicsData *graphicsData){
 	ProgrammableWorker *programmableWorker;
 	ProgrammableWorker *nextt = NULL;
-	int dead = 0;
 	for(programmableWorker = gameObjectData->first_programmable_worker; programmableWorker != NULL ; programmableWorker = nextt){
 	 nextt = programmableWorker->next;
 	 if(!(programmableWorker->wet_and_cant_fly || programmableWorker->cold_and_about_to_die)){
@@ -1913,6 +1920,8 @@ static void getResourceNodeInfoString(ResourceNode *resourceNode, char *targetSt
 }
 
 static void getSpiderInfoString(RoamingSpider *roamingSpider, char *targetString){
+	/* This just tells the compiler not to throw unused parameter warnings when compiling */
+	(void)roamingSpider;
 	sprintf(targetString,"Insy winsy");
 }
 
