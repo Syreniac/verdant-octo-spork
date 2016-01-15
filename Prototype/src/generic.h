@@ -25,8 +25,8 @@ FILE *DEBUGGING_FILE_FREE;
 #define VERBOSE 1
 
 #define NUMBER_OF_CELLS_IN_HIVE 6
-#define SUGAR_COST_OF_WORKER 50
-#define HIVE_CELL_SPAWN_DELAY 30*1000
+#define SUGAR_COST_OF_WORKER 1
+#define HIVE_CELL_SPAWN_DELAY 1*1000
 
 #define HONEY_REQUIRED_FOR_WINTER 100
 #define REQUIREMENT_YEAR_INCREASE_PERCENTAGE 10
@@ -53,7 +53,7 @@ FILE *DEBUGGING_FILE_FREE;
 #define RAIN_FRAME_DELAY 4
 
 
-#define INITIAL_NUMBER_OF_WORKERS 3
+#define INITIAL_NUMBER_OF_WORKERS 1000
 
 /*lower values result in a higher chance of bees regaining flight when wet, with
 each call to updateProgrammableWorker*/
@@ -61,7 +61,8 @@ each call to updateProgrammableWorker*/
 
 /*lower values result in a higher chance of bees falling during rain, with
 each call to updateProgrammableWorker*/
-#define CHANCE_OF_FALLING_IN_RAIN 1
+/* Just trust me with this value (I think it gives bees on average 3 seconds in the rain) */
+#define CHANCE_OF_FALLING_IN_RAIN 7000000
 
 /*how much smaller are the bees when they are on the ground (further away from screen*/
 #define BEE_SHRINK_FACTOR_ON_GROUND 1.2
@@ -76,6 +77,9 @@ each call to updateProgrammableWorker*/
 #define SUGAR_VALUE_OF_RED_FLOWER 2
 #define SUGAR_VALUE_OF_YELLOW_FLOWER 5
 #define SUGAR_VALUE_OF_ICECREAM 50
+
+#define RESOURCE_NODE_NAME "Flower"
+#define WORKER_NAME "Bee"
 
 #define MELT_TIME_THRESHOLD 1000
 #define ICECREAM_PICKUP_RADIUS 20
@@ -135,9 +139,9 @@ each call to updateProgrammableWorker*/
 
 #define LENGTH_OF_STATUS_STRING 32
 
-#define WINTER_COUNTDOWN_SPEED 0.05
+#define WINTER_COUNTDOWN_SPEED 0.01
 
-#define MAX_DAYS_TO_WINTER 31
+#define MAX_DAYS_TO_WINTER 301
 #define AUTUMN_THRESHOLD (MAX_DAYS_TO_WINTER / 3)
 #define WINTER_THRESHOLD 1
 
@@ -208,3 +212,4 @@ char *fileToString(FILE *file);
 SDL_Point getPointFromInvPoint(SDL_Window *window, int x, int y);
 SDL_Point getPointFromPerc(SDL_Window *window, float x, float y);
 void shrinkRectToFit(SDL_Rect *toShrink, SDL_Rect *fitTo);
+int isPointInRangeOf(SDL_Point point, SDL_Point center, double radius);

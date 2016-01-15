@@ -6,7 +6,7 @@
 
 
 # These are system independent
-CFLAGS = -ggdb -pedantic -Wall -Wextra -Wno-unused-variable -Wno-unused-parameter -std=c99
+CFLAGS = -pedantic -Wall -Wextra -std=c99 -O3
 
 # File structure variables
 ASSETS_CONTENTS = .\assets

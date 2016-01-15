@@ -15,7 +15,7 @@ static void UITrigger_Destroy(UI_Action *action, UI_Trigger *trigger);
 static void UIElement_RemoveExposedData(UI_Element *element);
 
 static void sUIAction_Minimap_DrawGameObject(UI_Action *action, GraphicsData *graphicsData, SDL_Rect *rect);
-static void sUIAction_DisplayNumber_EditNumber(UI_Action *action, int editNumber);
+//static void sUIAction_DisplayNumber_EditNumber(UI_Action *action, int editNumber);
 static void sUIAction_DisplayString_EditString(UI_Action *action, char *editString);
 
 int UIAction_PercentageFillRect(UI_Action *action, UIData *uiData);
@@ -110,6 +110,8 @@ static int countOptionsForAITemplate(BlockFunctionTemplate *template){
 			case BF_SEASON_TIME:
 				count += 1;
 				break;
+			default:
+				break;
 		}
 		i++;
 	}
@@ -135,6 +137,8 @@ static int countUIActionsNeededForAITemplate(BlockFunctionTemplate *template){
 			case BF_SEASON_TIME:
 				printf("+1 required option\n");
 				count += 4;
+				break;
+			default:
 				break;
 		}
 		i++;
@@ -330,6 +334,8 @@ UI_Element *makeAIBlock(int x_offset, int y_offset, BlockFunctionTemplate *templ
 				integerArg = makeAIBlockIntegerSelector(element2, &nextAvailableAction, x, 25);
 				optionsPlaced++;
 				break;
+			case BF_WORKER_STATUS:
+				break;
 		}
 		i++;
 	}
@@ -388,6 +394,36 @@ UI_Element *UIElement_Create(int x, int y, int w, int h, int num_of_actions){
 	   element->exposed_data_count = 0;
 	   return element;
 }
+
+/* UIAction_OnIntegerChange
+
+   This calls it's triggers when a given integer changes value */
+
+#define watchedInteger extra
+#define previousValue integers[0]
+
+int UIAction_OnIntegerChange(UI_Action *action, UIData *uiData){
+	if(action->status != 0){
+		if(action->previousValue != *((int*)action->watchedInteger)){
+			action->previousValue = *((int*)action->watchedInteger);
+			UITrigger_Execute(action);
+		}
+		return 1;
+	}
+	return 0;
+}
+
+void UIConfigure_OnIntegerChange(UI_Element *element, UI_Action *action, int *target){
+	UIAction_Init(element,action);
+	action->response = UPDATE;
+	action->function = UIAction_OnIntegerChange;
+	action->integers = calloc(1,sizeof(int));
+	action->previousValue = *target;
+	action->watchedInteger = target;
+}
+
+#undef watchedInteger
+#undef previousValue
 
 /* UIAction_StringCollection
 
@@ -1046,12 +1082,12 @@ int UIAction_Minimap(UI_Action *action, UIData *uiData){
 		sUIAction_Minimap_DrawGameObject(action,graphicsData,&gameObjectData->roamingSpider->rect);
 		SDL_SetRenderDrawColor(graphicsData->renderer,255,255,255,255);
 		sUIAction_Minimap_DrawGameObject(action, graphicsData,&gameObjectData->iceCreamPerson->rect);
-		
+
 		if(gameObjectData->droppedIceCream->dropped){
 			SDL_SetRenderDrawColor(graphicsData->renderer,255,0,0,255);
 			sUIAction_Minimap_DrawGameObject(action, graphicsData,&gameObjectData->droppedIceCream->rect);
 		}
-		
+
 		SDL_SetRenderDrawColor(graphicsData->renderer,255,255,255,255);
 		rect.x = (double)-graphicsData->navigationOffset.x / X_SIZE_OF_WORLD * action->element->rect.w + action->element->rect.x;
 		rect.y = (double)-graphicsData->navigationOffset.y / Y_SIZE_OF_WORLD * action->element->rect.h + action->element->rect.y;
@@ -1233,13 +1269,11 @@ void UIConfigure_GetGameOverString(UI_Element *element, UI_Action *action, UI_Ac
 }
 
 int UIAction_GetInfoDisplayString(UI_Action *action, UIData *uiData){
-		ObjectInfoDisplay* objectInfoDisplay;
 		va_list vargs;
-		objectInfoDisplay = uiData->objectInfoDisplay;
 		if(action->status != 0){
 			action->displayStringAction->companionChangeDisplayString = realloc(action->displayStringAction->companionChangeDisplayString,
-				                                                                  strlen(objectInfoDisplay->infoDisplayString)+1);
-			strcpy(action->displayStringAction->companionChangeDisplayString, objectInfoDisplay->infoDisplayString);
+				                                                                  strlen(uiData->gameObjectData->gameObjectSelection.nameString)+1);
+			strcpy(action->displayStringAction->companionChangeDisplayString, uiData->gameObjectData->gameObjectSelection.nameString);
 		}
 		return 0;
 }
@@ -1254,13 +1288,11 @@ void UIConfigure_GetInfoDisplayString(UI_Element *element, UI_Action *action, UI
 }
 
 int UIAction_GetObjectStatusString(UI_Action *action, UIData *uiData){
-		ObjectInfoDisplay* objectInfoDisplay;
 		va_list vargs;
-		objectInfoDisplay = uiData->objectInfoDisplay;
 		if(action->status != 0){
 			action->displayStringAction->companionChangeDisplayString = realloc(action->displayStringAction->companionChangeDisplayString,
-				                                                                  strlen(objectInfoDisplay->objectStatusString)+1);
-			strcpy(action->displayStringAction->companionChangeDisplayString, objectInfoDisplay->objectStatusString);
+				                                                                  strlen(uiData->gameObjectData->gameObjectSelection.infoString)+1);
+			strcpy(action->displayStringAction->companionChangeDisplayString, uiData->gameObjectData->gameObjectSelection.infoString);
 		}
 		return 0;
 }
@@ -2158,10 +2190,10 @@ void UIConfigure_ShrinkFitToParent(UI_Element *element, UI_Action *action){
 #define alignOffset integers[4]
 #define numberAsString strings[0]
 
-static void sUIAction_DisplayNumber_EditNumber(UI_Action *action, int editNumber){
+/* static void sUIAction_DisplayNumber_EditNumber(UI_Action *action, int editNumber){
 	assert(action->function == UIAction_DisplayNumber);
 	action->newNumber = editNumber;
-}
+} */
 
 int UIAction_DisplayNumber(UI_Action *action, UIData *uiData){
 	GraphicsData *graphicsData;
@@ -2376,7 +2408,7 @@ int UIAction_DaysCounter(UI_Action *action, UIData *uiData){
 	GameObjectData *gameObjectData;
 	gameObjectData = uiData->gameObjectData;
 	if(action->status == 1){
-		action->dayCount = gameObjectData->hive.winterCountdown;
+		action->dayCount = gameObjectData->environment.winterCountdown;
 		while(i < action->num_of_companions){
 			action->companions[i]->dayCount = action->dayCount;
 			i++;
@@ -2421,7 +2453,7 @@ int UIAction_YearsCounter(UI_Action *action, UIData *uiData){
 	GameObjectData *gameObjectData;
 	gameObjectData = uiData->gameObjectData;
 	if(action->status == 1){
-		action->yearCount = gameObjectData->hive.years_survived;
+		action->yearCount = gameObjectData->years_survived;
 		while(i < action->num_of_companions){
 			action->companions[i]->yearCount = action->yearCount;
 			i++;

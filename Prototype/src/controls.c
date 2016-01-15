@@ -33,18 +33,11 @@ int handleEvent(SDL_Event *event, GameObjectData *gameObjectData, UIData *uiData
 					/* trust me */
 					if(event->button.button == SDL_BUTTON_LEFT){
 					  UIRoot_ExecuteUpwards(uiData,LEFT_CLICK,1);
-					  if(controlsData->objectSelection){
-					  	objectInfoDisplay(gameObjectData, graphicsData, uiData->announcementsData, &event->button);
-								controlsData->mouseButtons[LEFT_CLICK_BUTTON] = 1;
-					  }
+						selectGameObject(gameObjectData,graphicsData,event);
 
 					}
 					else if(event->button.button == SDL_BUTTON_RIGHT){
 					  UIRoot_ExecuteUpwards(uiData,RIGHT_CLICK,1);
-					  if(controlsData->objectSelection){
-					  	objectInfoDisplay(gameObjectData, graphicsData,uiData->announcementsData, &event->button);
-								controlsData->mouseButtons[RIGHT_CLICK_BUTTON] = 1;
-					  }
 					}
 				}
 				break;

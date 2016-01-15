@@ -16,6 +16,7 @@ int getConfiguredInt(ConfigurationData *configurationData, char *name){
     flag = flag->next;
   }
   assert(flag!=NULL);
+  return 0;
 }
 
 ConfigurationFlag *makeConfigurationFlag(char *data){

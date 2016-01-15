@@ -277,3 +277,11 @@ void setNavigationOffset(GraphicsData *graphicsData, int x, int y){
 	graphicsData->navigationOffset.x = x;
 	graphicsData->navigationOffset.y = y;
 }
+
+void centerCameraOnPoint(GraphicsData *graphicsData, int x, int y){
+	int win_x, win_y;
+	SDL_GetWindowSize(graphicsData->window,&win_x,&win_y);
+	x = x - win_x/2;
+	y = y - win_y/2;
+	setNavigationOffset(graphicsData,x,y);
+}

@@ -248,6 +248,14 @@ void shrinkRectToFit(SDL_Rect *toShrink, SDL_Rect *fitTo){
   }
 }
 
+int isPointInRangeOf(SDL_Point point, SDL_Point center, double radius){
+	radius = radius * radius;
+	if(getDistance2BetweenPoints(center.x,center.y,point.x,point.y) <= radius){
+		return 1;
+	}
+	return 0;
+}
+
 #if DEBUGGING==1
 #undef calloc
 #undef malloc

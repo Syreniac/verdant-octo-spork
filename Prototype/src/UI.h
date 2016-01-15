@@ -26,6 +26,16 @@ enum UIDataTypes{UI_NULL,
 
 enum LineOrigins{CENTER,BL_CORNER,BR_CORNER,TL_CORNER,TR_CORNER};
 
+enum UIElement_Variety{
+  HIVECELL,
+  BLOCK,
+  STOPBOX,
+  COMPILEBOX,
+	CROSSBOX,
+	SCROLLHANDLE,
+	FILLRECT
+};
+
 typedef struct UI_Element UI_Element;
 typedef struct UI_Action UI_Action;
 typedef struct UI_Trigger UI_Trigger;
@@ -42,7 +52,6 @@ struct UIData{
 	AIData *aiData;
 	AnnouncementsData *announcementsData;
 	GameOverData *gameOverData;
-	ObjectInfoDisplay *objectInfoDisplay;
 	SDL_Event *event;
 	int *ticks;
 	AudioData *audioData;
@@ -96,16 +105,6 @@ enum UIString_Align{
 	UISTRING_ALIGN_LEFT,
 	UISTRING_ALIGN_CENTER,
 	UISTRING_ALIGN_RIGHT
-};
-
-enum UIElement_Variety{
-  HIVECELL,
-  BLOCK,
-  STOPBOX,
-  COMPILEBOX,
-	CROSSBOX,
-	SCROLLHANDLE,
-	FILLRECT
 };
 
 void UIConfigure_FillRect(UI_Element *element, UI_Action *action, int r, int g, int b);
@@ -166,7 +165,6 @@ void UIConfigure_GetGameOverString(UI_Element *element, UI_Action *action, UI_Ac
 void UIConfigure_GetFinalScoreString(UI_Element *element, UI_Action *action, UI_Action *placeToPut);
 void UIConfigure_GetInfoDisplayString(UI_Element *element, UI_Action *action, UI_Action *placeToPut);
 void UIConfigure_GetObjectStatusString(UI_Element *element, UI_Action *action, UI_Action *placeToPut);
-void UIConfigure_GetObjectStatusString(UI_Element *element, UI_Action *action, UI_Action *placeToPut);
 void UIConfigure_FillAndBorderRect(UI_Element *element, UI_Action *action, int fr, int fg, int fb, int br, int bg, int bb, UIElement_Variety variety);
 void UIConfigure_PassThrough(UI_Element *element, UI_Action *action, enum Response response, int num_of_companions, ...);
 void UIConfigure_SlideWithMouseWheel(UI_Element *element, UI_Action *action, int x, int y, int num_of_companions,...);
@@ -184,6 +182,7 @@ void UIConfigure_DisplayStringSubrect(UI_Element *element, UI_Action *action, ch
 void UIConfigure_FillAndBorderSubrect(UI_Element *element, UI_Action *action, int x, int y, int w, int h, int red, int green, int blue,int bred, int bgreen, int bblue);
 void UIConfigure_StringCollection(UI_Element *element, UI_Action *action, int num_of_companions, int num_of_strings, ...);
 void UIConfigure_DisplayNumberSubrect(UI_Element *element, UI_Action *action, int number, int font, int x, int y, int w, int h);
+void UIConfigure_OnIntegerChange(UI_Element *element, UI_Action *action, int *target);
 void UITrigger_Bind(UI_Action *action, UI_Action *target, int state_from, int state_to);
 
 void UIElement_Free(UI_Element *element);

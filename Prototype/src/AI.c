@@ -13,7 +13,7 @@ static int doIntCompWithCharOperator(int a, int b, char op){
     case '=':
       return a == b;
   }
-  assert(op != op);
+  return 0;
 }
 
 static int doDoubleCompWithCharOperator(double a, double b, char op){
@@ -26,6 +26,7 @@ static int doDoubleCompWithCharOperator(double a, double b, char op){
       return a == b;
   }
   assert(op != op);
+  return 0;
 }
 
 /* All blockFunctions must:
@@ -58,7 +59,7 @@ int blockFunction_HeadToNearestWorker(BlockFunctionGlobals *globals, BlockFuncti
 }
 
 int blockFunction_IfCountToWinter(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
-  if(doIntCompWithCharOperator(gameObjectData->hive.winterCountdown,arguments->integers[0],arguments->characters[0])){
+  if(doIntCompWithCharOperator(gameObjectData->environment.winterCountdown,arguments->integers[0],arguments->characters[0])){
     return 1;
   }
   return 2;
@@ -104,10 +105,10 @@ int blockFunction_GoToTree(BlockFunctionGlobals *globals, BlockFunctionArgs *arg
 }
 
 int blockFunction_IsRaining(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
-  if(gameObjectData->weather.present_weather == Rain){
+  if(gameObjectData->environment.weather.present_weather == Rain){
     return 1;
   }
-  return 0;
+  return 2;
 }
 
 int blockFunction_PercentChance(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData, int ticks){
@@ -690,7 +691,7 @@ BlockFunction createAIBlockFunctionFromTokens(BlockFunctionRoot *blockFunctionRo
 	int read_int;
 	float read_float;
 	char read_char;
-	int read_position = 0;
+	unsigned int read_position = 0;
 	int read_add;
 	int read_count;
 	blockFunction.primary = NULL;
@@ -705,7 +706,6 @@ BlockFunction createAIBlockFunctionFromTokens(BlockFunctionRoot *blockFunctionRo
 	while(i < numOfLinesToUse){
 		if(tokensToUse[i][0] != '\t'){
 			strcpy(blockFunction.name,tokensToUse[i]);
-      printf("making blockFunction: %s\n",blockFunction.name);
 			blockFunction.wrapped_function = getBlockFunctionByName(tokensToUse[i]);
 		}
 		else if(strncmp(tokensToUse[i],"\tprimary = ",10) == 0){
@@ -718,14 +718,7 @@ BlockFunction createAIBlockFunctionFromTokens(BlockFunctionRoot *blockFunctionRo
 			read_position = 12;
 			blockFunction.arguments.numOfInts = 0;
 			blockFunction.arguments.integers = NULL;
-      int ii = 0;
-      while(ii < strlen(tokensToUse[i])){
-        printf("%d%c",ii,tokensToUse[i][ii]);
-        ii++;
-      }
-      printf("\n");
 			while((sscanf(&tokensToUse[i][read_position],"%d%n",&read_int,&read_add)) != 0 && read_add != 0 && read_position < strlen(tokensToUse[i])){
-        printf("adding integer %d %d\n",read_position,read_int);
   			read_position += read_add+1;
 				blockFunction.arguments.numOfInts++;
 				blockFunction.arguments.integers = realloc(blockFunction.arguments.integers,
