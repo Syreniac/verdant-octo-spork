@@ -149,6 +149,10 @@ int keydown(ControlsData *controlsData, GameObjectData *gameObjectData, Graphics
 				printf("DEV HACKING A LOT OF HONEY\n");
 				gameObjectData->hive.flowers_collected += 50000;
 				break;
+			case SDL_SCANCODE_N:
+				printf("DEV HACKING TO GO TO NEXT WEATHER\n");
+				gameObjectData->environment.weather.tickCount = TICKSPERWEATHER;
+				break;
 			#endif
 	    default:
 				return 1;

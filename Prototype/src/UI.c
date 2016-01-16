@@ -1867,7 +1867,7 @@ int UIAction_ReadAiBlocks(UI_Action *action, UIData *uiData){
 		}
 		printf("%s\n",workingSpace);
 		blockFunctionRoot = makeBlockFunctionRootFromString(workingSpace,childCount);
-	    erroneousBlockFunction = testBlockFunctionRootForLoops(&blockFunctionRoot.blockFunctions[0],NULL,0);
+	    erroneousBlockFunction = testBlockFunctionRootForLoops(uiData->aiData,&blockFunctionRoot.blockFunctions[0],NULL,0);
 	    if(erroneousBlockFunction != NULL){
 				while(erroneousBlockFunction != &blockFunctionRoot.blockFunctions[i]){
 				  i++;

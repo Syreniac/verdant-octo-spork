@@ -62,12 +62,10 @@ FILE *DEBUGGING_FILE_FREE;
 
 /*lower values result in a higher chance of bees regaining flight when wet, with
 each call to updateProgrammableWorker*/
-#define CHANCE_OF_REGAINING_FLIGHT 1000
+#define CHANCE_OF_REGAINING_FLIGHT 100
 
-/*lower values result in a higher chance of bees falling during rain, with
-each call to updateProgrammableWorker*/
-/* Just trust me with this value (I think it gives bees on average 3 seconds in the rain) */
-#define CHANCE_OF_FALLING_IN_RAIN 500
+#define BASE_WEATHERPROOF 3000
+#define RANDOM_WEATHERPROOF 1000
 
 /*how much smaller are the bees when they are on the ground (further away from screen*/
 #define BEE_SHRINK_FACTOR_ON_GROUND 1.2
@@ -137,7 +135,7 @@ each call to updateProgrammableWorker*/
 #define DEFAULT_SPAWNDELAY 300000
 #define DEFAULT_SPAWNRADIUS 100.0
 #define RANDOMISE_SPAWNRADIUS 2500
-#define DEFAULT_MAXNODECOUNT 10
+#define DEFAULT_MAXNODECOUNT 50
 #define TICKSPERWEATHER 30000
 #define SUN_LASTS_LONGER_FACTOR 5
 #define FRAME_TIME 15
