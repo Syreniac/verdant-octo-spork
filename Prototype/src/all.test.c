@@ -472,7 +472,6 @@ START_TEST(test_panScreen){
 END_TEST
 
 START_TEST(test_initControlData){
-    SDL_Event event;
     GameData gameData;
     int total, i;
     SDL_Init(SDL_INIT_VIDEO);

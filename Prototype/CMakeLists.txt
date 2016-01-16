@@ -53,9 +53,7 @@ set(COMMON_FILES
         src/world_generation.c
         src/world_generation.h
         src/announcements.c
-        src/announcements.h
-        src/configuration.c
-        src/configuration.h)
+        src/announcements.h)
 set(SOURCE_FILES
     src/main.c
     src/main.h
