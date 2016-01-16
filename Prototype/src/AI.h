@@ -181,5 +181,5 @@ BlockFunctionRoot makeBlockFunctionRootFromString(char *str, int numOfBlocks);
 
 blockFunction_WrappedFunction getBlockFunctionByName(char *blockFunctionName);
 void nullifyBlockFunctionRoot(BlockFunctionRoot *root, GameObjectData *gameObjectData);
-BlockFunction *testBlockFunctionRootForLoops(BlockFunction *toTest, BlockFunction **testAgainst, int countToTestAgainst);
+BlockFunction *testBlockFunctionRootForLoops(AIData *aiData, BlockFunction *toTest, BlockFunction **testAgainst, int countToTestAgainst);
 int testBlockFunctionRootForStart(BlockFunctionRoot *root);

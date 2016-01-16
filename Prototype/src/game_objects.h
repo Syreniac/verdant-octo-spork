@@ -113,6 +113,8 @@ struct ProgrammableWorker{
   int xRenderPosWhenSelected;
   int yRenderPosWhenSelected;
 
+  int weatherproofTimer;
+
   int type;
   enum ProgrammableWorkerStatus status;
   ProgrammableWorker *next;

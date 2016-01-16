@@ -17,6 +17,7 @@ static void chooseResourceNodeType(GameObjectData *gameObjectData, ResourceNode 
 static void updateWeather(GameObjectData *gameObjectData, AudioData *audioData, Weather *weather, int ticks);
 static void reInitialiseRoamingSpider(RoamingSpider *roamingSpider);
 static void updateEnvironment(GameObjectData *gameObjectData, AnnouncementsData *announcementsData, int ticks);
+static void programmableWorkerWeatherProofing(GameObjectData *gameObjectData);
 static void updateResourceNodes(GameObjectData *gameObjectData, int ticks);
 static void updateResourceNodeSpawner(GameObjectData *gameObjectData, ResourceNodeSpawner *spawner, int ticks);
 static int getFirstDeadResourceNode(ResourceNodeSpawner *resourceNodeSpawner);
@@ -30,7 +31,7 @@ static void updateHiveCell(GameObjectData *gameObjectData, AnnouncementsData *an
 static void killAllBees(ProgrammableWorker **programmableWorker);
 static void updateProgrammableWorkers(GameObjectData *gameObjectData, AnnouncementsData *announcementsData, AudioData *audioData, int ticks);
 static int updateProgrammableWorker(ProgrammableWorker **programmableWorkerP, GameObjectData *gameObjectData, AnnouncementsData *announcementsData, AudioData *audioData, int ticks);
-static void updateProgrammableWorkerWeather(GameObjectData *gameObjectData, ProgrammableWorker *programmableWorker);
+static void updateProgrammableWorkerWeather(GameObjectData *gameObjectData, ProgrammableWorker *programmableWorker, int ticks);
 static void updateProgrammableWorkerMove(ProgrammableWorker *programmableWorker, int ticks);
 static ResourceNode *checkResourceNodeCollision(ResourceNodeSpawner **resourceNodeSpawnerPointer,
 																				 				GameObjectData *gameObjectData,
@@ -303,6 +304,7 @@ ProgrammableWorker *createProgrammableWorker(GameObjectData *gameObjectData){
 	programmableWorker->status = IDLE;
 	programmableWorker->next = NULL;
 	programmableWorker->brain = createProgrammableWorkerBrain();
+	programmableWorker->weatherproofTimer = BASE_WEATHERPROOF + rand() % RANDOM_WEATHERPROOF;
 	return(programmableWorker);
 }
 
@@ -491,12 +493,12 @@ static void chooseResourceNodeType(GameObjectData *gameObjectData, ResourceNode 
 	int r = 5 - (rand() % 11);
 	SDL_Point p = getCenterOfRect(resourceNode->rect);
 	SDL_Point p1 = getCenterOfRect(gameObjectData->hive.rect);
-	double d = 0.1 * r + getDistance2BetweenPoints(p.x,p.y,p1.x,p1.y) / (X_SIZE_OF_WORLD*X_SIZE_OF_WORLD);
+	double d = 0.05 * r + getDistance2BetweenPoints(p.x,p.y,p1.x,p1.y) / (X_SIZE_OF_WORLD*X_SIZE_OF_WORLD);
 	printf("%lf\n",d);
-	if(d > 0.7 * 0.7){
+	if(d > 0.5 * 0.5){
 		resourceNode->type = 2;
 	}
-	else if(d > 0.5 * 0.5){
+	else if(d > 0.4 * 0.4){
 		resourceNode->type = 1;
 	}
 	else{
@@ -1315,14 +1317,14 @@ int updateProgrammableWorker(ProgrammableWorker **programmableWorkerP, GameObjec
 		}
 		programmableWorker->cold_and_about_to_die = 0;
 
+		updateProgrammableWorkerWeather(gameObjectData, programmableWorker, ticks);
+
 		if(!programmableWorker->wet_and_cant_fly){ /*programmable worker has not been caught in rain recently*/
 			programmableWorker->flapTimer += ticks;
 			if(programmableWorker->flapTimer > MS_BETWEEN_FLAPPING){
 				programmableWorker->flapTimer -= MS_BETWEEN_FLAPPING;
 				programmableWorker->currentGraphicIndex = (programmableWorker->currentGraphicIndex + 1) % 2;
 			}
-
-			updateProgrammableWorkerWeather(gameObjectData, programmableWorker);
 
 			if(programmableWorker->stunned_after_sting){
 				/* Make bees dizzy after stinging */
@@ -1395,13 +1397,6 @@ int updateProgrammableWorker(ProgrammableWorker **programmableWorkerP, GameObjec
 			}
 		}
 		else{
-			/*programmable worker has been caught in rain and hasn't regained ability to fly yet*/
-			if(!(rand() % CHANCE_OF_REGAINING_FLIGHT)){
-				programmableWorker->wet_and_cant_fly = 0;
-			}
-			if(!(rand() % 100)){
-			   programmableWorker->currentGraphicIndex = (programmableWorker->currentGraphicIndex + 1) % 2;
-			}
 		}
 
 		/*for battling with enemies*/
@@ -1415,19 +1410,35 @@ int updateProgrammableWorker(ProgrammableWorker **programmableWorkerP, GameObjec
 	return 0;
 }
 
-static void updateProgrammableWorkerWeather(GameObjectData *gameObjectData, ProgrammableWorker *programmableWorker){
+static void updateProgrammableWorkerWeather(GameObjectData *gameObjectData, ProgrammableWorker *programmableWorker, int ticks){
 	int i, j = 0;
 	if(gameObjectData->environment.weather.present_weather == Rain){
-		for(i = 0; i < NUMBER_OF_TREES; i++){
-			if(!testRectIntersection(programmableWorker->rect, gameObjectData->tree[i].rect)){
+		if(programmableWorker->weatherproofTimer <= 0){
+			for(i = 0; i < NUMBER_OF_TREES; i++){
+				if(!testRectIntersection(programmableWorker->rect, gameObjectData->tree[i].rect)){
+					j++;
+				}
+			}
+			if(!programmableWorker->insideHive){
 				j++;
 			}
+			if(j == NUMBER_OF_TREES + 1 /* + 1 includes the hive as shelter*/){
+				programmableWorker->wet_and_cant_fly =  1;/*true*/
+			}
 		}
-		if(!programmableWorker->insideHive){
-			j++;
+		else{
+			programmableWorker->weatherproofTimer -= ticks;
 		}
-		if(j == NUMBER_OF_TREES + 1 /* + 1 includes the hive as shelter*/){
-			programmableWorker->wet_and_cant_fly =  rand() < CHANCE_OF_FALLING_IN_RAIN ? 1 : programmableWorker->wet_and_cant_fly;/*true*/
+	}
+  else if(programmableWorker->wet_and_cant_fly){
+		/*programmable worker has been caught in rain and hasn't regained ability to fly yet*/
+		if((rand() % CHANCE_OF_REGAINING_FLIGHT) == 1){
+			programmableWorker->wet_and_cant_fly = 0;
+			programmableWorker->weatherproofTimer = BASE_WEATHERPROOF + rand() % RANDOM_WEATHERPROOF;
+			programmableWorker->currentGraphicIndex = 0;
+		}
+		if(!(rand() % 100)){
+		   programmableWorker->currentGraphicIndex = (programmableWorker->currentGraphicIndex + 1) % 2;
 		}
 	}
 }
@@ -1756,6 +1767,7 @@ static void blitDisabledWorkers(GameObjectData *gameObjectData, GraphicsData *gr
 		next = programmableWorker->next;
 
 		if(programmableWorker->wet_and_cant_fly == 1 || programmableWorker->cold_and_about_to_die == 1){
+
 			smallerBeeRect.w = (int)((double)programmableWorker->rect.w/BEE_SHRINK_FACTOR_ON_GROUND);
 			smallerBeeRect.h = (int)((double)programmableWorker->rect.h/BEE_SHRINK_FACTOR_ON_GROUND);
 			smallerBeeRect.y = programmableWorker->rect.y;
