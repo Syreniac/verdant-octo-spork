@@ -410,17 +410,22 @@ int blockFunction_IfNodeFound(BlockFunctionGlobals *globals, BlockFunctionArgs *
   (void)globals;
   (void)arguments;
   (void)gameObjectData;
+
   if(programmableWorker->brain.foundNode != NULL){
+  	printf("nodeFound\n");
     return 1;
   }
   return 2;
 }
 
+
 int blockFunction_HeadToFoundNode(BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
   (void)globals;
   (void)arguments;
   (void)gameObjectData;
+  printf(".\n");
   if(programmableWorker->brain.foundNode != NULL){
+  	printf("hhhhheere\n");
     programmableWorker->heading = getAngleBetweenRects(&programmableWorker->brain.foundNode->rect,&programmableWorker->rect);
     programmableWorker->status = LEAVING;
   }

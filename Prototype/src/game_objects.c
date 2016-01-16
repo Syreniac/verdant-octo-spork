@@ -39,8 +39,9 @@ static ResourceNode *checkResourceNodeCollision(ResourceNodeSpawner **resourceNo
 static void updateProgrammableWorkerIdle(GameObjectData *gameObjectData, ProgrammableWorker *programmableWorker);
 static int updateProgrammableWorkerCombat(GameObjectData *gameObjectData, ProgrammableWorker *programmableWorker, AnnouncementsData *announcementsData);
 static void killProgrammableWorker(GameObjectData *gameObjectData, ProgrammableWorker **toDeletePointer);
-static void updateProgrammableWorkerSenses(ProgrammableWorker *programmableWorker, ResourceNodeSpawner *resourceNodeSpawner);
+static void updateProgrammableWorkerSenses(GameObjectData *gameObjectData, ProgrammableWorker *programmableWorker, ResourceNodeSpawner *resourceNodeSpawner);
 static ResourceNode *chooseNodeRandomly(ResourceNodeSpawner *resourceNodeSpawner);
+static ResourceNode *chooseReachableAliveNode(GameObjectData *gameObjectData, SDL_Point workerPoint);
 /* Subfunctions for renderGameObjects */
 static void blitBackground(GameObjectData *gameObjectData, GraphicsData *graphicsData);
 static void blitTrees(GameObjectData *gameObjectData, GraphicsData *graphicsData);
@@ -438,6 +439,7 @@ ResourceNodeSpawner createResourceNodeSpawner(GameObjectData *gameObjectData,int
 		initResourceNode(&resourceNodeSpawner.resourceNodes[i]);
 		if(rand() % 2 != 0){
 			resourceNodeSpawner.resourceNodes[i] = createResourceNode(gameObjectData,&resourceNodeSpawner,0);
+			resourceNodeSpawner.currentNodeCount++;
 	 }
 	 i++;
 	}
@@ -673,7 +675,7 @@ static void updateEnvironment(GameObjectData *gameObjectData, AnnouncementsData 
 				gameObjectData->environment.season = WINTER;
 			}
 		case SUMMER:
-			if(gameObjectData->environment.winterCountdown >= AUTUMN_THRESHOLD){
+			if(gameObjectData->environment.winterCountdown <= AUTUMN_THRESHOLD){
 				gameObjectData->environment.treeGraphic = AUTUMN_INDEX;
 				gameObjectData->environment.season = AUTUMN;
 			}
@@ -1389,6 +1391,7 @@ int updateProgrammableWorker(ProgrammableWorker **programmableWorkerP, GameObjec
                   default:
                     break;
 								}
+								printf("here setting foundNode in brain to NULL\n");
 	  					programmableWorker->brain.foundNode = NULL;
   					}
   				}
@@ -1410,7 +1413,8 @@ int updateProgrammableWorker(ProgrammableWorker **programmableWorkerP, GameObjec
 			/* Returns 1 if its died from spider/enemy related injuries */
 			return 1;
 		};
-		updateProgrammableWorkerSenses(programmableWorker, resourceNodeSpawner);
+
+		updateProgrammableWorkerSenses(gameObjectData, programmableWorker, resourceNodeSpawner);
 	}
 	*programmableWorkerP = programmableWorker;
 	return 0;
@@ -1504,6 +1508,8 @@ static ResourceNode *checkResourceNodeCollision(ResourceNodeSpawner **resourceNo
 	return(NULL);
 }
 
+
+
 static void updateProgrammableWorkerIdle(GameObjectData *gameObjectData, ProgrammableWorker *programmableWorker){
 	double pX,pY;
 	if(getDistance2BetweenRects(programmableWorker->rect,gameObjectData->hive.rect) > 100 * 100){
@@ -1574,35 +1580,79 @@ static void killProgrammableWorker(GameObjectData *gameObjectData, ProgrammableW
 	}
 }
 
-static void updateProgrammableWorkerSenses(ProgrammableWorker *programmableWorker, ResourceNodeSpawner *resourceNodeSpawner){
+static void updateProgrammableWorkerSenses(GameObjectData *gameObjectData, ProgrammableWorker *programmableWorker, ResourceNodeSpawner *resourceNodeSpawner){
 	/* Sensory Perception */
 	ResourceNode *resourceNode;
 	if(programmableWorker->brain.foundNode != NULL &&
 		 (getDistance2BetweenRects(programmableWorker->rect,programmableWorker->brain.foundNode->rect) >= WORKER_SENSE_RANGE * WORKER_SENSE_RANGE ||
 		 !programmableWorker->brain.foundNode->alive)){
+		 	 printf("setting found Node to NULL\n");
 			 programmableWorker->brain.foundNode = NULL;
 	}
+	
 	if(programmableWorker->brain.foundNode == NULL && resourceNodeSpawner != NULL){
-		 resourceNode = chooseNodeRandomly(resourceNodeSpawner);
+		 resourceNode = chooseReachableAliveNode(gameObjectData, getCenterOfRect(programmableWorker->rect));
+		 if(resourceNode == NULL){
+			printf("node node return from chooseReachableAliveNode function\n");
+		 }else if(resourceNode->alive){
+		 	printf("alive node found\n");
+		 }else{
+		 	printf("dead node found\n");
+		 }
 		 if(resourceNode != NULL && getDistance2BetweenRects(programmableWorker->rect,resourceNode->rect) < WORKER_SENSE_RANGE * WORKER_SENSE_RANGE){
+		 		printf("foundNode has been set in brain\n");
 			 programmableWorker->brain.foundNode = resourceNode;
 		 }
 	}
 }
 
-static ResourceNode *chooseNodeRandomly(ResourceNodeSpawner *resourceNodeSpawner){
-	int i = 0, r = rand();
-	if(resourceNodeSpawner->currentNodeCount > 0){
-	r = r % (resourceNodeSpawner->currentNodeCount);
-	while(i < resourceNodeSpawner->currentNodeCount){
-		if(resourceNodeSpawner->resourceNodes[i].alive){
-		if(r == 0){
-			return &resourceNodeSpawner->resourceNodes[i];
-		}
-		r--;
+static ResourceNode *chooseReachableAliveNode(GameObjectData *gameObjectData, SDL_Point workerPoint){
+	int i = 0, j = 0, r = 0;
+
+	while(i < gameObjectData->resourceNodeSpawnerCount){
+		SDL_Point spawnerPoint = {gameObjectData->resourceNodeSpawners[i].xPosition,
+						   gameObjectData->resourceNodeSpawners[i].yPosition};
+				
+		if(isPointInRangeOf(spawnerPoint, workerPoint, gameObjectData->resourceNodeSpawners->spawnRadius + WORKER_SENSE_RANGE)){ 
+			while(j < gameObjectData->resourceNodeSpawners[i].maximumNodeCount){
+		
+				if(&gameObjectData->resourceNodeSpawners[i].resourceNodes[j] != NULL &&
+				gameObjectData->resourceNodeSpawners[i].resourceNodes[j].alive &&
+				isPointInRangeOf(getCenterOfRect(gameObjectData->resourceNodeSpawners[i].resourceNodes[j].rect), workerPoint,
+				WORKER_SENSE_RANGE)){
+					return &gameObjectData->resourceNodeSpawners[i].resourceNodes[j];
+				}
+				
+				j++;
+			}
 		}
 		i++;
 	}
+	
+	return NULL;	
+}
+
+static ResourceNode *chooseNodeRandomly(ResourceNodeSpawner *resourceNodeSpawner){
+	int i = 0, r = rand();
+	printf("resourceNodeSpawner node count = %d\n", resourceNodeSpawner->currentNodeCount);
+	
+	if(resourceNodeSpawner->currentNodeCount > 0){
+	
+		r = r % (resourceNodeSpawner->currentNodeCount);
+		printf("nodecount = %d\n", resourceNodeSpawner->currentNodeCount);
+		while(i < resourceNodeSpawner->currentNodeCount){
+		
+			if(resourceNodeSpawner->resourceNodes[i].alive){
+			/*
+				if(r == 0){*/
+					return &resourceNodeSpawner->resourceNodes[i];
+				/*}*/
+				r--;
+			}
+			
+			i++;
+		}
+		
 	}
 	return NULL;
 }

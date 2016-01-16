@@ -49,11 +49,16 @@ InitData initialise(void){
   initData.graphicsData.fonts[1] = TTF_OpenFont("font/Oxygen-Regular.ttf",12);
 
 	loadMusic("sound/music01.wav" , 0, &initData.audioData);
+
 	loadMusic("sound/music02.wav" , 1, &initData.audioData);
+
 	loadMusic("sound/music03.wav" , 1, &initData.audioData);
+
 	/*loadMusic("sound/music04.wav" , 1, &initData.audioData);*/
 	loadSoundEffect("sound/returnFlower.wav", "returnFlower", &initData.audioData);
+
 	loadSoundEffect("sound/thunder.wav", "thunder", &initData.audioData);
+
 
   return initData;
 }
