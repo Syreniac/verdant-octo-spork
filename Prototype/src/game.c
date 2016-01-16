@@ -582,12 +582,10 @@ int gameLoop(GameData *gameData){
   	  if(gameData->gameObjectData.gameOverCause == STARVATION){
   		    gameData->gameObjectData.hive.flowers_collected = 0;
   	  }
-  	  if(!gameData->gameObjectData.gameOverBoxVisible){
-		    SDL_Event gameOverEvent;
-		    gameOverEvent.type = gameData->gameObjectData.gameOverEventNum;
-  	  	gameData->gameObjectData.gameOverBoxVisible = 1;
-	      SDL_PushEvent(&gameOverEvent);
-  	  }
+	    SDL_Event gameOverEvent;
+	    gameOverEvent.type = gameData->gameObjectData.gameOverEventNum;
+	  	gameData->gameObjectData.gameOverBoxVisible = 1;
+      SDL_PushEvent(&gameOverEvent);
   }
   if (Mix_Playing(1) == 0) {
  	  playMusic(&gameData->audioData,1);

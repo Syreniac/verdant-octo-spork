@@ -643,7 +643,7 @@ static void updateEnvironment(GameObjectData *gameObjectData, AnnouncementsData 
 	char finalScore[255];
 	switch(gameObjectData->environment.season){
 		case WINTER:
-			if(gameObjectData->first_programmable_worker){
+			if(gameObjectData->first_programmable_worker == NULL){
 				gameObjectData->gameOver = 1;
 				gameObjectData->gameOverCause = COLD;
 				gameObjectData->years_survived++;
@@ -664,6 +664,7 @@ static void updateEnvironment(GameObjectData *gameObjectData, AnnouncementsData 
 				gameObjectData->environment.treeGraphic = SUMMER_INDEX;
 				gameObjectData->years_survived++;
 			}
+			printf("|||||||%d\n",gameObjectData->environment.delayBeforeSummer);
 			gameObjectData->environment.delayBeforeSummer -= ticks;
 			break;
 		case AUTUMN:
@@ -1557,18 +1558,20 @@ static void killProgrammableWorker(GameObjectData *gameObjectData, ProgrammableW
 		gameObjectData->gameObjectSelection.visible = 0;
 	}
 
-	if((toDelete)->next == NULL){
-		/* End case */
-    for(p = gameObjectData->first_programmable_worker;
-			  p->next != toDelete;
-				p = p->next){;}
-    p->next = NULL;
+	if(toDelete == gameObjectData->first_programmable_worker){
+		/* Start case */
+		gameObjectData->first_programmable_worker = gameObjectData->first_programmable_worker->next;
 		*toDeletePointer = NULL;
 		free(toDelete);
 	}
-	else if(toDelete == gameObjectData->first_programmable_worker){
-		/* Start case */
-		gameObjectData->first_programmable_worker = gameObjectData->first_programmable_worker->next;
+	else if((toDelete)->next == NULL){
+		/* End case */
+    for(p = gameObjectData->first_programmable_worker;
+			  p!=NULL && p->next != toDelete;
+				p = p->next){;}
+		if(p!=NULL){
+	    p->next = NULL;
+		}
 		*toDeletePointer = NULL;
 		free(toDelete);
 	}
