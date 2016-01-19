@@ -83,6 +83,8 @@ struct ProgrammableWorkerBrain{
   int aiStartPoint;
   int waitTime;
   int storedCount;
+  int nearestWorkerCacheTime;
+  ProgrammableWorker *nearestWorker;
 };
 
 struct ProgrammableWorker{
@@ -269,3 +271,4 @@ void nullifyLocalAIInformation(GameObjectData *gameObjectData);
 int countResourceNodesInRadius(GameObjectData *gameObjectData, int x, int y, double radius);
 Tree *getNearestTree(GameObjectData *gameObjectData, int x, int y);
 ProgrammableWorker *getNearestWorker(GameObjectData *gameObjectData, int x, int y, ProgrammableWorker *ignore);
+int countIdleWorkers(GameObjectData *gameObjectData);

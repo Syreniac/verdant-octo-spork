@@ -666,7 +666,6 @@ static void updateEnvironment(GameObjectData *gameObjectData, AnnouncementsData 
 				gameObjectData->environment.treeGraphic = SUMMER_INDEX;
 				gameObjectData->years_survived++;
 			}
-			printf("|||||||%d\n",gameObjectData->environment.delayBeforeSummer);
 			gameObjectData->environment.delayBeforeSummer -= ticks;
 			break;
 		case AUTUMN:
@@ -1393,7 +1392,6 @@ int updateProgrammableWorker(ProgrammableWorker **programmableWorkerP, GameObjec
                   default:
                     break;
 								}
-								printf("here setting foundNode in brain to NULL\n");
 	  					programmableWorker->brain.foundNode = NULL;
   					}
   				}
@@ -1546,7 +1544,6 @@ static int updateProgrammableWorkerCombat(GameObjectData *gameObjectData, Progra
 
 		if(gameObjectData->roamingSpider->eating_bee_complete == 1) {
 			killProgrammableWorker(gameObjectData, &programmableWorker);
-			printf("DEBUG: A BEE HAS BEEN EATEN (BEE FUNCTION)\n\n");
 			return 1;
 		}
 	}
@@ -1597,23 +1594,11 @@ static void updateProgrammableWorkerSenses(GameObjectData *gameObjectData, Progr
 	if(programmableWorker->brain.foundNode != NULL &&
 		 (getDistance2BetweenRects(programmableWorker->rect,programmableWorker->brain.foundNode->rect) >= WORKER_SENSE_RANGE * WORKER_SENSE_RANGE ||
 		 !programmableWorker->brain.foundNode->alive)){
-		 	 printf("setting found Node to NULL\n");
 			 programmableWorker->brain.foundNode = NULL;
 	}
-	
+
 	if(programmableWorker->brain.foundNode == NULL && resourceNodeSpawner != NULL){
-		 resourceNode = chooseReachableAliveNode(gameObjectData, getCenterOfRect(programmableWorker->rect));
-		 if(resourceNode == NULL){
-			printf("node node return from chooseReachableAliveNode function\n");
-		 }else if(resourceNode->alive){
-		 	printf("alive node found\n");
-		 }else{
-		 	printf("dead node found\n");
-		 }
-		 if(resourceNode != NULL && getDistance2BetweenRects(programmableWorker->rect,resourceNode->rect) < WORKER_SENSE_RANGE * WORKER_SENSE_RANGE){
-		 		printf("foundNode has been set in brain\n");
-			 programmableWorker->brain.foundNode = resourceNode;
-		 }
+			programmableWorker->brain.foundNode = chooseReachableAliveNode(gameObjectData, getCenterOfRect(programmableWorker->rect));
 	}
 }
 
@@ -1623,36 +1608,36 @@ static ResourceNode *chooseReachableAliveNode(GameObjectData *gameObjectData, SD
 	while(i < gameObjectData->resourceNodeSpawnerCount){
 		SDL_Point spawnerPoint = {gameObjectData->resourceNodeSpawners[i].xPosition,
 						   gameObjectData->resourceNodeSpawners[i].yPosition};
-				
-		if(isPointInRangeOf(spawnerPoint, workerPoint, gameObjectData->resourceNodeSpawners->spawnRadius + WORKER_SENSE_RANGE)){ 
+
+		if(isPointInRangeOf(spawnerPoint, workerPoint, gameObjectData->resourceNodeSpawners->spawnRadius + WORKER_SENSE_RANGE)){
 			while(j < gameObjectData->resourceNodeSpawners[i].maximumNodeCount){
-		
+
 				if(&gameObjectData->resourceNodeSpawners[i].resourceNodes[j] != NULL &&
 				gameObjectData->resourceNodeSpawners[i].resourceNodes[j].alive &&
 				isPointInRangeOf(getCenterOfRect(gameObjectData->resourceNodeSpawners[i].resourceNodes[j].rect), workerPoint,
 				WORKER_SENSE_RANGE)){
 					return &gameObjectData->resourceNodeSpawners[i].resourceNodes[j];
 				}
-				
+
 				j++;
 			}
 		}
 		i++;
 	}
-	
-	return NULL;	
+
+	return NULL;
 }
 
 static ResourceNode *chooseNodeRandomly(ResourceNodeSpawner *resourceNodeSpawner){
 	int i = 0, r = rand();
 	printf("resourceNodeSpawner node count = %d\n", resourceNodeSpawner->currentNodeCount);
-	
+
 	if(resourceNodeSpawner->currentNodeCount > 0){
-	
+
 		r = r % (resourceNodeSpawner->currentNodeCount);
 		printf("nodecount = %d\n", resourceNodeSpawner->currentNodeCount);
 		while(i < resourceNodeSpawner->currentNodeCount){
-		
+
 			if(resourceNodeSpawner->resourceNodes[i].alive){
 			/*
 				if(r == 0){*/
@@ -1660,10 +1645,10 @@ static ResourceNode *chooseNodeRandomly(ResourceNodeSpawner *resourceNodeSpawner
 				/*}*/
 				r--;
 			}
-			
+
 			i++;
 		}
-		
+
 	}
 	return NULL;
 }
@@ -2153,3 +2138,15 @@ static void nullifyProgrammableWorkerBrain(ProgrammableWorkerBrain *brain){
 }
 
 /* -------------------------------------------------------------------------- */
+
+int countIdleWorkers(GameObjectData *gameObjectData){
+	int count = 0;
+	ProgrammableWorker *p = gameObjectData->first_programmable_worker;
+	while(p != NULL){
+		if(p->status == IDLE){
+			count++;
+		}
+		p = p->next;
+	}
+	return count;
+}
