@@ -10,6 +10,7 @@ void loadMusic(char *music, int season, AudioData *audioData) {
 	audioData->seasonal_music_count[season]++;
 	if(newMusic->music == NULL) {
 		fprintf(stderr, "Unable to load music WAV file: %s\n", Mix_GetError());
+		fflush(stderr);
 		exit(1);
 	}
 
@@ -32,7 +33,8 @@ void playMusic(AudioData *audioData, int season) {
 	int i = 1 + rand() % audioData->seasonal_music_count[season];
 
 	if (active == NULL){
-		printf("active was NULL in playMusic\n");
+		fprintf(stderr,"active was NULL in playMusic\n");
+		fflush(stderr);
 		exit(1);
 	}
 
@@ -49,8 +51,6 @@ void playMusic(AudioData *audioData, int season) {
 		}
 		active = active->next;
 	}
-
-	/*fprintf(stderr,"No music for season %d\n",season);*/
 
 }
 
@@ -106,7 +106,8 @@ void playSoundEffect(int channel, AudioData *audioData, char* name) {
 	SoundEffect *active = audioData->soundEffect;
 
 	if (active == NULL){
-		printf("active was NULL in playSoundEffect\n");
+		fprintf(stderr,"active was NULL in playSoundEffect\n");
+		fflush(stderr);
 		exit(1);
 	}
 
@@ -115,6 +116,8 @@ void playSoundEffect(int channel, AudioData *audioData, char* name) {
 			audioData->channel = Mix_PlayChannel(channel, active->sound, 0);
 			if(audioData->channel == -1) {
 				fprintf(stderr, "Unable to play soundEffect WAV file: %s\n", Mix_GetError());
+				fflush(stderr);
+				exit(1);
 			}
 			return;
 		}
@@ -135,7 +138,8 @@ void fadeInChannel(int channel, AudioData *audioData, char* name) {
 	SoundEffect *active = audioData->soundEffect;
 
 	if (active == NULL){
-		printf("active was NULL in fadeInChannel\n");
+		fprintf(stderr,"active was NULL in fadeInChannel\n");
+		fflush(stderr);
 		exit(1);
 	}
 
@@ -144,6 +148,8 @@ void fadeInChannel(int channel, AudioData *audioData, char* name) {
 			audioData->channel = Mix_FadeInChannel(channel, active->sound, 2, 500);
 			if(audioData->channel == -1) {
 				fprintf(stderr, "Unable to play WAV file: %s\n", Mix_GetError());
+				fflush(stderr);
+				exit(1);
 			}
 			return;
 		}
@@ -158,12 +164,10 @@ void fadeInChannel(int channel, AudioData *audioData, char* name) {
 void muteMusic(AudioData *audioData) {
 	if (audioData->music_mute == 0) {
 		Mix_Volume(1, 0);
-		printf("Music muted.\n");
 		audioData->music_mute = 1;
 	}
 	else {
 		Mix_Volume(1, 102);
-		printf("Music un-muted.\n");
 		audioData->music_mute = 0;
 	}
 }
@@ -176,7 +180,6 @@ void muteSoundEffects(AudioData *audioData) {
 		Mix_Volume(2, 0); /*channel 2 is the sound effects channel*/
 		Mix_Volume(weatherChannel, 0);
 		stopSound(audioData, weatherChannel); /*stop weather effects*/
-		printf("Sound effects muted.\n");
 		audioData->soundEffect_mute = 1;
 	}
 
@@ -184,10 +187,8 @@ void muteSoundEffects(AudioData *audioData) {
 		Mix_Volume(weatherChannel, 102);
 		if (audioData->weatherSoundActive != 0) {
 			fadeInChannel(weatherChannel, audioData, "thunder"); /*restart weather effects*/
-			printf("On un-mute: weatherSoundActive = %d\n FADING IN CHANNEL\n", audioData->weatherSoundActive);
 		}
 		Mix_Volume(2, 102); /*channel 2 is the sound effects channel*/
-		printf("Sound effects un-muted.\n");
 		audioData->soundEffect_mute = 0;
 	}
 }

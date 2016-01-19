@@ -13,7 +13,8 @@ InitData initialise(void){
   {
     /* If the SDL_Init function doesn't return -1, then something has gone wrong
     and we should probably close (after giving a helpful error message!) */
-  	printf("Could not initialize SDL: %s\n", SDL_GetError());
+  	fprintf(stderr,"Could not initialize SDL: %s\n", SDL_GetError());
+    fflush(stderr);
   	exit(1);
   }
 
@@ -165,7 +166,6 @@ int game_welcome_page(GraphicsData graphicsData, AudioData audioData){
             break;
     			/* Closing the Window will exit the program */
     			case SDL_MOUSEBUTTONDOWN:
-            printf("click\b\n");
    				   UIRoot_ExecuteUpwards(&initData.uiData,LEFT_CLICK,1);
    				   break;
     			case SDL_QUIT:

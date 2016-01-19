@@ -58,7 +58,6 @@ int handleEvent(SDL_Event *event, GameObjectData *gameObjectData, UIData *uiData
 				return keyup(controlsData,gameObjectData, uiData,event);
 				break;
 			case SDL_QUIT:
-				printf("SDL_QUIT\n");
 				return 0;
 			case SDL_MOUSEWHEEL:
 				UIRoot_Execute(uiData,MOUSEWHEEL,0);
@@ -111,13 +110,11 @@ int keydown(ControlsData *controlsData, GameObjectData *gameObjectData, Graphics
 				break;
 			case (SDL_SCANCODE_RETURN):
 			case (SDL_SCANCODE_KP_ENTER):
-				printf("ENTER Key pressed\n");
 				if(gameObjectData->gameOver){
 					return 2;
 				}
 				break;
 			case (SDL_SCANCODE_H):
-				printf("finding home\n");
 				centerViewOnHive(graphicsData,gameObjectData);
 				break;
 

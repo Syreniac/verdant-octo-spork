@@ -210,7 +210,6 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
   }
 
   cleanUpGameData(&gameData);
-  printf("cleaned up\n");
   return gameLoopReturn;
 }
 
@@ -244,32 +243,6 @@ static void createGameUI(GameData *gameData){
   UIConfigure_GetAnnouncement(element, &element->actions[2], &element->actions[1]);
   UIConfigure_PercOffsetRect(element, &element->actions[3], 0.0, 0.0, 1.0, 0.0, -1, 0, 100, 31,0);
   UIElement_Reparent(element,gameData->uiData.root);
-
-
-    /*game Over box*/
-  /*element = UIElement_Create(0,0,win_x/2,win_y/2,6);
-  printf("game over box is %p\n",element);
-  UIConfigure_Auto(element, &element->actions[0], GAME_OVER);
-    UITrigger_Bind(&element->actions[0],&element->actions[0],-1,0);
-    UITrigger_Bind(&element->actions[0],&element->actions[1],0,2);
-    UITrigger_Bind(&element->actions[0],&element->actions[2],-1,0);
-    UITrigger_Bind(&element->actions[0],&element->actions[3],-1,0);
-	  quickSetStatus(&element->actions[0],0);
-  UIConfigure_Auto(element, &element->actions[1], GAME_OVER);
-    UITrigger_Bind(&element->actions[1],&element->actions[0],0,2);
-    UITrigger_Bind(&element->actions[1],&element->actions[1],1,0);
-    UITrigger_Bind(&element->actions[1],&element->actions[2],0,1);
-    UITrigger_Bind(&element->actions[1],&element->actions[3],0,1);
-  	quickSetStatus(&element->actions[1],1);
-  UIConfigure_FillAndBorderRect(element, &element->actions[2],255,255,255,0,0,0,FILLRECT);
-	  quickSetStatus(&element->actions[2],0);
-  UIConfigure_DisplayString(element, &element->actions[3],"GAME OVER",0, UISTRING_ALIGN_CENTER);
-	  quickSetStatus(&element->actions[3],0);
-  UIConfigure_Auto(element,&element->actions[4],UPDATE);
-  	UITrigger_Bind(&element->actions[4],&element->actions[0],2,1);
-  	UITrigger_Bind(&element->actions[4],&element->actions[1],2,1);
-  UIConfigure_PercOffsetRect(element, &element->actions[5], 0.25, 0.25, 0.75,0.75, 0,0,0,0,0);
-  UIElement_Reparent(element,gameData->uiData.root);*/
 
 
   /* Mute button */
@@ -545,7 +518,6 @@ int gameLoop(GameData *gameData){
   while (SDL_PollEvent(&event)){
     continuing = handleEvent(&event,&gameData->gameObjectData,&gameData->uiData,&gameData->controlsData, &gameData->graphicsData);
 	  if(continuing != 1){
-		  printf("escape\n");
 		  return continuing;
     }
   }
@@ -555,7 +527,9 @@ int gameLoop(GameData *gameData){
   }
 
   if(SDL_RenderClear(gameData->graphicsData.renderer) == -1){
-	   printf("Error clearing renderer: %s\n", SDL_GetError());
+	   fprintf(stderr,"Error clearing renderer: %s\n", SDL_GetError());
+     fflush(stderr);
+     exit(1);
   }
 
   paintBackground(&gameData->graphicsData,0,200,100);

@@ -17,7 +17,6 @@ static void chooseResourceNodeType(GameObjectData *gameObjectData, ResourceNode 
 static void updateWeather(GameObjectData *gameObjectData, AudioData *audioData, Weather *weather, int ticks);
 static void reInitialiseRoamingSpider(RoamingSpider *roamingSpider);
 static void updateEnvironment(GameObjectData *gameObjectData, AnnouncementsData *announcementsData, int ticks);
-static void programmableWorkerWeatherProofing(GameObjectData *gameObjectData);
 static void updateResourceNodes(GameObjectData *gameObjectData, int ticks);
 static void updateResourceNodeSpawner(GameObjectData *gameObjectData, ResourceNodeSpawner *spawner, int ticks);
 static int getFirstDeadResourceNode(ResourceNodeSpawner *resourceNodeSpawner);
@@ -317,6 +316,8 @@ static ProgrammableWorkerBrain createProgrammableWorkerBrain(void){
 	brain.foundNode = NULL;
 	brain.aiStartPoint = 0;
 	brain.waitTime = -1;
+	brain.nearestWorker = NULL;
+	brain.nearestWorkerCacheTime = 0;
 	return brain;
 }
 
@@ -477,12 +478,22 @@ static ResourceNode createResourceNode(GameObjectData *gameObjectData, ResourceN
 	resourceNode.resourceUnits = resourceUnits;
 	/* We use a randomly generated offset value for now to distribute the
 	 ResourceNode around the ResourceNodeSpawner. This can be improved. */
-	resourceNode.rect.x = (int)floor(parentSpawner->xPosition + generateRandomCoordOffset(parentSpawner->spawnRadius) - X_SIZE_OF_NODE/2);
-	resourceNode.rect.y = (int)floor(parentSpawner->yPosition + generateRandomCoordOffset(parentSpawner->spawnRadius) - Y_SIZE_OF_NODE/2);
+
+	double angle = randPi() * 2;
+	double r = (double)parentSpawner->spawnRadius * (double)rand()/(double)(RAND_MAX);
+	if(r < 1){
+		r = 2 - r;
+	}
+
+	resourceNode.rect.x = parentSpawner->xPosition + sin(angle) * r - X_SIZE_OF_NODE/2;
+	resourceNode.rect.y = parentSpawner->yPosition + cos(angle) * r - Y_SIZE_OF_NODE/2;
 	resourceNode.rect.w = SIZE_OF_FLOWER;
 	resourceNode.rect.h = SIZE_OF_FLOWER;
+	resourceNode.spawner = parentSpawner;
 
 	chooseResourceNodeType(gameObjectData, &resourceNode);
+
+	parentSpawner->currentNodeCount++;
 
 	resourceNode.displayInfo = 0;
 	fitRectToWorld(&resourceNode.rect);
@@ -494,7 +505,6 @@ static void chooseResourceNodeType(GameObjectData *gameObjectData, ResourceNode 
 	SDL_Point p = getCenterOfRect(resourceNode->rect);
 	SDL_Point p1 = getCenterOfRect(gameObjectData->hive.rect);
 	double d = 0.05 * r + getDistance2BetweenPoints(p.x,p.y,p1.x,p1.y) / (X_SIZE_OF_WORLD*X_SIZE_OF_WORLD);
-	printf("%lf\n",d);
 	if(d > 0.5 * 0.5){
 		resourceNode->type = 2;
 	}
@@ -664,7 +674,6 @@ static void updateEnvironment(GameObjectData *gameObjectData, AnnouncementsData 
 				gameObjectData->environment.treeGraphic = SUMMER_INDEX;
 				gameObjectData->years_survived++;
 			}
-			printf("|||||||%d\n",gameObjectData->environment.delayBeforeSummer);
 			gameObjectData->environment.delayBeforeSummer -= ticks;
 			break;
 		case AUTUMN:
@@ -725,7 +734,6 @@ static void updateResourceNodeSpawner(GameObjectData *gameObjectData, ResourceNo
 			/* Set the timer back to 0 */
 			spawner->ticksSinceSpawn = 0;
 			/* Update the currentNodeCount */
-			spawner->currentNodeCount++;
 		}
 	}
 }
@@ -1114,14 +1122,16 @@ static void updateIceCreamPerson(GameObjectData *gameObjectData, AnnouncementsDa
   		if(isPointInRangeOf(getCenterOfRect(programmableWorker->rect),
   		getCenterOfRect(gameObjectData->iceCreamPerson->rect), STING_HIT_RADIUS) != 0){
 
-	  		gameObjectData->iceCreamPerson->stung = 1;
-	  		/*drop iceCream!*/
-	  		gameObjectData->iceCreamPerson->has_ice_cream = 0;
+				if(gameObjectData->iceCreamPerson->has_ice_cream){
+		  		gameObjectData->iceCreamPerson->stung = 1;
+		  		/*drop iceCream!*/
+		  		gameObjectData->iceCreamPerson->has_ice_cream = 0;
 
-	  		gameObjectData->droppedIceCream->xPosition = gameObjectData->iceCreamPerson->xPosition;
-	  		gameObjectData->droppedIceCream->yPosition = gameObjectData->iceCreamPerson->yPosition;
+		  		gameObjectData->droppedIceCream->xPosition = gameObjectData->iceCreamPerson->xPosition;
+		  		gameObjectData->droppedIceCream->yPosition = gameObjectData->iceCreamPerson->yPosition;
 
-		  	gameObjectData->droppedIceCream->dropped = 1;
+			  	gameObjectData->droppedIceCream->dropped = 1;
+				}
 
 	  		/*run for your life!*/
 	  		gameObjectData->iceCreamPerson->speed = 0.1;
@@ -1483,17 +1493,20 @@ static ResourceNode *checkResourceNodeCollision(ResourceNodeSpawner **resourceNo
 																				 				GameObjectData *gameObjectData,
 																				 				ProgrammableWorker *programmableWorker,
 																			   				double sense_range){
-	int i = 0, j = 0;
+	int j = 0;
 	SDL_Point worker_p;
 	SDL_Point node_p;
 	double d2;
+	volatile int startPoint = (rand() % gameObjectData->resourceNodeSpawnerCount);
+	startPoint = startPoint == 0 ? gameObjectData->resourceNodeSpawnerCount - 1 : startPoint;
+	int i = (startPoint == gameObjectData->resourceNodeSpawnerCount - 1) ? 0 : startPoint + 1;
 	worker_p = getCenterOfRect(programmableWorker->rect);
-	while(i < gameObjectData->resourceNodeSpawnerCount){
+	while(i != startPoint){
 		d2 = getDistance2BetweenPoints(worker_p.x,
 											 					 worker_p.y,
 											 				   (int)gameObjectData->resourceNodeSpawners[i].xPosition,
 											 				   (int)gameObjectData->resourceNodeSpawners[i].yPosition);
-		if(d2 <= pow((sense_range + gameObjectData->resourceNodeSpawners[i].spawnRadius),2)){
+		if(d2 <= pow((sense_range + gameObjectData->resourceNodeSpawners[i].spawnRadius + X_SIZE_OF_NODE),2)){
 			j = 0;
 			while(j < gameObjectData->resourceNodeSpawners[i].maximumNodeCount){
 				node_p = getCenterOfRect(gameObjectData->resourceNodeSpawners[i].resourceNodes[j].rect);
@@ -1503,13 +1516,13 @@ static ResourceNode *checkResourceNodeCollision(ResourceNodeSpawner **resourceNo
 						return(&gameObjectData->resourceNodeSpawners[i].resourceNodes[j]);
 				}
 				else if(resourceNodeSpawnerPointer != NULL &&
-				        getDistance2BetweenPoints(node_p.x,node_p.y,worker_p.x,worker_p.y)){
+				        getDistance2BetweenPoints(node_p.x,node_p.y,worker_p.x,worker_p.y) <= pow(sense_range + X_SIZE_OF_NODE,2)){
 					*resourceNodeSpawnerPointer = &gameObjectData->resourceNodeSpawners[i];
 				}
 				j++;
 			}
 		}
-		i++;
+		i = (i + 1) % gameObjectData->resourceNodeSpawnerCount;
 	}
 
 	return(NULL);
@@ -1540,7 +1553,6 @@ static int updateProgrammableWorkerCombat(GameObjectData *gameObjectData, Progra
 
 		if(gameObjectData->roamingSpider->eating_bee_complete == 1) {
 			killProgrammableWorker(gameObjectData, &programmableWorker);
-			printf("DEBUG: A BEE HAS BEEN EATEN (BEE FUNCTION)\n\n");
 			return 1;
 		}
 	}
@@ -1595,7 +1607,7 @@ static void updateProgrammableWorkerSenses(ProgrammableWorker *programmableWorke
 	}
 	if(programmableWorker->brain.foundNode == NULL && resourceNodeSpawner != NULL){
 		 resourceNode = chooseNodeRandomly(resourceNodeSpawner);
-		 if(resourceNode != NULL && getDistance2BetweenRects(programmableWorker->rect,resourceNode->rect) < WORKER_SENSE_RANGE * WORKER_SENSE_RANGE){
+		 if(resourceNode != NULL && getDistance2BetweenRects(programmableWorker->rect,resourceNode->rect) <= WORKER_SENSE_RANGE * WORKER_SENSE_RANGE){
 			 programmableWorker->brain.foundNode = resourceNode;
 		 }
 	}
@@ -1604,16 +1616,16 @@ static void updateProgrammableWorkerSenses(ProgrammableWorker *programmableWorke
 static ResourceNode *chooseNodeRandomly(ResourceNodeSpawner *resourceNodeSpawner){
 	int i = 0, r = rand();
 	if(resourceNodeSpawner->currentNodeCount > 0){
-	r = r % (resourceNodeSpawner->currentNodeCount);
-	while(i < resourceNodeSpawner->currentNodeCount){
-		if(resourceNodeSpawner->resourceNodes[i].alive){
-		if(r == 0){
-			return &resourceNodeSpawner->resourceNodes[i];
+		r = (r % (resourceNodeSpawner->currentNodeCount));
+		while(i < resourceNodeSpawner->maximumNodeCount){
+			if(resourceNodeSpawner->resourceNodes[i].alive){
+				if(r == 0){
+					return &resourceNodeSpawner->resourceNodes[i];
+				}
+				r--;
+			}
+			i++;
 		}
-		r--;
-		}
-		i++;
-	}
 	}
 	return NULL;
 }
@@ -1678,6 +1690,8 @@ static void blitNodes(GameObjectData *gameObjectData, GraphicsData *graphicsData
 	while(i < gameObjectData->resourceNodeSpawnerCount){
 		j = 0;
 		/* Then we need to loop through the attached ResourceNodes and draw them */
+		p.x = (int) gameObjectData->resourceNodeSpawners[i].xPosition;
+		p.y = (int) gameObjectData->resourceNodeSpawners[i].yPosition;
 		 while(j < gameObjectData->resourceNodeSpawners[i].maximumNodeCount){
 			if(gameObjectData->resourceNodeSpawners[i].resourceNodes[j].alive){
 				blitGameObject(gameObjectData->resourceNodeSpawners[i].resourceNodes[j].rect,
@@ -1851,8 +1865,11 @@ static void blitSelection(GameObjectData *gameObjectData, GraphicsData *graphics
 		case GOS_RESOURCE_NODE:
 			sprintf(gameObjectData->gameObjectSelection.nameString,RESOURCE_NODE_NAME);
 			getResourceNodeInfoString(gameObjectData->gameObjectSelection.selected,gameObjectData->gameObjectSelection.infoString);
+			point.x = (int)((ResourceNode*)gameObjectData->gameObjectSelection.selected)->spawner->xPosition;
+			point.y = (int)((ResourceNode*)gameObjectData->gameObjectSelection.selected)->spawner->yPosition;
+			renderFillRadius(graphicsData, &point,((ResourceNode*)gameObjectData->gameObjectSelection.selected)->spawner->spawnRadius + WORKER_SENSE_RANGE, 255,255,255, 80);
 			point = getCenterOfRect(((ResourceNode*)gameObjectData->gameObjectSelection.selected)->rect);
-			renderFillRadius(graphicsData, &point, SIZE_OF_FLOWER, 255,255,255, 80);
+			renderFillRadius(graphicsData, &point,WORKER_SENSE_RANGE, 255,255,255, 80);
 			break;
 		case GOS_ICE_CREAM_PERSON:
 			if(!((IceCreamPerson*)gameObjectData->gameObjectSelection.selected)->currently_on_screen) {
@@ -2103,3 +2120,15 @@ static void nullifyProgrammableWorkerBrain(ProgrammableWorkerBrain *brain){
 }
 
 /* -------------------------------------------------------------------------- */
+
+int countIdleWorkers(GameObjectData *gameObjectData){
+	int count = 0;
+	ProgrammableWorker *p = gameObjectData->first_programmable_worker;
+	while(p != NULL){
+		if(p->status == IDLE){
+			count++;
+		}
+		p = p->next;
+	}
+	return count;
+}

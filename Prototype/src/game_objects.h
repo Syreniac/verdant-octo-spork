@@ -51,6 +51,7 @@ struct ResourceNode{
   int displayInfo;
   SDL_Rect rect;
   int type;
+  ResourceNodeSpawner *spawner;
 };
 
 /*   Rather than having an array with just resourceNodes in, if we have a
@@ -83,6 +84,11 @@ struct ProgrammableWorkerBrain{
   int aiStartPoint;
   int waitTime;
   int storedCount;
+
+  ProgrammableWorker *nearestWorker;
+
+  int nearestWorkerCacheTime;
+
 };
 
 struct ProgrammableWorker{
@@ -269,3 +275,4 @@ void nullifyLocalAIInformation(GameObjectData *gameObjectData);
 int countResourceNodesInRadius(GameObjectData *gameObjectData, int x, int y, double radius);
 Tree *getNearestTree(GameObjectData *gameObjectData, int x, int y);
 ProgrammableWorker *getNearestWorker(GameObjectData *gameObjectData, int x, int y, ProgrammableWorker *ignore);
+int countIdleWorkers(GameObjectData *gameObjectData);

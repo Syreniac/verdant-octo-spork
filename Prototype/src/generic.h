@@ -58,7 +58,7 @@ FILE *DEBUGGING_FILE_FREE;
 #define RAIN_FRAME_DELAY 4
 
 
-#define INITIAL_NUMBER_OF_WORKERS 1000
+#define INITIAL_NUMBER_OF_WORKERS 500
 
 /*lower values result in a higher chance of bees regaining flight when wet, with
 each call to updateProgrammableWorker*/
@@ -132,7 +132,7 @@ each call to updateProgrammableWorker*/
 #define CELEBRATION_THRESHOLD 50
 
 #define DEFAULT_RESOURCEUNITS 100
-#define DEFAULT_SPAWNDELAY 300000
+#define DEFAULT_SPAWNDELAY 15000
 #define DEFAULT_SPAWNRADIUS 100.0
 #define RANDOMISE_SPAWNRADIUS 2500
 #define DEFAULT_MAXNODECOUNT 50
@@ -142,7 +142,7 @@ each call to updateProgrammableWorker*/
 
 #define LENGTH_OF_STATUS_STRING 32
 
-#define WINTER_COUNTDOWN_SPEED 0.01
+#define WINTER_COUNTDOWN_SPEED 0.001
 
 #define MAX_DAYS_TO_WINTER 301
 #define AUTUMN_THRESHOLD (MAX_DAYS_TO_WINTER / 3)
@@ -172,6 +172,9 @@ each call to updateProgrammableWorker*/
 #define WORKER_SENSE_RANGE 500.0
 
 #define PROGRAMMABLE_WORKER_CARGO_SPEED_FACTOR 0.7
+
+#define NEARESTWORKER_CACHETIME 100
+#define FOUNDNODE_CACHETIME 100
 
 #define FILE_TO_STRING_STEP_SIZE 10
 
@@ -216,3 +219,4 @@ SDL_Point getPointFromInvPoint(SDL_Window *window, int x, int y);
 SDL_Point getPointFromPerc(SDL_Window *window, double x, double y);
 void shrinkRectToFit(SDL_Rect *toShrink, SDL_Rect *fitTo);
 int isPointInRangeOf(SDL_Point point, SDL_Point center, double radius);
+FILE *fopenAndVerify(char *file_name, char *permission);

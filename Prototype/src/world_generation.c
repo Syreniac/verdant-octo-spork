@@ -4,12 +4,18 @@ void generateResourceNodeSpawners(GameObjectData *gameObjectData){
 
   /* Create two ResourceNodeSpawners at 'random' positions */
   int i = 0;
+  int j = 0;
   while(i < NUMBER_OF_FLOWER_PATCHES){
     gameObjectData->resourceNodeSpawners[i] = createResourceNodeSpawner(gameObjectData,
                                                                         DEFAULT_MAXNODECOUNT,
                                                                         rand()%X_SIZE_OF_WORLD,
                                                                         rand()%Y_SIZE_OF_WORLD,
                                                                         DEFAULT_SPAWNRADIUS);
+    j = 0;
+    while(j < gameObjectData->resourceNodeSpawners[i].maximumNodeCount){
+      gameObjectData->resourceNodeSpawners[i].resourceNodes[j].spawner = &gameObjectData->resourceNodeSpawners[i];
+      j++;
+    }
     i++;
   }
 
