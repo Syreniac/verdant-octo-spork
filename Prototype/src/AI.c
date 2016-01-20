@@ -77,7 +77,7 @@ int blockFunction_IfDistanceToSpider(BlockFunctionUniversals *universals, BlockF
   (void)universals;
   (void)globals;
 	double d2 = getDistance2BetweenRects(programmableWorker->rect,gameObjectData->roamingSpider->rect);
-  if(doDoubleCompWithCharOperator(d2, (double) pow(arguments->integers[0]*WORKER_SENSE_RANGE,2),arguments->characters[0])){
+  if(doDoubleCompWithCharOperator(d2, (double) pow(arguments->integers[0]*WORKER_SENSE_RANGE_BLOCKS,2),arguments->characters[0])){
     return(1);
   }
   return(2);
@@ -130,15 +130,15 @@ int blockFunction_IfIceCreamExists(BlockFunctionUniversals *universals, BlockFun
   return 2;
 }
 
-int blockFunction_IfIceCreamManExists(BlockFunctionUniversals *universals, BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
+int blockFunction_IfDistanceToGarry(BlockFunctionUniversals *universals, BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
   (void)universals;
   (void)globals;
-  (void)arguments;
-  (void)programmableWorker;
-  if(gameObjectData->iceCreamPerson->currently_on_screen){
-    return 1;
+	double d2 = getDistance2BetweenRects(programmableWorker->rect,gameObjectData->iceCreamPerson->rect);
+  if(doDoubleCompWithCharOperator(d2, (double) pow(arguments->integers[0]*WORKER_SENSE_RANGE_BLOCKS,2),arguments->characters[0])){
+    return(1);
   }
-  return 2;
+  return(2);
+
 }
 
 int blockFunction_GoToIceCreamMan(BlockFunctionUniversals *universals, BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
@@ -929,8 +929,8 @@ AIData initAIData(void){
                       0,IF_BLOCK_COLOR,4,BF_PRIMARY, BF_SECONDARY, BF_COMPARISON, BF_DISTANCE);
 	makeAIBlockTemplate(&aiData,"IfDistanceToSpider",&blockFunction_IfDistanceToSpider,
                       0,IF_BLOCK_COLOR,4,BF_PRIMARY, BF_SECONDARY, BF_COMPARISON, BF_DISTANCE);
-	makeAIBlockTemplate(&aiData,"IfIceCreamManExists",&blockFunction_IfIceCreamExists,
-                      0,IF_BLOCK_COLOR,2,BF_PRIMARY, BF_SECONDARY);
+	makeAIBlockTemplate(&aiData,"IfDistanceToGarry",&blockFunction_IfDistanceToGarry,
+                      0,IF_BLOCK_COLOR,4,BF_PRIMARY, BF_SECONDARY);
 	makeAIBlockTemplate(&aiData,"IfIceCreamExists",&blockFunction_IfIceCreamExists,
                       0,IF_BLOCK_COLOR,2,BF_PRIMARY,BF_SECONDARY);
 	makeAIBlockTemplate(&aiData,"IfDaysToWinter",&blockFunction_IfdaysToWinter,

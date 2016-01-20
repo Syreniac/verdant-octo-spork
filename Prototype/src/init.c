@@ -40,11 +40,18 @@ InitData initialise(void){
 	loadMusic("sound/music03.wav" , 1, &initData.audioData);
 
 	/*loadMusic("sound/music04.wav" , 1, &initData.audioData);*/
+	
 	loadSoundEffect("sound/returnFlower.wav", "returnFlower", &initData.audioData);
 
 	loadSoundEffect("sound/thunder.wav", "thunder", &initData.audioData);
 
+	loadSoundEffect("sound/garryScream.wav", "garryScream", &initData.audioData);
 
+	loadSoundEffect("sound/applause.wav", "applause", &initData.audioData);
+
+	loadSoundEffect("sound/winterComing.wav", "winterComing", &initData.audioData);
+	
+	
   return initData;
 }
 

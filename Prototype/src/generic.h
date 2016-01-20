@@ -86,7 +86,7 @@ each call to updateProgrammableWorker*/
 #define RESOURCE_NODE_NAME "Flower"
 #define WORKER_NAME "Bee"
 
-#define MELT_TIME_THRESHOLD 1000
+#define MELT_TIME_THRESHOLD 10000
 #define ICECREAM_PICKUP_RADIUS 20
 
 #define SUGAR_VALUE_OF_FLOWER 1
@@ -172,6 +172,7 @@ each call to updateProgrammableWorker*/
 #define WINTER_INDEX 2
 
 #define WORKER_SENSE_RANGE 500.0
+#define WORKER_SENSE_RANGE_BLOCKS 100.0
 
 #define PROGRAMMABLE_WORKER_CARGO_SPEED_FACTOR 0.7
 
