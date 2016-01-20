@@ -908,7 +908,7 @@ int UIAction_PercentageFillRect(UI_Action *action, UIData *uiData){
 		rect.y = action->element->rect.y + (int)((1.0 - action->percentage) * (double)action->element->rect.h);
 		SDL_SetRenderDrawColor(uiData->graphicsData->renderer,action->fillRed,action->fillGreen,action->fillBlue,100);
 		SDL_RenderFillRect(uiData->graphicsData->renderer,&rect);
-    SDL_RenderCopy(graphicsData->renderer, graphicsData->uiEle->graphic[HIVECELLMASK_GRAPHIC], NULL, &action->element->rect);
+    SDL_RenderCopy(graphicsData->renderer, graphicsData->uiEle.graphic[HIVECELLMASK_GRAPHIC], NULL, &action->element->rect);
 		return 1;
 	}
 	return 0;
@@ -2943,9 +2943,9 @@ int UIAction_DrawScrollhandle(UI_Action *action, UIData *uiData){
 		SDL_RenderFillRect(graphicsData->renderer,&action->element->rect);
 		/* A border is already drawn into my scrollhandle graphic, so the code for drawing a border in UIAction_FillAndBorderRect() is removed. */
 		/* SDL_SetTextureBlendMode() blends the overlaying colours of the FillRect down onto those of the greyscale image I provide. */
-		SDL_SetTextureBlendMode(graphicsData->uiEle->graphic[SCROLLHANDLE_GRAPHIC],
+		SDL_SetTextureBlendMode(graphicsData->uiEle.graphic[SCROLLHANDLE_GRAPHIC],
 														SDL_BLENDMODE_MOD);
-		SDL_RenderCopy(graphicsData->renderer, graphicsData->uiEle->graphic[SCROLLHANDLE_GRAPHIC], NULL, &action->element->rect);
+		SDL_RenderCopy(graphicsData->renderer, graphicsData->uiEle.graphic[SCROLLHANDLE_GRAPHIC], NULL, &action->element->rect);
 
 		return 1;
 	}
@@ -2972,9 +2972,9 @@ int UIAction_DrawCrossbox(UI_Action *action, UIData *uiData){
 		SDL_RenderDrawRect(graphicsData->renderer,&action->element->rect);
 
 		/* SDL_SetTextureBlendMode() blends the overlaying colours of the FillRect down onto those of the greyscale image I provide. */
-		SDL_SetTextureBlendMode(graphicsData->uiEle->graphic[CROSSBOX_GRAPHIC],
+		SDL_SetTextureBlendMode(graphicsData->uiEle.graphic[CROSSBOX_GRAPHIC],
 														SDL_BLENDMODE_MOD);
-		SDL_RenderCopy(graphicsData->renderer, graphicsData->uiEle->graphic[CROSSBOX_GRAPHIC], NULL, &action->element->rect);
+		SDL_RenderCopy(graphicsData->renderer, graphicsData->uiEle.graphic[CROSSBOX_GRAPHIC], NULL, &action->element->rect);
 
 		return 1;
 	}
@@ -3001,9 +3001,9 @@ int UIAction_DrawCompilebox(UI_Action *action, UIData *uiData){
 		SDL_RenderDrawRect(graphicsData->renderer,&action->element->rect);
 
 		/* SDL_SetTextureBlendMode() blends the overlaying colours of the FillRect down onto those of the greyscale image I provide. */
-		SDL_SetTextureBlendMode(graphicsData->uiEle->graphic[COMPILEBOX_GRAPHIC],
+		SDL_SetTextureBlendMode(graphicsData->uiEle.graphic[COMPILEBOX_GRAPHIC],
 														SDL_BLENDMODE_MOD);
-		SDL_RenderCopy(graphicsData->renderer, graphicsData->uiEle->graphic[COMPILEBOX_GRAPHIC], NULL, &action->element->rect);
+		SDL_RenderCopy(graphicsData->renderer, graphicsData->uiEle.graphic[COMPILEBOX_GRAPHIC], NULL, &action->element->rect);
 
 		return 1;
 	}
@@ -3030,9 +3030,9 @@ int UIAction_DrawStopbox(UI_Action *action, UIData *uiData){
 		SDL_RenderDrawRect(graphicsData->renderer,&action->element->rect);
 
 		/* SDL_SetTextureBlendMode() blends the overlaying colours of the FillRect down onto those of the greyscale image I provide. */
-		SDL_SetTextureBlendMode(graphicsData->uiEle->graphic[STOP_GRAPHIC],
+		SDL_SetTextureBlendMode(graphicsData->uiEle.graphic[STOP_GRAPHIC],
 														SDL_BLENDMODE_MOD);
-		SDL_RenderCopy(graphicsData->renderer, graphicsData->uiEle->graphic[STOP_GRAPHIC], NULL, &action->element->rect);
+		SDL_RenderCopy(graphicsData->renderer, graphicsData->uiEle.graphic[STOP_GRAPHIC], NULL, &action->element->rect);
 
 		return 1;
 	}
@@ -3059,9 +3059,9 @@ int UIAction_DrawBlock(UI_Action *action, UIData *uiData){
 		SDL_RenderDrawRect(graphicsData->renderer,&action->element->rect);
 
 		/* SDL_SetTextureBlendMode() blends the overlaying colours of the FillRect down onto those of the greyscale image I provide. */
-		SDL_SetTextureBlendMode(graphicsData->uiEle->graphic[BLOCK_GRAPHIC],
+		SDL_SetTextureBlendMode(graphicsData->uiEle.graphic[BLOCK_GRAPHIC],
 														SDL_BLENDMODE_MOD);
-		SDL_RenderCopy(graphicsData->renderer, graphicsData->uiEle->graphic[BLOCK_GRAPHIC], NULL, &action->element->rect);
+		SDL_RenderCopy(graphicsData->renderer, graphicsData->uiEle.graphic[BLOCK_GRAPHIC], NULL, &action->element->rect);
 
 		return 1;
 	}
@@ -3074,9 +3074,9 @@ int UIAction_DrawHivecell(UI_Action *action, UIData *uiData){
 	GraphicsData *graphicsData;
 	graphicsData = uiData->graphicsData;
 	if(action->status == 1 && UIElement_isVisible(action->element)){
-//    SDL_SetTextureBlendMode(graphicsData->uiEle->graphic[HIVECELL_GRAPHIC], SDL_BLENDMODE_MOD);
-		SDL_RenderCopy(graphicsData->renderer, graphicsData->uiEle->graphic[HIVECELL_GRAPHIC], NULL, &action->element->rect);
-//		SDL_RenderCopy(graphicsData->renderer, graphicsData->uiEle->graphic[HIVECELLMASK_GRAPHIC], NULL, &action->element->rect);
+//    SDL_SetTextureBlendMode(graphicsData->uiEle.graphic[HIVECELL_GRAPHIC], SDL_BLENDMODE_MOD);
+		SDL_RenderCopy(graphicsData->renderer, graphicsData->uiEle.graphic[HIVECELL_GRAPHIC], NULL, &action->element->rect);
+//		SDL_RenderCopy(graphicsData->renderer, graphicsData->uiEle.graphic[HIVECELLMASK_GRAPHIC], NULL, &action->element->rect);
 
 		return 1;
 	}

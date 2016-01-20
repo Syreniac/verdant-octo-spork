@@ -134,7 +134,7 @@ int keydown(ControlsData *controlsData, GameObjectData *gameObjectData, Graphics
 				break;
 			case (SDL_SCANCODE_W):
 				printf("DEV HACKING TOGGLING SEASON TO WINTER\n");
-				gameObjectData->environment.winterCountdownFloat = WINTER_THRESHOLD;
+				gameObjectData->environment.winterCountdownFloat = WINTER_THRESHOLD+1;
 				break;
 			case (SDL_SCANCODE_A):
 				printf("DEV HACKING TOGGLING SEASON TO AUTUMN\n");

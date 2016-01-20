@@ -318,6 +318,8 @@ static ProgrammableWorkerBrain createProgrammableWorkerBrain(void){
 	brain.foundNode = NULL;
 	brain.aiStartPoint = 0;
 	brain.waitTime = -1;
+	brain.nearestWorkerCacheTime = 0;
+	brain.nearestWorker = NULL;
 	return brain;
 }
 
@@ -667,23 +669,27 @@ static void updateEnvironment(GameObjectData *gameObjectData, AnnouncementsData 
 				gameObjectData->years_survived++;
 			}
 			gameObjectData->environment.delayBeforeSummer -= ticks;
-			break;
+			printf("delay before summer:%d\n",gameObjectData->environment.delayBeforeSummer);
+			return;
 		case AUTUMN:
+			printf("season == AUTUMN\n");
 			if(gameObjectData->environment.winterCountdown <= 0){
 				announce(announcementsData,"Winter has come!");
 				gameObjectData->environment.treeGraphic = WINTER_INDEX;
 				gameObjectData->environment.delayBeforeSummer = DELAY_BEFORE_SUMMER;
 				gameObjectData->environment.season = WINTER;
 			}
+			break;
+		case SPRING:
 		case SUMMER:
 			if(gameObjectData->environment.winterCountdown <= AUTUMN_THRESHOLD){
 				gameObjectData->environment.treeGraphic = AUTUMN_INDEX;
 				gameObjectData->environment.season = AUTUMN;
 			}
-		case SPRING:
-			gameObjectData->environment.winterCountdownFloat-= WINTER_COUNTDOWN_SPEED * ticks;
-			gameObjectData->environment.winterCountdown = (int) gameObjectData->environment.winterCountdownFloat;
+			break;
 	}
+	gameObjectData->environment.winterCountdownFloat-= WINTER_COUNTDOWN_SPEED * ticks;
+	gameObjectData->environment.winterCountdown = (int) gameObjectData->environment.winterCountdownFloat;
 }
 
 /* updateResourceNodes
@@ -909,7 +915,8 @@ static void updateRoamingSpider(GameObjectData *gameObjectData, AnnouncementsDat
 	}
 
 	/*If there are fewer than 3 bees perilously close*/
-	if(countProgrammableWorkersInRange(gameObjectData, getCenterOfRect(gameObjectData->roamingSpider->rect), 250.0) <= 3 && !gameObjectData->roamingSpider->going_home){
+	int bees_nearby = countProgrammableWorkersInRange(gameObjectData, getCenterOfRect(gameObjectData->roamingSpider->rect), 250.0);
+	if(bees_nearby <= 3 && bees_nearby > 0 && !gameObjectData->roamingSpider->going_home){
 	  ProgrammableWorker *pw = getNearestWorker(gameObjectData, spiderCentre.x, spiderCentre.y, NULL);
 		SDL_Point pp = getCenterOfRect(pw->rect);
 		if(isPointInRangeOf(pp, spiderCentre,2000.0 ) && !gameObjectData->roamingSpider->stung){
@@ -1678,11 +1685,11 @@ static void blitBackground(GameObjectData *gameObjectData, GraphicsData *graphic
 				break;
 			case AUTUMN:
 				blitTiledBackground(graphicsData,
-														graphicsData->grass->graphic[SUMMER_INDEX + 1]);
+														graphicsData->grass.graphic[SUMMER_INDEX + 1]);
 				break;
 			case SUMMER:
 				blitTiledBackground(graphicsData,
-					                  graphicsData->grass->graphic[SUMMER_INDEX]);
+					                  graphicsData->grass.graphic[SUMMER_INDEX]);
 			case SPRING:
 				break;
 
@@ -1702,7 +1709,7 @@ static void blitTrees(GameObjectData *gameObjectData, GraphicsData *graphicsData
 
 	 	blitParallaxTreeTops(gameObjectData->tree[i].rect,
 						             graphicsData,
-						             graphicsData->shelter->graphic[gameObjectData->environment.treeGraphic]);
+						             graphicsData->shelter.graphic[gameObjectData->environment.treeGraphic]);
 	}
 }
 
@@ -1741,7 +1748,7 @@ static void blitIceCreamPerson(GameObjectData *gameObjectData, GraphicsData *gra
 	if(gameObjectData->iceCreamPerson->currently_on_screen){
 		blitGameObject(gameObjectData->iceCreamPerson->rect,
 								 	 graphicsData,
-								 	 graphicsData->person->graphic[gameObjectData->iceCreamPerson->currentGraphicIndex +
+								 	 graphicsData->person.graphic[gameObjectData->iceCreamPerson->currentGraphicIndex +
 								 	 ((gameObjectData->iceCreamPerson->has_ice_cream) ? 0 : NO_ICECREAM_INDEX_OFFSET)],
 								 	 DEGREESINCIRCLE-(gameObjectData->iceCreamPerson->heading * RADIANSTODEGREES),
 								 	 NULL,
@@ -1790,7 +1797,7 @@ static void blitRoamingSpider(GameObjectData *gameObjectData, GraphicsData *grap
 	if(gameObjectData->roamingSpider->currently_on_screen){
 		blitGameObject(gameObjectData->roamingSpider->rect,
 							 	 	 graphicsData,
-							  	 graphicsData->roamingArachnid->graphic[gameObjectData->roamingSpider->currentGraphicIndex],
+							  	 graphicsData->roamingArachnid.graphic[gameObjectData->roamingSpider->currentGraphicIndex],
 									 DEGREESINCIRCLE-(gameObjectData->roamingSpider->heading * RADIANSTODEGREES),
 									 NULL,
 									 SDL_FLIP_NONE);
@@ -1812,7 +1819,7 @@ static void blitDisabledWorkers(GameObjectData *gameObjectData, GraphicsData *gr
 			smallerBeeRect.x = programmableWorker->rect.x;
 			blitGameObject(smallerBeeRect,
 										 graphicsData,
-										 graphicsData->bee->graphic[programmableWorker->currentGraphicIndex > 5 ? 0 : programmableWorker->currentGraphicIndex],
+										 graphicsData->bee.graphic[programmableWorker->currentGraphicIndex > 5 ? 0 : programmableWorker->currentGraphicIndex],
 										 DEGREESINCIRCLE-(programmableWorker->heading * RADIANSTODEGREES),
 										 NULL,
 										 SDL_FLIP_NONE);
@@ -1834,7 +1841,7 @@ static void blitProgrammableWorkers(GameObjectData *gameObjectData, GraphicsData
 		 if(!isPointInRangeOf(getCenterOfRect(programmableWorker->rect),getCenterOfRect(gameObjectData->hive.rect), HIVE_SHELTER_RADIUS)){
 			 blitGameObject(programmableWorker->rect,
 					            graphicsData,
-					            graphicsData->bee->graphic[programmableWorker->currentGraphicIndex +
+					            graphicsData->bee.graphic[programmableWorker->currentGraphicIndex +
 					                                       ((programmableWorker->cargo < SUGAR_VALUE_OF_ICECREAM && programmableWorker->cargo > 0) ? CARRYING_FLOWER_INDEX_OFFSET :
 					                                       ((programmableWorker->cargo == SUGAR_VALUE_OF_ICECREAM) ? CARRYING_ICECREAM_INDEX_OFFSET : 0))],
 					            DEGREESINCIRCLE-(programmableWorker->heading * RADIANSTODEGREES),
@@ -2149,4 +2156,18 @@ int countIdleWorkers(GameObjectData *gameObjectData){
 		p = p->next;
 	}
 	return count;
+}
+
+void cleanGameObjectData(GameObjectData *gameObjectData){
+	ProgrammableWorker *p = gameObjectData->first_programmable_worker;
+	ProgrammableWorker *next;
+	while(p != NULL){
+		next = p->next;
+		killProgrammableWorker(gameObjectData,p);
+		p = gameObjectData->first_programmable_worker;
+	}
+	free(gameObjectData->roamingSpider);
+	gameObjectData->roamingSpider = NULL;
+	free(gameObjectData->iceCreamPerson);
+	gameObjectData->iceCreamPerson = NULL;
 }

@@ -1,5 +1,14 @@
 #include "graphics.h"
 
+static void loadBeeGraphics(GraphicsData *graphicsData);
+static void loadUIGraphics(GraphicsData *graphicsData);
+static void loadWeatherGraphics(GraphicsData *graphicsData);
+static void loadHiveGraphics(GraphicsData *graphicsData);
+static void loadSpiderGraphics(GraphicsData *graphicsData);
+static void loadIceCreamGraphics(GraphicsData *graphicsData);
+static void loadShelterGraphics(GraphicsData *graphicsData);
+static void loadNodeGraphics(GraphicsData *graphicsData);
+static void loadGrass(GraphicsData *graphicsData);
 
 void paintWeatherLayer(GraphicsData *graphicsData, enum WeatherStatus present_weather){
 	/* This function creates a Weather struct and fills in the default
@@ -77,12 +86,12 @@ void blitRainRandomly(GraphicsData *graphicsData){
 
 	   if(rand()%30){
 	      SDL_RenderCopy(graphicsData->renderer,
-						 graphicsData->rainy->graphic[rand()%4],
+						 graphicsData->rainy.graphic[rand()%4],
 						 NULL,
 						 &srcRect);
 	   }else{
 	      SDL_RenderCopy(graphicsData->renderer,
-						 graphicsData->rainy->graphic[(rand()%2)+3],
+						 graphicsData->rainy.graphic[(rand()%2)+3],
 					         NULL,
 						 &srcRect);
 	   }
@@ -284,4 +293,122 @@ void centerCameraOnPoint(GraphicsData *graphicsData, int x, int y){
 	x = x - win_x/2;
 	y = y - win_y/2;
 	setNavigationOffset(graphicsData,x,y);
+}
+
+GraphicsData createGraphicsData(void){
+	GraphicsData graphicsData;
+
+	graphicsData.window = SDL_CreateWindow(PROGRAM_NAME,25,25,
+																		     X_SIZE_OF_SCREEN, Y_SIZE_OF_SCREEN,
+																		     SDL_WINDOW_SHOWN|SDL_WINDOW_RESIZABLE);
+
+	graphicsData.renderer = SDL_CreateRenderer(graphicsData.window,-1,
+																			    	 SDL_RENDERER_TARGETTEXTURE|SDL_RENDERER_PRESENTVSYNC|SDL_RENDERER_ACCELERATED);
+
+	graphicsData.mainMenuImage = loadTextureFromFile("images/mainMenuImage.bmp", &graphicsData, 0);
+
+
+	/* initialise navigationOffset values */
+	graphicsData.navigationOffset.x = X_INITIAL_SCREEN_OFFSET; /*setting initial x offset to center of world*/
+	graphicsData.navigationOffset.y = Y_INITIAL_SCREEN_OFFSET; /*setting initial y offset ot center of world*/
+	graphicsData.fonts[0] = TTF_OpenFont("font/Oxygen-Regular.ttf",16);
+	graphicsData.fonts[1] = TTF_OpenFont("font/Oxygen-Regular.ttf",12);
+
+	graphicsData.trackingMode = 0;
+
+	loadBeeGraphics(&graphicsData);
+	loadUIGraphics(&graphicsData);
+	loadWeatherGraphics(&graphicsData);
+	loadHiveGraphics(&graphicsData);
+	loadSpiderGraphics(&graphicsData);
+	loadIceCreamGraphics(&graphicsData);
+	loadShelterGraphics(&graphicsData);
+	loadNodeGraphics(&graphicsData);
+	loadGrass(&graphicsData);
+
+	return graphicsData;
+}
+
+static void loadBeeGraphics(GraphicsData *graphicsData){
+
+	graphicsData->bee.graphic[BEE_FLAP_GRAPHIC_1] = loadTextureFromFile("images/bee.bmp", graphicsData, 1);
+	graphicsData->bee.graphic[BEE_FLAP_GRAPHIC_2] = loadTextureFromFile("images/bee2.bmp",graphicsData, 1);
+
+	graphicsData->bee.graphic[BEE_FLAP_GRAPHIC_1 + CARRYING_FLOWER_INDEX_OFFSET] = loadTextureFromFile("images/beeWithFlower.bmp", graphicsData, 1);
+	graphicsData->bee.graphic[BEE_FLAP_GRAPHIC_2 + CARRYING_FLOWER_INDEX_OFFSET] = loadTextureFromFile("images/beeWithFlower2.bmp",graphicsData, 1);
+
+	graphicsData->bee.graphic[BEE_FLAP_GRAPHIC_1 + CARRYING_ICECREAM_INDEX_OFFSET] = loadTextureFromFile("images/beeWithIcecream.bmp", graphicsData, 1);
+	graphicsData->bee.graphic[BEE_FLAP_GRAPHIC_2 + CARRYING_ICECREAM_INDEX_OFFSET] = loadTextureFromFile("images/beeWithIcecream2.bmp",graphicsData, 1);
+}
+
+static void loadUIGraphics(GraphicsData *graphicsData){
+
+	graphicsData->uiEle.graphic[SCROLLHANDLE_GRAPHIC] = loadTextureFromFile("images/UI/scrollhandle.bmp",graphicsData, 1);
+
+	graphicsData->uiEle.graphic[CROSSBOX_GRAPHIC] = loadTextureFromFile("images/UI/crossbox.bmp",graphicsData, 1);
+	graphicsData->uiEle.graphic[COMPILEBOX_GRAPHIC] = loadTextureFromFile("images/UI/compilebox.bmp",graphicsData, 1);
+	graphicsData->uiEle.graphic[STOP_GRAPHIC] = loadTextureFromFile("images/UI/stop.bmp",graphicsData, 1);
+	graphicsData->uiEle.graphic[BLOCK_GRAPHIC] = loadTextureFromFile("images/UI/block.bmp",graphicsData, 1);
+	graphicsData->uiEle.graphic[HIVECELL_GRAPHIC] = loadTextureFromFile("images/UI/hivecell.bmp",graphicsData, 1);
+	graphicsData->uiEle.graphic[HIVECELLMASK_GRAPHIC] = loadTextureFromFile("images/UI/hivecellmask.bmp",graphicsData, 1);
+}
+
+static void loadWeatherGraphics(GraphicsData *graphicsData){
+
+  graphicsData->rainy.graphic[0] = loadTextureFromFile("images/rain/rain1.bmp", graphicsData, 1);
+  graphicsData->rainy.graphic[1] = loadTextureFromFile("images/rain/rain2.bmp", graphicsData, 1);
+  graphicsData->rainy.graphic[2] = loadTextureFromFile("images/rain/rain3.bmp", graphicsData, 1);
+  graphicsData->rainy.graphic[3] = loadTextureFromFile("images/rain/rain4.bmp", graphicsData, 1);
+  graphicsData->rainy.graphic[4] = loadTextureFromFile("images/rain/rain5.bmp", graphicsData, 1);
+  graphicsData->rainy.graphic[5] = loadTextureFromFile("images/rain/rain6.bmp", graphicsData, 1);
+}
+
+static void loadHiveGraphics(GraphicsData *graphicsData){
+  graphicsData->hiveTexture = loadTextureFromFile("images/beehive.bmp", graphicsData, 1);
+}
+
+static void loadSpiderGraphics(GraphicsData *graphicsData){
+
+  /*roamingSpider graphics*/
+  graphicsData->roamingArachnid.graphic[SPIDER] = loadTextureFromFile("images/spider.bmp", graphicsData, 1);
+  graphicsData->roamingArachnid.graphic[SPIDER2] = loadTextureFromFile("images/spider2.bmp", graphicsData, 1);
+  graphicsData->roamingArachnid.graphic[SPIDER15] = loadTextureFromFile("images/spider15.bmp", graphicsData, 1);
+  graphicsData->roamingArachnid.graphic[SPIDER15b] = loadTextureFromFile("images/spider15.bmp", graphicsData, 1);
+
+  graphicsData->roamingArachnid.graphic[SPIDER_DEAD] = loadTextureFromFile("images/spider_dead2.bmp", graphicsData, 1);
+  graphicsData->roamingArachnid.graphic[SPIDER_FIGHTING] = loadTextureFromFile("images/spiderFighting.bmp", graphicsData, 1);
+}
+
+static void loadIceCreamGraphics(GraphicsData *graphicsData){
+
+	graphicsData->person.graphic[WITH_ICE_CREAM_STRIDE1] = loadTextureFromFile("images/person/withIceCream1.bmp", graphicsData, 1);
+	graphicsData->person.graphic[WITH_ICE_CREAM_STRIDE2] = loadTextureFromFile("images/person/withIceCream2.bmp", graphicsData, 1);
+
+	graphicsData->person.graphic[WITH_ICE_CREAM_STRIDE1 + NO_ICECREAM_INDEX_OFFSET] = loadTextureFromFile("images/person/withoutIceCream1.bmp", graphicsData, 1);
+	graphicsData->person.graphic[WITH_ICE_CREAM_STRIDE2 + NO_ICECREAM_INDEX_OFFSET] = loadTextureFromFile("images/person/withoutIceCream2.bmp", graphicsData, 1);
+
+	graphicsData->droppedIceCreamTexture = loadTextureFromFile("images/person/droppedIceCream.bmp", graphicsData, 1);
+	graphicsData->meltedIceCreamTexture = loadTextureFromFile("images/person/meltedIceCream.bmp", graphicsData, 1);
+
+}
+
+static void loadShelterGraphics(GraphicsData *graphicsData){
+
+  graphicsData->shelter.graphic[SUMMER_INDEX] =loadTextureFromFile("images/tree1.bmp",graphicsData,1);
+
+  graphicsData->shelter.graphic[AUTUMN_INDEX] = loadTextureFromFile("images/treeAutumn1.bmp",graphicsData, 1);
+
+  graphicsData->shelter.graphic[WINTER_INDEX] =  loadTextureFromFile("images/treeWinter.bmp",graphicsData, 1);
+	graphicsData->treeStumpTexture = loadTextureFromFile("images/stump.bmp",graphicsData, 1);
+}
+
+static void loadNodeGraphics(GraphicsData *graphicsData){
+  graphicsData->nodeTexture[0] = loadTextureFromFile("images/blueFlower.bmp",graphicsData, 1);
+  graphicsData->nodeTexture[1] = loadTextureFromFile("images/redFlower.bmp",graphicsData, 1);
+  graphicsData->nodeTexture[2] = loadTextureFromFile("images/yellowFlower.bmp",graphicsData, 1);
+}
+
+static void loadGrass(GraphicsData *graphicsData){
+  graphicsData->grass.graphic[SUMMER_INDEX] = loadTextureFromFile("images/grass/grass4.bmp",graphicsData, 0);
+  graphicsData->grass.graphic[AUTUMN_INDEX] = loadTextureFromFile("images/grass/autumnGrass4.bmp", graphicsData, 0);
 }

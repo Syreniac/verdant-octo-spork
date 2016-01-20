@@ -36,15 +36,6 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
 
   initControlData(&gameData.controlsData);
 
-  /* initialise navigationOffset values */
-  gameData.graphicsData.navigationOffset.x = X_INITIAL_SCREEN_OFFSET; /*setting initial x offset to center of world*/
-  gameData.graphicsData.navigationOffset.y = Y_INITIAL_SCREEN_OFFSET; /*setting initial y offset ot center of world*/
-  gameData.graphicsData.navigationOffset.w = 0;
-  gameData.graphicsData.navigationOffset.h = 0;
-
-  gameData.graphicsData.trackingMode = 0;
-
-
 
   /* We also need some time information to make things run smoothly */
   gameData.gameStartTime = SDL_GetTicks();
@@ -71,120 +62,6 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
 
   memset(&gameData.gameObjectData.droppedIceCream->rect.x,256,sizeof(int));
   memset(&gameData.gameObjectData.droppedIceCream->rect.y,256,sizeof(int));
-
-  gameData.graphicsData.grass = malloc(sizeof(struct Shelter));
-
-  gameData.graphicsData.grass->graphic[SUMMER_INDEX] = loadTextureFromFile("images/grass/grass4.bmp",&gameData.graphicsData, 0);
-  gameData.graphicsData.grass->graphic[AUTUMN_INDEX] = loadTextureFromFile("images/grass/autumnGrass4.bmp", &gameData.graphicsData, 0);
-  gameData.graphicsData.treeStumpTexture = loadTextureFromFile("images/stump.bmp",&gameData.graphicsData, 1);
-  gameData.graphicsData.nodeTexture[0] = loadTextureFromFile("images/blueFlower.bmp",
-														                                 &gameData.graphicsData, 1);
-  gameData.graphicsData.nodeTexture[1] = loadTextureFromFile("images/redFlower.bmp",&gameData.graphicsData, 1);
-  gameData.graphicsData.nodeTexture[2] = loadTextureFromFile("images/yellowFlower.bmp",&gameData.graphicsData, 1);
-
-  gameData.graphicsData.shelter = malloc(sizeof(struct Shelter));
-
-  gameData.graphicsData.shelter->graphic[SUMMER_INDEX] =
-  loadTextureFromFile("images/tree1.bmp",
-					  &gameData.graphicsData, 1);
-
-  gameData.graphicsData.shelter->graphic[AUTUMN_INDEX] =
-  loadTextureFromFile("images/treeAutumn1.bmp",
-					  &gameData.graphicsData, 1);
-
-  gameData.graphicsData.shelter->graphic[WINTER_INDEX] =
-  loadTextureFromFile("images/treeWinter.bmp",
-					  &gameData.graphicsData, 1);
-
-
-
-  gameData.graphicsData.person = (Person*) malloc(sizeof(Person));
-
-  gameData.graphicsData.person->graphic[WITH_ICE_CREAM_STRIDE1] =
-  loadTextureFromFile("images/person/withIceCream1.bmp",
-					  &gameData.graphicsData, 1);
-
-  gameData.graphicsData.person->graphic[WITH_ICE_CREAM_STRIDE2] =
-  loadTextureFromFile("images/person/withIceCream2.bmp",
-					  &gameData.graphicsData, 1);
-
-  gameData.graphicsData.person->graphic[WITH_ICE_CREAM_STRIDE1 + NO_ICECREAM_INDEX_OFFSET] =
-  loadTextureFromFile("images/person/withoutIceCream1.bmp",
-					  &gameData.graphicsData, 1);
-
-  gameData.graphicsData.person->graphic[WITH_ICE_CREAM_STRIDE2 + NO_ICECREAM_INDEX_OFFSET] =
-  loadTextureFromFile("images/person/withoutIceCream2.bmp",
-					  &gameData.graphicsData, 1);
-
-  gameData.graphicsData.droppedIceCreamTexture = loadTextureFromFile("images/person/droppedIceCream.bmp", &gameData.graphicsData, 1);
-  gameData.graphicsData.meltedIceCreamTexture = loadTextureFromFile("images/person/meltedIceCream.bmp", &gameData.graphicsData, 1);
-
-  gameData.graphicsData.roamingArachnid = (RoamingArachnid*) malloc(sizeof(RoamingArachnid));
-
-  /*roamingSpider graphics*/
-  gameData.graphicsData.roamingArachnid->graphic[SPIDER] =
-  loadTextureFromFile("images/spider.bmp", &gameData.graphicsData, 1);
-  gameData.graphicsData.roamingArachnid->graphic[SPIDER2] =
-  loadTextureFromFile("images/spider2.bmp", &gameData.graphicsData, 1);
-  gameData.graphicsData.roamingArachnid->graphic[SPIDER15] =
-  loadTextureFromFile("images/spider15.bmp", &gameData.graphicsData, 1);
-  gameData.graphicsData.roamingArachnid->graphic[SPIDER15b] =
-  loadTextureFromFile("images/spider15.bmp", &gameData.graphicsData, 1);
-
-  gameData.graphicsData.roamingArachnid->graphic[SPIDER_DEAD] =
-  loadTextureFromFile("images/spider_dead2.bmp", &gameData.graphicsData, 1);
-  gameData.graphicsData.roamingArachnid->graphic[SPIDER_FIGHTING] =
-  loadTextureFromFile("images/spiderFighting.bmp", &gameData.graphicsData, 1);
-
-  gameData.graphicsData.rainy = (Rainy*) malloc(sizeof(Rainy));
-
-  gameData.graphicsData.rainy->graphic[0] = loadTextureFromFile("images/rain/rain1.bmp", &gameData.graphicsData, 1);
-  gameData.graphicsData.rainy->graphic[1] = loadTextureFromFile("images/rain/rain2.bmp", &gameData.graphicsData, 1);
-  gameData.graphicsData.rainy->graphic[2] = loadTextureFromFile("images/rain/rain3.bmp", &gameData.graphicsData, 1);
-  gameData.graphicsData.rainy->graphic[3] = loadTextureFromFile("images/rain/rain4.bmp", &gameData.graphicsData, 1);
-  gameData.graphicsData.rainy->graphic[4] = loadTextureFromFile("images/rain/rain5.bmp", &gameData.graphicsData, 1);
-  gameData.graphicsData.rainy->graphic[5] = loadTextureFromFile("images/rain/rain6.bmp", &gameData.graphicsData, 1);
-
-  gameData.graphicsData.bee = (Bee*) malloc(sizeof(Bee));
-
-
-  gameData.graphicsData.bee->graphic[BEE_FLAP_GRAPHIC_1] = loadTextureFromFile("images/bee.bmp",
-														  &gameData.graphicsData, 1);
-  gameData.graphicsData.bee->graphic[BEE_FLAP_GRAPHIC_2] = loadTextureFromFile("images/bee2.bmp",
-														  &gameData.graphicsData, 1);
-
-  gameData.graphicsData.bee->graphic[BEE_FLAP_GRAPHIC_1 + CARRYING_FLOWER_INDEX_OFFSET] = loadTextureFromFile("images/beeWithFlower.bmp",
-														  &gameData.graphicsData, 1);
-  gameData.graphicsData.bee->graphic[BEE_FLAP_GRAPHIC_2 + CARRYING_FLOWER_INDEX_OFFSET] = loadTextureFromFile("images/beeWithFlower2.bmp",
-														  &gameData.graphicsData, 1);
-
-  gameData.graphicsData.bee->graphic[BEE_FLAP_GRAPHIC_1 + CARRYING_ICECREAM_INDEX_OFFSET] =
-  loadTextureFromFile("images/beeWithIcecream.bmp", &gameData.graphicsData, 1);
-  gameData.graphicsData.bee->graphic[BEE_FLAP_GRAPHIC_2 + CARRYING_ICECREAM_INDEX_OFFSET] =
-  loadTextureFromFile("images/beeWithIcecream2.bmp",&gameData.graphicsData, 1);
-
-  gameData.graphicsData.hiveTexture = loadTextureFromFile("images/beehive.bmp",
-														  &gameData.graphicsData, 1);
-
-  gameData.graphicsData.uiEle = (UIEle*) malloc(sizeof(UIEle));
-//  gameData.graphicsData.ui->graphic[SCROLLHANDLE_GRAPHIC] = loadTextureFromFile("images/UI/scrollhandle.bmp",
-//														  &gameData.graphicsData, 1);
-
-  gameData.graphicsData.uiEle->graphic[SCROLLHANDLE_GRAPHIC] = loadTextureFromFile("images/UI/scrollhandle.bmp",
-                                                                                  &gameData.graphicsData, 1);
-
-  gameData.graphicsData.uiEle->graphic[CROSSBOX_GRAPHIC] = loadTextureFromFile("images/UI/crossbox.bmp",
-                                                                                  &gameData.graphicsData, 1);
-  gameData.graphicsData.uiEle->graphic[COMPILEBOX_GRAPHIC] = loadTextureFromFile("images/UI/compilebox.bmp",
-                                                                                  &gameData.graphicsData, 1);
-  gameData.graphicsData.uiEle->graphic[STOP_GRAPHIC] = loadTextureFromFile("images/UI/stop.bmp",
-                                                                                  &gameData.graphicsData, 1);
-  gameData.graphicsData.uiEle->graphic[BLOCK_GRAPHIC] = loadTextureFromFile("images/UI/block.bmp",
-                                                                                  &gameData.graphicsData, 1);
-  gameData.graphicsData.uiEle->graphic[HIVECELL_GRAPHIC] = loadTextureFromFile("images/UI/hivecell.bmp",
-                                                                                  &gameData.graphicsData, 1);
-  gameData.graphicsData.uiEle->graphic[HIVECELLMASK_GRAPHIC] = loadTextureFromFile("images/UI/hivecellmask.bmp",
-                                                                                  &gameData.graphicsData, 1);
 
   gameData.aiData = initAIData();
 
@@ -216,6 +93,7 @@ int gameStart(GraphicsData graphicsData, AudioData audioData){
 
 static void cleanUpGameData(GameData *gameData){
   UIRoot_Destroy(&gameData->uiData);
+  cleanGameObjectData(&gameData->gameObjectData);
 }
 
 static void createGameUI(GameData *gameData){

@@ -1,6 +1,6 @@
 # Please run the clean command detailed at the bottom, before running: make -f makefile_lab
 
-CFLAGS = -pedantic -Wall -Wextra -std=c99 -Wno-unused-parameter -O3 -g
+CFLAGS = -pedantic -Wall -Wextra -std=c99 -Wno-unused-parameter -ggdb
 TTF_FLAGS = -Ilibraries_Lab/SDL_ttf/include -Llibraries_Lab/SDL_ttf/lib
 TEST_FLAGS = -I/usr/include -L/usr/lib64 -Wl,-rpath,/usr/lib64
 IMAGE_FLAGS = -Ilibraries_Lab/SDL_image/include -Llibraries_Lab/SDL_image/lib

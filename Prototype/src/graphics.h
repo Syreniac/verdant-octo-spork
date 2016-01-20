@@ -32,29 +32,6 @@ enum WeatherStatus {/*Should belong in game_objects.h, but graphics.c needs to a
 #define HIVECELL_GRAPHIC 5
 #define HIVECELLMASK_GRAPHIC 6
 
-
-struct GraphicsData{
-  SDL_Window *window;
-  SDL_Rect navigationOffset;
-  int trackingMode;
-  SDL_Renderer *renderer;
-  SDL_Texture *nodeTexture[3];
-  SDL_Texture *hiveTexture;
-  SDL_Texture *treeStumpTexture;
-  /*SDL_Texture *grassTexture;*/
-  TTF_Font *fonts[2];
-  SDL_Texture *droppedIceCreamTexture;
-  SDL_Texture *meltedIceCreamTexture;
-  struct Grass *grass;
-  struct Shelter *shelter;
-  struct Bee *bee;
-  struct Rainy *rainy;
-  struct Person *person;
-  struct RoamingArachnid *roamingArachnid;
-  struct UIEle *uiEle;
-  SDL_Texture *mainMenuImage;
-};
-
 struct Grass{
 	SDL_Texture *graphic[2];
 };
@@ -84,6 +61,28 @@ struct UIEle{
 	SDL_Texture *graphic[10];
 };
 
+struct GraphicsData{
+  SDL_Window *window;
+  SDL_Point navigationOffset;
+  int trackingMode;
+  SDL_Renderer *renderer;
+  SDL_Texture *nodeTexture[3];
+  SDL_Texture *hiveTexture;
+  SDL_Texture *treeStumpTexture;
+  /*SDL_Texture *grassTexture;*/
+  TTF_Font *fonts[2];
+  SDL_Texture *droppedIceCreamTexture;
+  SDL_Texture *meltedIceCreamTexture;
+  struct Grass grass;
+  struct Shelter shelter;
+  struct Bee bee;
+  struct Rainy rainy;
+  struct Person person;
+  struct RoamingArachnid roamingArachnid;
+  struct UIEle uiEle;
+  SDL_Texture *mainMenuImage;
+};
+
 
 void paintWeatherLayer(GraphicsData *graphicsData, enum WeatherStatus present_weather);
 
@@ -105,3 +104,4 @@ void renderRadius(GraphicsData *graphicsData, SDL_Point *point, double radius, U
 void renderFillRadius(GraphicsData *graphicsData, SDL_Point *point, double radius, Uint8 r, Uint8 g, Uint8 b, Uint8 a);
 void setNavigationOffset(GraphicsData *graphicsData, int x, int y);
 void centerCameraOnPoint(GraphicsData *graphicsData, int x, int y);
+GraphicsData createGraphicsData(void);

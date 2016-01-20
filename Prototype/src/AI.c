@@ -39,6 +39,19 @@ static int doDoubleCompWithCharOperator(double a, double b, char op){
     function.
   - Take the same arguments to ensure pointer compatibility */
 
+int blockFunction_HeadAwayFromHive(BlockFunctionUniversals *universals, BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
+  programmableWorker->heading = getAngleBetweenRects(&gameObjectData->hive.rect,&programmableWorker->rect) + PI;
+  adjustProgrammableWorkerStatus(universals,programmableWorker,LEAVING);
+  return 1;
+
+}
+
+int blockFunction_HeadAtTangentToHive(BlockFunctionUniversals *universals, BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
+  programmableWorker->heading = getAngleBetweenRects(&gameObjectData->hive.rect,&programmableWorker->rect) + PI/2;
+  adjustProgrammableWorkerStatus(universals,programmableWorker,LEAVING);
+  return 1;
+}
+
 int blockFunction_IfNumOfIdleWorkers(BlockFunctionUniversals *universals, BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
   (void)globals;
   (void)programmableWorker;
@@ -75,7 +88,7 @@ int blockFunction_HeadToNearestWorker(BlockFunctionUniversals *universals, Block
   (void)universals;
   (void)arguments;
   SDL_Point point = getCenterOfRect(programmableWorker->rect);
-  if(programmableWorker->brain.nearestWorkerCacheTime <= 0){
+  if(programmableWorker->brain.nearestWorker == NULL || programmableWorker->brain.nearestWorkerCacheTime <= 0){
     programmableWorker->brain.nearestWorker = getNearestWorker(gameObjectData,point.x,point.y,programmableWorker);
     programmableWorker->brain.nearestWorkerCacheTime += NEARESTWORKER_CACHETIME + globals->flip * 20;
   }
@@ -405,7 +418,7 @@ int blockFunction_ReturnToHive(BlockFunctionUniversals *universals, BlockFunctio
   (void)globals;
   (void)arguments;
   programmableWorker->heading = getAngleBetweenRects(&gameObjectData->hive.rect,&programmableWorker->rect);
-    adjustProgrammableWorkerStatus(universals,programmableWorker,RETURNING);
+  adjustProgrammableWorkerStatus(universals,programmableWorker,RETURNING);
   return(1);
 }
 
@@ -881,6 +894,10 @@ AIData initAIData(void){
 	makeAIBlockTemplate(&aiData,"HeadToNearestWorker",&blockFunction_HeadToNearestWorker,
                       0,ACTION_BLOCK_COLOR,1,BF_THEN);
 	makeAIBlockTemplate(&aiData,"HuntSpider",&blockFunction_HuntSpider,
+                      0,ACTION_BLOCK_COLOR,1,BF_THEN);
+  makeAIBlockTemplate(&aiData,"HeadAtTangentToHive",&blockFunction_HeadAtTangentToHive,
+                      0,ACTION_BLOCK_COLOR,1,BF_THEN);
+  makeAIBlockTemplate(&aiData,"HeadAwayFromHive",&blockFunction_HeadAwayFromHive,
                       0,ACTION_BLOCK_COLOR,1,BF_THEN);
 
 	makeAIBlockTemplate(&aiData,"Delay",&blockFunction_Delay,

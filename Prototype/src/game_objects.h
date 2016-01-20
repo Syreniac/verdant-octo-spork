@@ -249,6 +249,7 @@ struct GameObjectData{
 };
 
 GameObjectData createGameObjectData(void);
+void cleanGameObjectData(GameObjectData *gameObjectData);
 ProgrammableWorker *createProgrammableWorker(GameObjectData *gameObjectData);
 Hive createHive(void);
 Tree createTree(GameObjectData *gameObjectData, int forceX, int forceY);

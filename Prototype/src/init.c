@@ -25,28 +25,13 @@ InitData initialise(void){
         - The X size of the window in pixels
         - The Y size like above
         - SDL configuration options which can be found online in the API documentation*/
-
-	initData.graphicsData.window = SDL_CreateWindow(PROGRAM_NAME,
-										   25,
-                                           25,
-                                           X_SIZE_OF_SCREEN, Y_SIZE_OF_SCREEN,
-                                           SDL_WINDOW_SHOWN|SDL_WINDOW_RESIZABLE);
-
-    initData.graphicsData.renderer = SDL_CreateRenderer(initData.graphicsData.window,
-                                               -1,
-                                               SDL_RENDERER_TARGETTEXTURE|SDL_RENDERER_PRESENTVSYNC|SDL_RENDERER_ACCELERATED);
-	assert(initData.graphicsData.renderer != NULL);
-  initData.graphicsData.navigationOffset.w = 0;
-  initData.graphicsData.navigationOffset.h = 0;
-
-  initData.graphicsData.mainMenuImage = loadTextureFromFile("images/mainMenuImage.bmp", &initData.graphicsData, 0);
-
 	/*Audio needs to be initialized at the very start too.*/
+    TTF_Init();
+
+  initData.graphicsData = createGraphicsData();
+
 	audioSystem(&initData.audioData);
 
-  TTF_Init();
-  initData.graphicsData.fonts[0] = TTF_OpenFont("font/Oxygen-Regular.ttf",16);
-  initData.graphicsData.fonts[1] = TTF_OpenFont("font/Oxygen-Regular.ttf",12);
 
 	loadMusic("sound/music01.wav" , 0, &initData.audioData);
 
@@ -122,13 +107,13 @@ int game_welcome_page(GraphicsData graphicsData, AudioData audioData){
    UIConfigure_PercOffsetRect(initData.uiData.root,&initData.uiData.root->actions[1],0.0,0.0,1.0,1.0,
                                                                                      0,  0,  0,  0,  0);
 
-   element = UIElement_Create(0,0,0,0,3);
+   element = UIElement_Create(0,0,0,0,4);
    UIConfigure_Counter(element,&element->actions[0],1,0);
    UIConfigure_LeftClickRect(element,&element->actions[1]);
        UITrigger_Bind(&element->actions[1],&element->actions[0],-1,UITRIGGER_PLUSONE);
    UIConfigure_PercOffsetRect(element,&element->actions[2],0.55, 0.69, 0.9, 0.82,
                                                            0,    0,  0,0,0);
-   //UIConfigure_FillRect(element,&element->actions[3],255,255,255);
+   UIConfigure_FillRect(element,&element->actions[3],255,255,255);
 
    UIElement_Reparent(element,initData.uiData.root);
 
@@ -153,7 +138,7 @@ int game_welcome_page(GraphicsData graphicsData, AudioData audioData){
 
       /*UIRoot_Execute(&initData.uiData,UPDATE,0);*/
 
-      paintBackground(&initData.graphicsData,0,200,100);
+      //paintBackground(&initData.graphicsData,0,200,100);
       UIRoot_Execute(&initData.uiData,UPDATE,0);
       SDL_RenderPresent(initData.graphicsData.renderer);
     	while (SDL_PollEvent(&event))
