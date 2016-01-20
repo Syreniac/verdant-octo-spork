@@ -239,6 +239,7 @@ struct GameObjectData{
   char gameOverString[256];
   int gameOver;
   int gameOverBoxVisible;
+  int soundEffectDeployed; /*These are deployed sequentially: 1 = first sound effect, 2 = second sound effect etc.*/
   GameOverCause gameOverCause;
   Uint32 gameOverEventNum;
   Uint32 objectDisplayEventNum;

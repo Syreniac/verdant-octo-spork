@@ -16,14 +16,14 @@ static void chooseResourceNodeType(GameObjectData *gameObjectData, ResourceNode 
 /* Subfunctions for updateGameObjects */
 static void updateWeather(GameObjectData *gameObjectData, AudioData *audioData, Weather *weather, int ticks);
 static void reInitialiseRoamingSpider(RoamingSpider *roamingSpider);
-static void updateEnvironment(GameObjectData *gameObjectData, AnnouncementsData *announcementsData, int ticks);
+static void updateEnvironment(GameObjectData *gameObjectData, AudioData *audioData, AnnouncementsData *announcementsData, int ticks);
 static void programmableWorkerWeatherProofing(GameObjectData *gameObjectData);
 static void updateResourceNodes(GameObjectData *gameObjectData, int ticks);
 static void updateResourceNodeSpawner(GameObjectData *gameObjectData, ResourceNodeSpawner *spawner, int ticks);
 static int getFirstDeadResourceNode(ResourceNodeSpawner *resourceNodeSpawner);
 static void updateRoamingSpider(GameObjectData *gameObjectData, AnnouncementsData *announcementsData, int ticks);
 static void reInitialiseRoamingSpider(RoamingSpider *roamingSpider);
-static void updateIceCreamPerson(GameObjectData *gameObjectData, AnnouncementsData *announcementsData, int ticks);
+static void updateIceCreamPerson(GameObjectData *gameObjectData, AudioData *audioData, AnnouncementsData *announcementsData, int ticks);
 static void reInitialiseIceCreamPerson(IceCreamPerson *iceCreamPerson);
 static void updateIceCream(GameObjectData *gameObjectData, int ticks);
 static void updateHive(GameObjectData *gameObjectData, AnnouncementsData *announcementsData, int ticks);
@@ -573,7 +573,7 @@ void updateGameObjects(GameObjectData *gameObjectData, AudioData *audioData, Ann
 		updateWeather(gameObjectData, audioData, &gameObjectData->environment.weather, ticks);
 	}
 	if(!gameObjectData->gameOver && !gameObjectData->pause_status){
-		updateEnvironment(gameObjectData,announcementsData,ticks);
+		updateEnvironment(gameObjectData, audioData, announcementsData,ticks);
   }
 	if(!gameObjectData->gameOver && !gameObjectData->pause_status){
 		updateResourceNodes(gameObjectData,ticks);
@@ -582,7 +582,7 @@ void updateGameObjects(GameObjectData *gameObjectData, AudioData *audioData, Ann
 		updateRoamingSpider(gameObjectData,announcementsData,ticks);
 	}
 	if(!gameObjectData->gameOver && !gameObjectData->pause_status){
-		updateIceCreamPerson(gameObjectData,announcementsData,ticks);
+		updateIceCreamPerson(gameObjectData, audioData, announcementsData,ticks);
 	}
 	if(!gameObjectData->gameOver && !gameObjectData->pause_status){
 		updateIceCream(gameObjectData,ticks);
@@ -641,7 +641,7 @@ static void updateWeather(GameObjectData *gameObjectData, AudioData *audioData, 
 
    This is where we progress the seasons */
 
-static void updateEnvironment(GameObjectData *gameObjectData, AnnouncementsData *announcementsData, int ticks){
+static void updateEnvironment(GameObjectData *gameObjectData, AudioData *audioData, AnnouncementsData *announcementsData, int ticks){
 	char finalScore[255];
 	switch(gameObjectData->environment.season){
 		case WINTER:
@@ -665,6 +665,10 @@ static void updateEnvironment(GameObjectData *gameObjectData, AnnouncementsData 
 				gameObjectData->environment.winterCountdown = (int) gameObjectData->environment.winterCountdownFloat;
 				gameObjectData->environment.treeGraphic = SUMMER_INDEX;
 				gameObjectData->years_survived++;
+				if (gameObjectData->soundEffectDeployed == 1) {
+					playSoundEffect(2, audioData, "applause");
+					gameObjectData->soundEffectDeployed = 0; /*set back to start*/
+				}
 			}
 			gameObjectData->environment.delayBeforeSummer -= ticks;
 			break;
@@ -674,6 +678,10 @@ static void updateEnvironment(GameObjectData *gameObjectData, AnnouncementsData 
 				gameObjectData->environment.treeGraphic = WINTER_INDEX;
 				gameObjectData->environment.delayBeforeSummer = DELAY_BEFORE_SUMMER;
 				gameObjectData->environment.season = WINTER;
+			}
+			else if(gameObjectData->environment.winterCountdown == 10 && gameObjectData->soundEffectDeployed == 0) {
+				playSoundEffect(2, audioData, "winterComing");
+				gameObjectData->soundEffectDeployed = 1;
 			}
 		case SUMMER:
 			if(gameObjectData->environment.winterCountdown <= AUTUMN_THRESHOLD){
@@ -1028,7 +1036,7 @@ static void reInitialiseRoamingSpider(RoamingSpider *roamingSpider){
 
 	 updates the ice cream person */
 
-static void updateIceCreamPerson(GameObjectData *gameObjectData, AnnouncementsData *announcementsData, int ticks){
+static void updateIceCreamPerson(GameObjectData *gameObjectData, AudioData *audioData, AnnouncementsData *announcementsData, int ticks){
 
 	double newX,newY;
 	int distanceFromYBorder;
@@ -1118,6 +1126,7 @@ static void updateIceCreamPerson(GameObjectData *gameObjectData, AnnouncementsDa
 	  		gameObjectData->iceCreamPerson->stung = 1;
 	  		/*drop iceCream!*/
 	  		gameObjectData->iceCreamPerson->has_ice_cream = 0;
+			playSoundEffect(2, audioData, "garryScream");
 
 	  		gameObjectData->droppedIceCream->xPosition = gameObjectData->iceCreamPerson->xPosition;
 	  		gameObjectData->droppedIceCream->yPosition = gameObjectData->iceCreamPerson->yPosition;
@@ -1529,7 +1538,7 @@ static void updateProgrammableWorkerIdle(GameObjectData *gameObjectData, Program
 }
 
 static int updateProgrammableWorkerCombat(GameObjectData *gameObjectData, ProgrammableWorker *programmableWorker, AnnouncementsData *announcementsData){
-	if(isPointInRangeOf(getCenterOfRect(programmableWorker->rect), getCenterOfRect(gameObjectData->roamingSpider->rect),SPIDER_ATTACK_AREA)){
+	if(isPointInRangeOf(getCenterOfRect(programmableWorker->rect), getCenterOfRect(gameObjectData->roamingSpider->rect),SPIDER_ATTACK_AREA*0.8)){
 
 		if(!gameObjectData->roamingSpider->stung){
 			announce(announcementsData,"A spider is attacking one of your bees!");
@@ -1540,6 +1549,7 @@ static int updateProgrammableWorkerCombat(GameObjectData *gameObjectData, Progra
 		if(gameObjectData->roamingSpider->stung == 1) {
 			programmableWorker->fighting_spider = 0;
 			programmableWorker->stunned_after_sting = 1;
+			programmableWorker->wet_and_cant_fly = 0;
 		}
 
 		if(gameObjectData->roamingSpider->eating_bee_complete == 1) {
