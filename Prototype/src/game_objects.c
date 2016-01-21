@@ -684,7 +684,7 @@ static void updateEnvironment(GameObjectData *gameObjectData, AudioData *audioDa
 			break;
 		case SPRING:
 		case SUMMER:
-			else if(gameObjectData->environment.winterCountdown == 10 && gameObjectData->soundEffectDeployed == 0) {
+			if(gameObjectData->environment.winterCountdown == 10 && gameObjectData->soundEffectDeployed == 0) {
 				playSoundEffect(2, audioData, "winterComing");
 				gameObjectData->soundEffectDeployed = 1;
 			}
