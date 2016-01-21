@@ -218,6 +218,7 @@ struct Environment{
   int delayBeforeSummer;
   int winterCountdown;
   double winterCountdownFloat;
+  double winterCountdownSpeed;
   enum Season season;
   int years_survived;
   int treeGraphic;
@@ -247,6 +248,7 @@ struct GameObjectData{
   int years_survived;
   Environment environment;
   GameObjectSelection gameObjectSelection;
+  
 };
 
 GameObjectData createGameObjectData(void);
@@ -274,3 +276,5 @@ int countResourceNodesInRadius(GameObjectData *gameObjectData, int x, int y, dou
 Tree *getNearestTree(GameObjectData *gameObjectData, int x, int y);
 ProgrammableWorker *getNearestWorker(GameObjectData *gameObjectData, int x, int y, ProgrammableWorker *ignore);
 int countIdleWorkers(GameObjectData *gameObjectData);
+
+void killProgrammableWorker(GameObjectData *gameObjectData, ProgrammableWorker **toDeletePointer);

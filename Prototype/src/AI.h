@@ -12,7 +12,9 @@ enum BlockFunctionArgumentType{
   BF_COUNT_QUANTITY,
   BF_PERCENT,
   BF_SEASON_TIME,
-  BF_DURATION
+  BF_DURATION,
+  BF_OPERATION,
+  BF_INTEGER
 };
 
 typedef struct BlockFunctionArgs BlockFunctionArgs;

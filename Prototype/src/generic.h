@@ -60,7 +60,7 @@ FILE *DEBUGGING_FILE_FREE;
 #define RAIN_FRAME_DELAY 4
 
 
-#define INITIAL_NUMBER_OF_WORKERS 1000
+#define INITIAL_NUMBER_OF_WORKERS 10
 
 /*lower values result in a higher chance of bees regaining flight when wet, with
 each call to updateProgrammableWorker*/
@@ -116,6 +116,8 @@ each call to updateProgrammableWorker*/
 
 
 #define BENCHMARK_TEST 0
+
+#define DUMP_AI_TO_FILE 1
 
 #define X_SIZE_OF_WORKER 40
 #define Y_SIZE_OF_WORKER 40

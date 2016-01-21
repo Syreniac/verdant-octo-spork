@@ -303,7 +303,7 @@ GraphicsData createGraphicsData(void){
 																		     SDL_WINDOW_SHOWN|SDL_WINDOW_RESIZABLE);
 
 	graphicsData.renderer = SDL_CreateRenderer(graphicsData.window,-1,
-																			    	 SDL_RENDERER_TARGETTEXTURE|SDL_RENDERER_PRESENTVSYNC|SDL_RENDERER_ACCELERATED);
+											   SDL_RENDERER_TARGETTEXTURE|SDL_RENDERER_PRESENTVSYNC);
 
 	graphicsData.mainMenuImage = loadTextureFromFile("images/mainMenuImage.bmp", &graphicsData, 0);
 

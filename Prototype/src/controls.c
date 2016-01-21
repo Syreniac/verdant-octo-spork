@@ -58,7 +58,6 @@ int handleEvent(SDL_Event *event, GameObjectData *gameObjectData, UIData *uiData
 				return keyup(controlsData,gameObjectData, uiData,event);
 				break;
 			case SDL_QUIT:
-				printf("SDL_QUIT\n");
 				return 0;
 			case SDL_MOUSEWHEEL:
 				UIRoot_Execute(uiData,MOUSEWHEEL,0);
@@ -111,13 +110,11 @@ int keydown(ControlsData *controlsData, GameObjectData *gameObjectData, Graphics
 				break;
 			case (SDL_SCANCODE_RETURN):
 			case (SDL_SCANCODE_KP_ENTER):
-				printf("ENTER Key pressed\n");
 				if(gameObjectData->gameOver){
 					return 2;
 				}
 				break;
 			case (SDL_SCANCODE_H):
-				printf("finding home\n");
 				centerViewOnHive(graphicsData,gameObjectData);
 				break;
 
@@ -152,6 +149,19 @@ int keydown(ControlsData *controlsData, GameObjectData *gameObjectData, Graphics
 			case SDL_SCANCODE_N:
 				printf("DEV HACKING TO GO TO NEXT WEATHER\n");
 				gameObjectData->environment.weather.tickCount = TICKSPERWEATHER;
+				break;
+			case SDL_SCANCODE_J:
+				printf("DEV HACKING TO STOP SEASONS PROGRESSING\n");
+				gameObjectData->environment.winterCountdownSpeed = (!(gameObjectData->environment.winterCountdownSpeed)) * WINTER_COUNTDOWN_SPEED;
+				break;
+			case SDL_SCANCODE_L:
+				printf("DEV HACKING ANOTHER BEE INTO EXISTENCE\n");
+				createProgrammableWorker(gameObjectData);
+				break;
+			case SDL_SCANCODE_K:
+				printf("DEV HACKING A BEE TO DEATH\n");
+				ProgrammableWorker *p = gameObjectData->first_programmable_worker;
+				killProgrammableWorker(gameObjectData,&p);
 				break;
 			#endif
 	    default:

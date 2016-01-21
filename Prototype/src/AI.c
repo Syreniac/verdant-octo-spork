@@ -2,8 +2,8 @@
 
 static void resetBlockFunctionGlobals(BlockFunctionGlobals *globals);
 static int doIntCompWithCharOperator(int a, int b, char op);
-static int doDoubleCompWithCharOperator(double a, double b, char op);
-static void resetBlockFunctionUniversals(BlockFunctionUniversals *universals);
+static double doDoubleCompWithCharOperator(double a, double b, char op);
+static int doIntOpWithCharOperator(int a, int b, char op);
 static blockFunction_WrappedFunction getBlockFunctionByName(AIData *aiData, char *blockFunctionName);
 
 static void adjustProgrammableWorkerStatus(BlockFunctionUniversals *universals, ProgrammableWorker *programmableWorker, enum ProgrammableWorkerStatus new_status);
@@ -20,7 +20,7 @@ static int doIntCompWithCharOperator(int a, int b, char op){
   return 0;
 }
 
-static int doDoubleCompWithCharOperator(double a, double b, char op){
+static double doDoubleCompWithCharOperator(double a, double b, char op){
   switch(op){
     case '<':
       return a < b;
@@ -33,13 +33,45 @@ static int doDoubleCompWithCharOperator(double a, double b, char op){
   return 0;
 }
 
+static int doIntOpWithCharOperator(int a, int b, char op){
+	switch(op){
+		case '+':
+			return a + b;
+		case '-':
+			return a - b;
+		case '='
+			return b;
+	}
+	return 0;
+}
+
 /* All blockFunctions must:
   - Return either integers between 0 and 2.
   - Have accomodations for resetting any arguments adjusted in the course of the
     function.
   - Take the same arguments to ensure pointer compatibility */
+  
+int blockFunction_AdjustCount(BlockFunctionUniversals *universals, BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
+	(void)universals;
+	(void)gameObjectData;
+	(void)programmableWorker;
+	globals->count = doIntOpWithCharOperator(globals->count, arguments->integers[0], arguments->characters[0]);
+	printf("count is now %d\n",globals->count);
+	return 1;
+}
 
+int blockFunction_DropCargo(BlockFunctionUniversals *universals, BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
+	(void)universals;
+	(void)arguments;
+	(void)globals;
+	(void)gameObjectData;
+	programmableWorker->cargo = 0;
+	return 1;
+} 
+  
 int blockFunction_HeadAwayFromHive(BlockFunctionUniversals *universals, BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
+  (void)globals;
+  (void)arguments;
   programmableWorker->heading = getAngleBetweenRects(&gameObjectData->hive.rect,&programmableWorker->rect) + PI;
   adjustProgrammableWorkerStatus(universals,programmableWorker,LEAVING);
   return 1;
@@ -47,6 +79,9 @@ int blockFunction_HeadAwayFromHive(BlockFunctionUniversals *universals, BlockFun
 }
 
 int blockFunction_HeadAtTangentToHive(BlockFunctionUniversals *universals, BlockFunctionGlobals *globals, BlockFunctionArgs *arguments, ProgrammableWorker *programmableWorker, GameObjectData *gameObjectData){
+  (void)globals;
+  (void)universals;
+  (void)arguments;
   programmableWorker->heading = getAngleBetweenRects(&gameObjectData->hive.rect,&programmableWorker->rect) + PI/2;
   adjustProgrammableWorkerStatus(universals,programmableWorker,LEAVING);
   return 1;
@@ -755,11 +790,13 @@ void runAI(AIData *aiData, GameObjectData *gameObjectData, int ticks){
   }
   universals.idle_count = countIdleWorkers(gameObjectData);
   for(programmableWorker = gameObjectData -> first_programmable_worker; programmableWorker != NULL; programmableWorker = programmableWorker->next){
-    runBlockFunctionRootOverWorker(&aiData->blockFunctionRoots[0],
-                                   &universals,
-                                   programmableWorker,
-                                   gameObjectData,
-                                   ticks);
+	if(programmableWorker->stunned_after_sting <= 0){
+		runBlockFunctionRootOverWorker(&aiData->blockFunctionRoots[0],
+									   &universals,
+									   programmableWorker,
+									   gameObjectData,
+									   ticks);
+	}
   }
 }
 
@@ -899,6 +936,8 @@ AIData initAIData(void){
                       0,ACTION_BLOCK_COLOR,1,BF_THEN);
   makeAIBlockTemplate(&aiData,"HeadAwayFromHive",&blockFunction_HeadAwayFromHive,
                       0,ACTION_BLOCK_COLOR,1,BF_THEN);
+	makeAIBlockTemplate(&aiData,"DropCargo",&blockFunction_DropCargo,
+	                    0,ACTION_BLOCK_COLOR,1,BF_THEN);
 
 	makeAIBlockTemplate(&aiData,"Delay",&blockFunction_Delay,
                       1,WAIT_BLOCK_COLOR,2,BF_THEN,BF_DURATION);
@@ -950,6 +989,8 @@ AIData initAIData(void){
                       0,COUNT_BLOCK_COLOR,1,BF_THEN);
 	makeAIBlockTemplate(&aiData,"SaveCountFromOther",&blockFunction_SaveCountFromOther,
                       0,COUNT_BLOCK_COLOR,1,BF_THEN);
+	makeAIBlockTemplate(&aiData,"AdjustCount",&blockFunction_AdjustCount,
+	                    0,COUNT_BLOCK_COLOR,4,BF_PRIMARY,BF_SECONDARY,BF_OPERATION,BF_INTEGER);
 
 	makeAIBlockTemplate(&aiData,"StoreCurrentLocation",&blockFunction_StoreCurrentLocation,
                       0,POINT_BLOCK_COLOR,1,BF_THEN);
