@@ -17,7 +17,6 @@ static void chooseResourceNodeType(GameObjectData *gameObjectData, ResourceNode 
 static void updateWeather(GameObjectData *gameObjectData, AudioData *audioData, Weather *weather, int ticks);
 static void reInitialiseRoamingSpider(RoamingSpider *roamingSpider);
 static void updateEnvironment(GameObjectData *gameObjectData, AudioData *audioData, AnnouncementsData *announcementsData, int ticks);
-static void programmableWorkerWeatherProofing(GameObjectData *gameObjectData);
 static void updateResourceNodes(GameObjectData *gameObjectData, int ticks);
 static void updateResourceNodeSpawner(GameObjectData *gameObjectData, ResourceNodeSpawner *spawner, int ticks);
 static int getFirstDeadResourceNode(ResourceNodeSpawner *resourceNodeSpawner);
@@ -39,9 +38,7 @@ static ResourceNode *checkResourceNodeCollision(ResourceNodeSpawner **resourceNo
 																			   				double sense_range);
 static void updateProgrammableWorkerIdle(GameObjectData *gameObjectData, ProgrammableWorker *programmableWorker);
 static int updateProgrammableWorkerCombat(GameObjectData *gameObjectData, ProgrammableWorker *programmableWorker, AnnouncementsData *announcementsData);
-static void killProgrammableWorker(GameObjectData *gameObjectData, ProgrammableWorker **toDeletePointer);
 static void updateProgrammableWorkerSenses(GameObjectData *gameObjectData, ProgrammableWorker *programmableWorker, ResourceNodeSpawner *resourceNodeSpawner);
-static ResourceNode *chooseNodeRandomly(ResourceNodeSpawner *resourceNodeSpawner);
 static ResourceNode *chooseReachableAliveNode(GameObjectData *gameObjectData, SDL_Point workerPoint);
 /* Subfunctions for renderGameObjects */
 static void blitBackground(GameObjectData *gameObjectData, GraphicsData *graphicsData);
@@ -111,6 +108,7 @@ static Environment createEnvironment(void){
 	environment.winterCountdown = MAX_DAYS_TO_WINTER;
 	environment.winterCountdownFloat = (double) environment.winterCountdown;
 	environment.season = SUMMER;
+	environment.winterCountdownSpeed = WINTER_COUNTDOWN_SPEED;
 	environment.years_survived = 0;
 	environment.treeGraphic = SUMMER_INDEX;
 	environment.weather = createWeather();
@@ -498,7 +496,6 @@ static void chooseResourceNodeType(GameObjectData *gameObjectData, ResourceNode 
 	SDL_Point p = getCenterOfRect(resourceNode->rect);
 	SDL_Point p1 = getCenterOfRect(gameObjectData->hive.rect);
 	double d = 0.05 * r + getDistance2BetweenPoints(p.x,p.y,p1.x,p1.y) / (X_SIZE_OF_WORLD*X_SIZE_OF_WORLD);
-	printf("%lf\n",d);
 	if(d > 0.5 * 0.5){
 		resourceNode->type = 2;
 	}
@@ -570,29 +567,32 @@ RoamingSpider *createRoamingSpider(void){
 	 the screen */
 
 void updateGameObjects(GameObjectData *gameObjectData, AudioData *audioData, AnnouncementsData *announcementsData, int ticks){
-
-	if(!gameObjectData->gameOver && !gameObjectData->pause_status){
+	
+	if(gameObjectData->pause_status){
+		return;
+	}
+	if(!gameObjectData->gameOver){
 		updateWeather(gameObjectData, audioData, &gameObjectData->environment.weather, ticks);
 	}
-	if(!gameObjectData->gameOver && !gameObjectData->pause_status){
+	if(!gameObjectData->gameOver){
 		updateEnvironment(gameObjectData, audioData, announcementsData,ticks);
-  }
-	if(!gameObjectData->gameOver && !gameObjectData->pause_status){
+	}
+	if(!gameObjectData->gameOver){
 		updateResourceNodes(gameObjectData,ticks);
 	}
-	if(!gameObjectData->gameOver && !gameObjectData->pause_status){
+	if(!gameObjectData->gameOver){
 		updateRoamingSpider(gameObjectData,announcementsData,ticks);
 	}
-	if(!gameObjectData->gameOver && !gameObjectData->pause_status){
+	if(!gameObjectData->gameOver){
 		updateIceCreamPerson(gameObjectData, audioData, announcementsData,ticks);
 	}
-	if(!gameObjectData->gameOver && !gameObjectData->pause_status){
+	if(!gameObjectData->gameOver){
 		updateIceCream(gameObjectData,ticks);
 	}
-	if(!gameObjectData->gameOver && !gameObjectData->pause_status){
+	if(!gameObjectData->gameOver){
 		updateHive(gameObjectData,announcementsData,ticks);
-  }
-	if(!gameObjectData->gameOver && !gameObjectData->pause_status){
+	}
+	if(!gameObjectData->gameOver){
 		updateProgrammableWorkers(gameObjectData,announcementsData,audioData,ticks);
 	}
 }
@@ -681,20 +681,20 @@ static void updateEnvironment(GameObjectData *gameObjectData, AudioData *audioDa
 				gameObjectData->environment.delayBeforeSummer = DELAY_BEFORE_SUMMER;
 				gameObjectData->environment.season = WINTER;
 			}
-			break;
-		case SPRING:
-		case SUMMER:
-			else if(gameObjectData->environment.winterCountdown == 10 && gameObjectData->soundEffectDeployed == 0) {
+			if(gameObjectData->environment.winterCountdown <= 10 && gameObjectData->soundEffectDeployed == 0) {
 				playSoundEffect(2, audioData, "winterComing");
 				gameObjectData->soundEffectDeployed = 1;
 			}
+			break;
+		case SPRING:
+		case SUMMER:
 			if(gameObjectData->environment.winterCountdown <= AUTUMN_THRESHOLD){
 				gameObjectData->environment.treeGraphic = AUTUMN_INDEX;
 				gameObjectData->environment.season = AUTUMN;
 			}
 			break;
 	}
-	gameObjectData->environment.winterCountdownFloat-= WINTER_COUNTDOWN_SPEED * ticks;
+	gameObjectData->environment.winterCountdownFloat-= gameObjectData->environment.winterCountdownSpeed * ticks;
 	gameObjectData->environment.winterCountdown = (int) gameObjectData->environment.winterCountdownFloat;
 }
 
@@ -1092,7 +1092,7 @@ static void updateIceCreamPerson(GameObjectData *gameObjectData, AudioData *audi
 	/*if countDownToStride equals zero, reset count, and change stride image*/
 	if(gameObjectData->iceCreamPerson->countDownToStride <= 0){
 		gameObjectData->iceCreamPerson->countDownToStride =
-        (int)((double)STRIDE_FREQUENCY / gameObjectData->iceCreamPerson->speed);
+        (int)((double)STRIDE_FREQUENCY / (0.05 + gameObjectData->iceCreamPerson->speed/2));
 
 
 		switch(gameObjectData->iceCreamPerson->currentGraphicIndex){
@@ -1126,7 +1126,8 @@ static void updateIceCreamPerson(GameObjectData *gameObjectData, AudioData *audi
 	programmableWorker = programmableWorker->next){
 
   		if(isPointInRangeOf(getCenterOfRect(programmableWorker->rect),
-  		getCenterOfRect(gameObjectData->iceCreamPerson->rect), STING_HIT_RADIUS) != 0){
+  		getCenterOfRect(gameObjectData->iceCreamPerson->rect), STING_HIT_RADIUS) != 0 &&
+		gameObjectData->iceCreamPerson->has_ice_cream){
 
 	  		gameObjectData->iceCreamPerson->stung = 1;
 	  		/*drop iceCream!*/
@@ -1137,9 +1138,10 @@ static void updateIceCreamPerson(GameObjectData *gameObjectData, AudioData *audi
 	  		gameObjectData->droppedIceCream->yPosition = gameObjectData->iceCreamPerson->yPosition;
 
 		  	gameObjectData->droppedIceCream->dropped = 1;
+			gameObjectData->droppedIceCream->droppedTimer = 0;
 
 	  		/*run for your life!*/
-	  		gameObjectData->iceCreamPerson->speed = 0.1;
+	  		gameObjectData->iceCreamPerson->speed = 0.31;
 
 	  		/*set programmable worker to stunned after sting*/
 	  		programmableWorker->stunned_after_sting = 1;
@@ -1345,7 +1347,8 @@ int updateProgrammableWorker(ProgrammableWorker **programmableWorkerP, GameObjec
 			if(programmableWorker->stunned_after_sting){
 				/* Make bees dizzy after stinging */
 				programmableWorker->heading += (rand()%3)-1;
-				if(programmableWorker->stunned_after_sting++ > STUNNED_AFTER_STING_DURATION){
+				programmableWorker->stunned_after_sting += ticks;
+				if(programmableWorker->stunned_after_sting > STUNNED_AFTER_STING_DURATION){
 					programmableWorker->stunned_after_sting = 0;
 				}
 			}
@@ -1565,7 +1568,7 @@ static int updateProgrammableWorkerCombat(GameObjectData *gameObjectData, Progra
 	return 0;
 }
 
-static void killProgrammableWorker(GameObjectData *gameObjectData, ProgrammableWorker **toDeletePointer){
+void killProgrammableWorker(GameObjectData *gameObjectData, ProgrammableWorker **toDeletePointer){
 	/* I tidied this up a bit by giving things new names - the compiler will optimise out
 		 most of these variables anyway */
 	ProgrammableWorker *p = NULL;
@@ -1605,7 +1608,6 @@ static void killProgrammableWorker(GameObjectData *gameObjectData, ProgrammableW
 
 static void updateProgrammableWorkerSenses(GameObjectData *gameObjectData, ProgrammableWorker *programmableWorker, ResourceNodeSpawner *resourceNodeSpawner){
 	/* Sensory Perception */
-	ResourceNode *resourceNode;
 	if(programmableWorker->brain.foundNode != NULL &&
 		 (getDistance2BetweenRects(programmableWorker->rect,programmableWorker->brain.foundNode->rect) >= WORKER_SENSE_RANGE * WORKER_SENSE_RANGE ||
 		 !programmableWorker->brain.foundNode->alive)){
@@ -1618,7 +1620,7 @@ static void updateProgrammableWorkerSenses(GameObjectData *gameObjectData, Progr
 }
 
 static ResourceNode *chooseReachableAliveNode(GameObjectData *gameObjectData, SDL_Point workerPoint){
-	int i = 0, j = 0, r = 0;
+	int i = 0, j = 0;
 
 	while(i < gameObjectData->resourceNodeSpawnerCount){
 		SDL_Point spawnerPoint = {gameObjectData->resourceNodeSpawners[i].xPosition,
@@ -1640,31 +1642,6 @@ static ResourceNode *chooseReachableAliveNode(GameObjectData *gameObjectData, SD
 		i++;
 	}
 
-	return NULL;
-}
-
-static ResourceNode *chooseNodeRandomly(ResourceNodeSpawner *resourceNodeSpawner){
-	int i = 0, r = rand();
-	printf("resourceNodeSpawner node count = %d\n", resourceNodeSpawner->currentNodeCount);
-
-	if(resourceNodeSpawner->currentNodeCount > 0){
-
-		r = r % (resourceNodeSpawner->currentNodeCount);
-		printf("nodecount = %d\n", resourceNodeSpawner->currentNodeCount);
-		while(i < resourceNodeSpawner->currentNodeCount){
-
-			if(resourceNodeSpawner->resourceNodes[i].alive){
-			/*
-				if(r == 0){*/
-					return &resourceNodeSpawner->resourceNodes[i];
-				/*}*/
-				r--;
-			}
-
-			i++;
-		}
-
-	}
 	return NULL;
 }
 
@@ -1971,23 +1948,34 @@ static void getWorkerInfoString(ProgrammableWorker *programmableWorker, char *ta
 }
 
 static void getResourceNodeInfoString(ResourceNode *resourceNode, char *targetString){
-		switch(resourceNode->type){
-			case 0:
-				sprintf(targetString,"Blue: %d",SUGAR_VALUE_OF_BLUE_FLOWER);
-				break;
-			case 1:
-				sprintf(targetString,"Red: %d",SUGAR_VALUE_OF_RED_FLOWER);
-				break;
-			case 2:
-				sprintf(targetString,"Yellow: %d",SUGAR_VALUE_OF_YELLOW_FLOWER);
-				break;
-		}
+	switch(resourceNode->type){
+		case 0:
+			sprintf(targetString,"Blue: %d",SUGAR_VALUE_OF_BLUE_FLOWER);
+			break;
+		case 1:
+			sprintf(targetString,"Red: %d",SUGAR_VALUE_OF_RED_FLOWER);
+			break;
+		case 2:
+			sprintf(targetString,"Yellow: %d",SUGAR_VALUE_OF_YELLOW_FLOWER);
+			break;
+	}
 }
 
 static void getSpiderInfoString(RoamingSpider *roamingSpider, char *targetString){
 	/* This just tells the compiler not to throw unused parameter warnings when compiling */
 	(void)roamingSpider;
-	sprintf(targetString,"Insy winsy");
+	if(roamingSpider->deadSpider){
+		sprintf(targetString,"Dead");
+	}
+	if(roamingSpider->stung){
+		sprintf(targetString,"Stung");
+		return;
+	}
+	if(roamingSpider->eating_bee){
+		sprintf(targetString,"Eating a bee");
+		return;
+	}
+	sprintf(targetString,"Doing spider things");
 }
 
 /* -------------------------------------------------------------------------- */
@@ -2171,8 +2159,8 @@ void cleanGameObjectData(GameObjectData *gameObjectData){
 	ProgrammableWorker *next;
 	while(p != NULL){
 		next = p->next;
-		killProgrammableWorker(gameObjectData,p);
-		p = gameObjectData->first_programmable_worker;
+		killProgrammableWorker(gameObjectData,&p);
+		p = next;
 	}
 	free(gameObjectData->roamingSpider);
 	gameObjectData->roamingSpider = NULL;

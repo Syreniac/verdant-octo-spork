@@ -50,6 +50,18 @@ static UI_Action* makeAIBlockOperatorSelector(UI_Element *element, int *nextAvai
 		UITrigger_Bind(&element->actions[nextAvailableAction],&element->actions[nextAvailableAction+3],-1,UITRIGGER_PLUSONE);
 	UIConfigure_FillAndBorderSubrect(element, &element->actions[nextAvailableAction+1],x,y,25,25,255,255,255,0,0,0);
 	UIConfigure_DisplayStringSubrect(element, &element->actions[nextAvailableAction+2],"",1,x,y,25,25);
+	UIConfigure_StringCollection(element,&element->actions[nextAvailableAction+3],1,3,&element->actions[nextAvailableAction+2],"+","-","=");
+	*nextAvailableActionPointer = *nextAvailableActionPointer + 4;
+	return &element->actions[nextAvailableAction+2];
+}
+
+
+static UI_Action* makeAIBlockComparatorSelector(UI_Element *element, int *nextAvailableActionPointer, int x, int y){
+	int nextAvailableAction = *nextAvailableActionPointer;
+	UIConfigure_LeftClickSubrect(element, &element->actions[nextAvailableAction], x, y, 25, 25);
+		UITrigger_Bind(&element->actions[nextAvailableAction],&element->actions[nextAvailableAction+3],-1,UITRIGGER_PLUSONE);
+	UIConfigure_FillAndBorderSubrect(element, &element->actions[nextAvailableAction+1],x,y,25,25,255,255,255,0,0,0);
+	UIConfigure_DisplayStringSubrect(element, &element->actions[nextAvailableAction+2],"",1,x,y,25,25);
 	UIConfigure_StringCollection(element,&element->actions[nextAvailableAction+3],1,3,&element->actions[nextAvailableAction+2],"=","<",">");
 	*nextAvailableActionPointer = *nextAvailableActionPointer + 4;
 	return &element->actions[nextAvailableAction+2];
@@ -108,6 +120,8 @@ static int countOptionsForAITemplate(BlockFunctionTemplate *template){
 			case BF_DISTANCE:
 			case BF_SEASON_TIME:
 			case BF_DURATION:
+			case BF_OPERATION:
+			case BF_INTEGER:
 				count += 1;
 				break;
 			default:
@@ -126,7 +140,6 @@ static int countUIActionsNeededForAITemplate(BlockFunctionTemplate *template){
 			case BF_PRIMARY:
 			case BF_SECONDARY:
 			case BF_THEN:
-				printf("+1 required link\n");
 				count += 7;
 				break;
 			case BF_CARGO_QUANTITY:
@@ -136,7 +149,8 @@ static int countUIActionsNeededForAITemplate(BlockFunctionTemplate *template){
 			case BF_PERCENT:
 			case BF_SEASON_TIME:
 			case BF_DURATION:
-				printf("+1 required option\n");
+			case BF_INTEGER:
+			case BF_OPERATION:
 				count += 4;
 				break;
 			default:
@@ -164,7 +178,7 @@ UI_Element *makeHiveCellBlock(int x_offset, int y_offset, UI_Element *parent, Hi
 
 UI_Element *makeStartBlock(int x_offset, int y_offset, UI_Element *parent){
 	UI_Element *element;
-	element = UIElement_Create(x_offset,y_offset,200,50,11);
+	element = UIElement_Create(x_offset,y_offset,200,50,10);
 	UIConfigure_FillAndBorderRect(element,&element->actions[0],248,221,35,0,0,0,FILLRECT);
 	UIConfigure_ShrinkFitToParent(element, &element->actions[1]);
 	UIConfigure_DisplayString(element, &element->actions[2],"START",0,UISTRING_ALIGN_CENTER);
@@ -194,7 +208,6 @@ UI_Element *makeStartBlock(int x_offset, int y_offset, UI_Element *parent){
 		element->actions[3].new_status = 0;
 	UIConfigure_SetUpAiBlock(element,&element->actions[8],2,&element->actions[2],&element->actions[7]);
 	UIConfigure_FillSubrect(element, &element->actions[9], 175, 25, 24, 24, 255, 255, 255);
-	UIConfigure_StringCollection(element, &element->actions[10], 1, 3, &element->actions[2],"Start","Go","Begin");
 	UIElement_Reparent(element,parent);
 	return element;
 }
@@ -277,7 +290,6 @@ UI_Element *makeAIBlock(int x_offset, int y_offset, BlockFunctionTemplate *templ
 	UI_Action *comparator = NULL;
 	UI_Action *integerArg = NULL;
 	/* Set it up */
-	printf("expecting %d elements\n",count);
 	UIConfigure_FillAndBorderRect(element2,
 															  &element2->actions[0],
 																template->red,
@@ -299,22 +311,25 @@ UI_Element *makeAIBlock(int x_offset, int y_offset, BlockFunctionTemplate *templ
 	nextAvailableAction = 6;
 
 	while(i < template->numOfArguments){
-		printf("%d\n",nextAvailableAction);
 		switch(template->arguments[i]){
 			case BF_PRIMARY:
-				printf("making primary\n");
 				primary = makeAIBlockLineLinker(element2, &nextAvailableAction, 0,25, "Yes", BL_CORNER);
 				break;
 			case BF_THEN:
-				printf("making primary\n");
 				primary = makeAIBlockLineLinker(element2, &nextAvailableAction, 0,25, "Then", BL_CORNER);
 				break;
 			case BF_SECONDARY:
-				printf("making secondary\n");
 				secondary = makeAIBlockLineLinker(element2, &nextAvailableAction, 165,25, "No", BR_CORNER);
 				break;
 			case BF_COMPARISON:
-				printf("making comparator\n");
+				x = 130 / (optionsCount + 1);
+				x *= (1 + optionsPlaced);
+				x -= 25/2;
+				x += 35;
+				comparator = makeAIBlockComparatorSelector(element2, &nextAvailableAction, x, 25);
+				optionsPlaced++;
+				break;
+			case BF_OPERATION:
 				x = 130 / (optionsCount + 1);
 				x *= (1 + optionsPlaced);
 				x -= 25/2;
@@ -328,7 +343,7 @@ UI_Element *makeAIBlock(int x_offset, int y_offset, BlockFunctionTemplate *templ
 			case BF_PERCENT:
 			case BF_SEASON_TIME:
 			case BF_DURATION:
-				printf("making integrator\n");
+			case BF_INTEGER:
 				x = 130 / (optionsCount + 1);
 				x *= (1 + optionsPlaced);
 				x -= 25/2;
@@ -344,7 +359,6 @@ UI_Element *makeAIBlock(int x_offset, int y_offset, BlockFunctionTemplate *templ
 
 	UIConfigure_DeleteKeyFlagDestroy(element2, &element2->actions[nextAvailableAction]);
 	UIConfigure_SetUpAiBlock(element2,&element2->actions[nextAvailableAction+1],5,&element2->actions[5],primary,secondary,comparator,integerArg);
-	printf("nextAvailableAction %d && element2->num_of_actions %d\n",nextAvailableAction,element2->num_of_actions);
 	assert(nextAvailableAction < element2->num_of_actions);
 
 	UIElement_Reparent(element2,parent);
@@ -417,7 +431,6 @@ int UIAction_StringCollection(UI_Action *action, UIData *uiData){
 	(void)uiData;
 	if(action->status != 0){
 		if(action->status > action->num_of_strings){
-			printf("resetting string collection\n");
 			action->status = 1;
 			action->new_status = 1;
 		}
@@ -514,9 +527,6 @@ int UIAction_DisplayNumberSubrect(UI_Action *action, UIData *uiData){
 }
 
 void UIConfigure_DisplayNumberSubrect(UI_Element *element, UI_Action *action, int number, int font, int x, int y, int w, int h){
-	#if DEBUGGING==1
-	printf("UIConfigure_DisplayNumber\n");
-	#endif
 	UIAction_Init(element,action);
 	action->response = UPDATE;
 	action->status = 1;
@@ -598,9 +608,6 @@ int UIAction_DisplayStringSubrect(UI_Action *action, UIData *uiData){
 }
 
 void UIConfigure_DisplayStringSubrect(UI_Element *element, UI_Action *action, char *string, int font, int x, int y, int w, int h){
-	#if DEBUGGING==1
-	printf("UIConfigure_DisplayString\n");
-	#endif
 	UIAction_Init(element,action);
 	action->response = UPDATE;
 	action->function = UIAction_DisplayStringSubrect;
@@ -1616,9 +1623,6 @@ int UIAction_ShrinkFitToParentWithYShift(UI_Action *action, UIData *uiData){
 }
 
 void UIConfigure_ShrinkFitToParentWithYShift(UI_Element *element, UI_Action *action, UI_Action *yShiftSourceElement){
-	#if DEBUGGING==1
-	printf("UIConfigure_ShrinkFitToParent\n");
-	#endif
 	UIAction_Init(element,action);
 	action->response = UPDATE;
 	action->function = UIAction_ShrinkFitToParentWithYShift;
@@ -1680,9 +1684,6 @@ void UIConfigure_GetDifferenceInChildYOffset(UI_Element *element, UI_Action *act
 		int i = 0;
 		va_list vargs;
 		va_start(vargs,num_of_companions);
-		#if DEBUGGING==1
-		printf("UIConfigure_GetDifferenceInChildYOffset\n");
-		#endif
 		UIAction_Init(element,action);
 		action->response = UPDATE;
 		action->function = UIAction_GetDifferenceInChildYOffset;
@@ -1750,9 +1751,6 @@ void UIConfigure_DraggableVerticalOverride(UI_Element *element, UI_Action *actio
 	int i = 0;
 	va_list vargs;
 	va_start(vargs,num_of_companions);
-	#if DEBUGGING==1
-	printf("UIConfigure_DraggableVerticalOverride\n");
-	#endif
 	UIAction_Init(element,action);
 	action->response = MOTION;
 	action->function = UIAction_DraggableVerticalOverride;
@@ -1787,9 +1785,6 @@ int UIAction_NullifyAI(UI_Action *action, UIData *uiData){
 }
 
 void UIConfigure_NullifyAI(UI_Element *element, UI_Action *action){
-	#if DEBUGGING==1
-	printf("UIConfigure_NullifyAI\n");
-	#endif
 	UIAction_Init(element,action);
 	action->response = UPDATE;
 	action->function = UIAction_NullifyAI;
@@ -1820,9 +1815,6 @@ int UIAction_RecallWorkers(UI_Action *action, UIData *uiData){
 }
 
 void UIConfigure_RecallWorkers(UI_Element *element, UI_Action *action){
-	#if DEBUGGING==1
-	printf("UIConfigure_RecallWorkers\n");
-	#endif
 	UIAction_Init(element,action);
 	action->response = UPDATE;
 	action->function = UIAction_RecallWorkers;
@@ -1849,6 +1841,9 @@ int UIAction_ReadAiBlocks(UI_Action *action, UIData *uiData){
 	int i;
 	UI_Element *childElement;
 	int childCount;
+	#ifdef DUMP_AI_TO_FILE
+	FILE *aiDump;
+	#endif
 	if(action->status == 1){
 		childElement = action->element->child;
 		childCount = 0;
@@ -1865,19 +1860,25 @@ int UIAction_ReadAiBlocks(UI_Action *action, UIData *uiData){
 			strcat(workingSpace,childElementExposedString);
 			childElement = childElement->sibling;
 		}
-		printf("%s\n",workingSpace);
+		#ifdef DUMP_AI_TO_FILE
+		aiDump = fopen("AI_Output.bpp","w");
+		fprintf(aiDump,workingSpace);
+		fflush(aiDump);
+		fclose(aiDump);
+		#endif
+		/* This function carves up the workingSpace string */
 		blockFunctionRoot = makeBlockFunctionRootFromString(uiData->aiData,workingSpace,childCount);
 	    erroneousBlockFunction = testBlockFunctionRootForLoops(uiData->aiData,&blockFunctionRoot.blockFunctions[0],NULL,0);
 	    if(erroneousBlockFunction != NULL){
-				while(erroneousBlockFunction != &blockFunctionRoot.blockFunctions[i]){
-				  i++;
-				}
-				if(action->infoOuput != NULL){
-					action->infoOuput->changeString = realloc(action->infoOuput->changeString,strlen("ERROR: Loop detected at Block ###: \'BlockFunctionGenericNameThatMakesSureWeHaveSpace\'")+1);
-					sprintf(action->infoOuput->changeString,"ERROR: Loop detected at Block %d: \'%s\'",i,erroneousBlockFunction->name);
-				}
-				/* THIS FUNCTION BEING ONE LINE HIGHER CAUSED A SEGFAULT DO NOT TOUCH IT */
-				nullifyBlockFunctionRoot(&blockFunctionRoot,NULL);
+			while(erroneousBlockFunction != &blockFunctionRoot.blockFunctions[i]){
+			  i++;
+			}
+			if(action->infoOuput != NULL){
+				action->infoOuput->changeString = realloc(action->infoOuput->changeString,strlen("ERROR: Loop detected at Block ###: \'BlockFunctionGenericNameThatMakesSureWeHaveSpace\'")+1);
+				sprintf(action->infoOuput->changeString,"ERROR: Loop detected at Block %d: \'%s\'",i,erroneousBlockFunction->name);
+			}
+			/* THIS FUNCTION BEING ONE LINE HIGHER CAUSED A SEGFAULT DO NOT TOUCH IT */
+			nullifyBlockFunctionRoot(&blockFunctionRoot,NULL);
 	    }
 	    else if(testBlockFunctionRootForStart(&blockFunctionRoot) == 0){
 				nullifyBlockFunctionRoot(&blockFunctionRoot, NULL);
@@ -1897,9 +1898,6 @@ int UIAction_ReadAiBlocks(UI_Action *action, UIData *uiData){
 }
 
 void UIConfigure_ReadAiBlocks(UI_Element *element, UI_Action *action, UI_Action *infoOutput){
-	#if DEBUGGING==1
-	printf("UIConfigure_ReadAiBlocks\n");
-	#endif
 	UIAction_Init(element,action);
 	action->response = UPDATE;
 	action->function = UIAction_ReadAiBlocks;
@@ -1977,9 +1975,6 @@ int UIAction_SetUpAiBlock(UI_Action *action, UIData *uiData){
 void UIConfigure_SetUpAiBlock(UI_Element *element, UI_Action *action, int num_of_companions, ...){
 	va_list vargs;
 	int i = 0;
-	#if DEBUGGING==1
-	printf("UIConfigure_SetUpAiBlock\n");
-	#endif
 	UIAction_Init(element,action);
 	va_start(vargs,num_of_companions);
 	action->response = UPDATE;
@@ -2015,9 +2010,6 @@ int UIAction_DeleteKeyFlagDestroy(UI_Action *action, UIData *uiData){
 }
 
 void UIConfigure_DeleteKeyFlagDestroy(UI_Element *element, UI_Action *action){
-	#if DEBUGGING==1
-	printf("UIConfigure_DeleteKeyFlagDestroy\n");
-	#endif
 	UIAction_Init(element,action);
 	action->response = RESPONSE_DELETE;
 	action->function = UIAction_DeleteKeyFlagDestroy;
@@ -2044,9 +2036,6 @@ int UIAction_AddAiBlock(UI_Action *action, UIData *uiData){
 }
 
 void UIConfigure_AddAiBlock(UI_Element *element, UI_Action *action, BlockFunctionTemplate *template, UI_Element *target){
-	#if DEBUGGING==1
-	printf("UIConfigure_AddAiBlock\n");
-	#endif
 	UIAction_Init(element,action);
 	action->response = UPDATE;
 	action->function = UIAction_AddAiBlock;
@@ -2074,9 +2063,6 @@ int UIAction_DisplayImage(UI_Action *action, UIData *uiData){
 }
 
 void UIConfigure_DisplayImage(UI_Element *element, UI_Action *action, SDL_Texture *image){
-	#if DEBUGGING==1
-	printf("UIConfigure_DisplayImage\n");
-	#endif
 	UIAction_Init(element,action);
 	action->response = UPDATE;
 	action->function = UIAction_DisplayImage;
@@ -2099,9 +2085,6 @@ int UIAction_Auto(UI_Action *action, UIData *uiData){
 }
 
 void UIConfigure_Auto(UI_Element *element, UI_Action *action, enum Response response){
-	#if DEBUGGING==1
-	printf("UIConfigure_Auto\n");
-	#endif
 	UIAction_Init(element,action);
 	action->response = response;
 	action->function = UIAction_Auto;
@@ -2158,9 +2141,6 @@ int UIAction_ShrinkFitToParent(UI_Action *action, UIData *uiData){
 }
 
 void UIConfigure_ShrinkFitToParent(UI_Element *element, UI_Action *action){
-	#if DEBUGGING==1
-	printf("UIConfigure_ShrinkFitToParent\n");
-	#endif
 	UIAction_Init(element,action);
 	action->response = UPDATE;
 	action->function = UIAction_ShrinkFitToParent;
@@ -2235,9 +2215,6 @@ int UIAction_DisplayNumber(UI_Action *action, UIData *uiData){
 }
 
 void UIConfigure_DisplayNumber(UI_Element *element, UI_Action *action, int number, int font, enum UIString_Align align){
-	#if DEBUGGING==1
-	printf("UIConfigure_DisplayNumber\n");
-	#endif
 	UIAction_Init(element,action);
 	action->response = UPDATE;
 	action->status = 1;
@@ -2320,9 +2297,6 @@ int UIAction_DisplayString(UI_Action *action, UIData *uiData){
 }
 
 void UIConfigure_DisplayString(UI_Element *element, UI_Action *action, char *string, int font, enum UIString_Align align){
-	#if DEBUGGING==1
-	printf("UIConfigure_DisplayString\n");
-	#endif
 	UIAction_Init(element,action);
 	action->response = UPDATE;
 	action->function = UIAction_DisplayString;
@@ -2378,9 +2352,6 @@ int UIAction_ResourceCounter(UI_Action *action, UIData *uiData){
 void UIConfigure_ResourceCounter(UI_Element *element, UI_Action *action, int num_of_companions, ...){
 	va_list vargs;
 	int i = 0;
-	#if DEBUGGING==1
-	printf("UIConfigure_ResourceCounter\n");
-	#endif
 	UIAction_Init(element,action);
 	va_start(vargs,num_of_companions);
 	action->response = UPDATE;
@@ -2421,9 +2392,6 @@ int UIAction_DaysCounter(UI_Action *action, UIData *uiData){
 void UIConfigure_DaysCounter(UI_Element *element, UI_Action *action, int num_of_companions, ...){
 	va_list vargs;
 	int i = 0;
-	#if DEBUGGING==1
-	printf("UIConfigure_DaysCounter\n");
-	#endif
 	UIAction_Init(element,action);
 	va_start(vargs,num_of_companions);
 	action->response = UPDATE;
@@ -2466,9 +2434,6 @@ int UIAction_YearsCounter(UI_Action *action, UIData *uiData){
 void UIConfigure_YearsCounter(UI_Element *element, UI_Action *action, int num_of_companions, ...){
 	va_list vargs;
 	int i = 0;
-	#if DEBUGGING==1
-	printf("UIConfigure_YearsCounter\n");
-	#endif
 	UIAction_Init(element,action);
 	va_start(vargs,num_of_companions);
 	action->response = UPDATE;
@@ -2506,9 +2471,6 @@ int UIAction_Counter(UI_Action *action, UIData *uiData){
 }
 
 void UIConfigure_Counter(UI_Element *element, UI_Action *action, int maximum, int num_of_companions, ...){
-	#if DEBUGGING==1
-	printf("UIConfigure_Counter\n");
-	#endif
 	int i = 0;
 	va_list vargs;
 	va_start(vargs,num_of_companions);
@@ -2611,9 +2573,6 @@ int UIAction_RenderLine(UI_Action *action, UIData *uiData){
 }
 
 void UIConfigure_RenderLine(UI_Element *element, UI_Action *action, enum LineOrigins origin, UI_Element *external){
-	#if DEBUGGING==1
-	printf("UIConfigure_RenderLine\n");
-	#endif
 	UIAction_Init(element,action);
 	action->response = UPDATE;
 	action->function = UIAction_RenderLine;
@@ -2674,18 +2633,12 @@ int UIAction_ClickAnywhere(UI_Action *action, UIData *uiData){
 }
 
 void UIConfigure_LeftClickAnywhere(UI_Element *element, UI_Action *action){
-	#if DEBUGGING==1
-	printf("UIConfigure_LeftClickAnywhere\n");
-	#endif
 	UIAction_Init(element,action);
 	action->response = LEFT_CLICK;
 	action->function = UIAction_ClickAnywhere;
 }
 
 void UIConfigure_RightClickAnywhere(UI_Element *element, UI_Action *action){
-	#if DEBUGGING==1
-	printf("UIConfigure_RightClickAnywhere\n");
-	#endif
 	UIAction_Init(element,action);
 	action->response = RIGHT_CLICK;
 	action->function = UIAction_ClickAnywhere;
@@ -2707,18 +2660,12 @@ int UIAction_ReleaseAnywhere(UI_Action *action, UIData *uiData){
 }
 
 void UIConfigure_LeftReleaseAnywhere(UI_Element *element, UI_Action *action){
-	#if DEBUGGING==1
-	printf("UIConfigure_LeftReleaseAnywhere\n");
-	#endif
 	UIAction_Init(element,action);
 	action->response = LEFT_RELEASE;
 	action->function = UIAction_ReleaseAnywhere;
 }
 
 void UIConfigure_RightReleaseAnywhere(UI_Element *element, UI_Action *action){
-	#if DEBUGGING==1
-	printf("UIConfigure_RightReleaseAnywhere\n");
-	#endif
 	UIAction_Init(element,action);
 	action->response = RIGHT_RELEASE;
 	action->function = UIAction_ReleaseAnywhere;
@@ -2769,9 +2716,6 @@ int UIAction_CalculateSibling(UI_Action *action, UIData *uiData){
 void UIConfigure_CalculateSibling(UI_Element *element, UI_Action *action, int num_of_companions, ...){
 	va_list vargs;
 	int i = 0;
-	#if DEBUGGING==1
-	printf("UIConfigure_CalculateSibling\n");
-	#endif
 	UIAction_Init(element,action);
 	va_start(vargs,num_of_companions);
 	action->response = UPDATE;
@@ -2824,9 +2768,6 @@ int UIAction_StoreMousePosition(UI_Action *action, UIData *uiData){
 void UIConfigure_StoreMousePosition(UI_Element *element, UI_Action *action, int num_of_companions, ...){
 	va_list vargs;
 	int i = 0;
-	#if DEBUGGING==1
-	printf("UIConfigure_StoreMousePosition\n");
-	#endif
 	UIAction_Init(element,action);
 	va_start(vargs,num_of_companions);
 	action->response = MOTION;
@@ -2875,9 +2816,6 @@ int UIAction_FillRect(UI_Action *action, UIData *uiData){
 }
 
 void UIConfigure_FillRect(UI_Element *element, UI_Action *action, int r, int g, int b){
-	#if DEBUGGING==1
-	printf("UIConfigure_FillRect\n");
-	#endif
 	UIAction_Init(element,action);
 	action->response = UPDATE;
 	action->function = UIAction_FillRect;
@@ -3146,18 +3084,12 @@ int UIAction_ClickRect(UI_Action *action, UIData *uiData){
 }
 
 void UIConfigure_LeftClickRect(UI_Element *element, UI_Action *action){
-	#if DEBUGGING==1
-	printf("UIConfigure_LeftClickRect\n");
-	#endif
 	UIAction_Init(element,action);
 	action->response = LEFT_CLICK;
 	action->function = UIAction_ClickRect;
 }
 
 void UIConfigure_RightClickRect(UI_Element *element, UI_Action *action){
-	#if DEBUGGING==1
-	printf("UIConfigure_RightClickRect\n");
-	#endif
 	UIAction_Init(element,action);
 	action->response = RIGHT_CLICK;
 	action->function = UIAction_ClickRect;
@@ -3179,8 +3111,8 @@ int UIAction_DraggableRectOverride(UI_Action *action, UIData *uiData){
 	/* UIACTION_INTS is the status, 0 = rooted, 1 = grabbed */
 
 	if(action->status == 1){
-		x = event->motion.x;
-		y = event->motion.y;
+		x = event->motion.x - action->element->rect.w/2;
+		y = event->motion.y - action->element->rect.h/2;
 		if(x < action->element->parent->rect.x){
 			x = action->element->parent->rect.x;
 		}
@@ -3211,9 +3143,6 @@ void UIConfigure_DraggableRectOverride(UI_Element *element, UI_Action *action, i
 	int i = 0;
 	va_list vargs;
 	va_start(vargs,num_of_companions);
-	#if DEBUGGING==1
-	printf("UIConfigure_DraggableRectOverride\n");
-	#endif
 	UIAction_Init(element,action);
 	action->response = MOTION;
 	action->function = UIAction_DraggableRectOverride;
@@ -3297,9 +3226,6 @@ int UIAction_TwoRectOverride(UI_Action *action, UIData *uiData){
 }
 
 void UIConfigure_TwoRectOverride(UI_Element *element, UI_Action *action, int sx, int sy, int sw, int sh, int bx, int by, int bw, int bh, int delay){
-	#if DEBUGGING==1
-	printf("UIConfigure_TwoRectOverride\n");
-	#endif
 	UIAction_Init(element,action);
 	action->response = UPDATE;
 	action->function = UIAction_TwoRectOverride;
