@@ -189,7 +189,6 @@ UI_Element *makeStartBlock(int x_offset, int y_offset, UI_Element *parent){
 		UITrigger_Bind(&element->actions[4],&element->actions[4],1,0);
 		UITrigger_Bind(&element->actions[4],&element->actions[5],0,1);
 		UITrigger_Bind(&element->actions[4],&element->actions[6],0,1);
-		UITrigger_Bind(&element->actions[4],&element->actions[10],-1,UITRIGGER_PLUSONE);
 
 	UIConfigure_LeftReleaseAnywhere(element, &element->actions[5]);
 		element->actions[5].status = 0;
