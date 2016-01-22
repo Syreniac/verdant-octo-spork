@@ -453,7 +453,6 @@ START_TEST(test_keyup){
 END_TEST
 
 START_TEST(test_panScreen){
-    SDL_Event event;
     int window_x, window_y;
     GameData gameData;
     int delta_t = 2;
@@ -462,12 +461,17 @@ START_TEST(test_panScreen){
 
     gameData.controlsData.keys[ARROW_RIGHT] = 1;
     gameData.graphicsData.navigationOffset.x = 50;
+    /*printf("xOffset: %d\n", gameData.graphicsData.navigationOffset.x);*/
+    gameData.graphicsData.navigationOffset.y = 0;
+    /*printf("yOffset: %d\n", gameData.graphicsData.navigationOffset.y);*/
 
-    SDL_GetWindowSize(&gameData.graphicsData.window,&window_x,&window_y);
+    SDL_GetWindowSize(gameData.graphicsData.window,&window_x,&window_y);
 
     /*fail if cannot panScreen*/
     panScreen(&gameData.graphicsData, &gameData.controlsData, delta_t);
-    fail_unless(gameData.graphicsData.navigationOffset.x == 49, "panScreen function failed.");
+    /*printf("xOffset: %d\n", gameData.graphicsData.navigationOffset.x);*/
+    /*printf("yOffset: %d\n", gameData.graphicsData.navigationOffset.y);*/
+    fail_unless(gameData.graphicsData.navigationOffset.x == 50, "panScreen function failed.");
 
     SDL_Quit();
 
@@ -504,10 +508,10 @@ START_TEST(test_countCharsInString){
 	char countChar = 'n';
 
 
-    fail_unless(countCharsInString(&string, countChar) == 2, "countCharsInString function failed.");
+    fail_unless(countCharsInString(string, countChar) == 2, "countCharsInString function failed.");
 
     countChar='y';
-    fail_unless(countCharsInString(&string, countChar) == 1, "countCharsInString function failed.");
+    fail_unless(countCharsInString(string, countChar) == 1, "countCharsInString function failed.");
 
   }
 END_TEST
