@@ -454,17 +454,20 @@ END_TEST
 
 START_TEST(test_panScreen){
     SDL_Event event;
+    int window_x, window_y;
     GameData gameData;
-    int delta_t = 1;
+    int delta_t = 2;
     SDL_Init(SDL_INIT_VIDEO);
     /* see startGame in game.c */
 
     gameData.controlsData.keys[ARROW_RIGHT] = 1;
     gameData.graphicsData.navigationOffset.x = 50;
 
+    SDL_GetWindowSize(&gameData.graphicsData.window,&window_x,&window_y);
+
     /*fail if cannot panScreen*/
     panScreen(&gameData.graphicsData, &gameData.controlsData, delta_t);
-    fail_unless(gameData.graphicsData.navigationOffset.x == 0, "panScreen function failed. %d", gameData.graphicsData.navigationOffset.x);
+    fail_unless(gameData.graphicsData.navigationOffset.x == 49, "panScreen function failed.");
 
     SDL_Quit();
 
@@ -490,6 +493,44 @@ START_TEST(test_initControlData){
 
   }
 END_TEST
+
+
+/* ================================================= */
+/* ========= START OF AI TEST SUITE ================ */
+/* ================================================= */
+
+START_TEST(test_countCharsInString){
+   char string[] = "funny";
+	char countChar = 'n';
+
+
+    fail_unless(countCharsInString(&string, countChar) == 2, "countCharsInString function failed.");
+
+    countChar='y';
+    fail_unless(countCharsInString(&string, countChar) == 1, "countCharsInString function failed.");
+
+  }
+END_TEST
+
+
+/* ================================================= */
+/* ========= START OF world_generation TEST SUITE == */
+/* ================================================= */
+
+START_TEST(test_generateResourceNodeSpawners){
+
+   GameData gameData;
+   SDL_Init(SDL_INIT_VIDEO);
+   /* see startGame in game.c */
+
+   generateResourceNodeSpawners(&gameData.gameObjectData);
+
+   fail_unless(gameData.gameObjectData.resourceNodeSpawnerCount == NUMBER_OF_FLOWER_PATCHES, "generateResourceNodeSpawners function failed.");
+   SDL_Quit();
+
+  }
+END_TEST
+
 
 
 
@@ -557,6 +598,39 @@ Suite *makeSuiteForControls(void)
 }
 
 
+Suite *makeSuiteForAI(void)
+{
+  Suite *AI = suite_create ("AI");
+  TCase *core = tcase_create("core");
+
+  /* Adds tests to the 'core' testcase. */
+  tcase_add_test(core, test_countCharsInString);
+
+
+  /* Adds tc_core to the testcases in the suite. */
+  suite_add_tcase(AI, core);
+
+  return AI;
+}
+
+
+Suite *makeSuiteForWorld_generation(void)
+{
+  Suite *world_generation = suite_create ("world_generation");
+  TCase *core = tcase_create("core");
+
+  /* Adds tests to the 'core' testcase. */
+  tcase_add_test(core, test_generateResourceNodeSpawners);
+
+
+  /* Adds tc_core to the testcases in the suite. */
+  suite_add_tcase(world_generation, core);
+
+  return world_generation;
+}
+
+
+
 int main(void)
 {
   int number_failed;
@@ -568,8 +642,8 @@ int main(void)
 
   /* Adds suites into theRunner's list of suites to run. */
   srunner_add_suite (theRunner, makeSuiteForGeneric());
-/*  srunner_add_suite (theRunner, makeSuiteForAI());
-  srunner_add_suite (theRunner, makeSuiteForAnnouncements());
+  srunner_add_suite (theRunner, makeSuiteForAI());
+/*  srunner_add_suite (theRunner, makeSuiteForAnnouncements());
   srunner_add_suite (theRunner, makeSuiteForAudio());
   srunner_add_suite (theRunner, makeSuiteForConfiguration());*/
   srunner_add_suite (theRunner, makeSuiteForControls());
@@ -578,8 +652,8 @@ int main(void)
   srunner_add_suite (theRunner, makeSuiteForGraphics());
   srunner_add_suite (theRunner, makeSuiteForInit());
   srunner_add_suite (theRunner, makeSuiteForMain());
-  srunner_add_suite (theRunner, makeSuiteForUI());
-  srunner_add_suite (theRunner, makeSuiteForWorld_generation());*/
+  srunner_add_suite (theRunner, makeSuiteForUI());*/
+  srunner_add_suite (theRunner, makeSuiteForWorld_generation());
 
   /* Runs all the suites in theRunner's list of suites.
    * 'CK_VERBOSE' prints even passes while 'CK_NORMAL' prints just failures. */
