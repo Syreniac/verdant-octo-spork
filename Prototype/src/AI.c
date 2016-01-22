@@ -39,7 +39,7 @@ static int doIntOpWithCharOperator(int a, int b, char op){
 			return a + b;
 		case '-':
 			return a - b;
-		case '='
+		case '=':
 			return b;
 	}
 	return 0;
