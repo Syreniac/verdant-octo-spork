@@ -1,9 +1,0 @@
-*.o
-*.idea
-*.c~
-*.h~
-*.txt~
-bin
-makefile_win64
-
-~$port_backup.docx
