@@ -8,10 +8,23 @@ int main(int argc, char *argv[]){
      from Windows (or something?), so the functionality is split between other
      functions from other modules */
 
-  SDL_Window *window;
+  (void)argc;
+  (void)argv;
 
-  window  = initialise();
-  gameStart(window);
+  InitData initData;
+  int game_return = 2;
+
+  #if DEBUGGING==1
+  DEBUGGING_FILE_ALLOC= fopen("debug_output_alloc.txt","w");
+  DEBUGGING_FILE_FREE= fopen("debug_output_free.txt","w");
+  #endif
+  //ConfigurationData configData;
+  //initConfigurationData(&configData);
+  initData  = initialise();
+	game_welcome_page(initData.graphicsData,initData.audioData);
+  while(game_return == 2){
+    game_return = gameStart(initData.graphicsData,initData.audioData);
+  }
   uninitialise();
   exit(0);
 }

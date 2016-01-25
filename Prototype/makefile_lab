@@ -1,23 +1,52 @@
-CFLAGS = -pedantic
-# Remove the -lmingw32 part if you need it to compile on linux!
-PATHS = -I/opt/SDL/2.0.3/include/SDL2 -L/opt/SDL/2.0.3/lib/ -Wl,-rpath=/opt/SDL/2.0.3/lib/ 
-LFLAGS = -lSDL2 -lm
+# Please run the clean command detailed at the bottom, before running: make -f makefile_lab
+
+CFLAGS = -pedantic -Wall -Wextra -std=c99 -Wno-unused-parameter -ggdb
+TTF_FLAGS = -Ilibraries_Lab/SDL_ttf/include -Llibraries_Lab/SDL_ttf/lib
+TEST_FLAGS = -I/usr/include -L/usr/lib64 -Wl,-rpath,/usr/lib64
+IMAGE_FLAGS = -Ilibraries_Lab/SDL_image/include -Llibraries_Lab/SDL_image/lib
+MIXER_FLAGS = -Ilibraries_Lab/SDL_mixer/include -Llibraries_Lab/SDL_mixer/lib
+LFLAGS = -g $(TTF_FLAGS) $(IMAGE_FLAGS) $(MIXER_FLAGS) -lSDL2 -lSDL2_Image -lSDL_ttf -lSDL_Mixer -lfreetype -lm
+DELETE = rm
+DELETE_RECURSIVE = rm -r
+
 # List all the files here
-OBJS = main.o init.o game.o world_generation.o game_objects.o AI.o UI.o
-PROG = Prototype
+#Add a /. after assets to copy only the contents inside, rather than the folder too.
+ASSETS_CONTENTS = assets/*
+COMMON_FILES = init.o game.o world_generation.o game_objects.o AI.o UI.o generic.o controls.o graphics.o audio.o announcements.o
+SOURCE_FILES = main.o $(COMMON_FILES)
+ALLTEST_FILES = all.test.o $(COMMON_FILES)
+BIN = bin
+PROG = $(BIN)/Prototype
+ALLTEST = $(BIN)/Test
 CXX = gcc
 
-# top-level rule to create the program.
-all: $(PROG)
 
-# compiling other source files.
-%.o: src/%.c src/%.h src/generic.h
-	$(CXX) $(PATHS) $(CFLAGS) -c -s $< $(LFLAGS)
+#==========
+########### Makes both executables simultaneously, in the same bin.
+#==========
 
-# linking the program.
-$(PROG): $(OBJS)
-	$(CXX) $(OBJS) -o $(PROG) $(PATHS) $(LFLAGS)
+# Dictates which executables need to be made.
+all: $(PROG) $(ALLTEST)
 
-# cleaning everything that can be automatically recreated with "make".
+# Compiles all object files needed to make each executable.
+%.o: src/%.c src/%.h
+	$(CXX) $(CFLAGS) $(LFLAGS) -c -s $<
+all.test.o: src/all.test.c src/all.test.h
+	$(CXX) $(CFLAGS) $(LFLAGS) -c -s $<
+
+# Gives rules for making both executables.
+$(PROG): $(SOURCE_FILES) | $(BIN)
+	$(CXX) $(SOURCE_FILES) -o $(PROG) $(LFLAGS)
+$(ALLTEST): $(ALLTEST_FILES) | $(BIN)
+	$(CXX) $(ALLTEST_FILES) -o $(ALLTEST) $(LFLAGS) $(TEST_FLAGS) -lcheck
+
+# makes one unified bin.
+$(BIN):
+	mkdir $@
+	cp -R $(ASSETS_CONTENTS) $@
+
+# cleans everything that can be automatically recreated with "make -f makefile_lab".
+# To do this, run the following command in verdant-octo-spork/Prototype: make -f makefile_lab clean
 clean:
-	rm $(PROG) *.o
+	$(DELETE) *.o
+	$(DELETE_RECURSIVE) $(BIN)
